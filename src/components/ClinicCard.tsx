@@ -77,7 +77,7 @@ export async function ClinicCard({
         </p>
         <div className="flex gap-2 pt-1">
           <Link href={`/clinics/${clinic.slug}`} className="btn btn-ghost flex-1 text-sm">
-            {tClinic("about")}
+            {tClinic("open")}
           </Link>
           <Link
             href={`/clinics/${clinic.slug}/apply`}

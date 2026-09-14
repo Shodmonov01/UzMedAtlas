@@ -13,25 +13,60 @@ export default async function LeadDetailPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
+  const tChecker = await getTranslations("checker");
+  const tApply = await getTranslations("apply");
   const lead = await prisma.lead.findUnique({
     where: { id },
     include: { clinic: true, recommendedSpecialty: true },
   });
   if (!lead) notFound();
 
+  const genderLabel =
+    lead.gender === "female"
+      ? tChecker("female")
+      : lead.gender === "male"
+        ? tChecker("male")
+        : lead.gender === "prefer_not"
+          ? tChecker("preferNot")
+          : "—";
+  const durationLabel =
+    lead.duration === "few_days"
+      ? tChecker("fewDays")
+      : lead.duration === "few_weeks"
+        ? tChecker("fewWeeks")
+        : lead.duration === "few_months"
+          ? tChecker("fewMonths")
+          : lead.duration === "more_than_year"
+            ? tChecker("moreThanYear")
+            : "—";
+  const contactLabel =
+    lead.contactMethod === "phone"
+      ? tApply("phoneMethod")
+      : lead.contactMethod === "email"
+        ? tApply("emailMethod")
+        : lead.contactMethod === "telegram"
+          ? tApply("telegram")
+          : tApply("whatsapp");
+  const arrivalLabel =
+    lead.arrivalType === "exact"
+      ? tApply("exact")
+      : lead.arrivalType === "approximate"
+        ? tApply("approximate")
+        : tApply("undecided");
+
   const rows = [
     [t("patient"), lead.fullName],
     [t("country"), lead.country],
     [t("clinic"), locale === "ru" ? lead.clinic.nameRu : lead.clinic.nameEn],
-    [t("contact"), `${lead.phone} · ${lead.contactMethod}`],
+    [t("contact"), `${lead.phone} · ${contactLabel}`],
     ["Email", lead.email || "—"],
-    [t("date"), lead.createdAt.toISOString()],
-    ["Arrival", `${lead.arrivalType}${lead.arrivalDate ? ` · ${lead.arrivalDate}` : ""}`],
+    [t("date"), lead.createdAt.toISOString().slice(0, 16).replace("T", " ")],
+    [tApply("arrival"), `${arrivalLabel}${lead.arrivalDate ? ` · ${lead.arrivalDate}` : ""}`],
     [t("direction"), lead.recommendedSpecialty ? (locale === "ru" ? lead.recommendedSpecialty.nameRu : lead.recommendedSpecialty.nameEn) : "—"],
-    ["Symptoms", lead.symptoms || lead.medicalNeed || "—"],
-    ["Age", lead.age?.toString() || "—"],
-    ["Gender", lead.gender || "—"],
-    ["Duration", lead.duration || "—"],
+    [tChecker("symptomsLabel"), lead.symptoms || lead.medicalNeed || "—"],
+    [tChecker("age"), lead.age?.toString() || "—"],
+    [tChecker("gender"), genderLabel],
+    [tChecker("duration"), durationLabel],
   ];
 
   return (

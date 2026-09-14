@@ -50,7 +50,7 @@ export default async function AdminHome({
           {cards.map(([label, value]) => (
             <div key={label} className="rounded-2xl border border-line bg-white p-4">
               <p className="text-sm text-muted">{label}</p>
-              <p className="mt-1 font-display text-4xl">{value}</p>
+              <p className="mt-1 text-4xl font-semibold tabular-nums">{value}</p>
             </div>
           ))}
         </div>
