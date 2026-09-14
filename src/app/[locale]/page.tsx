@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { HomeChecker } from "@/components/HomeChecker";
 import { prisma } from "@/lib/db";
+import { trackEvent } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default async function HomePage({
   setRequestLocale(locale);
   const t = await getTranslations("home");
   const clinicCount = await prisma.clinic.count({ where: { published: true } });
+  await trackEvent("home_view");
 
   return (
     <div className="ornament">

@@ -216,6 +216,8 @@ type ClinicSeed = {
   languages: string[];
   coverColor: string;
   specialties: string[];
+  responseHours?: number;
+  coordinatorName?: string;
   services: Array<{
     specialty: string;
     nameEn: string;
@@ -243,6 +245,8 @@ const clinics: ClinicSeed[] = [
     website: "https://atlasmed.example",
     languages: ["en", "ru", "uz"],
     coverColor: "#1B6B6A",
+    responseHours: 12,
+    coordinatorName: "Malika Karimova",
     specialties: [
       "cardiology",
       "neurology",
@@ -701,6 +705,39 @@ const clinics: ClinicSeed[] = [
   },
 ];
 
+function inferCanonicalSlug(nameEn: string, nameRu: string) {
+  const haystack = `${nameEn} ${nameRu}`.toLowerCase();
+  const rules: Array<[string, string[]]> = [
+    ["mri", ["mri", "мрт"]],
+    ["ct", ["ct", "кт"]],
+    ["ultrasound", ["ultrasound", "узи", "echo", "эхо"]],
+    ["checkup", ["checkup", "check-up", "чекап"]],
+    ["endoscopy", ["endoscopy", "gastroscopy", "эндоскоп", "гастроскоп"]],
+    ["surgery", ["surgery", "operation", "операц"]],
+    ["consultation", ["consultation", "consult", "консультац"]],
+  ];
+  for (const [slug, aliases] of rules) {
+    if (aliases.some((alias) => haystack.includes(alias))) return slug;
+  }
+  return null;
+}
+
+function trustFields(clinic: ClinicSeed) {
+  const hours = clinic.responseHours ?? 24;
+  return {
+    whatsapp: clinic.phone.replace(/[^\d+ ]/g, ""),
+    telegram: null as string | null,
+    coordinatorName: clinic.coordinatorName || "International desk",
+    coordinatorRoleEn: "International patient coordinator",
+    coordinatorRoleRu: "Координатор зарубежных пациентов",
+    responseHours: hours,
+    licenseInfoEn: `Licensed private clinic in ${clinic.city}.`,
+    licenseInfoRu: `Лицензированная частная клиника, ${clinic.city}.`,
+    afterRequestEn: `A coordinator will contact you within ${hours} hours on WhatsApp or your chosen channel. This is not a confirmed doctor appointment.`,
+    afterRequestRu: `Координатор свяжется с вами в течение ${hours} часов в WhatsApp или другим указанным способом. Это не запись к врачу.`,
+  };
+}
+
 function svgLogo(name: string, color: string) {
   const initials = name
     .split(" ")
@@ -751,11 +788,31 @@ function writeAssets() {
   }
 }
 
+async function patchExisting() {
+  for (const clinic of clinics) {
+    await prisma.clinic.updateMany({
+      where: { slug: clinic.slug },
+      data: trustFields(clinic),
+    });
+  }
+  const services = await prisma.service.findMany();
+  for (const service of services) {
+    const slug = inferCanonicalSlug(service.nameEn, service.nameRu);
+    if (slug && service.canonicalSlug !== slug) {
+      await prisma.service.update({
+        where: { id: service.id },
+        data: { canonicalSlug: slug },
+      });
+    }
+  }
+}
+
 async function main() {
   writeAssets();
 
   if ((await prisma.clinic.count()) > 0) {
-    console.log("Database already has clinics. Skipping seed.");
+    await patchExisting();
+    console.log("Database already has clinics. Trust fields and canonical services updated.");
     return;
   }
 
@@ -783,6 +840,7 @@ async function main() {
         logoUrl: `/clinics/${clinic.slug}/logo.svg`,
         coverColor: clinic.coverColor,
         published: true,
+        ...trustFields(clinic),
         specialties: {
           create: clinic.specialties.map((slug) => ({
             specialtyId: specialtyIds.get(slug)!,
@@ -804,6 +862,7 @@ async function main() {
             descriptionEn: service.descriptionEn,
             descriptionRu: service.descriptionRu,
             priceUsd: service.priceUsd ?? null,
+            canonicalSlug: inferCanonicalSlug(service.nameEn, service.nameRu),
           })),
         },
       },

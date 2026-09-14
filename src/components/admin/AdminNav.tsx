@@ -12,6 +12,7 @@ const LINKS = [
   ["specialties", "/admin/specialties"],
   ["services", "/admin/services"],
   ["leads", "/admin/leads"],
+  ["outbox", "/admin/outbox"],
 ] as const;
 
 export function AdminNav({ locale }: { locale: string }) {

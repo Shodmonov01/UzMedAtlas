@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
+import { updateLeadStatus } from "@/actions/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +68,9 @@ export default async function LeadDetailPage({
     [tChecker("age"), lead.age?.toString() || "—"],
     [tChecker("gender"), genderLabel],
     [tChecker("duration"), durationLabel],
+    [t("source"), lead.source === "checker" ? t("sourceChecker") : t("sourceCatalog")],
+    [t("status"), lead.status],
+    [tChecker("forChild"), lead.forChild ? "yes" : "no"],
   ];
 
   return (
@@ -75,6 +79,17 @@ export default async function LeadDetailPage({
         ← {t("leads")}
       </Link>
       <h1 className="font-display text-4xl">{lead.fullName}</h1>
+      <form action={updateLeadStatus} className="flex flex-wrap items-center gap-3">
+        <input type="hidden" name="id" value={lead.id} />
+        <select name="status" defaultValue={lead.status} className="field w-auto">
+          <option value="new">{t("statusNew")}</option>
+          <option value="contacted">{t("statusContacted")}</option>
+          <option value="closed">{t("statusClosed")}</option>
+        </select>
+        <button className="btn btn-primary" type="submit">
+          {t("save")}
+        </button>
+      </form>
       <dl className="grid gap-4 rounded-3xl border border-line bg-white p-6 md:grid-cols-2">
         {rows.map(([label, value]) => (
           <div key={label}>

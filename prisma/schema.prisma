@@ -24,28 +24,38 @@ model Specialty {
 }
 
 model Clinic {
-  id            String            @id @default(cuid())
-  slug          String            @unique
-  nameEn        String
-  nameRu        String
-  city          String
-  addressEn     String
-  addressRu     String
-  descriptionEn String
-  descriptionRu String
-  phone         String
-  email         String
-  website       String?
-  languages     String
-  logoUrl       String?
-  coverColor    String            @default("#1B6B6A")
-  published     Boolean           @default(true)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  photos        ClinicPhoto[]
-  specialties   ClinicSpecialty[]
-  services      Service[]
-  leads         Lead[]
+  id                 String            @id @default(cuid())
+  slug               String            @unique
+  nameEn             String
+  nameRu             String
+  city               String
+  addressEn          String
+  addressRu          String
+  descriptionEn      String
+  descriptionRu      String
+  phone              String
+  email              String
+  website            String?
+  whatsapp           String?
+  telegram           String?
+  languages          String
+  logoUrl            String?
+  coverColor         String            @default("#1B6B6A")
+  published          Boolean           @default(true)
+  coordinatorName    String?
+  coordinatorRoleEn  String?
+  coordinatorRoleRu  String?
+  responseHours      Int               @default(24)
+  licenseInfoEn      String?
+  licenseInfoRu      String?
+  afterRequestEn     String?
+  afterRequestRu     String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  photos             ClinicPhoto[]
+  specialties        ClinicSpecialty[]
+  services           Service[]
+  leads              Lead[]
 }
 
 model ClinicPhoto {
@@ -68,16 +78,17 @@ model ClinicSpecialty {
 }
 
 model Service {
-  id            String    @id @default(cuid())
-  clinicId      String
-  specialtyId   String
-  nameEn        String
-  nameRu        String
-  descriptionEn String
-  descriptionRu String
-  priceUsd      Int?
-  clinic        Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  specialty     Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  id             String    @id @default(cuid())
+  clinicId       String
+  specialtyId    String
+  canonicalSlug  String?
+  nameEn         String
+  nameRu         String
+  descriptionEn  String
+  descriptionRu  String
+  priceUsd       Int?
+  clinic         Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  specialty      Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
@@ -95,15 +106,35 @@ model Lead {
   age                    Int?
   gender                 String?
   duration               String?
+  forChild               Boolean    @default(false)
+  source                 String     @default("catalog")
+  status                 String     @default("new")
+  sessionId              String?
+  idempotencyKey         String?    @unique
   recommendedSpecialtyId String?
   createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @default(now()) @updatedAt
   clinic                 Clinic     @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   recommendedSpecialty   Specialty? @relation(fields: [recommendedSpecialtyId], references: [id], onDelete: SetNull)
+  emails                 EmailLog[]
 }
 
 model AnalyticsEvent {
   id        String   @id @default(cuid())
   type      String
+  sessionId String?
   meta      String?
   createdAt DateTime @default(now())
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  leadId    String?
+  toAddress String
+  subject   String
+  body      String
+  status    String   @default("logged")
+  error     String?
+  createdAt DateTime @default(now())
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
 }

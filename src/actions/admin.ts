@@ -47,6 +47,16 @@ const clinicSchema = z.object({
   coverColor: z.string().optional(),
   published: z.boolean(),
   specialtyIds: z.array(z.string()),
+  whatsapp: z.string().optional(),
+  telegram: z.string().optional(),
+  coordinatorName: z.string().optional(),
+  coordinatorRoleEn: z.string().optional(),
+  coordinatorRoleRu: z.string().optional(),
+  responseHours: z.coerce.number().int().min(1).max(168).optional(),
+  licenseInfoEn: z.string().optional(),
+  licenseInfoRu: z.string().optional(),
+  afterRequestEn: z.string().optional(),
+  afterRequestRu: z.string().optional(),
 });
 
 export async function saveClinic(formData: FormData) {
@@ -71,15 +81,33 @@ export async function saveClinic(formData: FormData) {
     coverColor: String(formData.get("coverColor") || "#1B6B6A"),
     published: formData.get("published") === "on",
     specialtyIds,
+    whatsapp: String(formData.get("whatsapp") || ""),
+    telegram: String(formData.get("telegram") || ""),
+    coordinatorName: String(formData.get("coordinatorName") || ""),
+    coordinatorRoleEn: String(formData.get("coordinatorRoleEn") || ""),
+    coordinatorRoleRu: String(formData.get("coordinatorRoleRu") || ""),
+    responseHours: formData.get("responseHours") || 24,
+    licenseInfoEn: String(formData.get("licenseInfoEn") || ""),
+    licenseInfoRu: String(formData.get("licenseInfoRu") || ""),
+    afterRequestEn: String(formData.get("afterRequestEn") || ""),
+    afterRequestRu: String(formData.get("afterRequestRu") || ""),
   });
+  const locale = ((formData.get("locale") as string) || "en") as "en" | "ru";
   if (!parsed.success) {
-    return;
+    go(id ? `/admin/clinics/${id}?error=invalid` : "/admin/clinics/new?error=invalid", locale);
   }
 
   const slug =
     parsed.data.slug && parsed.data.slug.length > 1
       ? slugify(parsed.data.slug)
       : slugify(parsed.data.nameEn);
+
+  const taken = await prisma.clinic.findFirst({
+    where: { slug, ...(id ? { NOT: { id } } : {}) },
+  });
+  if (taken) {
+    go(id ? `/admin/clinics/${id}?error=slug` : "/admin/clinics/new?error=slug", locale);
+  }
 
   const logoFile = formData.get("logo") as File | null;
   const logoUrl = logoFile && logoFile.size > 0 ? await saveUpload(logoFile) : undefined;
@@ -99,6 +127,16 @@ export async function saveClinic(formData: FormData) {
     languages: JSON.stringify(parsed.data.languages),
     coverColor: parsed.data.coverColor || "#1B6B6A",
     published: parsed.data.published,
+    whatsapp: parsed.data.whatsapp || null,
+    telegram: parsed.data.telegram || null,
+    coordinatorName: parsed.data.coordinatorName || null,
+    coordinatorRoleEn: parsed.data.coordinatorRoleEn || null,
+    coordinatorRoleRu: parsed.data.coordinatorRoleRu || null,
+    responseHours: parsed.data.responseHours || 24,
+    licenseInfoEn: parsed.data.licenseInfoEn || null,
+    licenseInfoRu: parsed.data.licenseInfoRu || null,
+    afterRequestEn: parsed.data.afterRequestEn || null,
+    afterRequestRu: parsed.data.afterRequestRu || null,
     ...(logoUrl ? { logoUrl } : {}),
   };
 
@@ -138,7 +176,6 @@ export async function saveClinic(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/clinics");
-  const locale = ((formData.get("locale") as string) || "en") as "en" | "ru";
   go(`/admin/clinics/${clinic.id}`, locale);
 }
 
@@ -220,8 +257,9 @@ const serviceSchema = z.object({
   nameRu: z.string().min(2),
   descriptionEn: z.string().min(4),
   descriptionRu: z.string().min(4),
-  priceUsd: z.string().optional(),
-});
+    canonicalSlug: z.string().optional(),
+    priceUsd: z.string().optional(),
+  });
 
 export async function saveService(formData: FormData) {
   await requireAdmin();
@@ -233,6 +271,7 @@ export async function saveService(formData: FormData) {
     nameRu: formData.get("nameRu"),
     descriptionEn: formData.get("descriptionEn"),
     descriptionRu: formData.get("descriptionRu"),
+    canonicalSlug: String(formData.get("canonicalSlug") || "") || undefined,
     priceUsd: String(formData.get("priceUsd") || ""),
   });
   if (!parsed.success) return;
@@ -244,6 +283,7 @@ export async function saveService(formData: FormData) {
     nameRu: parsed.data.nameRu,
     descriptionEn: parsed.data.descriptionEn,
     descriptionRu: parsed.data.descriptionRu,
+    canonicalSlug: parsed.data.canonicalSlug || null,
     priceUsd: Number.isFinite(priceUsd) ? priceUsd : null,
   };
   if (parsed.data.id) {
@@ -259,4 +299,13 @@ export async function deleteService(formData: FormData) {
   const id = String(formData.get("id") || "");
   await prisma.service.delete({ where: { id } });
   revalidatePath("/");
+}
+
+export async function updateLeadStatus(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const status = String(formData.get("status") || "new");
+  if (!["new", "contacted", "closed"].includes(status)) return;
+  await prisma.lead.update({ where: { id }, data: { status } });
+  revalidatePath("/admin/leads");
 }

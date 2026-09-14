@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getCheckerState, hasCheckerDetails } from "@/lib/checker-state";
 import { LeadForm } from "@/components/LeadForm";
 import { localized } from "@/lib/format";
+import { trackEvent } from "@/lib/analytics";
 import type { Locale } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default async function ApplyPage({
   const tChecker = await getTranslations("checker");
   const clinic = await prisma.clinic.findUnique({ where: { slug } });
   if (!clinic || !clinic.published) notFound();
+  await trackEvent("apply_start", { clinic: clinic.slug });
 
   const checker = await getCheckerState();
   const usedChecker = hasCheckerDetails(checker);
@@ -67,6 +69,7 @@ export default async function ApplyPage({
           clinicSlug={clinic.slug}
           usedChecker={usedChecker}
           checkerSummary={summary}
+          afterRequest={(loc === "ru" ? clinic.afterRequestRu : clinic.afterRequestEn) || undefined}
         />
       </div>
     </div>

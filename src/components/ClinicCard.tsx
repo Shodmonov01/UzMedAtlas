@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { MapPin } from "lucide-react";
-import { cityLabel, languageLabel, localized, parseLanguages } from "@/lib/format";
+import { cityLabel, formatPrice, languageLabel, localized, parseLanguages } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
 
 type ClinicCardClinic = {
@@ -14,16 +14,20 @@ type ClinicCardClinic = {
   languages: string;
   logoUrl: string | null;
   coverColor: string;
+  responseHours?: number;
   photos: { url: string }[];
   specialties: { specialty: { nameEn: string; nameRu: string } }[];
+  fromPrice?: number | null;
 };
 
 export async function ClinicCard({
   clinic,
   compact = false,
+  matchReason,
 }: {
   clinic: ClinicCardClinic;
   compact?: boolean;
+  matchReason?: string;
 }) {
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("catalog");
@@ -35,12 +39,8 @@ export async function ClinicCard({
 
   return (
     <article className="card-shadow overflow-hidden rounded-3xl border border-line bg-white">
-      <div
-        className="relative h-44 bg-teal"
-        style={{ backgroundColor: clinic.coverColor }}
-      >
+      <div className="relative h-44 bg-teal" style={{ backgroundColor: clinic.coverColor }}>
         {photo ? (
-          // SVG clinic art is local; img keeps aspect without next/image config.
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photo} alt="" className="h-full w-full object-cover opacity-90" />
         ) : null}
@@ -61,6 +61,7 @@ export async function ClinicCard({
             {cityLabel(clinic.city, locale)}
           </p>
         </div>
+        {matchReason ? <p className="text-sm text-teal-deep">{matchReason}</p> : null}
         {!compact ? (
           <p className="line-clamp-3 text-sm leading-relaxed text-muted">{description}</p>
         ) : null}
@@ -71,18 +72,19 @@ export async function ClinicCard({
             </span>
           ))}
         </div>
-        <p className="text-xs text-muted">
+        <p className="text-xs font-semibold text-ink">
           {t("languages")}:{" "}
-          {languages.map((code) => languageLabel(code, locale)).join(", ")}
+          {languages.map((code) => languageLabel(code, locale)).join(" · ")}
+        </p>
+        <p className="text-xs text-muted">
+          {clinic.fromPrice != null ? `${t("fromPrice")} ${formatPrice(clinic.fromPrice, locale)} · ` : ""}
+          {t("replyIn", { hours: clinic.responseHours ?? 24 })}
         </p>
         <div className="flex gap-2 pt-1">
           <Link href={`/clinics/${clinic.slug}`} className="btn btn-ghost flex-1 text-sm">
             {tClinic("open")}
           </Link>
-          <Link
-            href={`/clinics/${clinic.slug}/apply`}
-            className="btn btn-primary flex-1 text-sm"
-          >
+          <Link href={`/clinics/${clinic.slug}/apply`} className="btn btn-primary flex-1 text-sm">
             {tClinic("apply")}
           </Link>
         </div>

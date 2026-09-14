@@ -1,38 +1,102 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { submitLead } from "@/actions/public";
 import { ARRIVAL_TYPES, CONTACT_METHODS, COUNTRIES } from "@/lib/constants";
+import { DIAL_CODES } from "@/lib/phone";
 
 export function LeadForm({
   locale,
   clinicSlug,
   usedChecker,
   checkerSummary,
+  afterRequest,
 }: {
   locale: string;
   clinicSlug: string;
   usedChecker: boolean;
   checkerSummary?: string[];
+  afterRequest?: string;
 }) {
   const t = useTranslations("apply");
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const [arrivalType, setArrivalType] = useState("undecided");
   const [contactMethod, setContactMethod] = useState("whatsapp");
+  const [country, setCountry] = useState("Kazakhstan");
+  const [dial, setDial] = useState("+7");
+  const [fullName, setFullName] = useState("");
+  const [nationalPhone, setNationalPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [medicalNeed, setMedicalNeed] = useState("");
+  const idempotencyKey = useMemo(
+    () => (typeof crypto !== "undefined" ? crypto.randomUUID() : `${Date.now()}`),
+    [],
+  );
+
+  useEffect(() => {
+    const raw = localStorage.getItem(`uma_draft_${clinicSlug}`);
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as Record<string, string>;
+      if (draft.fullName) setFullName(draft.fullName);
+      if (draft.country) setCountry(draft.country);
+      if (draft.dial) setDial(draft.dial);
+      if (draft.nationalPhone) setNationalPhone(draft.nationalPhone);
+      if (draft.email) setEmail(draft.email);
+      if (draft.medicalNeed) setMedicalNeed(draft.medicalNeed);
+      if (draft.contactMethod) setContactMethod(draft.contactMethod);
+      if (draft.arrivalType) setArrivalType(draft.arrivalType);
+    } catch {
+      /* ignore */
+    }
+  }, [clinicSlug]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      `uma_draft_${clinicSlug}`,
+      JSON.stringify({
+        fullName,
+        country,
+        dial,
+        nationalPhone,
+        email,
+        medicalNeed,
+        contactMethod,
+        arrivalType,
+      }),
+    );
+  }, [clinicSlug, fullName, country, dial, nationalPhone, email, medicalNeed, contactMethod, arrivalType]);
+
+  function onCountry(value: string) {
+    setCountry(value);
+    const match = DIAL_CODES.find((item) => item.country === value);
+    if (match) setDial(match.dial);
+  }
 
   async function action(formData: FormData) {
     setError(null);
+    setPending(true);
     const result = await submitLead(formData);
+    setPending(false);
     if (result?.error === "emailRequired") setError(t("emailRequired"));
     else if (result?.error === "medicalNeed") setError(t("required"));
+    else if (result?.error === "rateLimit") setError(t("rateLimit"));
     else if (result?.error) setError(t("invalidPhone"));
+    else localStorage.removeItem(`uma_draft_${clinicSlug}`);
   }
 
   return (
     <form action={action} className="space-y-5 rounded-3xl border border-line bg-white p-6">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="clinicSlug" value={clinicSlug} />
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+
+      <div className="rounded-2xl bg-sand p-4 text-sm">
+        <p className="font-semibold">{t("nextTitle")}</p>
+        <p className="mt-1 text-muted">{afterRequest || t("nextBody")}</p>
+      </div>
 
       {usedChecker && checkerSummary?.length ? (
         <div className="rounded-2xl bg-sand p-4 text-sm">
@@ -51,30 +115,44 @@ export function LeadForm({
 
       <label className="block text-sm font-semibold">
         {t("fullName")}
-        <input name="fullName" required className="field mt-1" />
+        <input name="fullName" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="field mt-1" />
       </label>
       <label className="block text-sm font-semibold">
         {t("country")}
-        <select name="country" required className="field mt-1" defaultValue="Kazakhstan">
-          {COUNTRIES.map((country) => (
-            <option key={country} value={country}>
-              {country}
+        <select name="country" required className="field mt-1" value={country} onChange={(e) => onCountry(e.target.value)}>
+          {COUNTRIES.map((item) => (
+            <option key={item} value={item}>
+              {item}
             </option>
           ))}
         </select>
       </label>
-      <label className="block text-sm font-semibold">
-        {t("phone")}
-        <input
-          name="phone"
-          required
-          placeholder={t("phonePlaceholder")}
-          className="field mt-1"
-        />
-      </label>
+      <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+        <label className="block text-sm font-semibold">
+          {t("dial")}
+          <select name="dial" className="field mt-1" value={dial} onChange={(e) => setDial(e.target.value)}>
+            {DIAL_CODES.map((item) => (
+              <option key={`${item.country}-${item.dial}`} value={item.dial}>
+                {item.dial}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm font-semibold">
+          {t("nationalPhone")}
+          <input
+            name="nationalPhone"
+            required
+            value={nationalPhone}
+            onChange={(e) => setNationalPhone(e.target.value)}
+            placeholder="700 000 00 00"
+            className="field mt-1"
+          />
+        </label>
+      </div>
       <label className="block text-sm font-semibold">
         {t("email")}
-        <input name="email" type="email" className="field mt-1" />
+        <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="field mt-1" />
       </label>
 
       <fieldset>
@@ -90,11 +168,7 @@ export function LeadForm({
                 onChange={() => setContactMethod(method)}
               />
               {t(
-                method === "phone"
-                  ? "phoneMethod"
-                  : method === "email"
-                    ? "emailMethod"
-                    : method,
+                method === "phone" ? "phoneMethod" : method === "email" ? "emailMethod" : method,
               )}
             </label>
           ))}
@@ -132,14 +206,16 @@ export function LeadForm({
             name="medicalNeed"
             required
             rows={4}
+            value={medicalNeed}
+            onChange={(e) => setMedicalNeed(e.target.value)}
             placeholder={t("medicalNeedPlaceholder")}
             className="field mt-1"
           />
         </label>
       ) : null}
 
-      <button className="btn btn-clay w-full text-base" type="submit">
-        {t("submit")}
+      <button className="btn btn-clay w-full text-base" type="submit" disabled={pending}>
+        {pending ? "…" : t("submit")}
       </button>
     </form>
   );

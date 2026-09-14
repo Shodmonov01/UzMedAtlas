@@ -30,6 +30,7 @@ export const COUNTRIES = [
   "Kyrgyzstan",
   "Tajikistan",
   "Turkmenistan",
+  "Uzbekistan",
   "Russia",
   "Turkey",
   "United Arab Emirates",
@@ -41,3 +42,9 @@ export const COUNTRIES = [
   "United States",
   "Other",
 ] as const;
+
+export const LEAD_STATUSES = ["new", "contacted", "closed"] as const;
+export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
+export const LEAD_SOURCES = ["checker", "catalog"] as const;
+export type LeadSource = (typeof LEAD_SOURCES)[number];

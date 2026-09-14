@@ -62,6 +62,19 @@ export default async function ServicesPage({
           <textarea name="descriptionRu" required className="field mt-1" />
         </label>
         <label className="text-sm font-semibold">
+          {t("canonical")}
+          <select name="canonicalSlug" className="field mt-1" defaultValue="">
+            <option value="">—</option>
+            <option value="mri">MRI / МРТ</option>
+            <option value="ct">CT / КТ</option>
+            <option value="ultrasound">Ultrasound / УЗИ</option>
+            <option value="checkup">Check-up</option>
+            <option value="consultation">Consultation</option>
+            <option value="surgery">Surgery</option>
+            <option value="endoscopy">Endoscopy</option>
+          </select>
+        </label>
+        <label className="text-sm font-semibold">
           {t("priceUsd")}
           <input name="priceUsd" type="number" min="0" className="field mt-1" />
         </label>

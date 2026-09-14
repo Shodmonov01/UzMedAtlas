@@ -13,9 +13,11 @@ export default async function AdminHome({
   setRequestLocale(locale);
   const t = await getTranslations("admin");
 
-  const [clinics, leads, events] = await Promise.all([
+  const [clinics, leads, checkerLeads, catalogLeads, events] = await Promise.all([
     prisma.clinic.count(),
     prisma.lead.count(),
+    prisma.lead.count({ where: { source: "checker" } }),
+    prisma.lead.count({ where: { source: "catalog" } }),
     prisma.analyticsEvent.groupBy({
       by: ["type"],
       _count: { type: true },
@@ -53,6 +55,19 @@ export default async function AdminHome({
               <p className="mt-1 text-4xl font-semibold tabular-nums">{value}</p>
             </div>
           ))}
+        </div>
+      </section>
+      <section>
+        <h2 className="font-display text-2xl">{t("conversion")}</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <p className="text-sm text-muted">{t("checkerToLead")}</p>
+            <p className="mt-1 text-4xl font-semibold tabular-nums">{checkerLeads}</p>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <p className="text-sm text-muted">{t("catalogToLead")}</p>
+            <p className="mt-1 text-4xl font-semibold tabular-nums">{catalogLeads}</p>
+          </div>
         </div>
       </section>
       <section>

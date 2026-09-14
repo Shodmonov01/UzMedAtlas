@@ -153,9 +153,46 @@ export default async function ClinicPage({
             ) : null}
           </ul>
           <h3 className="mt-6 font-semibold">{t("languages")}</h3>
-          <p className="mt-1 text-sm text-muted">
-            {languages.map((code) => languageLabel(code, loc)).join(", ")}
+          <p className="mt-1 text-sm font-medium">
+            {languages.map((code) => languageLabel(code, loc)).join(" · ")}
           </p>
+          {clinic.coordinatorName ? (
+            <>
+              <h3 className="mt-6 font-semibold">{t("coordinator")}</h3>
+              <p className="mt-1 text-sm text-muted">
+                {clinic.coordinatorName}
+                {(loc === "ru" ? clinic.coordinatorRoleRu : clinic.coordinatorRoleEn)
+                  ? ` · ${loc === "ru" ? clinic.coordinatorRoleRu : clinic.coordinatorRoleEn}`
+                  : ""}
+              </p>
+            </>
+          ) : null}
+          <p className="mt-3 text-sm text-muted">
+            {loc === "ru"
+              ? `Обычно отвечают за ${clinic.responseHours} ч.`
+              : `Usually replies within ${clinic.responseHours} hours.`}
+          </p>
+          {(loc === "ru" ? clinic.licenseInfoRu : clinic.licenseInfoEn) ? (
+            <>
+              <h3 className="mt-6 font-semibold">{t("license")}</h3>
+              <p className="mt-1 text-sm text-muted">
+                {loc === "ru" ? clinic.licenseInfoRu : clinic.licenseInfoEn}
+              </p>
+            </>
+          ) : null}
+          {(loc === "ru" ? clinic.afterRequestRu : clinic.afterRequestEn) ? (
+            <>
+              <h3 className="mt-6 font-semibold">{t("afterRequest")}</h3>
+              <p className="mt-1 text-sm text-muted">
+                {loc === "ru" ? clinic.afterRequestRu : clinic.afterRequestEn}
+              </p>
+            </>
+          ) : null}
+          {clinic.whatsapp ? (
+            <a className="mt-4 block text-sm font-semibold text-teal" href={`https://wa.me/${clinic.whatsapp.replace(/[^\d]/g, "")}`}>
+              {t("whatsapp")}
+            </a>
+          ) : null}
           <Link href={`/clinics/${clinic.slug}/apply`} className="btn btn-clay mt-6 w-full">
             {t("apply")}
           </Link>

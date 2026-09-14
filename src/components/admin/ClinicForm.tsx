@@ -22,16 +22,28 @@ type ClinicFormData = {
   logoUrl?: string | null;
   photos?: { id: string; url: string }[];
   specialties?: { specialtyId: string }[];
+  whatsapp?: string | null;
+  telegram?: string | null;
+  coordinatorName?: string | null;
+  coordinatorRoleEn?: string | null;
+  coordinatorRoleRu?: string | null;
+  responseHours?: number;
+  licenseInfoEn?: string | null;
+  licenseInfoRu?: string | null;
+  afterRequestEn?: string | null;
+  afterRequestRu?: string | null;
 };
 
 export async function ClinicForm({
   clinic,
   specialties,
   locale,
+  error,
 }: {
   clinic?: ClinicFormData;
   specialties: { id: string; nameEn: string; nameRu: string }[];
   locale: string;
+  error?: string;
 }) {
   const t = await getTranslations("admin");
   const selected = new Set(clinic?.specialties?.map((item) => item.specialtyId) ?? []);
@@ -39,6 +51,18 @@ export async function ClinicForm({
 
   return (
     <div>
+    {error === "slug" ? (
+      <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{t("slugTaken")}</p>
+    ) : error === "invalid" ? (
+      <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{t("formError")}</p>
+    ) : null}
+    {clinic?.slug ? (
+      <p className="mb-4">
+        <a className="text-sm font-semibold text-teal" href={`/${locale}/clinics/${clinic.slug}`} target="_blank" rel="noreferrer">
+          {t("preview")}
+        </a>
+      </p>
+    ) : null}
     <form action={saveClinic} className="space-y-5 rounded-3xl border border-line bg-white p-6">
       <input type="hidden" name="locale" value={locale} />
       {clinic?.id ? <input type="hidden" name="id" value={clinic.id} /> : null}
@@ -134,6 +158,48 @@ export async function ClinicForm({
         <input type="checkbox" name="published" defaultChecked={clinic?.published ?? true} />
         {t("published")}
       </label>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="text-sm font-semibold">
+          {t("whatsapp")}
+          <input name="whatsapp" defaultValue={clinic?.whatsapp || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("telegram")}
+          <input name="telegram" defaultValue={clinic?.telegram || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("coordinator")}
+          <input name="coordinatorName" defaultValue={clinic?.coordinatorName || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("responseHours")}
+          <input name="responseHours" type="number" min={1} defaultValue={clinic?.responseHours ?? 24} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("coordinator")} EN
+          <input name="coordinatorRoleEn" defaultValue={clinic?.coordinatorRoleEn || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("coordinator")} RU
+          <input name="coordinatorRoleRu" defaultValue={clinic?.coordinatorRoleRu || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("licenseEn")}
+          <textarea name="licenseInfoEn" defaultValue={clinic?.licenseInfoEn || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("licenseRu")}
+          <textarea name="licenseInfoRu" defaultValue={clinic?.licenseInfoRu || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("afterEn")}
+          <textarea name="afterRequestEn" defaultValue={clinic?.afterRequestEn || ""} className="field mt-1" />
+        </label>
+        <label className="text-sm font-semibold">
+          {t("afterRu")}
+          <textarea name="afterRequestRu" defaultValue={clinic?.afterRequestRu || ""} className="field mt-1" />
+        </label>
+      </div>
       <label className="block text-sm font-semibold">
         {t("logo")}
         <input name="logo" type="file" accept="image/*" className="field mt-1" />

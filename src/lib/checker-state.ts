@@ -7,7 +7,10 @@ export type CheckerState = {
   age?: number;
   gender?: Gender;
   duration?: Duration;
+  forChild?: boolean;
   specialtySlug?: string;
+  specialtySlugs?: string[];
+  redFlags?: string[];
 };
 
 const COOKIE = "uma_checker";
@@ -33,7 +36,7 @@ export async function setCheckerState(state: CheckerState) {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24,
+    maxAge: 60 * 60 * 24 * 7,
   });
 }
 
@@ -43,10 +46,5 @@ export async function clearCheckerState() {
 }
 
 export function hasCheckerDetails(state: CheckerState | null) {
-  return Boolean(
-    state &&
-      !state.skipped &&
-      state.symptoms &&
-      state.specialtySlug,
-  );
+  return Boolean(state && !state.skipped && state.symptoms && state.specialtySlug);
 }

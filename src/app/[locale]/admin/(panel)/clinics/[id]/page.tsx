@@ -7,10 +7,13 @@ export const dynamic = "force-dynamic";
 
 export default async function EditClinicPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { locale, id } = await params;
+  const { error } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
   const [clinic, specialties] = await Promise.all([
@@ -25,7 +28,7 @@ export default async function EditClinicPage({
   return (
     <div className="space-y-6">
       <h1 className="font-display text-4xl">{t("editClinic")}</h1>
-      <ClinicForm locale={locale} specialties={specialties} clinic={clinic} />
+      <ClinicForm locale={locale} specialties={specialties} clinic={clinic} error={error} />
     </div>
   );
 }

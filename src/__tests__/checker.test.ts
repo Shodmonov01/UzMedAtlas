@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { pickSpecialty, scoreSpecialty } from "@/lib/checker";
+import {
+  detectRedFlags,
+  pickSpecialty,
+  rankSpecialties,
+  scoreSpecialty,
+} from "@/lib/checker";
 
 const specialties = [
   {
@@ -13,6 +18,18 @@ const specialties = [
   {
     slug: "cardiology",
     keywords: "heart, chest, cardiolog, сердце, давлен",
+  },
+  {
+    slug: "pediatrics",
+    keywords: "child, kid, pediatric, ребенок, детск",
+  },
+  {
+    slug: "gynecology",
+    keywords: "period, pregnancy, gynecolo, цикл, беременност",
+  },
+  {
+    slug: "urology",
+    keywords: "urine, prostate, urolog, моч, простат",
   },
   {
     slug: "diagnostics",
@@ -52,5 +69,34 @@ describe("symptom checker", () => {
   it("gives zero when keywords are absent", () => {
     expect(scoreSpecialty("I feel generally unwell", "knee, heart")).toBe(0);
     expect(scoreSpecialty("knee pain while walking", "knee, walking")).toBeGreaterThan(0);
+  });
+
+  it("boosts pediatrics for a child", () => {
+    const ranked = rankSpecialties(
+      { text: "My child has a headache and dizziness", age: 7, forChild: true },
+      specialties,
+    );
+    expect(ranked[0]?.specialty.slug).toBe("pediatrics");
+  });
+
+  it("does not recommend gynecology for male patients", () => {
+    const ranked = rankSpecialties(
+      { text: "irregular period and pregnancy planning", gender: "male" },
+      specialties,
+    );
+    expect(ranked.every((item) => item.specialty.slug !== "gynecology")).toBe(true);
+  });
+
+  it("returns more than one specialty when scores are close", () => {
+    const ranked = rankSpecialties(
+      { text: "knee pain while walking and I also need an MRI checkup" },
+      specialties,
+    );
+    expect(ranked.length).toBeGreaterThan(1);
+  });
+
+  it("detects chest and stroke red flags", () => {
+    expect(detectRedFlags("severe chest pain and I cannot breathe")).toContain("chest");
+    expect(detectRedFlags("sudden weakness on one side and I can't speak")).toContain("stroke");
   });
 });

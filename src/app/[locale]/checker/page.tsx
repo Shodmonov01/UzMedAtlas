@@ -78,6 +78,10 @@ export default async function CheckerPage({
             </label>
           </div>
         </fieldset>
+        <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2 text-sm font-semibold">
+          <input type="checkbox" name="forChild" />
+          {t("forChild")}
+        </label>
         <button className="btn btn-primary w-full" type="submit">
           {t("submit")}
         </button>
