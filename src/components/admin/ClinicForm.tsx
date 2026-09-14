@@ -1,5 +1,5 @@
 import { CITIES, SERVICE_LANGUAGES } from "@/lib/constants";
-import { saveClinic, deleteClinic, deletePhoto } from "@/actions/admin";
+import { saveClinic, deleteClinic, deletePhoto, duplicateClinic } from "@/actions/admin";
 import { getTranslations } from "next-intl/server";
 import { parseLanguages } from "@/lib/format";
 
@@ -232,13 +232,22 @@ export async function ClinicForm({
       </button>
     </form>
       {clinic?.id ? (
-        <form action={deleteClinic} className="mt-4">
-          <input type="hidden" name="id" value={clinic.id} />
-          <input type="hidden" name="locale" value={locale} />
-          <button className="text-sm text-red-700" type="submit">
-            {t("delete")}
-          </button>
-        </form>
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <form action={duplicateClinic}>
+            <input type="hidden" name="id" value={clinic.id} />
+            <input type="hidden" name="locale" value={locale} />
+            <button className="text-sm font-semibold text-teal" type="submit">
+              {t("duplicate")}
+            </button>
+          </form>
+          <form action={deleteClinic}>
+            <input type="hidden" name="id" value={clinic.id} />
+            <input type="hidden" name="locale" value={locale} />
+            <button className="text-sm text-red-700" type="submit">
+              {t("delete")}
+            </button>
+          </form>
+        </div>
       ) : null}
     </div>
   );

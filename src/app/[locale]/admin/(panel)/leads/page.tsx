@@ -10,16 +10,27 @@ export default async function LeadsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ status?: string; source?: string }>;
+  searchParams: Promise<{ status?: string; source?: string; q?: string }>;
 }) {
   const { locale } = await params;
   const filters = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
+  const q = filters.q?.trim();
   const leads = await prisma.lead.findMany({
     where: {
       ...(filters.status ? { status: filters.status } : {}),
       ...(filters.source ? { source: filters.source } : {}),
+      ...(q
+        ? {
+            OR: [
+              { fullName: { contains: q } },
+              { phone: { contains: q } },
+              { email: { contains: q } },
+              { country: { contains: q } },
+            ],
+          }
+        : {}),
     },
     orderBy: { createdAt: "desc" },
     include: { clinic: true, recommendedSpecialty: true },
@@ -34,6 +45,12 @@ export default async function LeadsPage({
         </a>
       </div>
       <form className="flex flex-wrap gap-3 rounded-2xl border border-line bg-white p-4">
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder={t("searchLeads")}
+          className="field w-full max-w-xs"
+        />
         <select name="status" defaultValue={filters.status || ""} className="field w-auto">
           <option value="">{t("allStatuses")}</option>
           <option value="new">{t("statusNew")}</option>

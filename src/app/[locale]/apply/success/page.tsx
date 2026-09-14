@@ -27,6 +27,7 @@ export default async function SuccessPage({
   const hours = lead?.clinic.responseHours ?? 24;
   const wa = lead?.clinic.whatsapp || lead?.clinic.phone;
   const waHref = wa ? whatsappLink(wa) : null;
+  const steps = [t("step1"), t("step2"), t("step3")];
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-20 text-center">
@@ -35,13 +36,20 @@ export default async function SuccessPage({
       </p>
       <h1 className="mt-6 font-display text-4xl md:text-5xl">{t("title")}</h1>
       <p className="mt-4 text-lg text-muted">{t("body")}</p>
-      <p className="mt-3 text-muted">{t("next")}</p>
-      <p className="mt-1 text-sm text-muted">{t("hours", { hours })}</p>
       {lead ? (
-        <p className="mt-2 text-sm font-semibold">
-          {localized(lead.clinic, loc, "name")}
+        <p className="mt-4 text-sm font-semibold">
+          {localized(lead.clinic, loc, "name")} · {lead.phone}
         </p>
       ) : null}
+      <ol className="mt-8 space-y-3 text-left">
+        {steps.map((step, index) => (
+          <li key={step} className="rounded-2xl border border-line bg-white p-4">
+            <span className="text-xs font-bold text-clay">0{index + 1}</span>
+            <p className="mt-1">{step}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-4 text-sm text-muted">{t("hours", { hours })}</p>
       <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
         {waHref ? (
           <a href={waHref} className="btn btn-clay" target="_blank" rel="noreferrer">

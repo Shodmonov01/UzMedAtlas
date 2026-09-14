@@ -35,6 +35,7 @@ export default async function AdminHome({
     [t("checkerDone"), counts.checker_complete || 0],
     [t("skips"), counts.checker_skip || 0],
     [t("clinicViews"), counts.clinic_view || 0],
+    [t("applyStarts"), counts.apply_start || 0],
     [t("requests"), counts.lead_submit || leads],
   ];
 
@@ -48,7 +49,7 @@ export default async function AdminHome({
       </div>
       <section>
         <h2 className="font-display text-2xl">{t("funnel")}</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {cards.map(([label, value]) => (
             <div key={label} className="rounded-2xl border border-line bg-white p-4">
               <p className="text-sm text-muted">{label}</p>

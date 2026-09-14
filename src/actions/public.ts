@@ -7,10 +7,12 @@ import { getCheckerState, setCheckerState } from "@/lib/checker-state";
 import { trackEvent } from "@/lib/analytics";
 import { go } from "@/lib/redirect";
 import { DURATIONS, GENDERS } from "@/lib/constants";
-import { getSessionId, setLastLeadId } from "@/lib/session";
+import { getSessionId, setLastLeadId, getUtm } from "@/lib/session";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { formatLeadEmail, sendLeadEmails } from "@/lib/email";
 import { combinePhone } from "@/lib/phone";
+import { isRecentDuplicate } from "@/lib/leads";
+import { PREFERRED_HOURS } from "@/lib/constants";
 
 const symptomsSchema = z.object({
   symptoms: z.string().trim().min(8).max(1500),
@@ -131,11 +133,17 @@ const leadSchema = z.object({
   arrivalType: z.enum(["exact", "approximate", "undecided"]),
   arrivalDate: z.string().optional(),
   medicalNeed: z.string().trim().max(1500).optional(),
+  preferredHours: z.enum(PREFERRED_HOURS).optional(),
+  consent: z.literal("on"),
+  company: z.string().max(80).optional(),
   idempotencyKey: z.string().min(8).max(80),
 });
 
 export async function submitLead(formData: FormData) {
   const locale = ((formData.get("locale") as string) || "en") as "en" | "ru";
+  if (String(formData.get("company") || "").trim()) {
+    go("/apply/success", locale);
+  }
   const parsed = leadSchema.safeParse({
     clinicSlug: formData.get("clinicSlug"),
     locale,
@@ -148,10 +156,15 @@ export async function submitLead(formData: FormData) {
     arrivalType: formData.get("arrivalType"),
     arrivalDate: formData.get("arrivalDate") || "",
     medicalNeed: formData.get("medicalNeed") || "",
+    preferredHours: formData.get("preferredHours") || "anytime",
+    consent: formData.get("consent") === "on" ? "on" : "",
+    company: String(formData.get("company") || ""),
     idempotencyKey: formData.get("idempotencyKey") || "",
   });
 
   if (!parsed.success) {
+    const fields = parsed.error.flatten().fieldErrors;
+    if (fields.consent) return { error: "consent" as const };
     return { error: "invalid" as const };
   }
 
@@ -185,6 +198,14 @@ export async function submitLead(formData: FormData) {
     return { error: "invalid" as const };
   }
 
+  const duplicate = await prisma.lead.findFirst({
+    where: { clinicId: clinic.id, phone },
+    orderBy: { createdAt: "desc" },
+  });
+  if (duplicate && isRecentDuplicate(duplicate.createdAt)) {
+    return { error: "duplicate" as const };
+  }
+
   const checker = await getCheckerState();
   const usedChecker = Boolean(checker && !checker.skipped && checker.symptoms);
 
@@ -207,6 +228,8 @@ export async function submitLead(formData: FormData) {
       ? "not decided yet"
       : `${parsed.data.arrivalType}: ${parsed.data.arrivalDate || ""}`;
 
+  const utm = await getUtm();
+
   const lead = await prisma.lead.create({
     data: {
       clinicId: clinic.id,
@@ -228,6 +251,11 @@ export async function submitLead(formData: FormData) {
       status: "new",
       sessionId,
       idempotencyKey: parsed.data.idempotencyKey,
+      preferredHours: parsed.data.preferredHours || "anytime",
+      consentAt: new Date(),
+      utmSource: utm?.source || null,
+      utmMedium: utm?.medium || null,
+      utmCampaign: utm?.campaign || null,
       recommendedSpecialtyId: usedChecker ? specialtyId : null,
     },
   });
@@ -253,6 +281,8 @@ export async function submitLead(formData: FormData) {
       gender: usedChecker ? checker?.gender : null,
       duration: usedChecker ? checker?.duration : null,
       forChild: usedChecker ? Boolean(checker?.forChild) : false,
+      preferredHours: parsed.data.preferredHours,
+      utmSource: utm?.source,
     }),
   });
 

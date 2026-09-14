@@ -111,6 +111,12 @@ model Lead {
   status                 String     @default("new")
   sessionId              String?
   idempotencyKey         String?    @unique
+  preferredHours         String?
+  notes                  String?
+  consentAt              DateTime?
+  utmSource              String?
+  utmMedium              String?
+  utmCampaign            String?
   recommendedSpecialtyId String?
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @default(now()) @updatedAt

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { startChecker, skipChecker } from "@/actions/public";
@@ -15,6 +15,15 @@ export function HomeChecker({
   const t = useTranslations("home");
   const examples = t.raw("examples") as string[];
   const [symptoms, setSymptoms] = useState("");
+
+  useEffect(() => {
+    const last = localStorage.getItem("uma_last_symptoms");
+    if (last) setSymptoms(last);
+  }, []);
+
+  useEffect(() => {
+    if (symptoms) localStorage.setItem("uma_last_symptoms", symptoms);
+  }, [symptoms]);
 
   return (
     <div className="mx-auto w-full max-w-3xl">

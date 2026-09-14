@@ -41,6 +41,8 @@ export function formatLeadEmail(input: {
   gender?: string | null;
   duration?: string | null;
   forChild?: boolean;
+  preferredHours?: string | null;
+  utmSource?: string | null;
 }) {
   const lines = [
     `New UzMedAtlas request for ${input.clinicName}`,
@@ -50,8 +52,10 @@ export function formatLeadEmail(input: {
     `Phone: ${input.phone}`,
     input.email ? `Email: ${input.email}` : null,
     `Preferred contact: ${input.contactMethod}`,
+    input.preferredHours ? `Preferred hours: ${input.preferredHours}` : null,
     `Arrival: ${input.arrival}`,
     `Source: ${input.source}`,
+    input.utmSource ? `Campaign: ${input.utmSource}` : null,
     input.specialty ? `Suggested specialty: ${input.specialty}` : null,
     input.forChild ? "The request is for a child." : null,
     input.age != null ? `Age: ${input.age}` : null,

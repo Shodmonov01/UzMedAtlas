@@ -24,9 +24,14 @@ export default async function AdminClinicsPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-4xl">{t("clinics")}</h1>
-        <Link href="/admin/clinics/new" className="btn btn-primary">
-          {t("newClinic")}
-        </Link>
+        <div className="flex gap-2">
+          <a href="/api/admin/clinics.csv" className="btn btn-ghost">
+            {t("export")}
+          </a>
+          <Link href="/admin/clinics/new" className="btn btn-primary">
+            {t("newClinic")}
+          </Link>
+        </div>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-line bg-white">
         <table className="w-full text-left text-sm">

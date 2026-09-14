@@ -48,3 +48,6 @@ export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
 export const LEAD_SOURCES = ["checker", "catalog"] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
+
+export const PREFERRED_HOURS = ["anytime", "morning", "afternoon", "evening"] as const;
+export type PreferredHours = (typeof PREFERRED_HOURS)[number];

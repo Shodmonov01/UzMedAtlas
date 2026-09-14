@@ -6,7 +6,8 @@
   "nav": {
     "clinics": "Clinics",
     "home": "Home",
-    "admin": "Admin"
+    "admin": "Admin",
+    "faq": "FAQ"
   },
   "home": {
     "kicker": "Private clinics of Uzbekistan for international patients",
@@ -28,7 +29,11 @@
     "howTitle": "How it works",
     "step1": "Describe the problem or skip to the catalog",
     "step2": "See a suggested specialty and matching clinics",
-    "step3": "Open a clinic, review services, and send a request"
+    "step3": "Open a clinic, review services, and send a request",
+    "howMore": "Read the full path",
+    "featured": "Clinics that usually reply fastest",
+    "allClinics": "Browse all clinics",
+    "allFaq": "All questions"
   },
   "checker": {
     "title": "A few details to suggest the right specialty",
@@ -88,13 +93,16 @@
     "count": "{count, plural, one {# clinic} other {# clinics}}",
     "empty": "No clinics match these filters. Try another city, specialty, or search term.",
     "languages": "Languages",
+    "language": "Language of care",
+    "allLanguages": "Any language",
     "sort": "Sort",
     "sortName": "Name",
     "sortCity": "City",
     "sortPrice": "Price",
     "sortResponse": "Reply time",
     "fromPrice": "From",
-    "replyIn": "Usually replies in {hours}h"
+    "replyIn": "Usually replies in {hours}h",
+    "suggestions": "You can still look at these clinics"
   },
   "clinic": {
     "about": "About the clinic",
@@ -114,7 +122,11 @@
     "license": "License",
     "afterRequest": "After you send a request",
     "whatsapp": "WhatsApp",
-    "telegram": "Telegram"
+    "telegram": "Telegram",
+    "copyLink": "Copy clinic link",
+    "copied": "Link copied",
+    "related": "Similar clinics",
+    "recent": "Recently viewed"
   },
   "apply": {
     "title": "Send a request to {clinic}",
@@ -145,7 +157,16 @@
     "nextTitle": "What happens next",
     "nextBody": "The clinic coordinator will contact you on the channel you choose. This is a request for a callback, not a booked appointment.",
     "dial": "Country code",
-    "nationalPhone": "Phone number"
+    "nationalPhone": "Phone number",
+    "preferredHours": "Preferred time to be contacted",
+    "anytime": "Any time",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "consent": "I agree that UzMedAtlas will send this request and my contact details to the chosen clinic.",
+    "privacyLink": "How we use this data",
+    "consentRequired": "Please confirm that we may send your request to the clinic.",
+    "duplicate": "You already sent a request to this clinic in the last 24 hours. The clinic already has your details."
   },
   "success": {
     "title": "Your request has been sent. The clinic will be able to contact you using the details you provided.",
@@ -154,11 +175,18 @@
     "home": "Go to the home page",
     "next": "A coordinator will contact you using the details you left.",
     "hours": "Typical reply time: {hours} hours.",
-    "whatsappClinic": "Message the clinic on WhatsApp"
+    "whatsappClinic": "Message the clinic on WhatsApp",
+    "step1": "The clinic coordinator sees your request and contacts you on the channel you chose.",
+    "step2": "This is a callback request, not a booked appointment or a diagnosis.",
+    "step3": "If you need another clinic, you can send a separate request from the catalog."
   },
   "footer": {
     "disclaimer": "UzMedAtlas is a catalog and request form for international patients. It is not a medical information system, does not provide diagnoses, and does not replace a consultation with a doctor.",
-    "rights": "Private clinics of Uzbekistan"
+    "rights": "Private clinics of Uzbekistan",
+    "how": "How it works",
+    "faq": "FAQ",
+    "privacy": "Privacy",
+    "clinics": "Clinics"
   },
   "admin": {
     "loginTitle": "Admin sign in",
@@ -246,11 +274,85 @@
     "canonical": "Canonical service",
     "to": "To",
     "subject": "Subject",
-    "emailStatus": "Email status"
+    "emailStatus": "Email status",
+    "loginRateLimit": "Too many sign-in attempts. Please wait and try again.",
+    "duplicate": "Duplicate clinic",
+    "notes": "Internal notes",
+    "searchLeads": "Search name, phone, email",
+    "sessionEvents": "Session events",
+    "applyStarts": "Opened request form"
   },
   "common": {
     "loading": "Loading…",
     "notFound": "Page not found",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "skipToContent": "Skip to content",
+    "error": "Something went wrong",
+    "errorBody": "Please try again. If this continues, return to the home page.",
+    "retry": "Try again"
+  },
+  "faq": {
+    "title": "Questions patients usually ask",
+    "subtitle": "UzMedAtlas helps you choose a specialty and send a request. A clinic coordinator then contacts you.",
+    "items": [
+      {
+        "q": "Is this a diagnosis?",
+        "a": "No. The symptom checker only suggests a medical specialty so you can find the right clinic. A doctor at the clinic confirms the next step."
+      },
+      {
+        "q": "Is a request the same as a booking?",
+        "a": "No. A request is a callback. The clinic will contact you to discuss dates, documents, and whether the specialty fits."
+      },
+      {
+        "q": "Who will contact me?",
+        "a": "The clinic’s international coordinator, using the channel you choose: WhatsApp, Telegram, phone, or email."
+      },
+      {
+        "q": "Are prices final?",
+        "a": "Prices on clinic pages are indicative. The clinic confirms the actual cost after reviewing your case."
+      },
+      {
+        "q": "Which languages can I use?",
+        "a": "The site is in English and Russian. Each clinic lists the languages its coordinators can speak."
+      },
+      {
+        "q": "What happens to my data?",
+        "a": "We send your request to the clinic you chose so they can contact you. We do not sell patient data. See the privacy page for details."
+      }
+    ]
+  },
+  "how": {
+    "title": "How UzMedAtlas works",
+    "subtitle": "A short path from a symptom or a catalog search to a clinic callback.",
+    "steps": [
+      {
+        "title": "Describe the problem or browse clinics",
+        "body": "Use the symptom checker in your own words, or skip it and filter the catalog by city, specialty, language, or service."
+      },
+      {
+        "title": "Compare matching clinics",
+        "body": "See why a specialty was suggested, compare reply time and starting prices, and open a clinic page for services and a coordinator."
+      },
+      {
+        "title": "Send a request",
+        "body": "Leave your contacts and preferred channel. The clinic receives the request and contacts you. This is not an appointment."
+      }
+    ],
+    "limitsTitle": "What this first version does not do",
+    "limits": [
+      "It does not diagnose or prescribe treatment.",
+      "It does not book slots, take payments, or store medical records.",
+      "It does not open a patient or clinic cabinet."
+    ]
+  },
+  "privacy": {
+    "title": "How we use your data",
+    "updated": "This notice is for the first MVP catalog and request form.",
+    "paragraphs": [
+      "When you send a request, UzMedAtlas collects the details you type: name, country, phone, optional email, preferred contact method, planned arrival, and a short medical description or the symptom-checker answers you already gave.",
+      "We send that request to the private clinic you chose, and may keep a copy so the platform team can see that delivery worked. If you arrived from a campaign link, we may store the campaign source with the request.",
+      "We do not sell patient data. We do not create a patient account. Analytics events are stored with a random browser session, not with your name, unless they belong to the same session as a request.",
+      "If you sent a request in error, contact the clinic using the details on its page, or write to the platform team if a notify email is published for this deployment."
+    ]
   }
 }

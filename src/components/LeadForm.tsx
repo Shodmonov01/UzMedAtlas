@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { submitLead } from "@/actions/public";
-import { ARRIVAL_TYPES, CONTACT_METHODS, COUNTRIES } from "@/lib/constants";
+import { ARRIVAL_TYPES, CONTACT_METHODS, COUNTRIES, PREFERRED_HOURS } from "@/lib/constants";
 import { DIAL_CODES } from "@/lib/phone";
 
 export function LeadForm({
@@ -30,6 +31,7 @@ export function LeadForm({
   const [nationalPhone, setNationalPhone] = useState("");
   const [email, setEmail] = useState("");
   const [medicalNeed, setMedicalNeed] = useState("");
+  const [preferredHours, setPreferredHours] = useState("anytime");
   const idempotencyKey = useMemo(
     () => (typeof crypto !== "undefined" ? crypto.randomUUID() : `${Date.now()}`),
     [],
@@ -48,6 +50,7 @@ export function LeadForm({
       if (draft.medicalNeed) setMedicalNeed(draft.medicalNeed);
       if (draft.contactMethod) setContactMethod(draft.contactMethod);
       if (draft.arrivalType) setArrivalType(draft.arrivalType);
+      if (draft.preferredHours) setPreferredHours(draft.preferredHours);
     } catch {
       /* ignore */
     }
@@ -65,9 +68,21 @@ export function LeadForm({
         medicalNeed,
         contactMethod,
         arrivalType,
+        preferredHours,
       }),
     );
-  }, [clinicSlug, fullName, country, dial, nationalPhone, email, medicalNeed, contactMethod, arrivalType]);
+  }, [
+    clinicSlug,
+    fullName,
+    country,
+    dial,
+    nationalPhone,
+    email,
+    medicalNeed,
+    contactMethod,
+    arrivalType,
+    preferredHours,
+  ]);
 
   function onCountry(value: string) {
     setCountry(value);
@@ -83,6 +98,8 @@ export function LeadForm({
     if (result?.error === "emailRequired") setError(t("emailRequired"));
     else if (result?.error === "medicalNeed") setError(t("required"));
     else if (result?.error === "rateLimit") setError(t("rateLimit"));
+    else if (result?.error === "consent") setError(t("consentRequired"));
+    else if (result?.error === "duplicate") setError(t("duplicate"));
     else if (result?.error) setError(t("invalidPhone"));
     else localStorage.removeItem(`uma_draft_${clinicSlug}`);
   }
@@ -92,6 +109,12 @@ export function LeadForm({
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="clinicSlug" value={clinicSlug} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+      <div className="sr-only" aria-hidden="true">
+        <label>
+          Company
+          <input name="company" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
 
       <div className="rounded-2xl bg-sand p-4 text-sm">
         <p className="font-semibold">{t("nextTitle")}</p>
@@ -110,7 +133,9 @@ export function LeadForm({
       ) : null}
 
       {error ? (
-        <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>
+        <p role="alert" aria-live="polite" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error}
+        </p>
       ) : null}
 
       <label className="block text-sm font-semibold">
@@ -147,12 +172,14 @@ export function LeadForm({
             onChange={(e) => setNationalPhone(e.target.value)}
             placeholder="700 000 00 00"
             className="field mt-1"
+            inputMode="tel"
+            autoComplete="tel-national"
           />
         </label>
       </div>
       <label className="block text-sm font-semibold">
         {t("email")}
-        <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="field mt-1" />
+        <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="field mt-1" autoComplete="email" />
       </label>
 
       <fieldset>
@@ -167,13 +194,27 @@ export function LeadForm({
                 checked={contactMethod === method}
                 onChange={() => setContactMethod(method)}
               />
-              {t(
-                method === "phone" ? "phoneMethod" : method === "email" ? "emailMethod" : method,
-              )}
+              {t(method === "phone" ? "phoneMethod" : method === "email" ? "emailMethod" : method)}
             </label>
           ))}
         </div>
       </fieldset>
+
+      <label className="block text-sm font-semibold">
+        {t("preferredHours")}
+        <select
+          name="preferredHours"
+          className="field mt-1"
+          value={preferredHours}
+          onChange={(e) => setPreferredHours(e.target.value)}
+        >
+          {PREFERRED_HOURS.map((item) => (
+            <option key={item} value={item}>
+              {t(item)}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <fieldset>
         <legend className="text-sm font-semibold">{t("arrival")}</legend>
@@ -213,6 +254,16 @@ export function LeadForm({
           />
         </label>
       ) : null}
+
+      <label className="flex items-start gap-3 rounded-2xl border border-line px-3 py-3 text-sm">
+        <input name="consent" type="checkbox" required className="mt-1" />
+        <span>
+          {t("consent")}{" "}
+          <Link href="/privacy" className="font-semibold text-teal underline">
+            {t("privacyLink")}
+          </Link>
+        </span>
+      </label>
 
       <button className="btn btn-clay w-full text-base" type="submit" disabled={pending}>
         {pending ? "…" : t("submit")}

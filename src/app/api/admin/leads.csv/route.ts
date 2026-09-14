@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { toCsv } from "@/lib/csv";
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) {
@@ -21,24 +22,28 @@ export async function GET() {
     "clinic",
     "specialty",
     "contactMethod",
+    "preferredHours",
+    "utmSource",
+    "utmMedium",
+    "utmCampaign",
   ];
-  const rows = leads.map((lead) =>
-    [
-      lead.createdAt.toISOString(),
-      lead.status,
-      lead.source,
-      lead.fullName,
-      lead.country,
-      lead.phone,
-      lead.email ?? "",
-      lead.clinic.nameEn,
-      lead.recommendedSpecialty?.nameEn ?? "",
-      lead.contactMethod,
-    ]
-      .map((value) => `"${String(value).replaceAll('"', '""')}"`)
-      .join(","),
-  );
-  return new NextResponse([header.join(","), ...rows].join("\n"), {
+  const rows = leads.map((lead) => [
+    lead.createdAt.toISOString(),
+    lead.status,
+    lead.source,
+    lead.fullName,
+    lead.country,
+    lead.phone,
+    lead.email ?? "",
+    lead.clinic.nameEn,
+    lead.recommendedSpecialty?.nameEn ?? "",
+    lead.contactMethod,
+    lead.preferredHours ?? "",
+    lead.utmSource ?? "",
+    lead.utmMedium ?? "",
+    lead.utmCampaign ?? "",
+  ]);
+  return new NextResponse(toCsv(header, rows), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": "attachment; filename=uzmedatlas-leads.csv",

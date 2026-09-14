@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
-import { updateLeadStatus } from "@/actions/admin";
+import { saveLeadNotes, updateLeadStatus } from "@/actions/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +18,17 @@ export default async function LeadDetailPage({
   const tApply = await getTranslations("apply");
   const lead = await prisma.lead.findUnique({
     where: { id },
-    include: { clinic: true, recommendedSpecialty: true },
+    include: { clinic: true, recommendedSpecialty: true, emails: { orderBy: { createdAt: "desc" } } },
   });
   if (!lead) notFound();
+
+  const events = lead.sessionId
+    ? await prisma.analyticsEvent.findMany({
+        where: { sessionId: lead.sessionId },
+        orderBy: { createdAt: "asc" },
+        take: 40,
+      })
+    : [];
 
   const genderLabel =
     lead.gender === "female"
@@ -54,6 +62,16 @@ export default async function LeadDetailPage({
       : lead.arrivalType === "approximate"
         ? tApply("approximate")
         : tApply("undecided");
+  const hoursLabel =
+    lead.preferredHours === "morning"
+      ? tApply("morning")
+      : lead.preferredHours === "afternoon"
+        ? tApply("afternoon")
+        : lead.preferredHours === "evening"
+          ? tApply("evening")
+          : lead.preferredHours
+            ? tApply("anytime")
+            : "—";
 
   const rows = [
     [t("patient"), lead.fullName],
@@ -63,6 +81,7 @@ export default async function LeadDetailPage({
     ["Email", lead.email || "—"],
     [t("date"), lead.createdAt.toISOString().slice(0, 16).replace("T", " ")],
     [tApply("arrival"), `${arrivalLabel}${lead.arrivalDate ? ` · ${lead.arrivalDate}` : ""}`],
+    [tApply("preferredHours"), hoursLabel],
     [t("direction"), lead.recommendedSpecialty ? (locale === "ru" ? lead.recommendedSpecialty.nameRu : lead.recommendedSpecialty.nameEn) : "—"],
     [tChecker("symptomsLabel"), lead.symptoms || lead.medicalNeed || "—"],
     [tChecker("age"), lead.age?.toString() || "—"],
@@ -71,6 +90,7 @@ export default async function LeadDetailPage({
     [t("source"), lead.source === "checker" ? t("sourceChecker") : t("sourceCatalog")],
     [t("status"), lead.status],
     [tChecker("forChild"), lead.forChild ? "yes" : "no"],
+    ["UTM", [lead.utmSource, lead.utmMedium, lead.utmCampaign].filter(Boolean).join(" / ") || "—"],
   ];
 
   return (
@@ -98,6 +118,45 @@ export default async function LeadDetailPage({
           </div>
         ))}
       </dl>
+      <form action={saveLeadNotes} className="rounded-3xl border border-line bg-white p-6">
+        <input type="hidden" name="id" value={lead.id} />
+        <label className="block text-sm font-semibold">
+          {t("notes")}
+          <textarea name="notes" rows={4} defaultValue={lead.notes || ""} className="field mt-1" />
+        </label>
+        <button className="btn btn-primary mt-3" type="submit">
+          {t("save")}
+        </button>
+      </form>
+      {lead.emails.length ? (
+        <section>
+          <h2 className="font-display text-2xl">{t("outbox")}</h2>
+          <ul className="mt-3 space-y-2 text-sm">
+            {lead.emails.map((email) => (
+              <li key={email.id} className="rounded-2xl border border-line bg-white p-4">
+                <p className="font-semibold">{email.toAddress}</p>
+                <p className="text-muted">{email.subject} · {email.status}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {events.length ? (
+        <section>
+          <h2 className="font-display text-2xl">{t("sessionEvents")}</h2>
+          <ol className="mt-3 space-y-2 text-sm">
+            {events.map((event) => (
+              <li key={event.id} className="rounded-2xl border border-line bg-white px-4 py-3">
+                <span className="font-semibold">{event.type}</span>
+                <span className="ml-2 text-muted">
+                  {event.createdAt.toISOString().slice(11, 16)}
+                  {event.meta ? ` · ${event.meta}` : ""}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
     </div>
   );
 }

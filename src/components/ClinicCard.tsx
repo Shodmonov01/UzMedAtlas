@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { MapPin } from "lucide-react";
+import { ClinicCover } from "@/components/ClinicCover";
 import { cityLabel, formatPrice, languageLabel, localized, parseLanguages } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
 
@@ -40,10 +41,12 @@ export async function ClinicCard({
   return (
     <article className="card-shadow overflow-hidden rounded-3xl border border-line bg-white">
       <div className="relative h-44 bg-teal" style={{ backgroundColor: clinic.coverColor }}>
-        {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photo} alt="" className="h-full w-full object-cover opacity-90" />
-        ) : null}
+        <ClinicCover
+          src={photo}
+          alt=""
+          color={clinic.coverColor}
+          className="h-full w-full object-cover opacity-90"
+        />
         {clinic.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

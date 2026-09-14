@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CatalogFilters } from "@/components/CatalogFilters";
 import { ClinicCard } from "@/components/ClinicCard";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { queryClinics } from "@/lib/catalog-query";
 import { trackEvent } from "@/lib/analytics";
 
@@ -17,6 +18,7 @@ export default async function ClinicsPage({
     specialty?: string;
     service?: string;
     sort?: string;
+    lang?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -26,9 +28,12 @@ export default async function ClinicsPage({
   await trackEvent("catalog_view", {
     q: filters.q || "",
     specialty: filters.specialty || "",
+    lang: filters.lang || "",
   });
 
   const clinics = await queryClinics(filters);
+  const hasFilters = Boolean(filters.q || filters.city || filters.specialty || filters.service || filters.lang);
+  const suggestions = hasFilters && clinics.length === 0 ? await queryClinics({ sort: "response" }) : [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -41,11 +46,25 @@ export default async function ClinicsPage({
           specialty={filters.specialty}
           service={filters.service}
           sort={filters.sort}
+          lang={filters.lang}
         />
       </div>
       <p className="mt-6 text-sm font-semibold text-muted">{t("count", { count: clinics.length })}</p>
+      <RecentlyViewed />
       {clinics.length === 0 ? (
-        <p className="mt-8 rounded-3xl bg-sand p-6">{t("empty")}</p>
+        <div className="mt-8 space-y-6">
+          <p className="rounded-3xl bg-sand p-6">{t("empty")}</p>
+          {suggestions.length ? (
+            <>
+              <h2 className="font-display text-3xl">{t("suggestions")}</h2>
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {suggestions.slice(0, 3).map((clinic) => (
+                  <ClinicCard key={clinic.id} clinic={clinic} />
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
       ) : (
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {clinics.map((clinic) => (

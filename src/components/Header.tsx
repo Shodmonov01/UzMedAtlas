@@ -18,9 +18,12 @@ export function Header() {
           </span>
           <span className="font-display text-2xl leading-none">UzMedAtlas</span>
         </Link>
-        <nav className="flex items-center gap-3 text-sm font-semibold">
+        <nav className="flex items-center gap-2 text-sm font-semibold sm:gap-3">
           <Link href="/clinics" className="rounded-full px-3 py-2 hover:bg-white">
             {t("clinics")}
+          </Link>
+          <Link href="/faq" className="hidden rounded-full px-3 py-2 hover:bg-white sm:inline">
+            {t("faq")}
           </Link>
           <LanguageSwitch />
         </nav>

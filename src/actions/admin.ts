@@ -7,6 +7,8 @@ import { isAdminAuthenticated, setAdminSession, clearAdminSession, checkAdminPas
 import { saveUpload, slugify } from "@/lib/uploads";
 import { CITIES } from "@/lib/constants";
 import { go } from "@/lib/redirect";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getSessionId } from "@/lib/session";
 
 async function requireAdmin() {
   if (!(await isAdminAuthenticated())) {
@@ -16,6 +18,11 @@ async function requireAdmin() {
 
 export async function adminLogin(formData: FormData) {
   const locale = ((formData.get("locale") as string) || "en") as "en" | "ru";
+  const sessionId = await getSessionId();
+  const limited = checkRateLimit(`admin:${sessionId}`, 8, 15 * 60 * 1000);
+  if (!limited.ok) {
+    return { error: "rateLimit" as const };
+  }
   const password = String(formData.get("password") || "");
   if (!checkAdminPassword(password)) {
     return { error: "invalid" as const };
@@ -308,4 +315,89 @@ export async function updateLeadStatus(formData: FormData) {
   if (!["new", "contacted", "closed"].includes(status)) return;
   await prisma.lead.update({ where: { id }, data: { status } });
   revalidatePath("/admin/leads");
+}
+
+export async function saveLeadNotes(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const notes = String(formData.get("notes") || "").slice(0, 4000);
+  if (!id) return;
+  await prisma.lead.update({ where: { id }, data: { notes } });
+  revalidatePath(`/admin/leads/${id}`);
+}
+
+export async function duplicateClinic(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const locale = ((formData.get("locale") as string) || "en") as "en" | "ru";
+  const clinic = await prisma.clinic.findUnique({
+    where: { id },
+    include: { specialties: true, services: true },
+  });
+  if (!clinic) {
+    go("/admin/clinics", locale);
+  }
+
+  let slug = `${clinic.slug}-copy`;
+  let n = 2;
+  while (await prisma.clinic.findUnique({ where: { slug } })) {
+    slug = `${clinic.slug}-copy-${n}`;
+    n += 1;
+  }
+
+  const copy = await prisma.clinic.create({
+    data: {
+      slug,
+      nameEn: `${clinic.nameEn} (copy)`,
+      nameRu: `${clinic.nameRu} (копия)`,
+      city: clinic.city,
+      addressEn: clinic.addressEn,
+      addressRu: clinic.addressRu,
+      descriptionEn: clinic.descriptionEn,
+      descriptionRu: clinic.descriptionRu,
+      phone: clinic.phone,
+      email: clinic.email,
+      website: clinic.website,
+      whatsapp: clinic.whatsapp,
+      telegram: clinic.telegram,
+      languages: clinic.languages,
+      logoUrl: clinic.logoUrl,
+      coverColor: clinic.coverColor,
+      published: false,
+      coordinatorName: clinic.coordinatorName,
+      coordinatorRoleEn: clinic.coordinatorRoleEn,
+      coordinatorRoleRu: clinic.coordinatorRoleRu,
+      responseHours: clinic.responseHours,
+      licenseInfoEn: clinic.licenseInfoEn,
+      licenseInfoRu: clinic.licenseInfoRu,
+      afterRequestEn: clinic.afterRequestEn,
+      afterRequestRu: clinic.afterRequestRu,
+    },
+  });
+
+  if (clinic.specialties.length) {
+    await prisma.clinicSpecialty.createMany({
+      data: clinic.specialties.map((item) => ({
+        clinicId: copy.id,
+        specialtyId: item.specialtyId,
+      })),
+    });
+  }
+  if (clinic.services.length) {
+    await prisma.service.createMany({
+      data: clinic.services.map((service) => ({
+        clinicId: copy.id,
+        specialtyId: service.specialtyId,
+        canonicalSlug: service.canonicalSlug,
+        nameEn: service.nameEn,
+        nameRu: service.nameRu,
+        descriptionEn: service.descriptionEn,
+        descriptionRu: service.descriptionRu,
+        priceUsd: service.priceUsd,
+      })),
+    });
+  }
+
+  revalidatePath("/admin/clinics");
+  go(`/admin/clinics/${copy.id}`, locale);
 }
