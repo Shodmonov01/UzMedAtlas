@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #1a2b2c;
+  --teal: #1b6b6a;
+  --teal-deep: #0e3d3c;
+  --sand: #f3ede3;
+  --paper: #fbf8f3;
+  --clay: #c45c26;
+  --gold: #c4a574;
+  --muted: #5e6e6f;
+  --line: rgba(26, 43, 44, 0.12);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-teal: var(--teal);
+  --color-teal-deep: var(--teal-deep);
+  --color-sand: var(--sand);
+  --color-paper: var(--paper);
+  --color-clay: var(--clay);
+  --color-gold: var(--gold);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --font-sans: var(--font-sans-body);
+  --font-display: var(--font-display);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans-body), "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: -0.03em;
+}
+
+.ornament {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(196, 165, 116, 0.18), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(27, 107, 106, 0.12), transparent 28%),
+    url("/ornaments/girih.svg");
+  background-size: auto, auto, 420px;
+}
+
+.textarea-shadow,
+.card-shadow {
+  box-shadow: 0 24px 60px -32px rgba(14, 61, 60, 0.35);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--teal);
+  color: #fff;
+  padding: 0.9rem 1.4rem;
+}
+
+.btn-primary:hover {
+  background: var(--teal-deep);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.9rem 1.4rem;
+}
+
+.btn-ghost:hover {
+  background: #fff;
+}
+
+.btn-clay {
+  background: var(--clay);
+  color: #fff;
+  padding: 0.9rem 1.4rem;
+}
+
+.btn-clay:hover {
+  filter: brightness(0.95);
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  outline: none;
+}
+
+.field:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(27, 107, 106, 0.12);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  background: rgba(27, 107, 106, 0.08);
+  color: var(--teal-deep);
+  font-size: 0.85rem;
+}
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+@media (max-width: 840px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+}

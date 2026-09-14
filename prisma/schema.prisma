@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Specialty {
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  nameEn         String
+  nameRu         String
+  descriptionEn  String
+  descriptionRu  String
+  explanationEn  String
+  explanationRu  String
+  keywords       String
+  sortOrder      Int               @default(0)
+  clinics        ClinicSpecialty[]
+  services       Service[]
+  leads          Lead[]
+}
+
+model Clinic {
+  id            String            @id @default(cuid())
+  slug          String            @unique
+  nameEn        String
+  nameRu        String
+  city          String
+  addressEn     String
+  addressRu     String
+  descriptionEn String
+  descriptionRu String
+  phone         String
+  email         String
+  website       String?
+  languages     String
+  logoUrl       String?
+  coverColor    String            @default("#1B6B6A")
+  published     Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  photos        ClinicPhoto[]
+  specialties   ClinicSpecialty[]
+  services      Service[]
+  leads         Lead[]
+}
+
+model ClinicPhoto {
+  id        String @id @default(cuid())
+  clinicId  String
+  url       String
+  altEn     String @default("")
+  altRu     String @default("")
+  sortOrder Int    @default(0)
+  clinic    Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
+
+model ClinicSpecialty {
+  clinicId    String
+  specialtyId String
+  clinic      Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  specialty   Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@id([clinicId, specialtyId])
+}
+
+model Service {
+  id            String    @id @default(cuid())
+  clinicId      String
+  specialtyId   String
+  nameEn        String
+  nameRu        String
+  descriptionEn String
+  descriptionRu String
+  priceUsd      Int?
+  clinic        Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  specialty     Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id                     String     @id @default(cuid())
+  clinicId               String
+  fullName               String
+  country                String
+  phone                  String
+  email                  String?
+  contactMethod          String
+  arrivalType            String
+  arrivalDate            String?
+  medicalNeed            String?
+  symptoms               String?
+  age                    Int?
+  gender                 String?
+  duration               String?
+  recommendedSpecialtyId String?
+  createdAt              DateTime   @default(now())
+  clinic                 Clinic     @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  recommendedSpecialty   Specialty? @relation(fields: [recommendedSpecialtyId], references: [id], onDelete: SetNull)
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  meta      String?
+  createdAt DateTime @default(now())
+}
