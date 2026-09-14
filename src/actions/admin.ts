@@ -317,13 +317,17 @@ export async function updateLeadStatus(formData: FormData) {
   revalidatePath("/admin/leads");
 }
 
-export async function saveLeadNotes(formData: FormData) {
+export async function saveLeadDetails(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id") || "");
+  const locale = ((formData.get("locale") as string) || "en") as "en" | "ru";
+  const status = String(formData.get("status") || "new");
   const notes = String(formData.get("notes") || "").slice(0, 4000);
   if (!id) return;
-  await prisma.lead.update({ where: { id }, data: { notes } });
-  revalidatePath(`/admin/leads/${id}`);
+  if (!["new", "contacted", "closed"].includes(status)) return;
+  await prisma.lead.update({ where: { id }, data: { status, notes } });
+  revalidatePath("/admin/leads");
+  go(`/admin/leads/${id}`, locale);
 }
 
 export async function duplicateClinic(formData: FormData) {

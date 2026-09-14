@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
-import { saveLeadNotes, updateLeadStatus } from "@/actions/admin";
+import { saveLeadDetails } from "@/actions/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -99,32 +99,29 @@ export default async function LeadDetailPage({
         ← {t("leads")}
       </Link>
       <h1 className="font-display text-4xl">{lead.fullName}</h1>
-      <form action={updateLeadStatus} className="flex flex-wrap items-center gap-3">
+      <form action={saveLeadDetails} className="space-y-4">
         <input type="hidden" name="id" value={lead.id} />
-        <select name="status" defaultValue={lead.status} className="field w-auto">
-          <option value="new">{t("statusNew")}</option>
-          <option value="contacted">{t("statusContacted")}</option>
-          <option value="closed">{t("statusClosed")}</option>
-        </select>
-        <button className="btn btn-primary" type="submit">
-          {t("save")}
-        </button>
-      </form>
-      <dl className="grid gap-4 rounded-3xl border border-line bg-white p-6 md:grid-cols-2">
-        {rows.map(([label, value]) => (
-          <div key={label}>
-            <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
-            <dd className="mt-1 text-sm leading-relaxed">{value}</dd>
-          </div>
-        ))}
-      </dl>
-      <form action={saveLeadNotes} className="rounded-3xl border border-line bg-white p-6">
-        <input type="hidden" name="id" value={lead.id} />
-        <label className="block text-sm font-semibold">
+        <input type="hidden" name="locale" value={locale} />
+        <div className="flex flex-wrap items-center gap-3">
+          <select name="status" defaultValue={lead.status} className="field w-auto">
+            <option value="new">{t("statusNew")}</option>
+            <option value="contacted">{t("statusContacted")}</option>
+            <option value="closed">{t("statusClosed")}</option>
+          </select>
+        </div>
+        <dl className="grid gap-4 rounded-3xl border border-line bg-white p-6 md:grid-cols-2">
+          {rows.map(([label, value]) => (
+            <div key={label}>
+              <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
+              <dd className="mt-1 text-sm leading-relaxed">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <label className="block rounded-3xl border border-line bg-white p-6 text-sm font-semibold">
           {t("notes")}
-          <textarea name="notes" rows={4} defaultValue={lead.notes || ""} className="field mt-1" />
+          <textarea name="notes" rows={4} defaultValue={lead.notes || ""} className="field mt-1 font-normal" />
         </label>
-        <button className="btn btn-primary mt-3" type="submit">
+        <button className="btn btn-primary" type="submit">
           {t("save")}
         </button>
       </form>
