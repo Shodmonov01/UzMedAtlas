@@ -4,6 +4,11 @@
 
 Пациент может описать симптомы, получить рекомендуемое медицинское направление, выбрать клинику и оставить заявку. Либо сразу открыть каталог.
 
+Репозиторий разделён на два независимых приложения:
+
+- `front/` — чистый React (Vite, React Router, Tailwind)
+- `back/` — REST API (Express, Prisma, SQLite)
+
 ## Состав MVP
 
 1. Symptom Checker — не ставит диагноз, подсказывает направление
@@ -17,7 +22,6 @@
 ## Запуск
 
 ```bash
-npm install
 npm run setup
 npm run dev
 ```
@@ -26,19 +30,28 @@ npm run dev
 
 Админка: [http://localhost:3000/en/admin/login](http://localhost:3000/en/admin/login)
 
-Демо-пароль админки задаётся в `.env` (`ADMIN_PASSWORD`, по умолчанию `admin123`). Смените его перед любым публичным запуском.
+Демо-пароль админки задаётся в `back/.env` (`ADMIN_PASSWORD`, по умолчанию `admin123`). Смените его перед любым публичным запуском.
+
+Фронтенд на порту 3000 проксирует `/api`, `/clinics` и `/uploads` на бэкенд `http://localhost:4000`.
+
+Можно запускать папки отдельно:
+
+```bash
+cd back && npm run setup && npm run dev
+cd front && npm install && npm run dev
+```
 
 ## Скрипты
 
-- `npm run setup` — Prisma-клиент, SQLite-база и демо-клиники
-- `npm run dev` — локальная разработка
-- `npm test` — тесты Symptom Checker
-- `npm run lint` — ESLint
-- `npm run build` — production-сборка
+- `npm run setup` — зависимости, Prisma-клиент, SQLite-база и демо-клиники
+- `npm run dev` — фронт и бэк одновременно
+- `npm test` — тесты Symptom Checker и каталога
+- `npm run build` — production-сборка фронтенда
 
 ## Стек
 
-Next.js 15, TypeScript, Tailwind CSS 4, Prisma, SQLite, next-intl.
+- Frontend: React 19, Vite, TypeScript, Tailwind CSS 4, React Router, i18next
+- Backend: Express, Prisma, SQLite, Zod
 
 Данные клиник в сиде — демонстрационные, для проверки пользовательского пути.
 
@@ -49,8 +62,7 @@ Next.js 15, TypeScript, Tailwind CSS 4, Prisma, SQLite, next-intl.
 - Каталог ищет без учёта регистра, фильтрует канонические услуги (МРТ, КТ, check-up), сравнивает клиники и показывает, почему клиника попала в выдачу.
 - На карточке клиники: координатор, лицензия, срок ответа и что будет после заявки.
 - Админка: фильтры заявок, CSV, outbox писем, конверсия checker vs каталог.
-- Доверие и SEO: FAQ, как это работает, конфиденциальность, согласие на заявке, sitemap, JSON-LD клиники.
+- Доверие: FAQ, как это работает, конфиденциальность, согласие на заявке.
 - Каталог фильтрует язык обслуживания; пустая выдача показывает похожие клиники; на карточке есть похожие клиники и копирование ссылки.
 - Заявка: удобные часы связи, защита от спама и повторной заявки за 24 часа, UTM с посадочной ссылки.
 - Админка: заметки по заявке, события сессии, дубль клиники, лимит попыток входа, CSV клиник.
-

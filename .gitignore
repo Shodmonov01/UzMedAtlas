@@ -1,22 +1,16 @@
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
+# next leftovers
+.next
+out
+front/dist
+back/dist
 
 # misc
 .DS_Store
@@ -35,20 +29,15 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # sqlite
 *.db
 *.db-journal
-prisma/*.db
-prisma/*.db-journal
-prisma/**/*.db
+**/*.db
+**/*.db-journal
 
 # uploads
-/public/uploads/*
-!/public/uploads/.gitkeep
+back/public/uploads/*
+!back/public/uploads/.gitkeep
