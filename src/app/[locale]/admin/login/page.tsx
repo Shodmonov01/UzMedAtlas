@@ -18,8 +18,8 @@ export default async function AdminLoginPage({
   const t = await getTranslations("admin");
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16">
-      <h1 className="font-display text-4xl">{t("loginTitle")}</h1>
+    <div className="portal mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16">
+      <h1 className="text-4xl">{t("loginTitle")}</h1>
       <div className="mt-6">
         <LoginForm locale={locale} />
       </div>

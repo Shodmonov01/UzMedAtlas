@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Onest } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -12,13 +12,7 @@ import "../globals.css";
 
 export const dynamic = "force-dynamic";
 
-const display = Cormorant_Garamond({
-  subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display",
-});
-
-const sans = Manrope({
+const sans = Onest({
   subsets: ["latin", "cyrillic"],
   variable: "--font-sans-body",
 });
@@ -75,7 +69,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${display.variable} ${sans.variable}`}>
+    <html lang={locale} className={sans.variable}>
       <body className="antialiased">
         <NextIntlClientProvider messages={messages}>
           <SkipLink />

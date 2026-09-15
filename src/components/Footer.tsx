@@ -9,16 +9,16 @@ export function Footer() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <footer className="border-t border-line bg-sand">
-      <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted">
+    <footer className="px-3 pb-6 pt-10">
+      <div className="mx-auto max-w-7xl rounded-[2rem] border border-line bg-white px-6 py-8 text-sm text-muted">
         <p className="max-w-3xl">{t("disclaimer")}</p>
-        <nav className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-semibold text-ink">
+        <nav className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-bold text-ink">
           <Link href="/how-it-works">{t("how")}</Link>
           <Link href="/faq">{t("faq")}</Link>
           <Link href="/privacy">{t("privacy")}</Link>
           <Link href="/clinics">{t("clinics")}</Link>
         </nav>
-        <p className="mt-4 font-semibold text-ink">UzMedAtlas · {t("rights")}</p>
+        <p className="mt-4 font-extrabold text-ink">UzMedAtlas · {t("rights")}</p>
       </div>
     </footer>
   );

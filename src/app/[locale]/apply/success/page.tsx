@@ -30,8 +30,8 @@ export default async function SuccessPage({
   const steps = [t("step1"), t("step2"), t("step3")];
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-      <p className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-teal text-2xl text-white">
+    <div className="portal mx-auto max-w-2xl px-4 py-20 text-center">
+      <p className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-lime text-2xl font-black text-teal-deep">
         ✓
       </p>
       <h1 className="mt-6 font-display text-4xl md:text-5xl">{t("title")}</h1>
@@ -44,7 +44,7 @@ export default async function SuccessPage({
       <ol className="mt-8 space-y-3 text-left">
         {steps.map((step, index) => (
           <li key={step} className="rounded-2xl border border-line bg-white p-4">
-            <span className="text-xs font-bold text-clay">0{index + 1}</span>
+            <span className="text-xs font-extrabold text-teal">0{index + 1}</span>
             <p className="mt-1">{step}</p>
           </li>
         ))}

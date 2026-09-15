@@ -58,8 +58,8 @@ export default async function ApplyPage({
     : [];
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="font-display text-4xl md:text-5xl">
+    <div className="portal mx-auto max-w-2xl px-4 py-10">
+      <h1 className="text-4xl md:text-5xl">
         {t("title", { clinic: localized(clinic, loc, "name") })}
       </h1>
       <p className="mt-3 text-muted">{t("subtitle")}</p>

@@ -115,7 +115,7 @@ export default async function ClinicPage({
   const tgHref = clinic.telegram ? telegramLink(clinic.telegram) : null;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className="portal mx-auto max-w-7xl px-4 py-10">
       <JsonLd data={clinicJsonLd(clinic, loc)} />
       <RecordClinicView slug={clinic.slug} name={name} />
       <Link href="/clinics" className="text-sm font-semibold text-muted">
@@ -214,7 +214,7 @@ export default async function ClinicPage({
           ) : null}
           <RecentlyViewed currentSlug={clinic.slug} />
         </div>
-        <aside className="h-fit rounded-3xl border border-line bg-sand p-6 lg:sticky lg:top-24">
+        <aside className="h-fit rounded-[2rem] bg-teal-deep p-6 text-white lg:sticky lg:top-24">
           {clinic.logoUrl ? (
             <ClinicCover
               src={clinic.logoUrl}
@@ -223,8 +223,8 @@ export default async function ClinicPage({
               className="mb-4 h-16 w-16 rounded-2xl"
             />
           ) : null}
-          <h2 className="font-display text-2xl">{t("contacts")}</h2>
-          <ul className="mt-4 space-y-3 text-sm">
+          <h2 className="text-2xl font-extrabold">{t("contacts")}</h2>
+          <ul className="mt-4 space-y-3 text-sm text-white/85">
             <li className="flex gap-2">
               <Phone size={16} /> {clinic.phone}
             </li>
@@ -240,14 +240,14 @@ export default async function ClinicPage({
               </li>
             ) : null}
           </ul>
-          <h3 className="mt-6 font-semibold">{t("languages")}</h3>
-          <p className="mt-1 text-sm font-medium">
+          <h3 className="mt-6 font-bold">{t("languages")}</h3>
+          <p className="mt-1 text-sm font-medium text-white/85">
             {languages.map((code) => languageLabel(code, loc)).join(" · ")}
           </p>
           {clinic.coordinatorName ? (
             <>
-              <h3 className="mt-6 font-semibold">{t("coordinator")}</h3>
-              <p className="mt-1 text-sm text-muted">
+              <h3 className="mt-6 font-bold">{t("coordinator")}</h3>
+              <p className="mt-1 text-sm text-white/75">
                 {clinic.coordinatorName}
                 {(loc === "ru" ? clinic.coordinatorRoleRu : clinic.coordinatorRoleEn)
                   ? ` · ${loc === "ru" ? clinic.coordinatorRoleRu : clinic.coordinatorRoleEn}`
@@ -255,44 +255,44 @@ export default async function ClinicPage({
               </p>
             </>
           ) : null}
-          <p className="mt-3 text-sm text-muted">
+          <p className="mt-3 text-sm text-white/75">
             {loc === "ru"
               ? `Обычно отвечают за ${clinic.responseHours} ч.`
               : `Usually replies within ${clinic.responseHours} hours.`}
           </p>
           {(loc === "ru" ? clinic.licenseInfoRu : clinic.licenseInfoEn) ? (
             <>
-              <h3 className="mt-6 font-semibold">{t("license")}</h3>
-              <p className="mt-1 text-sm text-muted">
+              <h3 className="mt-6 font-bold">{t("license")}</h3>
+              <p className="mt-1 text-sm text-white/75">
                 {loc === "ru" ? clinic.licenseInfoRu : clinic.licenseInfoEn}
               </p>
             </>
           ) : null}
           {(loc === "ru" ? clinic.afterRequestRu : clinic.afterRequestEn) ? (
             <>
-              <h3 className="mt-6 font-semibold">{t("afterRequest")}</h3>
-              <p className="mt-1 text-sm text-muted">
+              <h3 className="mt-6 font-bold">{t("afterRequest")}</h3>
+              <p className="mt-1 text-sm text-white/75">
                 {loc === "ru" ? clinic.afterRequestRu : clinic.afterRequestEn}
               </p>
             </>
           ) : null}
           {waHref ? (
-            <a className="mt-4 block text-sm font-semibold text-teal" href={waHref}>
+            <a className="mt-4 block text-sm font-bold text-lime" href={waHref}>
               {t("whatsapp")}
             </a>
           ) : null}
           {tgHref ? (
-            <a className="mt-2 block text-sm font-semibold text-teal" href={tgHref}>
+            <a className="mt-2 block text-sm font-bold text-lime" href={tgHref}>
               {t("telegram")}
             </a>
           ) : null}
-          <div className="mt-4">
+          <div className="mt-4 text-lime">
             <CopyLinkButton />
           </div>
-          <Link href={`/clinics/${clinic.slug}/apply`} className="btn btn-clay mt-6 w-full">
+          <Link href={`/clinics/${clinic.slug}/apply`} className="btn btn-primary mt-6 w-full">
             {t("apply")}
           </Link>
-          <Link href={`/clinics/${clinic.slug}/apply`} className="btn btn-ghost mt-3 w-full">
+          <Link href={`/clinics/${clinic.slug}/apply`} className="btn mt-3 w-full bg-white text-teal-deep">
             {t("consult")}
           </Link>
         </aside>

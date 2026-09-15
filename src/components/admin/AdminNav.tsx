@@ -20,19 +20,19 @@ export function AdminNav({ locale }: { locale: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="border-b border-line bg-teal-deep p-5 text-white md:min-h-screen md:border-b-0 md:border-r">
-      <p className="font-display text-2xl">UzMedAtlas</p>
-      <p className="mt-1 text-xs uppercase tracking-widest text-white/70">{t("dashboard")}</p>
-      <nav className="mt-6 grid gap-1 text-sm font-semibold">
+    <aside className="border-b border-line bg-white p-5 md:min-h-screen md:border-b-0 md:border-r">
+      <p className="text-xl font-extrabold tracking-tight">UzMedAtlas</p>
+      <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted">{t("dashboard")}</p>
+      <nav className="mt-6 grid gap-1 text-sm font-bold">
         {LINKS.map(([key, href]) => (
           <Link
             key={href}
             href={href}
             className={cn(
-              "rounded-xl px-3 py-2 hover:bg-white/10",
+              "rounded-full px-3 py-2",
               pathname === href || (href !== "/admin" && pathname.startsWith(href))
-                ? "bg-white/15"
-                : "",
+                ? "bg-lime text-teal-deep"
+                : "text-muted hover:bg-mint",
             )}
           >
             {t(key)}
@@ -43,7 +43,7 @@ export function AdminNav({ locale }: { locale: string }) {
         <LanguageSwitch />
         <form action={adminLogout}>
           <input type="hidden" name="locale" value={locale} />
-          <button className="text-sm underline" type="submit">
+          <button className="text-sm font-bold text-muted" type="submit">
             {t("signOut")}
           </button>
         </form>

@@ -19,10 +19,10 @@ export default async function CheckerPage({
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal">2 / 2</p>
-      <h1 className="mt-3 font-display text-4xl md:text-5xl">{t("title")}</h1>
-      <p className="mt-4 rounded-2xl bg-sand p-4 text-sm text-muted">
+    <div className="portal mx-auto max-w-2xl px-4 py-12">
+      <p className="chip w-fit">2 / 2</p>
+      <h1 className="mt-4 text-4xl md:text-5xl">{t("title")}</h1>
+      <p className="mt-4 rounded-[1.5rem] bg-white p-4 text-sm text-muted shadow-sm">
         <strong className="block text-ink">{t("symptomsLabel")}</strong>
         {state.symptoms}
       </p>

@@ -33,7 +33,15 @@
     "howMore": "Read the full path",
     "featured": "Clinics that usually reply fastest",
     "allClinics": "Browse all clinics",
-    "allFaq": "All questions"
+    "allFaq": "All questions",
+    "morning": "Good morning.",
+    "afternoon": "Good afternoon.",
+    "evening": "Good evening.",
+    "portal": "Portal",
+    "live": "Live catalog",
+    "statReply": "Fastest first reply",
+    "hoursShort": "{hours}h",
+    "fastList": "Coordinators on duty"
   },
   "checker": {
     "title": "A few details to suggest the right specialty",

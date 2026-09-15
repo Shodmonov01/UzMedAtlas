@@ -105,7 +105,7 @@ export function LeadForm({
   }
 
   return (
-    <form action={action} className="space-y-5 rounded-3xl border border-line bg-white p-6">
+    <form action={action} className="soft-card space-y-5 rounded-[2rem] bg-white p-6">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="clinicSlug" value={clinicSlug} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
@@ -116,13 +116,13 @@ export function LeadForm({
         </label>
       </div>
 
-      <div className="rounded-2xl bg-sand p-4 text-sm">
+      <div className="rounded-[1.4rem] bg-mint p-4 text-sm">
         <p className="font-semibold">{t("nextTitle")}</p>
         <p className="mt-1 text-muted">{afterRequest || t("nextBody")}</p>
       </div>
 
       {usedChecker && checkerSummary?.length ? (
-        <div className="rounded-2xl bg-sand p-4 text-sm">
+        <div className="rounded-[1.4rem] bg-mint p-4 text-sm">
           <p className="font-semibold">{t("checkerSummary")}</p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-muted">
             {checkerSummary.map((line) => (

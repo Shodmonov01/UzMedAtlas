@@ -17,7 +17,7 @@ export default async function AdminPanelLayout({
   }
 
   return (
-    <div className="admin-shell bg-sand">
+    <div className="admin-shell">
       <AdminNav locale={locale} />
       <div className="min-h-screen p-4 md:p-8">{children}</div>
     </div>

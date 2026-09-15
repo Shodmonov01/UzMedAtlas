@@ -26,7 +26,7 @@ export async function CatalogFilters({
   const specialties = await prisma.specialty.findMany({ orderBy: { sortOrder: "asc" } });
 
   return (
-    <form className="grid gap-3 rounded-3xl border border-line bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
+    <form className="soft-card grid gap-3 rounded-[2rem] bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
       <label className="text-sm font-semibold sm:col-span-2">
         {t("search")}
         <input name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="field mt-1" />
