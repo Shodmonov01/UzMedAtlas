@@ -18,7 +18,7 @@ export function CopyLinkButton() {
   }
 
   return (
-    <button type="button" className="text-sm font-semibold text-teal" onClick={copy}>
+    <button type="button" className="text-sm font-bold text-current" onClick={copy}>
       {copied ? t("copied") : t("copyLink")}
     </button>
   );

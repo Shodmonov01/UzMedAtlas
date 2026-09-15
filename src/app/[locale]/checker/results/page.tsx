@@ -68,17 +68,15 @@ export default async function ResultsPage({
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal">
-        {t("kicker")}
-      </p>
-      <h1 className="mt-3 max-w-4xl font-display text-4xl md:text-6xl">{specialtyName}</h1>
+    <div className="portal mx-auto max-w-7xl px-4 py-12">
+      <p className="chip w-fit">{t("kicker")}</p>
+      <h1 className="mt-4 max-w-4xl text-4xl md:text-6xl">{specialtyName}</h1>
       <p className="mt-4 max-w-3xl text-lg text-muted">
         {t("title", { specialty: specialtyName })}
       </p>
 
       {state.redFlags?.length ? (
-        <div className="mt-6 max-w-3xl rounded-3xl border border-clay/40 bg-orange-50 p-5">
+        <div className="mt-6 max-w-3xl rounded-[1.8rem] bg-orange-50 p-5">
           <h2 className="font-display text-2xl">{t("redFlagTitle")}</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {state.redFlags.map((flag) => (

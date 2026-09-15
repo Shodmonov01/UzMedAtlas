@@ -26,7 +26,7 @@ export function HomeChecker({
   }, [symptoms]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="soft-card h-full rounded-[2rem] bg-white p-5 md:p-6">
       <form action={startChecker} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
         <label className="sr-only" htmlFor="symptoms">
@@ -37,21 +37,16 @@ export function HomeChecker({
           name="symptoms"
           required
           minLength={8}
-          rows={6}
+          rows={7}
           value={symptoms}
           onChange={(event) => setSymptoms(event.target.value)}
           placeholder={t("placeholder")}
-          className="textarea-shadow field min-h-[160px] resize-y rounded-[1.5rem] p-5 text-lg"
+          className="field min-h-[180px] resize-y rounded-[1.5rem] bg-mint p-5 text-base md:text-lg"
         />
         <div className="flex flex-wrap gap-2">
-          <span className="self-center text-sm text-muted">{t("examplesLabel")}</span>
+          <span className="self-center text-sm font-semibold text-muted">{t("examplesLabel")}</span>
           {examples.map((example) => (
-            <button
-              key={example}
-              type="button"
-              className="chip"
-              onClick={() => setSymptoms(example)}
-            >
+            <button key={example} type="button" className="chip" onClick={() => setSymptoms(example)}>
               {example}
             </button>
           ))}
@@ -69,7 +64,7 @@ export function HomeChecker({
           {t("skip")}
         </button>
       </form>
-      <p className="mt-6 text-sm text-muted">
+      <p className="mt-5 text-sm font-semibold text-muted">
         {clinicCount} {t("trustClinics")} · 3 {t("trustCities")} · {t("trustLanguages")}
       </p>
     </div>

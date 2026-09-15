@@ -16,7 +16,7 @@ export function LoginForm({ locale }: { locale: string }) {
   }
 
   return (
-    <form action={action} className="space-y-4 rounded-3xl border border-line bg-white p-6">
+    <form action={action} className="soft-card mt-6 space-y-4 rounded-[2rem] bg-white p-6">
       <input type="hidden" name="locale" value={locale} />
       {error === "invalid" ? <p className="text-sm text-red-700">{t("invalid")}</p> : null}
       {error === "rateLimit" ? <p className="text-sm text-red-700">{t("loginRateLimit")}</p> : null}

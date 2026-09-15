@@ -14,7 +14,7 @@ export default async function FaqPage({
   const items = t.raw("items") as { q: string; a: string }[];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <div className="portal mx-auto max-w-3xl px-4 py-12">
       <h1 className="font-display text-5xl">{t("title")}</h1>
       <p className="mt-4 text-lg text-muted">{t("subtitle")}</p>
       <div className="mt-8">

@@ -36,8 +36,8 @@ export default async function ClinicsPage({
   const suggestions = hasFilters && clinics.length === 0 ? await queryClinics({ sort: "response" }) : [];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="font-display text-5xl">{t("title")}</h1>
+    <div className="portal mx-auto max-w-7xl px-4 py-10">
+      <h1 className="text-4xl md:text-5xl">{t("title")}</h1>
       <p className="mt-3 max-w-2xl text-muted">{t("subtitle")}</p>
       <div className="mt-8">
         <CatalogFilters
