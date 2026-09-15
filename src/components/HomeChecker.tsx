@@ -41,7 +41,8 @@ export function HomeChecker({
           value={symptoms}
           onChange={(event) => setSymptoms(event.target.value)}
           placeholder={t("placeholder")}
-          className="field min-h-[180px] resize-y rounded-[1.5rem] bg-mint p-5 text-base md:text-lg"
+          className="field min-h-[180px] resize-y rounded-[1.5rem] p-5 text-base md:text-lg"
+          style={{ background: "#e7f3e4" }}
         />
         <div className="flex flex-wrap gap-2">
           <span className="self-center text-sm font-semibold text-muted">{t("examplesLabel")}</span>

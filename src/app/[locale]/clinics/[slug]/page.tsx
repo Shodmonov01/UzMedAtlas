@@ -292,7 +292,7 @@ export default async function ClinicPage({
           <Link href={`/clinics/${clinic.slug}/apply`} className="btn btn-primary mt-6 w-full">
             {t("apply")}
           </Link>
-          <Link href={`/clinics/${clinic.slug}/apply`} className="btn mt-3 w-full border border-white/20 bg-white/10 text-white">
+          <Link href={`/clinics/${clinic.slug}/apply`} className="btn mt-3 w-full bg-white text-teal-deep">
             {t("consult")}
           </Link>
         </aside>
