@@ -510,6 +510,95 @@ h3,
   display: none;
 }
 
+.filter-bar {
+  display: grid;
+  gap: 0.65rem;
+  position: sticky;
+  top: 4.6rem;
+  z-index: 25;
+  margin: 0 -1rem;
+  padding: 0.35rem 1rem 0.7rem;
+  background: var(--paper);
+}
+
+.filter-count {
+  display: grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: 99px;
+  background: #fff;
+  color: var(--teal-deep);
+  font-size: 0.75rem;
+}
+
+.filter-desktop {
+  display: none;
+}
+
+.filter-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 46;
+  background: rgba(20, 36, 33, 0.32);
+  border: 0;
+}
+
+.filter-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 47;
+  display: flex;
+  flex-direction: column;
+  max-height: min(88dvh, 740px);
+  overflow: hidden;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: #fff;
+  padding: 0.7rem 1rem calc(0.85rem + env(safe-area-inset-bottom));
+  box-shadow: 0 -18px 50px -20px rgba(20, 36, 33, 0.45);
+}
+
+.filter-handle {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 0.4rem;
+  border-radius: 99px;
+  background: rgba(20, 36, 33, 0.16);
+}
+
+.filter-sheet-body {
+  display: grid;
+  gap: 0.75rem;
+  overflow-y: auto;
+  padding-bottom: 0.5rem;
+}
+
+.filter-sheet-actions {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  background: #fff;
+}
+
+@media (min-width: 1024px) {
+  .filter-bar,
+  .filter-backdrop,
+  .filter-sheet {
+    display: none;
+  }
+
+  .filter-desktop {
+    display: grid;
+    gap: 0.75rem;
+    border-radius: 1.6rem;
+    background: #fff;
+    padding: 1rem;
+  }
+}
+
 @media (max-width: 767px) {
   h1 {
     font-size: 2.05rem;
