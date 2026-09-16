@@ -244,12 +244,16 @@ h3,
   flex-shrink: 0;
 }
 
-.banner-frame {
-  position: relative;
-  overflow: hidden;
-  height: 200px;
-  border-radius: 1.6rem;
-  background: var(--teal-deep);
+.banner-frame a {
+  display: block;
+  height: 100%;
+}
+
+.banner-frame img,
+.banner-frame a > div {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 }
 
 .banner-copy {

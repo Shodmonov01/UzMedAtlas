@@ -109,8 +109,8 @@ export function CatalogFilters({
         {t("catalog.hoursMax")}
         <select name="hoursMax" defaultValue={values.hoursMax || ""} className="field mt-1">
           <option value="">{t("catalog.anyHours")}</option>
-          <option value="12">{t("catalog.upTo")} 12h</option>
-          <option value="24">{t("catalog.upTo")} 24h</option>
+          <option value="12">{t("catalog.upTo")} 12{locale === "ru" ? " ч" : "h"}</option>
+          <option value="24">{t("catalog.upTo")} 24{locale === "ru" ? " ч" : "h"}</option>
         </select>
       </label>
       <label className="text-sm font-semibold">
