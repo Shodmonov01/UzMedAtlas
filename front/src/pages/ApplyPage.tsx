@@ -71,8 +71,8 @@ export function ApplyPage() {
     : [];
 
   return (
-    <div className="portal mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-4xl md:text-5xl">{t("apply.title", { clinic: localized(data.clinic, locale, "name") })}</h1>
+    <div className="portal mx-auto max-w-2xl px-4 py-6 md:py-10">
+      <h1 className="text-3xl md:text-5xl">{t("apply.title", { clinic: localized(data.clinic, locale, "name") })}</h1>
       <p className="mt-3 text-muted">{t("apply.subtitle")}</p>
       <div className="mt-8">
         <LeadForm

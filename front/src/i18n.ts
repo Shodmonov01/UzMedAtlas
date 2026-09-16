@@ -11,7 +11,7 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
     ru: { translation: ru },
   },
-  lng: "en",
+  lng: typeof window !== "undefined" && window.location.pathname.startsWith("/ru") ? "ru" : "en",
   fallbackLng: "en",
   interpolation: {
     escapeValue: false,

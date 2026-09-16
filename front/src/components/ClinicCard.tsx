@@ -40,7 +40,7 @@ export function ClinicCard({
 
   return (
     <article className="soft-card overflow-hidden rounded-[2rem] bg-white">
-      <div className="relative h-48" style={{ backgroundColor: clinic.coverColor || "#173832" }}>
+      <div className="relative h-40 sm:h-48" style={{ backgroundColor: clinic.coverColor || "#173832" }}>
         <ClinicCover src={photo} alt="" color={clinic.coverColor} className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
         <span className="chip absolute right-3 top-3 bg-white/90">
