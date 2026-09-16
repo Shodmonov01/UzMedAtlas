@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { HomeChecker } from "../components/HomeChecker";
 import { ClinicCard, type ClinicCardClinic } from "../components/ClinicCard";
 import { FaqList } from "../components/FaqList";
-import { Greeting } from "../components/Greeting";
 import { Avatar } from "../components/Avatar";
 import { DoctorPortrait } from "../components/DoctorPortrait";
 import { LocaleLink, useLocale } from "../locale-link";
@@ -28,90 +26,57 @@ export function HomePage() {
   const faqItems = (t("faq.items", { returnObjects: true }) as { q: string; a: string }[]).slice(0, 3);
   const featured = data?.featured ?? [];
   const clinicCount = data?.clinicCount ?? 0;
-  const fastest = featured[0];
 
   return (
     <div className="portal">
-      <section className="mx-auto max-w-7xl px-4 py-5 md:py-10">
-        <p className="text-sm font-bold text-muted">{t("home.portal")}</p>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-3xl">
-            <p className="text-lg font-extrabold text-teal-deep md:text-2xl">
-              <Greeting />
-            </p>
-            <h1 className="mt-1 text-[2.05rem] leading-[1.05] md:text-6xl">
-              {t("home.title")}
-            </h1>
+      <section className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+        <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <h1 className="text-[2.35rem] leading-[1.02] md:text-6xl">{t("home.title")}</h1>
             <svg className="squiggle" viewBox="0 0 220 10" fill="none" aria-hidden="true">
               <path d="M2 6c24-6 48 6 72 0s48-6 72 0 48 6 72 0" stroke="#e07a5f" strokeWidth="3" strokeLinecap="round" />
             </svg>
-            <p className="mt-3 max-w-xl text-base text-muted md:text-lg">{t("home.subtitle")}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="chip">
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => window.dispatchEvent(new Event("uma-open-chat"))}
+              >
+                {t("home.deskCta")}
+              </button>
+              <LocaleLink to="/clinics" className="btn btn-ghost">
+                {t("home.allClinics")}
+              </LocaleLink>
+            </div>
+            <p className="mt-4 text-sm font-semibold text-muted">
               {clinicCount} {t("home.trustClinics")}
-            </span>
-            <span className="chip">{t("home.trustLanguages")}</span>
+              {(data?.cities ?? []).length
+                ? ` · ${(data?.cities ?? []).map((item) => cityLabel(item.city, locale)).join(", ")}`
+                : ""}
+            </p>
           </div>
-        </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_340px]">
-          <HomeChecker locale={locale} clinicCount={clinicCount} />
-          <div className="grid gap-4">
-            <button
-              type="button"
-              className="rounded-[1.6rem] bg-teal-deep p-5 text-left text-white"
-              onClick={() => window.dispatchEvent(new Event("uma-open-chat"))}
-            >
-              <div className="flex items-center gap-3">
-                <DoctorPortrait className="h-14 w-14 rounded-2xl" />
-                <div>
-                  <p className="flex items-center gap-2 text-sm font-semibold text-white/70">
-                    <span className="live-dot" />
-                    {t("home.live")}
-                  </p>
-                  <p className="text-lg font-extrabold">{t("operator.name")}</p>
-                  <p className="text-sm text-white/70">{t("home.deskTitle")}</p>
-                </div>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-white/85">{t("home.deskBody")}</p>
-              {fastest ? (
-                <p className="mt-3 text-sm text-white/70">
-                  {t("home.statReply")} {t("home.hoursShort", { hours: fastest.responseHours })}
+          <button
+            type="button"
+            className="w-full max-w-sm rounded-[1.6rem] bg-teal-deep p-5 text-left text-white lg:w-[340px]"
+            onClick={() => window.dispatchEvent(new Event("uma-open-chat"))}
+          >
+            <div className="flex items-center gap-3">
+              <DoctorPortrait className="h-14 w-14 rounded-2xl" />
+              <div>
+                <p className="flex items-center gap-2 text-sm font-semibold text-white/70">
+                  <span className="live-dot" />
+                  {t("home.live")}
                 </p>
-              ) : null}
-              <span className="btn mt-4 w-full bg-white text-teal-deep sm:w-auto">{t("home.deskCta")}</span>
-            </button>
-            <div className="rounded-[1.6rem] bg-white p-5 shadow-[0_18px_50px_-28px_rgba(20,36,33,0.35)]">
-              <p className="text-sm font-semibold text-muted">{t("home.trustCities")}</p>
-              <div className="mt-4 space-y-3">
-                {(data?.cities ?? []).map((item) => (
-                  <div key={item.city} className="flex items-center justify-between gap-3">
-                    <span className="font-bold">{cityLabel(item.city, locale)}</span>
-                    <span className="chip">{item.count}</span>
-                  </div>
-                ))}
+                <p className="text-xl font-extrabold">{t("operator.name")}</p>
               </div>
             </div>
-          </div>
+            <p className="mt-3 text-sm text-white/85">{t("home.deskBody")}</p>
+          </button>
         </div>
-
-        <section className="mt-8 grid gap-3 md:grid-cols-3 md:gap-4">
-          {[t("home.step1"), t("home.step2"), t("home.step3")].map((step, index) => (
-            <div key={step} className="rounded-[1.6rem] bg-white p-5 shadow-[0_18px_50px_-28px_rgba(20,36,33,0.35)]">
-              <span className="chip">0{index + 1}</span>
-              <p className="mt-3 text-lg font-bold leading-snug">{step}</p>
-            </div>
-          ))}
-        </section>
-        <p className="mt-4">
-          <LocaleLink to="/how-it-works" className="text-sm font-bold text-teal-deep">
-            {t("home.howMore")}
-          </LocaleLink>
-        </p>
 
         {featured.length ? (
-          <section className="mt-10 grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="mt-12 grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
             <div>
               <div className="flex items-end justify-between gap-3">
                 <h2 className="text-2xl md:text-3xl">{t("home.featured")}</h2>
