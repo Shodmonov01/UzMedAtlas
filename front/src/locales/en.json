@@ -47,7 +47,8 @@
     "deskTitle": "operator",
     "deskBody": "I’ll point you to a specialty. Not a diagnosis.",
     "deskCta": "Write to Leyla",
-    "talkHint": "Type it in your own words"
+    "talkHint": "Type it in your own words",
+    "banners": "Banners"
   },
   "operator": {
     "name": "Leyla",
@@ -135,11 +136,15 @@
     "languages": "Languages",
     "language": "Language of care",
     "allLanguages": "Any language",
-    "sort": "Sort",
-    "sortName": "Name",
-    "sortCity": "City",
-    "sortPrice": "Price",
-    "sortResponse": "Reply time",
+    "filters": "Filters",
+    "priceMax": "Price up to",
+    "anyPrice": "Any price",
+    "upTo": "Up to",
+    "hoursMax": "Reply time",
+    "anyHours": "Any reply time",
+    "messenger": "Messenger",
+    "anyMessenger": "Any messenger",
+    "hasCoordinator": "Has a named coordinator",
     "fromPrice": "From",
     "replyIn": "Usually replies in {hours}h",
     "suggestions": "You can still look at these clinics"

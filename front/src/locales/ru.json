@@ -47,7 +47,8 @@
     "deskTitle": "оператор",
     "deskBody": "Подскажу направление. Без диагноза.",
     "deskCta": "Написать Лейле",
-    "talkHint": "Напишите своими словами"
+    "talkHint": "Напишите своими словами",
+    "banners": "Баннеры"
   },
   "operator": {
     "name": "Лейла",
@@ -135,11 +136,15 @@
     "languages": "Языки",
     "language": "Язык обслуживания",
     "allLanguages": "Любой язык",
-    "sort": "Сортировка",
-    "sortName": "Название",
-    "sortCity": "Город",
-    "sortPrice": "Цена",
-    "sortResponse": "Скорость ответа",
+    "filters": "Фильтры",
+    "priceMax": "Цена до",
+    "anyPrice": "Любая цена",
+    "upTo": "До",
+    "hoursMax": "Время ответа",
+    "anyHours": "Любое время ответа",
+    "messenger": "Мессенджер",
+    "anyMessenger": "Любой мессенджер",
+    "hasCoordinator": "Указан координатор",
     "fromPrice": "От",
     "replyIn": "Обычно отвечают за {hours} ч",
     "suggestions": "Можно посмотреть эти клиники"

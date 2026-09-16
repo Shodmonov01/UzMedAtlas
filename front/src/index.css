@@ -244,11 +244,48 @@ h3,
   flex-shrink: 0;
 }
 
-.squiggle {
-  display: block;
-  width: min(220px, 70%);
-  height: 10px;
-  margin-top: 0.35rem;
+.banner-frame {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  border-radius: 1.6rem;
+  background: var(--teal-deep);
+}
+
+.banner-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1.25rem 1.35rem 2.4rem;
+  background: linear-gradient(to top, rgba(20, 36, 33, 0.78), transparent);
+}
+
+.banner-dots {
+  position: absolute;
+  left: 1.25rem;
+  bottom: 0.85rem;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.banner-dots button {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.banner-dots button.on {
+  width: 22px;
+  background: #fff;
+}
+
+@media (min-width: 768px) {
+  .banner-frame {
+    height: 320px;
+  }
 }
 
 .live-dot {

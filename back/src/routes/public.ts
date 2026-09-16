@@ -19,6 +19,11 @@ function str(value: unknown) {
   return String(value ?? "");
 }
 
+function num(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 publicRouter.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
@@ -65,8 +70,12 @@ publicRouter.get("/clinics", async (req, res) => {
     city: str(req.query.city) || undefined,
     specialty: str(req.query.specialty) || undefined,
     service: str(req.query.service) || undefined,
-    sort: str(req.query.sort) || undefined,
+    sort: "name",
     lang: str(req.query.lang) || undefined,
+    priceMax: num(req.query.priceMax),
+    hoursMax: num(req.query.hoursMax),
+    messenger: str(req.query.messenger) || undefined,
+    coordinator: str(req.query.coordinator) === "1" ? true : undefined,
   };
   await trackEvent(req, "catalog_view", {
     q: filters.q || "",
@@ -74,7 +83,17 @@ publicRouter.get("/clinics", async (req, res) => {
     lang: filters.lang || "",
   });
   const clinics = await queryClinics(filters);
-  const hasFilters = Boolean(filters.q || filters.city || filters.specialty || filters.service || filters.lang);
+  const hasFilters = Boolean(
+    filters.q ||
+      filters.city ||
+      filters.specialty ||
+      filters.service ||
+      filters.lang ||
+      filters.priceMax ||
+      filters.hoursMax ||
+      filters.messenger ||
+      filters.coordinator,
+  );
   const suggestions = hasFilters && clinics.length === 0 ? await queryClinics({ sort: "response" }) : [];
   res.json({ clinics, suggestions: suggestions.slice(0, 3) });
 });

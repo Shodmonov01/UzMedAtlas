@@ -10,6 +10,10 @@ export type CatalogFiltersInput = {
   service?: string;
   sort?: string;
   lang?: string;
+  priceMax?: number;
+  hoursMax?: number;
+  messenger?: string;
+  coordinator?: boolean;
 };
 
 export type CatalogClinicLike = {
@@ -20,6 +24,9 @@ export type CatalogClinicLike = {
   descriptionRu: string;
   languages: string;
   responseHours: number;
+  whatsapp?: string | null;
+  telegram?: string | null;
+  coordinatorName?: string | null;
   specialties: { specialty: { nameEn: string; nameRu: string; slug: string } }[];
   services: {
     nameEn: string;
@@ -55,6 +62,21 @@ export function clinicMatchesFilters(clinic: CatalogClinicLike, filters: Catalog
     });
     if (!serviceMatch) return false;
   }
+
+  if (filters.priceMax != null) {
+    const from =
+      clinic.services
+        .map((item) => item.priceUsd)
+        .filter((value): value is number => value != null)
+        .sort((a, b) => a - b)[0] ?? null;
+    if (from == null || from > filters.priceMax) return false;
+  }
+
+  if (filters.hoursMax != null && clinic.responseHours > filters.hoursMax) return false;
+
+  if (filters.messenger === "whatsapp" && !clinic.whatsapp) return false;
+  if (filters.messenger === "telegram" && !clinic.telegram) return false;
+  if (filters.coordinator && !clinic.coordinatorName) return false;
 
   const q = filters.q ? normalizeText(filters.q) : "";
   if (!q) return true;
@@ -98,7 +120,7 @@ export function sortCatalogClinics<
       return a.fromPrice - b.fromPrice;
     }
     if (sort === "response") return a.responseHours - b.responseHours;
-    return a.nameEn.localeCompare(b.nameEn);
+    return a.nameEn.localeCompare(b.nameEn, "en", { sensitivity: "base" });
   });
 }
 
@@ -119,5 +141,5 @@ export async function queryClinics(filters: CatalogFiltersInput) {
   });
 
   const filtered = clinics.filter((clinic) => clinicMatchesFilters(clinic, filters)).map(withFromPrice);
-  return sortCatalogClinics(filtered, filters.sort);
+  return sortCatalogClinics(filtered, filters.sort || "name");
 }
