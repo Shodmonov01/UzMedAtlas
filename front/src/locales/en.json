@@ -122,7 +122,7 @@
     "title": "Clinic catalog",
     "subtitle": "Find a private clinic by name, specialty, or service.",
     "search": "Search",
-    "searchPlaceholder": "Clinic name, cardiology, MRI…",
+    "searchPlaceholder": "Clinic, MRI…",
     "city": "City",
     "specialty": "Specialty",
     "service": "Service",

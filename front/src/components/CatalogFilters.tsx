@@ -236,7 +236,7 @@ export function CatalogFilters({
             <button
               key={item}
               type="button"
-              className={cn("chip shrink-0", values.city === item ? "bg-teal text-white" : "bg-white")}
+              className={cn("chip shrink-0", values.city === item && "is-on")}
               onClick={() => go({ ...values, city: values.city === item ? undefined : item })}
             >
               {cityLabel(item, locale)}

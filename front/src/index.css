@@ -142,6 +142,11 @@ h3,
   touch-action: manipulation;
 }
 
+.chip.is-on {
+  background: var(--teal);
+  color: #fff;
+}
+
 .pill-ok {
   background: #d8f0d3;
   color: #24633a;
