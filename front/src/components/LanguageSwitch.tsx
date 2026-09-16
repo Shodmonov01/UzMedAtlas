@@ -13,7 +13,7 @@ export function LanguageSwitch() {
           key={code}
           to={withLocale(code, pathname)}
           className={cn(
-            "rounded-full px-3 py-1.5",
+            "min-h-11 min-w-11 rounded-full px-3 py-2 grid place-items-center",
             locale === code ? "bg-white text-ink shadow-sm" : "text-muted",
           )}
         >

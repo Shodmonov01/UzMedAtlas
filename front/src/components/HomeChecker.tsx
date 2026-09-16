@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useLocale, withLocale } from "../locale-link";
+import { DoctorPortrait } from "./DoctorPortrait";
 
 export function HomeChecker({ locale, clinicCount }: { locale: string; clinicCount: number }) {
   const { t } = useTranslation();
@@ -33,7 +34,17 @@ export function HomeChecker({ locale, clinicCount }: { locale: string; clinicCou
   }
 
   return (
-    <div className="soft-card h-full rounded-[2rem] bg-white p-5 md:p-6">
+    <div className="relative h-full rounded-[1.6rem] bg-white p-4 pb-20 shadow-[0_18px_50px_-28px_rgba(20,36,33,0.35)] sm:rounded-[2rem] sm:p-6">
+      <div className="mb-3 flex items-center gap-3">
+        <DoctorPortrait className="h-12 w-12 rounded-2xl" />
+        <div>
+          <p className="text-sm font-extrabold">{t("home.talkHint")}</p>
+          <p className="text-xs font-bold text-muted">
+            <span className="live-dot mr-1 align-middle" />
+            {t("home.live")}
+          </p>
+        </div>
+      </div>
       <form onSubmit={start} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
         <label className="sr-only" htmlFor="symptoms">
@@ -44,11 +55,11 @@ export function HomeChecker({ locale, clinicCount }: { locale: string; clinicCou
           name="symptoms"
           required
           minLength={8}
-          rows={7}
+          rows={6}
           value={symptoms}
           onChange={(event) => setSymptoms(event.target.value)}
           placeholder={t("home.placeholder")}
-          className="field min-h-[180px] resize-y rounded-[1.5rem] p-5 text-base md:text-lg"
+          className="field min-h-[160px] resize-y rounded-[1.25rem] p-4 text-base sm:min-h-[180px] sm:rounded-[1.5rem] sm:p-5 md:text-lg"
           style={{ background: "#e7f3e4" }}
         />
         <div className="flex flex-wrap gap-2">
@@ -77,7 +88,7 @@ export function HomeChecker({ locale, clinicCount }: { locale: string; clinicCou
           {t("home.skip")}
         </button>
       </form>
-      <p className="mt-5 text-sm font-semibold text-muted">
+      <p className="mt-4 text-sm font-semibold text-muted">
         {clinicCount} {t("home.trustClinics")} · 3 {t("home.trustCities")} · {t("home.trustLanguages")}
       </p>
     </div>

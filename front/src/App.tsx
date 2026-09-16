@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { SkipLink } from "./components/SkipLink";
+import { OperatorChat } from "./components/OperatorChat";
 import { HomePage } from "./pages/HomePage";
 import { CheckerPage } from "./pages/CheckerPage";
 import { ResultsPage } from "./pages/ResultsPage";
@@ -61,6 +62,7 @@ function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      <OperatorChat />
     </div>
   );
 }

@@ -40,7 +40,7 @@ export function CatalogFilters({
   }
 
   return (
-    <form onSubmit={onSubmit} className="soft-card grid gap-3 rounded-[2rem] bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
+    <form onSubmit={onSubmit} className="grid gap-3 rounded-[1.6rem] bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
       <label className="text-sm font-semibold sm:col-span-2">
         {t("catalog.search")}
         <input name="q" defaultValue={q} placeholder={t("catalog.searchPlaceholder")} className="field mt-1" />
@@ -99,10 +99,10 @@ export function CatalogFilters({
         </select>
       </label>
       <div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-3">
-        <button className="btn btn-primary" type="submit">
+        <button className="btn btn-primary min-h-11 w-full sm:w-auto" type="submit">
           {t("catalog.applyFilters")}
         </button>
-        <LocaleLink to="/clinics" className="btn btn-ghost">
+        <LocaleLink to="/clinics" className="btn btn-ghost min-h-11 w-full sm:w-auto">
           {t("catalog.reset")}
         </LocaleLink>
       </div>

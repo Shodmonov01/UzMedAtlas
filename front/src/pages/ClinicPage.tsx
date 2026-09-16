@@ -85,7 +85,7 @@ export function ClinicPage() {
   const tgHref = clinic.telegram ? telegramLink(clinic.telegram) : null;
 
   return (
-    <div className="portal mx-auto max-w-7xl px-4 py-10">
+    <div className="portal mx-auto max-w-7xl px-4 py-6 md:py-10">
       <JsonLd data={clinicJsonLd(clinic, locale)} />
       <RecordClinicView slug={clinic.slug} name={name} />
       <LocaleLink to="/clinics" className="text-sm font-semibold text-muted">
@@ -98,7 +98,7 @@ export function ClinicPage() {
               src={clinic.photos[0]?.url || clinic.logoUrl}
               alt={name}
               color={clinic.coverColor}
-              className="h-72 w-full object-cover"
+              className="h-48 w-full object-cover sm:h-72"
             />
           </div>
           {clinic.photos.length > 1 ? (
@@ -114,7 +114,7 @@ export function ClinicPage() {
               ))}
             </div>
           ) : null}
-          <h1 className="mt-8 font-display text-5xl">{name}</h1>
+          <h1 className="mt-6 font-display text-3xl md:mt-8 md:text-5xl">{name}</h1>
           <p className="mt-2 flex items-center gap-2 text-muted">
             <MapPin size={16} />
             {cityLabel(clinic.city, locale)} · {localized(clinic, locale, "address")}

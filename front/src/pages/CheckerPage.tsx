@@ -35,7 +35,7 @@ export function CheckerPage() {
   if (!symptoms) return null;
 
   return (
-    <div className="portal mx-auto max-w-2xl px-4 py-12">
+    <div className="portal mx-auto max-w-2xl px-4 py-6 md:py-12">
       <p className="chip w-fit">2 / 2</p>
       <h1 className="mt-4 text-4xl md:text-5xl">{t("checker.title")}</h1>
       <p className="mt-4 rounded-[1.5rem] bg-white p-4 text-sm text-muted shadow-sm">
@@ -50,15 +50,15 @@ export function CheckerPage() {
         <fieldset>
           <legend className="text-sm font-semibold">{t("checker.gender")}</legend>
           <div className="mt-2 grid gap-2">
-            <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2">
+            <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3">
               <input type="radio" name="gender" value="female" required />
               {t("checker.female")}
             </label>
-            <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2">
+            <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3">
               <input type="radio" name="gender" value="male" />
               {t("checker.male")}
             </label>
-            <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2">
+            <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3">
               <input type="radio" name="gender" value="prefer_not" />
               {t("checker.preferNot")}
             </label>
@@ -67,25 +67,25 @@ export function CheckerPage() {
         <fieldset>
           <legend className="text-sm font-semibold">{t("checker.duration")}</legend>
           <div className="mt-2 grid gap-2">
-            <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2">
+            <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3">
               <input type="radio" name="duration" value="few_days" required />
               {t("checker.fewDays")}
             </label>
-            <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2">
+            <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3">
               <input type="radio" name="duration" value="few_weeks" />
               {t("checker.fewWeeks")}
             </label>
-            <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2">
+            <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3">
               <input type="radio" name="duration" value="few_months" />
               {t("checker.fewMonths")}
             </label>
-            <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2">
+            <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3">
               <input type="radio" name="duration" value="more_than_year" />
               {t("checker.moreThanYear")}
             </label>
           </div>
         </fieldset>
-        <label className="flex items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2 text-sm font-semibold">
+        <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white px-3 py-3 text-sm font-semibold">
           <input type="checkbox" name="forChild" />
           {t("checker.forChild")}
         </label>
