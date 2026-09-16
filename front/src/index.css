@@ -244,13 +244,20 @@ h3,
   flex-shrink: 0;
 }
 
+.banner-frame {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  border-radius: 1.6rem;
+  background: var(--teal-deep);
+}
+
 .banner-frame a {
   display: block;
   height: 100%;
 }
 
-.banner-frame img,
-.banner-frame a > div {
+.banner-frame img {
   height: 100%;
   width: 100%;
   object-fit: cover;
@@ -261,8 +268,10 @@ h3,
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 1;
   padding: 1.25rem 1.35rem 2.4rem;
   background: linear-gradient(to top, rgba(20, 36, 33, 0.78), transparent);
+  pointer-events: none;
 }
 
 .banner-dots {
