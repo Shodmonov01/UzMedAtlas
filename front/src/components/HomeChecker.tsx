@@ -84,7 +84,7 @@ export function HomeChecker({ locale, clinicCount }: { locale: string; clinicCou
           skip();
         }}
       >
-        <button className="btn btn-ghost w-full sm:w-auto" type="submit">
+        <button className="btn btn-ghost fab-clear w-full sm:w-auto" type="submit">
           {t("home.skip")}
         </button>
       </form>

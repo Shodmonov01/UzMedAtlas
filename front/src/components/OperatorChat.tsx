@@ -5,7 +5,6 @@ import { Send, X } from "lucide-react";
 import { api } from "../api";
 import { useLocale, withLocale } from "../locale-link";
 import { DoctorPortrait } from "./DoctorPortrait";
-import { cn } from "@/lib/format";
 
 type ChatMsg = { id: string; from: "leyla" | "you"; text: string };
 
@@ -34,7 +33,6 @@ export function OperatorChat() {
   const scroller = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLInputElement>(null);
 
-  const lift = /^\/clinics\/[^/]+$/.test(path) || path.includes("/apply");
   const isHome = path === "/";
 
   useEffect(() => {
@@ -172,7 +170,7 @@ export function OperatorChat() {
         />
       ) : null}
 
-      <div className={cn("operator-dock", lift && "operator-dock-lift")}>
+      <div className="operator-dock">
         {open ? (
           <section className="operator-panel" role="dialog" aria-modal="true" aria-label={t("operator.open")}>
             <header className="operator-head">

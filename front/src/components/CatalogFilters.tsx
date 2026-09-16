@@ -99,7 +99,7 @@ export function CatalogFilters({
         </select>
       </label>
       <div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-3">
-        <button className="btn btn-primary min-h-11 w-full sm:w-auto" type="submit">
+        <button className="btn btn-primary fab-clear min-h-11 w-full sm:w-auto" type="submit">
           {t("catalog.applyFilters")}
         </button>
         <LocaleLink to="/clinics" className="btn btn-ghost min-h-11 w-full sm:w-auto">
