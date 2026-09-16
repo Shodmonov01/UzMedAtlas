@@ -43,12 +43,23 @@ app.use("/uploads", express.static(path.join(root, "public", "uploads")));
 app.use("/api", publicRouter);
 app.use("/api/admin", adminRouter);
 
+const frontDist = path.join(root, "..", "front", "dist");
+if (fs.existsSync(frontDist)) {
+  app.use(express.static(frontDist));
+  app.use((req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") return next();
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(path.join(frontDist, "index.html"));
+  });
+}
+
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(error);
   res.status(500).json({ error: "server" });
 });
 
 const port = Number(process.env.PORT || 4000);
-app.listen(port, () => {
-  console.log(`UzMedAtlas API http://localhost:${port}`);
+const host = process.env.HOST || "0.0.0.0";
+app.listen(port, host, () => {
+  console.log(`UzMedAtlas http://${host}:${port}`);
 });
