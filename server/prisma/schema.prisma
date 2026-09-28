@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Specialty {
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  nameEn         String
+  nameRu         String
+  descriptionEn  String
+  descriptionRu  String
+  explanationEn  String
+  explanationRu  String
+  keywords       String
+  sortOrder      Int               @default(0)
+  clinics        ClinicSpecialty[]
+  branches       BranchSpecialty[]
+  doctors        DoctorSpecialty[]
+  services       Service[]
+  leads          Lead[]
+}
+
+model Clinic {
+  id                  String            @id @default(cuid())
+  slug                String            @unique
+  nameEn              String
+  nameRu              String
+  shortName           String?
+  foundedYear         Int?
+  city                String
+  addressEn           String
+  addressRu           String
+  descriptionEn       String
+  descriptionRu       String
+  historyEn           String?
+  historyRu           String?
+  missionEn           String?
+  missionRu           String?
+  advantagesEn        String?
+  advantagesRu        String?
+  phone               String
+  email               String
+  website             String?
+  whatsapp            String?
+  telegram            String?
+  instagram           String?
+  languages           String
+  logoUrl             String?
+  coverColor          String            @default("#1570ef")
+  /// draft | moderation | needs_changes | approved | published
+  status              String            @default("draft")
+  moderatorNote       String?
+  published           Boolean           @default(false)
+  coordinatorName     String?
+  coordinatorRoleEn   String?
+  coordinatorRoleRu   String?
+  chiefDoctorName     String?
+  chiefDoctorRoleEn   String?
+  chiefDoctorRoleRu   String?
+  chiefDoctorPhotoUrl String?
+  responseHours       Int               @default(24)
+  licenseInfoEn       String?
+  licenseInfoRu       String?
+  afterRequestEn      String?
+  afterRequestRu      String?
+  whyChooseEn         String?
+  whyChooseRu         String?
+  popularServicesEn   String?
+  popularServicesRu   String?
+  developmentPlansEn  String?
+  developmentPlansRu  String?
+  medicalTourism      Boolean           @default(false)
+  medicalTourismEn    String?
+  medicalTourismRu    String?
+  ownerId             String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  owner               ClinicOwner?      @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  photos              ClinicPhoto[]
+  specialties         ClinicSpecialty[]
+  services            Service[]
+  leads               Lead[]
+  branches            Branch[]
+  doctors             Doctor[]
+  equipment           Equipment[]
+  certificates        Certificate[]
+  moderationLogs      ModerationLog[]
+}
+
+model ClinicOwner {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  clinics      Clinic[]
+}
+
+model ClinicPhoto {
+  id        String @id @default(cuid())
+  clinicId  String
+  url       String
+  altEn     String @default("")
+  altRu     String @default("")
+  /// facade | reception | hall | rooms | or | equipment | staff | other
+  category  String @default("other")
+  sortOrder Int    @default(0)
+  clinic    Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
+
+model ClinicSpecialty {
+  clinicId    String
+  specialtyId String
+  clinic      Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  specialty   Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@id([clinicId, specialtyId])
+}
+
+model Branch {
+  id             String            @id @default(cuid())
+  clinicId       String
+  slug           String
+  nameEn         String
+  nameRu         String
+  city           String
+  addressEn      String
+  addressRu      String
+  lat            Float?
+  lng            Float?
+  phone          String
+  email          String?
+  whatsapp       String?
+  telegram       String?
+  website        String?
+  descriptionEn  String            @default("")
+  descriptionRu  String            @default("")
+  /// JSON: { mon: { open: "09:00", close: "18:00" } | null, ... }
+  scheduleJson   String            @default("{}")
+  coverUrl       String?
+  sortOrder      Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  clinic         Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  specialties    BranchSpecialty[]
+  photos         BranchPhoto[]
+  doctorLinks    DoctorBranch[]
+  services       Service[]
+  equipment      Equipment[]
+  certificates   Certificate[]
+
+  @@unique([clinicId, slug])
+}
+
+model BranchSpecialty {
+  branchId    String
+  specialtyId String
+  branch      Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  specialty   Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@id([branchId, specialtyId])
+}
+
+model BranchPhoto {
+  id        String @id @default(cuid())
+  branchId  String
+  url       String
+  altEn     String @default("")
+  altRu     String @default("")
+  category  String @default("other")
+  sortOrder Int    @default(0)
+  branch    Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+}
+
+model Doctor {
+  id              String            @id @default(cuid())
+  clinicId        String
+  nameEn          String
+  nameRu          String
+  roleEn          String            @default("")
+  roleRu          String            @default("")
+  photoUrl        String?
+  bioEn           String            @default("")
+  bioRu           String            @default("")
+  experienceYears Int?
+  sortOrder       Int               @default(0)
+  clinic          Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  branches        DoctorBranch[]
+  specialties     DoctorSpecialty[]
+}
+
+model DoctorBranch {
+  doctorId String
+  branchId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@id([doctorId, branchId])
+}
+
+model DoctorSpecialty {
+  doctorId    String
+  specialtyId String
+  doctor      Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  specialty   Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@id([doctorId, specialtyId])
+}
+
+model Equipment {
+  id             String  @id @default(cuid())
+  clinicId       String
+  branchId       String?
+  nameEn         String
+  nameRu         String
+  descriptionEn  String  @default("")
+  descriptionRu  String  @default("")
+  photoUrl       String?
+  sortOrder      Int     @default(0)
+  clinic         Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  branch         Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+}
+
+model Certificate {
+  id        String  @id @default(cuid())
+  clinicId  String
+  branchId  String?
+  nameEn    String
+  nameRu    String
+  issuerEn  String  @default("")
+  issuerRu  String  @default("")
+  year      Int?
+  imageUrl  String?
+  sortOrder Int     @default(0)
+  clinic    Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  branch    Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+}
+
+model Service {
+  id             String    @id @default(cuid())
+  clinicId       String
+  branchId       String?
+  specialtyId    String
+  canonicalSlug  String?
+  nameEn         String
+  nameRu         String
+  descriptionEn  String    @default("")
+  descriptionRu  String    @default("")
+  priceUsd       Int?
+  currency       String    @default("UZS")
+  unit           String    @default("")
+  clinic         Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  branch         Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  specialty      Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+}
+
+model ModerationLog {
+  id        String   @id @default(cuid())
+  clinicId  String
+  action    String
+  note      String?
+  createdAt DateTime @default(now())
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id                     String     @id @default(cuid())
+  clinicId               String
+  fullName               String
+  country                String
+  phone                  String
+  email                  String?
+  contactMethod          String
+  arrivalType            String
+  arrivalDate            String?
+  medicalNeed            String?
+  symptoms               String?
+  age                    Int?
+  gender                 String?
+  duration               String?
+  forChild               Boolean    @default(false)
+  source                 String     @default("catalog")
+  status                 String     @default("new")
+  sessionId              String?
+  idempotencyKey         String?    @unique
+  preferredHours         String?
+  notes                  String?
+  consentAt              DateTime?
+  utmSource              String?
+  utmMedium              String?
+  utmCampaign            String?
+  recommendedSpecialtyId String?
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @default(now()) @updatedAt
+  clinic                 Clinic     @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  recommendedSpecialty   Specialty? @relation(fields: [recommendedSpecialtyId], references: [id], onDelete: SetNull)
+  emails                 EmailLog[]
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  sessionId String?
+  meta      String?
+  createdAt DateTime @default(now())
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  leadId    String?
+  toAddress String
+  subject   String
+  body      String
+  status    String   @default("logged")
+  error     String?
+  createdAt DateTime @default(now())
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+}

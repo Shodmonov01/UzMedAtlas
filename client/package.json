@@ -1,0 +1,39 @@
+{
+  "name": "uzmedatlas-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "routes:gen": "tsr generate",
+    "prebuild": "npm run routes:gen",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "pretypecheck": "npm run routes:gen",
+    "typecheck": "tsc -b --pretty false",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-router": "^1.131.27",
+    "axios": "^1.12.2",
+    "clsx": "^2.1.1",
+    "i18next": "^25.5.2",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-i18next": "^15.7.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.13",
+    "@tanstack/router-cli": "^1.167.39",
+    "@tanstack/router-plugin": "^1.131.27",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}

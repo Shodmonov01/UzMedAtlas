@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
-  <g fill="none" stroke="#1B6B6A" stroke-width="1.2" opacity="0.18">
-    <path d="M100 10 L160 45 L160 115 L100 150 L40 115 L40 45 Z"/>
-    <path d="M100 40 L140 63 L140 107 L100 130 L60 107 L60 63 Z"/>
-    <circle cx="100" cy="80" r="18"/>
-    <path d="M100 10 V150 M40 45 L160 115 M160 45 L40 115"/>
-  </g>
-</svg>
