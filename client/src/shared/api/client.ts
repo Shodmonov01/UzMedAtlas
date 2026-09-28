@@ -34,6 +34,7 @@ export type ClinicListItem = {
   medicalTourism?: boolean;
   fromPrice: number | null;
   specialties: Specialty[];
+  photos?: { id: string; url: string }[];
   branchCount?: number;
 };
 
@@ -54,7 +55,16 @@ export type BranchSummary = {
   descriptionRu: string;
   coverUrl: string | null;
   sortOrder: number;
-  schedule: Record<string, { open: string; close: string } | null>;
+  schedule: Record<
+    string,
+    {
+      open: string;
+      close: string;
+      roundTheClock?: boolean;
+      breakStart?: string | null;
+      breakEnd?: string | null;
+    } | null
+  >;
   specialties: Specialty[];
   photoCount: number;
   doctorCount: number;
@@ -131,4 +141,16 @@ export const CITY_LABELS: Record<string, string> = {
   tashkent: "Ташкент",
   samarkand: "Самарканд",
   bukhara: "Бухара",
+  andijan: "Андижан",
+  fergana: "Фергана",
+  namangan: "Наманган",
+  nukus: "Нукус",
+  qarshi: "Карши",
+  termez: "Термез",
+  urgench: "Ургенч",
+  jizzakh: "Джизак",
+  navoi: "Навои",
+  kokand: "Коканд",
+  margilan: "Маргилан",
+  gulistan: "Гулистан",
 };

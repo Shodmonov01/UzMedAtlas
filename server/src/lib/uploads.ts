@@ -8,6 +8,7 @@ const ALLOWED = new Set([
   "image/webp",
   "image/svg+xml",
   "image/gif",
+  "application/pdf",
 ]);
 
 export async function saveUploadBuffer(
@@ -24,7 +25,9 @@ export async function saveUploadBuffer(
       ? "svg"
       : mimeType === "image/jpeg"
         ? "jpg"
-        : mimeType.split("/")[1];
+        : mimeType === "application/pdf"
+          ? "pdf"
+          : mimeType.split("/")[1];
   const name = `${Date.now()}-${randomBytes(4).toString("hex")}.${ext}`;
   const dir = path.join(process.cwd(), "public", folder);
   await mkdir(dir, { recursive: true });

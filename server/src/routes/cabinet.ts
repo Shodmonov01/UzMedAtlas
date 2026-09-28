@@ -10,7 +10,7 @@ import {
   setClinicSession,
   verifyPassword,
 } from "../lib/auth";
-import { CITIES, PHOTO_CATEGORIES, SERVICE_LANGUAGES } from "../lib/constants";
+import { PHOTO_CATEGORIES, SERVICE_LANGUAGES } from "../lib/constants";
 import { prisma } from "../lib/db";
 import { parseLanguages } from "../lib/format";
 import { checkRateLimit } from "../lib/rate-limit";
@@ -18,12 +18,20 @@ import { slugify, validateClinicForModeration } from "../lib/clinic-workflow";
 import {
   branchDetailInclude,
   clinicDetailInclude,
+  parseJsonArray,
+  parsePhones,
   parseSchedule,
   serializeBranchSummary,
   serializeDoctor,
   serializeService,
 } from "../lib/clinic-serialize";
 import { saveUploadBuffer } from "../lib/uploads";
+
+const withIds = <T extends { id?: string }>(items: T[] | undefined) =>
+  (items || []).map((item) => ({
+    ...item,
+    id: item.id || `id_${Math.random().toString(36).slice(2, 10)}`,
+  }));
 
 const ownerRegisterSchema = z.object({
   email: z.string().trim().email().max(120),
@@ -41,7 +49,7 @@ const clinicBodySchema = z.object({
   shortName: z.string().trim().max(120).optional().nullable(),
   foundedYear: z.coerce.number().int().min(1800).max(2100).optional().nullable(),
   slug: z.string().trim().min(2).max(80).optional(),
-  city: z.enum(CITIES),
+  city: z.string().trim().min(2).max(80),
   addressRu: z.string().trim().min(3).max(300),
   addressEn: z.string().trim().min(3).max(300),
   descriptionRu: z.string().trim().min(10).max(5000),
@@ -58,10 +66,60 @@ const clinicBodySchema = z.object({
   whatsapp: z.string().trim().max(40).optional().nullable(),
   telegram: z.string().trim().max(40).optional().nullable(),
   instagram: z.string().trim().max(80).optional().nullable(),
+  youtube: z.string().trim().max(200).optional().nullable(),
+  socials: z
+    .array(z.object({ label: z.string().trim().max(40), url: z.string().trim().max(300) }))
+    .max(10)
+    .optional(),
   languages: z.array(z.enum(SERVICE_LANGUAGES)).min(1).default(["ru", "en"]),
   coverColor: z.string().trim().max(20).optional(),
   logoUrl: z.string().trim().max(500).optional().nullable(),
   specialtyIds: z.array(z.string().min(1)).default([]),
+  founderName: z.string().trim().max(120).optional().nullable(),
+  founderRoleRu: z.string().trim().max(120).optional().nullable(),
+  founderRoleEn: z.string().trim().max(120).optional().nullable(),
+  founderBioRu: z.string().trim().max(4000).optional().nullable(),
+  founderBioEn: z.string().trim().max(4000).optional().nullable(),
+  founderPhotoUrl: z.string().trim().max(500).optional().nullable(),
+  achievements: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        titleRu: z.string().trim().max(200),
+        titleEn: z.string().trim().max(200).optional(),
+        descriptionRu: z.string().trim().max(1000).optional(),
+        descriptionEn: z.string().trim().max(1000).optional(),
+        year: z.coerce.number().int().min(1800).max(2100).optional().nullable(),
+      }),
+    )
+    .max(40)
+    .optional(),
+  leaders: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        name: z.string().trim().min(2).max(120),
+        roleRu: z.string().trim().max(120).optional(),
+        roleEn: z.string().trim().max(120).optional(),
+        bioRu: z.string().trim().max(2000).optional(),
+        bioEn: z.string().trim().max(2000).optional(),
+        photoUrl: z.string().trim().max(500).optional().nullable(),
+      }),
+    )
+    .max(20)
+    .optional(),
+  technologies: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        nameRu: z.string().trim().min(2).max(200),
+        nameEn: z.string().trim().max(200).optional(),
+        descriptionRu: z.string().trim().max(2000).optional(),
+        descriptionEn: z.string().trim().max(2000).optional(),
+      }),
+    )
+    .max(40)
+    .optional(),
   coordinatorName: z.string().trim().max(120).optional().nullable(),
   coordinatorRoleRu: z.string().trim().max(120).optional().nullable(),
   coordinatorRoleEn: z.string().trim().max(120).optional().nullable(),
@@ -69,6 +127,8 @@ const clinicBodySchema = z.object({
   chiefDoctorRoleRu: z.string().trim().max(120).optional().nullable(),
   chiefDoctorRoleEn: z.string().trim().max(120).optional().nullable(),
   chiefDoctorPhotoUrl: z.string().trim().max(500).optional().nullable(),
+  chiefDoctorBioRu: z.string().trim().max(4000).optional().nullable(),
+  chiefDoctorBioEn: z.string().trim().max(4000).optional().nullable(),
   responseHours: z.coerce.number().int().min(1).max(168).optional(),
   whyChooseRu: z.string().trim().max(4000).optional().nullable(),
   whyChooseEn: z.string().trim().max(4000).optional().nullable(),
@@ -112,12 +172,23 @@ function serializeClinic(clinic: any) {
     whatsapp: clinic.whatsapp,
     telegram: clinic.telegram,
     instagram: clinic.instagram,
+    youtube: clinic.youtube ?? null,
+    socials: parseJsonArray(clinic.socialsJson),
     languages: parseLanguages(clinic.languages),
     logoUrl: clinic.logoUrl,
     coverColor: clinic.coverColor,
     status: clinic.status,
     moderatorNote: clinic.moderatorNote,
     published: clinic.published,
+    founderName: clinic.founderName ?? null,
+    founderRoleEn: clinic.founderRoleEn ?? null,
+    founderRoleRu: clinic.founderRoleRu ?? null,
+    founderBioEn: clinic.founderBioEn ?? null,
+    founderBioRu: clinic.founderBioRu ?? null,
+    founderPhotoUrl: clinic.founderPhotoUrl ?? null,
+    achievements: parseJsonArray(clinic.achievementsJson),
+    leaders: parseJsonArray(clinic.leadersJson),
+    technologies: parseJsonArray(clinic.technologiesJson),
     coordinatorName: clinic.coordinatorName,
     coordinatorRoleEn: clinic.coordinatorRoleEn,
     coordinatorRoleRu: clinic.coordinatorRoleRu,
@@ -125,6 +196,8 @@ function serializeClinic(clinic: any) {
     chiefDoctorRoleEn: clinic.chiefDoctorRoleEn,
     chiefDoctorRoleRu: clinic.chiefDoctorRoleRu,
     chiefDoctorPhotoUrl: clinic.chiefDoctorPhotoUrl,
+    chiefDoctorBioEn: clinic.chiefDoctorBioEn ?? null,
+    chiefDoctorBioRu: clinic.chiefDoctorBioRu ?? null,
     responseHours: clinic.responseHours,
     whyChooseEn: clinic.whyChooseEn,
     whyChooseRu: clinic.whyChooseRu,
@@ -266,6 +339,12 @@ export async function cabinetRoutes(app: FastifyInstance) {
     const file = await request.file();
     if (!file) return reply.code(400).send({ error: "no_file" });
     const buffer = await file.toBuffer();
+    const purpose = file.fields.purpose;
+    const isLogo = !Array.isArray(purpose) && purpose !== undefined &&
+      "value" in purpose && purpose.value === "logo";
+    if (isLogo && buffer.byteLength > 2 * 1024 * 1024) {
+      return reply.code(413).send({ error: "logo_too_large", maxBytes: 2 * 1024 * 1024 });
+    }
     try {
       const url = await saveUploadBuffer(buffer, file.mimetype, "uploads");
       return { url };
@@ -379,9 +458,20 @@ export async function cabinetRoutes(app: FastifyInstance) {
         whatsapp: data.whatsapp || null,
         telegram: data.telegram || null,
         instagram: data.instagram || null,
+        youtube: data.youtube || null,
+        socialsJson: JSON.stringify(data.socials || []),
         languages: JSON.stringify(data.languages),
         coverColor: data.coverColor || "#1570ef",
         logoUrl: data.logoUrl || null,
+        founderName: data.founderName || null,
+        founderRoleEn: data.founderRoleEn || null,
+        founderRoleRu: data.founderRoleRu || null,
+        founderBioEn: data.founderBioEn || null,
+        founderBioRu: data.founderBioRu || null,
+        founderPhotoUrl: data.founderPhotoUrl || null,
+        achievementsJson: JSON.stringify(withIds(data.achievements)),
+        leadersJson: JSON.stringify(withIds(data.leaders)),
+        technologiesJson: JSON.stringify(withIds(data.technologies)),
         coordinatorName: data.coordinatorName || null,
         coordinatorRoleEn: data.coordinatorRoleEn || null,
         coordinatorRoleRu: data.coordinatorRoleRu || null,
@@ -389,6 +479,8 @@ export async function cabinetRoutes(app: FastifyInstance) {
         chiefDoctorRoleEn: data.chiefDoctorRoleEn || null,
         chiefDoctorRoleRu: data.chiefDoctorRoleRu || null,
         chiefDoctorPhotoUrl: data.chiefDoctorPhotoUrl || null,
+        chiefDoctorBioEn: data.chiefDoctorBioEn || null,
+        chiefDoctorBioRu: data.chiefDoctorBioRu || null,
         responseHours: data.responseHours ?? 24,
         whyChooseEn: data.whyChooseEn || null,
         whyChooseRu: data.whyChooseRu || null,
@@ -462,9 +554,24 @@ export async function cabinetRoutes(app: FastifyInstance) {
           ...(data.whatsapp !== undefined ? { whatsapp: data.whatsapp } : {}),
           ...(data.telegram !== undefined ? { telegram: data.telegram } : {}),
           ...(data.instagram !== undefined ? { instagram: data.instagram } : {}),
+          ...(data.youtube !== undefined ? { youtube: data.youtube } : {}),
+          ...(data.socials !== undefined ? { socialsJson: JSON.stringify(data.socials) } : {}),
           ...(data.languages !== undefined ? { languages: JSON.stringify(data.languages) } : {}),
           ...(data.coverColor !== undefined ? { coverColor: data.coverColor } : {}),
           ...(data.logoUrl !== undefined ? { logoUrl: data.logoUrl } : {}),
+          ...(data.founderName !== undefined ? { founderName: data.founderName } : {}),
+          ...(data.founderRoleEn !== undefined ? { founderRoleEn: data.founderRoleEn } : {}),
+          ...(data.founderRoleRu !== undefined ? { founderRoleRu: data.founderRoleRu } : {}),
+          ...(data.founderBioEn !== undefined ? { founderBioEn: data.founderBioEn } : {}),
+          ...(data.founderBioRu !== undefined ? { founderBioRu: data.founderBioRu } : {}),
+          ...(data.founderPhotoUrl !== undefined ? { founderPhotoUrl: data.founderPhotoUrl } : {}),
+          ...(data.achievements !== undefined
+            ? { achievementsJson: JSON.stringify(withIds(data.achievements)) }
+            : {}),
+          ...(data.leaders !== undefined ? { leadersJson: JSON.stringify(withIds(data.leaders)) } : {}),
+          ...(data.technologies !== undefined
+            ? { technologiesJson: JSON.stringify(withIds(data.technologies)) }
+            : {}),
           ...(data.coordinatorName !== undefined ? { coordinatorName: data.coordinatorName } : {}),
           ...(data.coordinatorRoleEn !== undefined ? { coordinatorRoleEn: data.coordinatorRoleEn } : {}),
           ...(data.coordinatorRoleRu !== undefined ? { coordinatorRoleRu: data.coordinatorRoleRu } : {}),
@@ -474,6 +581,8 @@ export async function cabinetRoutes(app: FastifyInstance) {
           ...(data.chiefDoctorPhotoUrl !== undefined
             ? { chiefDoctorPhotoUrl: data.chiefDoctorPhotoUrl }
             : {}),
+          ...(data.chiefDoctorBioEn !== undefined ? { chiefDoctorBioEn: data.chiefDoctorBioEn } : {}),
+          ...(data.chiefDoctorBioRu !== undefined ? { chiefDoctorBioRu: data.chiefDoctorBioRu } : {}),
           ...(data.responseHours !== undefined ? { responseHours: data.responseHours } : {}),
           ...(data.whyChooseEn !== undefined ? { whyChooseEn: data.whyChooseEn } : {}),
           ...(data.whyChooseRu !== undefined ? { whyChooseRu: data.whyChooseRu } : {}),
@@ -522,7 +631,7 @@ export async function cabinetRoutes(app: FastifyInstance) {
     const { id } = request.params as { id: string };
     const clinic = await prisma.clinic.findUnique({
       where: { id },
-      include: { specialties: true, branches: true },
+      include: { specialties: true, branches: { include: { specialties: true } } },
     });
     if (!clinic) return reply.code(404).send({ error: "not_found" });
     if (!["draft", "needs_changes"].includes(clinic.status)) {
@@ -597,6 +706,107 @@ export async function cabinetRoutes(app: FastifyInstance) {
     return { ok: true };
   });
 
+  app.put("/api/cabinet/clinics/:id/photos/reorder", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id } = request.params as { id: string };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const body = z.object({ photoIds: z.array(z.string().min(1)).min(1) }).safeParse(request.body);
+    if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+    const existing = await prisma.clinicPhoto.findMany({
+      where: { clinicId: id },
+      select: { id: true },
+    });
+    const existingIds = new Set(existing.map((p) => p.id));
+    if (
+      body.data.photoIds.length !== existingIds.size ||
+      body.data.photoIds.some((pid) => !existingIds.has(pid))
+    ) {
+      return reply.code(400).send({ error: "invalid_photo_ids" });
+    }
+    await prisma.$transaction(
+      body.data.photoIds.map((photoId, index) =>
+        prisma.clinicPhoto.update({
+          where: { id: photoId },
+          data: { sortOrder: index },
+        }),
+      ),
+    );
+    const items = await prisma.clinicPhoto.findMany({
+      where: { clinicId: id },
+      orderBy: { sortOrder: "asc" },
+    });
+    return { items };
+  });
+
+  app.post("/api/cabinet/clinics/:id/photos/:photoId/main", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id, photoId } = request.params as { id: string; photoId: string };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const photos = await prisma.clinicPhoto.findMany({
+      where: { clinicId: id },
+      orderBy: { sortOrder: "asc" },
+    });
+    if (!photos.some((p) => p.id === photoId)) {
+      return reply.code(404).send({ error: "not_found" });
+    }
+    const ordered = [photoId, ...photos.filter((p) => p.id !== photoId).map((p) => p.id)];
+    await prisma.$transaction(
+      ordered.map((pid, index) =>
+        prisma.clinicPhoto.update({
+          where: { id: pid },
+          data: { sortOrder: index },
+        }),
+      ),
+    );
+    const items = await prisma.clinicPhoto.findMany({
+      where: { clinicId: id },
+      orderBy: { sortOrder: "asc" },
+    });
+    return { items };
+  });
+
+  app.patch("/api/cabinet/clinics/:id/photos/:photoId", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id, photoId } = request.params as { id: string; photoId: string };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const body = z
+      .object({
+        url: z.string().min(1).optional(),
+        category: z.enum(PHOTO_CATEGORIES).optional(),
+        altRu: z.string().max(200).optional(),
+        altEn: z.string().max(200).optional(),
+      })
+      .safeParse(request.body);
+    if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+    const existing = await prisma.clinicPhoto.findFirst({ where: { id: photoId, clinicId: id } });
+    if (!existing) return reply.code(404).send({ error: "not_found" });
+    const photo = await prisma.clinicPhoto.update({
+      where: { id: photoId },
+      data: {
+        ...(body.data.url !== undefined ? { url: body.data.url } : {}),
+        ...(body.data.category !== undefined ? { category: body.data.category } : {}),
+        ...(body.data.altRu !== undefined ? { altRu: body.data.altRu } : {}),
+        ...(body.data.altEn !== undefined ? { altEn: body.data.altEn } : {}),
+      },
+    });
+    return photo;
+  });
+
   // --- Doctors ---
   app.post("/api/cabinet/clinics/:id/doctors", async (request, reply) => {
     if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
@@ -615,6 +825,19 @@ export async function cabinetRoutes(app: FastifyInstance) {
         roleEn: z.string().trim().max(120).optional(),
         bioRu: z.string().trim().max(2000).optional(),
         bioEn: z.string().trim().max(2000).optional(),
+        category: z.string().trim().max(40).optional(),
+        certsRu: z.string().trim().max(2000).optional(),
+        certsEn: z.string().trim().max(2000).optional(),
+        continuingEducationRu: z.string().trim().max(3000).optional(),
+        continuingEducationEn: z.string().trim().max(3000).optional(),
+        internationalExperienceRu: z.string().trim().max(3000).optional(),
+        internationalExperienceEn: z.string().trim().max(3000).optional(),
+        researchActivityRu: z.string().trim().max(3000).optional(),
+        researchActivityEn: z.string().trim().max(3000).optional(),
+        awardsRu: z.string().trim().max(3000).optional(),
+        awardsEn: z.string().trim().max(3000).optional(),
+        achievementsRu: z.string().trim().max(3000).optional(),
+        achievementsEn: z.string().trim().max(3000).optional(),
         photoUrl: z.string().max(500).optional().nullable(),
         experienceYears: z.coerce.number().int().min(0).max(80).optional().nullable(),
         specialtyIds: z.array(z.string()).default([]),
@@ -639,8 +862,21 @@ export async function cabinetRoutes(app: FastifyInstance) {
         nameEn: body.data.nameEn,
         roleRu: body.data.roleRu || "",
         roleEn: body.data.roleEn || "",
+        category: body.data.category || "",
         bioRu: body.data.bioRu || "",
         bioEn: body.data.bioEn || "",
+        certsRu: body.data.certsRu || "",
+        certsEn: body.data.certsEn || "",
+        continuingEducationRu: body.data.continuingEducationRu || "",
+        continuingEducationEn: body.data.continuingEducationEn || "",
+        internationalExperienceRu: body.data.internationalExperienceRu || "",
+        internationalExperienceEn: body.data.internationalExperienceEn || "",
+        researchActivityRu: body.data.researchActivityRu || "",
+        researchActivityEn: body.data.researchActivityEn || "",
+        awardsRu: body.data.awardsRu || "",
+        awardsEn: body.data.awardsEn || "",
+        achievementsRu: body.data.achievementsRu || "",
+        achievementsEn: body.data.achievementsEn || "",
         photoUrl: body.data.photoUrl || null,
         experienceYears: body.data.experienceYears ?? null,
         specialties: {
@@ -675,6 +911,19 @@ export async function cabinetRoutes(app: FastifyInstance) {
         roleEn: z.string().trim().max(120).optional(),
         bioRu: z.string().trim().max(2000).optional(),
         bioEn: z.string().trim().max(2000).optional(),
+        category: z.string().trim().max(40).optional(),
+        certsRu: z.string().trim().max(2000).optional(),
+        certsEn: z.string().trim().max(2000).optional(),
+        continuingEducationRu: z.string().trim().max(3000).optional(),
+        continuingEducationEn: z.string().trim().max(3000).optional(),
+        internationalExperienceRu: z.string().trim().max(3000).optional(),
+        internationalExperienceEn: z.string().trim().max(3000).optional(),
+        researchActivityRu: z.string().trim().max(3000).optional(),
+        researchActivityEn: z.string().trim().max(3000).optional(),
+        awardsRu: z.string().trim().max(3000).optional(),
+        awardsEn: z.string().trim().max(3000).optional(),
+        achievementsRu: z.string().trim().max(3000).optional(),
+        achievementsEn: z.string().trim().max(3000).optional(),
         photoUrl: z.string().max(500).optional().nullable(),
         experienceYears: z.coerce.number().int().min(0).max(80).optional().nullable(),
         specialtyIds: z.array(z.string()).optional(),
@@ -716,8 +965,21 @@ export async function cabinetRoutes(app: FastifyInstance) {
           nameEn: body.data.nameEn,
           roleRu: body.data.roleRu,
           roleEn: body.data.roleEn,
+          category: body.data.category,
           bioRu: body.data.bioRu,
           bioEn: body.data.bioEn,
+          certsRu: body.data.certsRu,
+          certsEn: body.data.certsEn,
+          continuingEducationRu: body.data.continuingEducationRu,
+          continuingEducationEn: body.data.continuingEducationEn,
+          internationalExperienceRu: body.data.internationalExperienceRu,
+          internationalExperienceEn: body.data.internationalExperienceEn,
+          researchActivityRu: body.data.researchActivityRu,
+          researchActivityEn: body.data.researchActivityEn,
+          awardsRu: body.data.awardsRu,
+          awardsEn: body.data.awardsEn,
+          achievementsRu: body.data.achievementsRu,
+          achievementsEn: body.data.achievementsEn,
           photoUrl: body.data.photoUrl === undefined ? undefined : body.data.photoUrl,
           experienceYears:
             body.data.experienceYears === undefined ? undefined : body.data.experienceYears,
@@ -913,7 +1175,114 @@ export async function cabinetRoutes(app: FastifyInstance) {
     },
   );
 
-  // --- Equipment ---
+  // --- Branch equipment ---
+  app.post("/api/cabinet/clinics/:id/branches/:branchId/equipment", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id, branchId } = request.params as { id: string; branchId: string };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const branch = await prisma.branch.findFirst({ where: { id: branchId, clinicId: id } });
+    if (!branch) return reply.code(404).send({ error: "not_found" });
+
+    const body = z
+      .object({
+        nameRu: z.string().trim().min(2).max(200),
+        nameEn: z.string().trim().min(2).max(200),
+        manufacturer: z.string().trim().max(200).optional(),
+        descriptionRu: z.string().trim().max(2000).optional(),
+        descriptionEn: z.string().trim().max(2000).optional(),
+        photoUrl: z.string().max(500).optional().nullable(),
+      })
+      .safeParse(request.body);
+    if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+
+    const count = await prisma.equipment.count({ where: { branchId } });
+    const item = await prisma.equipment.create({
+      data: {
+        clinicId: id,
+        branchId,
+        nameRu: body.data.nameRu,
+        nameEn: body.data.nameEn,
+        manufacturer: body.data.manufacturer || "",
+        descriptionRu: body.data.descriptionRu || "",
+        descriptionEn: body.data.descriptionEn || "",
+        photoUrl: body.data.photoUrl || null,
+        sortOrder: count,
+      },
+    });
+    return reply.code(201).send(item);
+  });
+
+  app.put("/api/cabinet/clinics/:id/branches/:branchId/equipment/:itemId", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id, branchId, itemId } = request.params as {
+      id: string;
+      branchId: string;
+      itemId: string;
+    };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+
+    const existing = await prisma.equipment.findFirst({
+      where: { id: itemId, clinicId: id, branchId },
+    });
+    if (!existing) return reply.code(404).send({ error: "not_found" });
+
+    const body = z
+      .object({
+        nameRu: z.string().trim().min(2).max(200).optional(),
+        nameEn: z.string().trim().min(2).max(200).optional(),
+        manufacturer: z.string().trim().max(200).optional(),
+        descriptionRu: z.string().trim().max(2000).optional(),
+        descriptionEn: z.string().trim().max(2000).optional(),
+        photoUrl: z.string().max(500).optional().nullable(),
+      })
+      .safeParse(request.body);
+    if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+
+    const item = await prisma.equipment.update({
+      where: { id: itemId },
+      data: {
+        nameRu: body.data.nameRu,
+        nameEn: body.data.nameEn,
+        manufacturer: body.data.manufacturer,
+        descriptionRu: body.data.descriptionRu,
+        descriptionEn: body.data.descriptionEn,
+        photoUrl: body.data.photoUrl === undefined ? undefined : body.data.photoUrl,
+      },
+    });
+    return item;
+  });
+
+  app.delete(
+    "/api/cabinet/clinics/:id/branches/:branchId/equipment/:itemId",
+    async (request, reply) => {
+      if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+      const { id, branchId, itemId } = request.params as {
+        id: string;
+        branchId: string;
+        itemId: string;
+      };
+      const gate = await requireClinicEditable(request, id);
+      if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+      if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+      if (gate.error === "locked_on_moderation") {
+        return reply.code(409).send({ error: "locked_on_moderation" });
+      }
+      await prisma.equipment.deleteMany({ where: { id: itemId, clinicId: id, branchId } });
+      return { ok: true };
+    },
+  );
+
+  // --- Equipment (clinic-level) ---
   app.post("/api/cabinet/clinics/:id/equipment", async (request, reply) => {
     if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
     const { id } = request.params as { id: string };
@@ -927,17 +1296,28 @@ export async function cabinetRoutes(app: FastifyInstance) {
       .object({
         nameRu: z.string().trim().min(2).max(200),
         nameEn: z.string().trim().min(2).max(200),
+        manufacturer: z.string().trim().max(200).optional(),
         descriptionRu: z.string().trim().max(2000).optional(),
         descriptionEn: z.string().trim().max(2000).optional(),
         photoUrl: z.string().max(500).optional().nullable(),
+        branchId: z.string().optional().nullable(),
       })
       .safeParse(request.body);
     if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+
+    let branchId: string | null = body.data.branchId || null;
+    if (branchId) {
+      const branch = await prisma.branch.findFirst({ where: { id: branchId, clinicId: id } });
+      if (!branch) return reply.code(400).send({ error: "invalid_branch_id" });
+    }
+
     const item = await prisma.equipment.create({
       data: {
         clinicId: id,
+        branchId,
         nameRu: body.data.nameRu,
         nameEn: body.data.nameEn,
+        manufacturer: body.data.manufacturer || "",
         descriptionRu: body.data.descriptionRu || "",
         descriptionEn: body.data.descriptionEn || "",
         photoUrl: body.data.photoUrl || null,
@@ -976,7 +1356,10 @@ export async function cabinetRoutes(app: FastifyInstance) {
         issuerRu: z.string().trim().max(200).optional(),
         issuerEn: z.string().trim().max(200).optional(),
         year: z.coerce.number().int().min(1900).max(2100).optional().nullable(),
+        receivedAt: z.string().trim().max(40).optional().nullable(),
+        validUntil: z.string().trim().max(40).optional().nullable(),
         imageUrl: z.string().max(500).optional().nullable(),
+        fileUrl: z.string().max(500).optional().nullable(),
       })
       .safeParse(request.body);
     if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
@@ -988,7 +1371,10 @@ export async function cabinetRoutes(app: FastifyInstance) {
         issuerRu: body.data.issuerRu || "",
         issuerEn: body.data.issuerEn || "",
         year: body.data.year ?? null,
+        receivedAt: body.data.receivedAt || null,
+        validUntil: body.data.validUntil || null,
         imageUrl: body.data.imageUrl || null,
+        fileUrl: body.data.fileUrl || null,
       },
     });
     return reply.code(201).send(item);
@@ -1009,7 +1395,13 @@ export async function cabinetRoutes(app: FastifyInstance) {
 
   // --- Branches CRUD ---
   const daySchema = z
-    .object({ open: z.string().min(1).max(8), close: z.string().min(1).max(8) })
+    .object({
+      open: z.string().min(1).max(8),
+      close: z.string().min(1).max(8),
+      roundTheClock: z.boolean().optional(),
+      breakStart: z.string().min(1).max(8).nullable().optional(),
+      breakEnd: z.string().min(1).max(8).nullable().optional(),
+    })
     .nullable();
   const scheduleSchema = z
     .object({
@@ -1027,18 +1419,31 @@ export async function cabinetRoutes(app: FastifyInstance) {
     nameRu: z.string().trim().min(2).max(200),
     nameEn: z.string().trim().min(2).max(200),
     slug: z.string().trim().min(2).max(80).optional(),
-    city: z.enum(CITIES),
+    city: z.string().trim().min(2).max(80),
+    country: z.string().trim().max(80).optional(),
+    region: z.string().trim().max(120).optional().nullable(),
+    district: z.string().trim().max(120).optional().nullable(),
+    street: z.string().trim().max(200).optional().nullable(),
+    building: z.string().trim().max(80).optional().nullable(),
+    addressExtra: z.string().trim().max(300).optional().nullable(),
     addressRu: z.string().trim().min(3).max(300),
     addressEn: z.string().trim().min(3).max(300),
     lat: z.coerce.number().min(-90).max(90).optional().nullable(),
     lng: z.coerce.number().min(-180).max(180).optional().nullable(),
     phone: z.string().trim().min(5).max(40),
+    phones: z.array(z.string().trim().min(5).max(40)).max(8).optional(),
     email: z.string().trim().email().max(120).optional().nullable(),
     whatsapp: z.string().trim().max(40).optional().nullable(),
     telegram: z.string().trim().max(40).optional().nullable(),
     website: z.string().trim().max(200).optional().nullable(),
+    instagram: z.string().trim().max(80).optional().nullable(),
+    socials: z.array(z.object({ label: z.string().trim().min(1).max(40), url: z.string().trim().max(300) })).max(10).optional(),
     descriptionRu: z.string().trim().max(5000).optional(),
     descriptionEn: z.string().trim().max(5000).optional(),
+    advantagesRu: z.string().trim().max(4000).optional(),
+    featuresRu: z.string().trim().max(4000).optional(),
+    medicalTourism: z.boolean().optional(),
+    medicalTourismInfoRu: z.string().trim().max(4000).optional(),
     coverUrl: z.string().trim().max(500).optional().nullable(),
     specialtyIds: z.array(z.string().min(1)).default([]),
     schedule: scheduleSchema,
@@ -1070,27 +1475,40 @@ export async function cabinetRoutes(app: FastifyInstance) {
     nameEn: string;
     nameRu: string;
     city: string;
+    country?: string | null;
+    region?: string | null;
+    district?: string | null;
+    street?: string | null;
+    building?: string | null;
+    addressExtra?: string | null;
     addressEn: string;
     addressRu: string;
     lat: number | null;
     lng: number | null;
     phone: string;
+    phonesJson?: string | null;
     email: string | null;
     whatsapp: string | null;
     telegram: string | null;
     website: string | null;
+    instagram?: string | null;
+    socialsJson?: string;
     descriptionEn: string;
     descriptionRu: string;
+    advantagesRu?: string;
+    featuresRu?: string;
+    medicalTourism?: boolean;
+    medicalTourismInfoRu?: string;
     coverUrl: string | null;
     sortOrder: number;
     scheduleJson: string;
-    specialties: { specialtyId: string; specialty: { id: string; slug: string; nameRu: string; nameEn: string } }[];
-    photos: unknown[];
+    specialties?: { specialtyId: string; specialty: { id: string; slug: string; nameRu: string; nameEn: string } }[];
+    photos?: unknown[];
     doctorLinks?: { doctor: Parameters<typeof serializeDoctor>[0] }[];
     doctors?: Parameters<typeof serializeDoctor>[0][];
-    services: Parameters<typeof serializeService>[0][];
-    equipment: unknown[];
-    certificates: unknown[];
+    services?: Parameters<typeof serializeService>[0][];
+    equipment?: unknown[];
+    certificates?: unknown[];
     clinic?: unknown;
   }) {
     const doctors = branch.doctorLinks
@@ -1103,27 +1521,40 @@ export async function cabinetRoutes(app: FastifyInstance) {
       nameEn: branch.nameEn,
       nameRu: branch.nameRu,
       city: branch.city,
+      country: branch.country ?? "Uzbekistan",
+      region: branch.region ?? null,
+      district: branch.district ?? null,
+      street: branch.street ?? null,
+      building: branch.building ?? null,
+      addressExtra: branch.addressExtra ?? null,
       addressEn: branch.addressEn,
       addressRu: branch.addressRu,
       lat: branch.lat,
       lng: branch.lng,
       phone: branch.phone,
+      phones: parsePhones(branch.phone, branch.phonesJson),
       email: branch.email,
       whatsapp: branch.whatsapp,
       telegram: branch.telegram,
       website: branch.website,
+      instagram: branch.instagram ?? null,
+      socials: parseJsonArray(branch.socialsJson),
       descriptionEn: branch.descriptionEn,
       descriptionRu: branch.descriptionRu,
+      advantagesRu: branch.advantagesRu ?? "",
+      featuresRu: branch.featuresRu ?? "",
+      medicalTourism: branch.medicalTourism ?? false,
+      medicalTourismInfoRu: branch.medicalTourismInfoRu ?? "",
       coverUrl: branch.coverUrl,
       sortOrder: branch.sortOrder,
       schedule: parseSchedule(branch.scheduleJson),
-      specialties: branch.specialties.map((s) => s.specialty),
-      specialtyIds: branch.specialties.map((s) => s.specialtyId),
-      photos: branch.photos,
+      specialties: branch.specialties?.map((s) => s.specialty) ?? [],
+      specialtyIds: branch.specialties?.map((s) => s.specialtyId) ?? [],
+      photos: branch.photos ?? [],
       doctors,
-      services: branch.services.map(serializeService),
-      equipment: branch.equipment,
-      certificates: branch.certificates,
+      services: (branch.services ?? []).map(serializeService),
+      equipment: branch.equipment ?? [],
+      certificates: branch.certificates ?? [],
       clinic: branch.clinic,
     };
   }
@@ -1173,17 +1604,30 @@ export async function cabinetRoutes(app: FastifyInstance) {
           nameEn: data.nameEn,
           nameRu: data.nameRu,
           city: data.city,
+          country: data.country || "Uzbekistan",
+          region: data.region || null,
+          district: data.district || null,
+          street: data.street || null,
+          building: data.building || null,
+          addressExtra: data.addressExtra || null,
           addressEn: data.addressEn,
           addressRu: data.addressRu,
           lat: data.lat ?? null,
           lng: data.lng ?? null,
           phone: data.phone,
+          phonesJson: JSON.stringify((data.phones || []).filter((p) => p && p !== data.phone)),
           email: data.email || null,
           whatsapp: data.whatsapp || null,
           telegram: data.telegram || null,
           website: data.website || null,
+          instagram: data.instagram || null,
+          socialsJson: JSON.stringify(data.socials || []),
           descriptionEn: data.descriptionEn || "",
           descriptionRu: data.descriptionRu || "",
+          advantagesRu: data.advantagesRu || "",
+          featuresRu: data.featuresRu || "",
+          medicalTourism: data.medicalTourism || false,
+          medicalTourismInfoRu: data.medicalTourismInfoRu || "",
           coverUrl: data.coverUrl || null,
           scheduleJson: JSON.stringify(data.schedule ?? JSON.parse(DEFAULT_BRANCH_SCHEDULE_FALLBACK)),
           sortOrder: data.sortOrder ?? count,
@@ -1247,18 +1691,31 @@ export async function cabinetRoutes(app: FastifyInstance) {
           nameEn: data.nameEn,
           nameRu: data.nameRu,
           city: data.city,
+          country: data.country || existing.country || "Uzbekistan",
+          region: data.region === undefined ? existing.region : data.region || null,
+          district: data.district === undefined ? existing.district : data.district || null,
+          street: data.street === undefined ? existing.street : data.street || null,
+          building: data.building === undefined ? existing.building : data.building || null,
+          addressExtra: data.addressExtra === undefined ? existing.addressExtra : data.addressExtra || null,
           addressEn: data.addressEn,
           addressRu: data.addressRu,
-          lat: data.lat ?? null,
-          lng: data.lng ?? null,
+          lat: data.lat === undefined ? existing.lat : data.lat,
+          lng: data.lng === undefined ? existing.lng : data.lng,
           phone: data.phone,
+          phonesJson: JSON.stringify((data.phones || []).filter((p) => p && p !== data.phone)),
           email: data.email || null,
           whatsapp: data.whatsapp || null,
           telegram: data.telegram || null,
           website: data.website || null,
+          instagram: data.instagram === undefined ? existing.instagram : data.instagram || null,
+          socialsJson: data.socials !== undefined ? JSON.stringify(data.socials) : existing.socialsJson,
           descriptionEn: data.descriptionEn || "",
           descriptionRu: data.descriptionRu || "",
-          coverUrl: data.coverUrl ?? existing.coverUrl,
+          advantagesRu: data.advantagesRu ?? existing.advantagesRu,
+          featuresRu: data.featuresRu ?? existing.featuresRu,
+          medicalTourism: data.medicalTourism ?? existing.medicalTourism,
+          medicalTourismInfoRu: data.medicalTourismInfoRu ?? existing.medicalTourismInfoRu,
+          coverUrl: data.coverUrl === undefined ? existing.coverUrl : data.coverUrl,
           scheduleJson: data.schedule
             ? JSON.stringify(data.schedule)
             : existing.scheduleJson,
@@ -1353,6 +1810,151 @@ export async function cabinetRoutes(app: FastifyInstance) {
       return { ok: true };
     },
   );
+
+  app.put("/api/cabinet/clinics/:id/branches/:branchId/photos/reorder", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id, branchId } = request.params as { id: string; branchId: string };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const branch = await prisma.branch.findFirst({ where: { id: branchId, clinicId: id } });
+    if (!branch) return reply.code(404).send({ error: "not_found" });
+    const body = z.object({ photoIds: z.array(z.string().min(1)).min(1) }).safeParse(request.body);
+    if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+    const existing = await prisma.branchPhoto.findMany({
+      where: { branchId },
+      select: { id: true },
+    });
+    const existingIds = new Set(existing.map((p) => p.id));
+    if (
+      body.data.photoIds.length !== existingIds.size ||
+      body.data.photoIds.some((pid) => !existingIds.has(pid))
+    ) {
+      return reply.code(400).send({ error: "invalid_photo_ids" });
+    }
+    await prisma.$transaction(
+      body.data.photoIds.map((photoId, index) =>
+        prisma.branchPhoto.update({ where: { id: photoId }, data: { sortOrder: index } }),
+      ),
+    );
+    const items = await prisma.branchPhoto.findMany({
+      where: { branchId },
+      orderBy: { sortOrder: "asc" },
+    });
+    return { items };
+  });
+
+  app.post("/api/cabinet/clinics/:id/branches/:branchId/photos/:photoId/main", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id, branchId, photoId } = request.params as {
+      id: string;
+      branchId: string;
+      photoId: string;
+    };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const photos = await prisma.branchPhoto.findMany({
+      where: { branchId },
+      orderBy: { sortOrder: "asc" },
+    });
+    if (!photos.some((p) => p.id === photoId)) return reply.code(404).send({ error: "not_found" });
+    const ordered = [photoId, ...photos.filter((p) => p.id !== photoId).map((p) => p.id)];
+    await prisma.$transaction(
+      ordered.map((pid, index) =>
+        prisma.branchPhoto.update({ where: { id: pid }, data: { sortOrder: index } }),
+      ),
+    );
+    const items = await prisma.branchPhoto.findMany({
+      where: { branchId },
+      orderBy: { sortOrder: "asc" },
+    });
+    return { items };
+  });
+
+  app.patch("/api/cabinet/clinics/:id/branches/:branchId/photos/:photoId", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id, branchId, photoId } = request.params as {
+      id: string;
+      branchId: string;
+      photoId: string;
+    };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const body = z
+      .object({
+        url: z.string().min(1).optional(),
+        category: z.enum(PHOTO_CATEGORIES).optional(),
+        altRu: z.string().max(200).optional(),
+        altEn: z.string().max(200).optional(),
+      })
+      .safeParse(request.body);
+    if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+    const existing = await prisma.branchPhoto.findFirst({ where: { id: photoId, branchId } });
+    if (!existing) return reply.code(404).send({ error: "not_found" });
+    return prisma.branchPhoto.update({
+      where: { id: photoId },
+      data: {
+        ...(body.data.url !== undefined ? { url: body.data.url } : {}),
+        ...(body.data.category !== undefined ? { category: body.data.category } : {}),
+        ...(body.data.altRu !== undefined ? { altRu: body.data.altRu } : {}),
+        ...(body.data.altEn !== undefined ? { altEn: body.data.altEn } : {}),
+      },
+    });
+  });
+
+  app.post("/api/cabinet/clinics/:id/specialty-suggestions", async (request, reply) => {
+    if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
+    const { id } = request.params as { id: string };
+    const gate = await requireClinicEditable(request, id);
+    if (gate.error === "unauthorized") return reply.code(401).send({ error: "unauthorized" });
+    if (gate.error === "not_found") return reply.code(404).send({ error: "not_found" });
+    if (gate.error === "locked_on_moderation") {
+      return reply.code(409).send({ error: "locked_on_moderation" });
+    }
+    const body = z
+      .object({
+        nameRu: z.string().trim().min(2).max(120),
+        nameEn: z.string().trim().min(2).max(120).optional(),
+      })
+      .safeParse(request.body);
+    if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
+    const nameEn = body.data.nameEn || body.data.nameRu;
+    const baseSlug = slugify(nameEn || body.data.nameRu);
+    let slug = baseSlug || `specialty-${Date.now()}`;
+    let i = 0;
+    while (await prisma.specialty.findUnique({ where: { slug } })) {
+      i += 1;
+      slug = `${baseSlug}-${i}`;
+    }
+    const specialty = await prisma.specialty.create({
+      data: {
+        slug,
+        nameRu: body.data.nameRu,
+        nameEn,
+        descriptionEn: "",
+        descriptionRu: "",
+        explanationEn: "",
+        explanationRu: "",
+        keywords: body.data.nameRu,
+        sortOrder: 900 + i,
+      },
+    });
+    await prisma.clinicSpecialty.create({
+      data: { clinicId: id, specialtyId: specialty.id },
+    });
+    return reply.code(201).send(specialty);
+  });
 
   app.get("/api/cabinet/clinics/:id/leads", async (request, reply) => {
     if (!isClinicAuthenticated(request)) {

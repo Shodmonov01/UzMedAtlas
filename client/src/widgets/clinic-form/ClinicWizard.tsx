@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Specialty } from "@/shared/api/client";
 import {
@@ -10,30 +10,43 @@ import {
   deleteClinicDoctor,
   deleteClinicEquipment,
   deleteClinicPhoto,
+  reorderClinicPhotos,
+  replaceClinicPhoto,
+  setClinicMainPhoto,
   updateCabinetClinic,
   uploadCabinetFile,
   WIZARD_SECTIONS,
   type CabinetClinic,
+  type AchievementItem,
   type ClinicFormPayload,
+  type LeaderItem,
+  type SocialItem,
   type WizardSectionId,
 } from "@/shared/api/cabinet";
 import { ClinicPreview } from "./ClinicPreview";
+import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 
-const CITIES = [
-  { value: "tashkent", label: "Ташкент" },
-  { value: "samarkand", label: "Самарканд" },
-  { value: "bukhara", label: "Бухара" },
-];
 const LANGS = ["ru", "en", "uz", "kz", "tr", "ar"];
 const PHOTO_CATS = [
   { value: "facade", label: "Фасад" },
   { value: "reception", label: "Ресепшен" },
   { value: "hall", label: "Холл" },
+  { value: "waiting", label: "Зона ожидания" },
   { value: "rooms", label: "Кабинеты" },
   { value: "or", label: "Операционная" },
   { value: "equipment", label: "Оборудование" },
-  { value: "staff", label: "Сотрудники" },
+  { value: "staff", label: "Команда врачей" },
+  { value: "leadership", label: "Руководство" },
+  { value: "patients", label: "Пациенты / процесс" },
+  { value: "team", label: "Коллектив" },
   { value: "other", label: "Другое" },
+];
+const DOCTOR_CATEGORIES = [
+  { value: "", label: "Без категории" },
+  { value: "highest", label: "Высшая" },
+  { value: "first", label: "Первая" },
+  { value: "second", label: "Вторая" },
+  { value: "other", label: "Другая" },
 ];
 
 type Props = {
@@ -59,6 +72,37 @@ function Field({
   );
 }
 
+function FormActions({
+  locked,
+  saving,
+  onContinue,
+}: {
+  locked?: boolean;
+  saving: boolean;
+  onContinue?: () => void;
+}) {
+  if (locked) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      <button className="btn btn-primary text-sm" type="submit" disabled={saving} name="intent" value="save">
+        {saving ? "Сохранение…" : "Сохранить"}
+      </button>
+      {onContinue ? (
+        <button
+          className="btn btn-ghost text-sm"
+          type="submit"
+          disabled={saving}
+          name="intent"
+          value="continue"
+          onClick={onContinue}
+        >
+          Сохранить и продолжить
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSection }: Props) {
   const qc = useQueryClient();
   const [section, setSection] = useState<WizardSectionId>(initialSection || "basic");
@@ -67,22 +111,91 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
   const [saving, setSaving] = useState(false);
   const [languages, setLanguages] = useState(clinic.languages?.length ? clinic.languages : ["ru", "en"]);
   const [specialtyIds, setSpecialtyIds] = useState(clinic.specialtyIds || []);
+  const [leaders, setLeaders] = useState<LeaderItem[]>(clinic.leaders || []);
+  const [achievements, setAchievements] = useState<AchievementItem[]>(clinic.achievements || []);
+  const [socials, setSocials] = useState<SocialItem[]>(clinic.socials || []);
+  const continueAfterSave = useRef(false);
+  const quietSave = useRef(false);
+  const skipSpecialtyAutosave = useRef(true);
+  const draftTimer = useRef<number | null>(null);
+
+  function goNext() {
+    const ids = WIZARD_SECTIONS.map((s) => s.id);
+    const i = ids.indexOf(section);
+    if (i >= 0 && i < ids.length - 1) {
+      setSection(ids[i + 1]);
+      setMessage(null);
+      setError(null);
+    }
+  }
 
   async function save(payload: ClinicFormPayload) {
     if (locked) return;
     setSaving(true);
     setError(null);
+    const quiet = quietSave.current;
+    quietSave.current = false;
     try {
       await updateCabinetClinic(clinic.id, payload);
-      setMessage("Сохранено");
+      setMessage(quiet ? "Черновик сохранён" : "Сохранено");
       await onSaved();
+      if (continueAfterSave.current) {
+        continueAfterSave.current = false;
+        goNext();
+      }
     } catch {
       setMessage(null);
       setError("Не удалось сохранить");
+      continueAfterSave.current = false;
     } finally {
       setSaving(false);
     }
   }
+
+  function markContinue() {
+    continueAfterSave.current = true;
+  }
+
+  function queueDraftAutosave(form: HTMLFormElement) {
+    if (locked) return;
+    if (draftTimer.current) window.clearTimeout(draftTimer.current);
+    draftTimer.current = window.setTimeout(() => {
+      quietSave.current = true;
+      if (form.checkValidity()) form.requestSubmit();
+      else quietSave.current = false;
+    }, 1200);
+  }
+
+  // §5 autosave directions when specialty selection changes
+  useEffect(() => {
+    if (locked) return;
+    if (skipSpecialtyAutosave.current) {
+      skipSpecialtyAutosave.current = false;
+      return;
+    }
+    const same =
+      specialtyIds.length === (clinic.specialtyIds || []).length &&
+      specialtyIds.every((id) => (clinic.specialtyIds || []).includes(id));
+    if (same) return;
+    const t = window.setTimeout(() => {
+      quietSave.current = true;
+      void save({ specialtyIds });
+    }, 900);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [specialtyIds, locked]);
+
+  useEffect(() => {
+    setLeaders(clinic.leaders || []);
+    setAchievements(clinic.achievements || []);
+    setSocials(clinic.socials || []);
+  }, [clinic.id, clinic.updatedAt]);
+
+  useEffect(() => {
+    return () => {
+      if (draftTimer.current) window.clearTimeout(draftTimer.current);
+    };
+  }, []);
 
   async function onUpload(file: File) {
     return uploadCabinetFile(file);
@@ -121,6 +234,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
         {section === "basic" ? (
           <form
             className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6"
+            onInput={(e) => queueDraftAutosave(e.currentTarget)}
             onSubmit={async (e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
@@ -130,7 +244,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 shortName: String(fd.get("shortName") || "") || null,
                 foundedYear: fd.get("foundedYear") ? Number(fd.get("foundedYear")) : null,
                 slug: String(fd.get("slug") || "") || undefined,
-                city: String(fd.get("city")),
+                city: normalizeCity(String(fd.get("city"))),
                 coverColor: String(fd.get("coverColor") || clinic.coverColor),
                 logoUrl: String(fd.get("logoUrl") || "") || null,
                 // keep required contacts/address from current clinic when patching basic
@@ -169,13 +283,8 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 <input name="slug" className="field" defaultValue={clinic.slug} disabled={locked} />
               </Field>
               <Field label="Город">
-                <select name="city" className="field" defaultValue={clinic.city} disabled={locked}>
-                  {CITIES.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
+                <input name="city" list="clinic-city-options" required className="field" defaultValue={displayCity(clinic.city)} disabled={locked} />
+                <datalist id="clinic-city-options">{CITY_OPTIONS.map((city) => <option key={city.value} value={city.label} />)}</datalist>
               </Field>
               <Field label="Цвет обложки">
                 <input
@@ -192,9 +301,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             </div>
             {!locked ? (
               <div className="flex flex-wrap items-center gap-3">
-                <button className="btn btn-primary text-sm" type="submit" disabled={saving}>
-                  {saving ? "…" : "Сохранить"}
-                </button>
+                <FormActions locked={locked} saving={saving} onContinue={markContinue} />
                 <label className="btn btn-ghost cursor-pointer text-sm">
                   Загрузить лого
                   <input
@@ -204,11 +311,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
+                      if (file.size > 2 * 1024 * 1024) {
+                        setError("Логотип: максимум 2 МБ");
+                        e.target.value = "";
+                        return;
+                      }
                       try {
-                        const url = await onUpload(file);
+                        const url = await uploadCabinetFile(file, "logo");
                         await save({ logoUrl: url });
                       } catch {
                         setError("Ошибка загрузки");
+                      } finally {
+                        e.target.value = "";
                       }
                     }}
                   />
@@ -221,6 +335,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
         {section === "about" ? (
           <form
             className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6"
+            onInput={(e) => queueDraftAutosave(e.currentTarget)}
             onSubmit={async (e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
@@ -233,6 +348,13 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 missionEn: String(fd.get("missionEn") || "") || null,
                 advantagesRu: String(fd.get("advantagesRu") || "") || null,
                 advantagesEn: String(fd.get("advantagesEn") || "") || null,
+                founderName: String(fd.get("founderName") || "") || null,
+                founderRoleRu: String(fd.get("founderRoleRu") || "") || null,
+                founderRoleEn: String(fd.get("founderRoleEn") || "") || null,
+                founderBioRu: String(fd.get("founderBioRu") || "") || null,
+                founderBioEn: String(fd.get("founderBioEn") || "") || null,
+                founderPhotoUrl: String(fd.get("founderPhotoUrl") || "") || null,
+                achievements: achievements.filter((item) => item.titleRu.trim()),
               });
             }}
           >
@@ -261,11 +383,68 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             <Field label="Преимущества (EN)">
               <textarea name="advantagesEn" rows={3} className="field" defaultValue={clinic.advantagesEn || ""} disabled={locked} />
             </Field>
+            <h3 className="pt-2 text-lg font-extrabold">Основатель</h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="ФИО">
+                <input name="founderName" className="field" defaultValue={clinic.founderName || ""} disabled={locked} />
+              </Field>
+              <Field label="Должность (RU)">
+                <input name="founderRoleRu" className="field" defaultValue={clinic.founderRoleRu || ""} disabled={locked} />
+              </Field>
+              <Field label="Должность (EN)">
+                <input name="founderRoleEn" className="field" defaultValue={clinic.founderRoleEn || ""} disabled={locked} />
+              </Field>
+              <Field label="Фото основателя (URL)">
+                <input name="founderPhotoUrl" className="field" defaultValue={clinic.founderPhotoUrl || ""} disabled={locked} />
+              </Field>
+            </div>
             {!locked ? (
-              <button className="btn btn-primary text-sm" type="submit" disabled={saving}>
-                Сохранить
-              </button>
+              <label className="btn btn-ghost inline-flex cursor-pointer text-sm">
+                Загрузить фото основателя
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await onUpload(file);
+                      const input = e.currentTarget.form?.elements.namedItem(
+                        "founderPhotoUrl",
+                      ) as HTMLInputElement | null;
+                      if (input) input.value = url;
+                      await save({ founderPhotoUrl: url });
+                    } catch {
+                      setError("Ошибка загрузки");
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
             ) : null}
+            <Field label="Биография основателя (RU)">
+              <textarea name="founderBioRu" rows={2} className="field" defaultValue={clinic.founderBioRu || ""} disabled={locked} />
+            </Field>
+            <Field label="Биография основателя (EN)">
+              <textarea name="founderBioEn" rows={2} className="field" defaultValue={clinic.founderBioEn || ""} disabled={locked} />
+            </Field>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-bold">Достижения и преимущества</h3>
+                {!locked ? <button type="button" className="btn btn-ghost text-sm" onClick={() => setAchievements((items) => [...items, { titleRu: "", descriptionRu: "", year: null }])}>Добавить достижение</button> : null}
+              </div>
+              {achievements.map((item, index) => (
+                <div key={item.id || index} className="grid gap-3 rounded-xl border border-line p-3 md:grid-cols-2">
+                  <input className="field" value={item.titleRu} disabled={locked} placeholder="Название" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, titleRu: event.target.value } : current))} />
+                  <input className="field" type="number" min={1800} max={2100} value={item.year ?? ""} disabled={locked} placeholder="Год (необязательно)" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, year: event.target.value ? Number(event.target.value) : null } : current))} />
+                  <textarea className="field md:col-span-2" rows={2} value={item.descriptionRu || ""} disabled={locked} placeholder="Описание" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, descriptionRu: event.target.value } : current))} />
+                  {!locked ? <button type="button" className="justify-self-start text-sm font-bold text-danger" onClick={() => setAchievements((items) => items.filter((_, i) => i !== index))}>Удалить</button> : null}
+                </div>
+              ))}
+              {!achievements.length ? <p className="text-sm text-muted">Достижения не добавлены</p> : null}
+            </div>
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
           </form>
         ) : null}
 
@@ -293,14 +472,53 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               })}
             </div>
             {!locked ? (
-              <button
-                type="button"
-                className="btn btn-primary text-sm"
-                disabled={saving}
-                onClick={() => save({ specialtyIds })}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn btn-primary text-sm"
+                  disabled={saving}
+                  onClick={() => save({ specialtyIds })}
+                >
+                  Сохранить направления
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost text-sm"
+                  disabled={saving}
+                  onClick={() => {
+                    markContinue();
+                    void save({ specialtyIds });
+                  }}
+                >
+                  Сохранить и продолжить
+                </button>
+              </div>
+            ) : null}
+            {!locked ? (
+              <form
+                className="space-y-2 rounded-2xl border border-dashed border-line p-4"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget);
+                  const nameRu = String(fd.get("nameRu") || "").trim();
+                  if (!nameRu) return;
+                  const { suggestSpecialty } = await import("@/shared/api/cabinet");
+                  await suggestSpecialty(clinic.id, {
+                    nameRu,
+                    nameEn: String(fd.get("nameEn") || "") || nameRu,
+                  });
+                  e.currentTarget.reset();
+                  await refresh();
+                  setMessage("Направление предложено и добавлено");
+                }}
               >
-                Сохранить направления
-              </button>
+                <p className="text-sm font-bold">Предложить новое направление</p>
+                <input name="nameRu" required className="field" placeholder="Название RU" />
+                <input name="nameEn" className="field" placeholder="Name EN" />
+                <button className="btn btn-ghost text-sm" type="submit">
+                  Предложить
+                </button>
+              </form>
             ) : null}
           </div>
         ) : null}
@@ -308,6 +526,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
         {section === "leadership" ? (
           <form
             className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6"
+            onInput={(e) => queueDraftAutosave(e.currentTarget)}
             onSubmit={async (e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
@@ -316,9 +535,17 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 chiefDoctorRoleRu: String(fd.get("chiefDoctorRoleRu") || "") || null,
                 chiefDoctorRoleEn: String(fd.get("chiefDoctorRoleEn") || "") || null,
                 chiefDoctorPhotoUrl: String(fd.get("chiefDoctorPhotoUrl") || "") || null,
+                chiefDoctorBioRu: String(fd.get("chiefDoctorBioRu") || "") || null,
+                chiefDoctorBioEn: String(fd.get("chiefDoctorBioEn") || "") || null,
                 coordinatorName: String(fd.get("coordinatorName") || "") || null,
                 coordinatorRoleRu: String(fd.get("coordinatorRoleRu") || "") || null,
                 coordinatorRoleEn: String(fd.get("coordinatorRoleEn") || "") || null,
+                leaders: leaders
+                  .map((l) => ({
+                    ...l,
+                    name: l.name.trim(),
+                  }))
+                  .filter((l) => l.name),
               });
             }}
           >
@@ -347,10 +574,145 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               </Field>
             </div>
             {!locked ? (
-              <button className="btn btn-primary text-sm" type="submit" disabled={saving}>
-                Сохранить
-              </button>
+              <label className="btn btn-ghost w-fit cursor-pointer text-sm">
+                Загрузить фото главврача
+                <input type="file" accept="image/*" className="hidden" onChange={async (event) => {
+                  const input = event.currentTarget;
+                  const file = input.files?.[0];
+                  if (!file) return;
+                  try {
+                    const url = await onUpload(file);
+                    const photoField = input.form?.elements.namedItem("chiefDoctorPhotoUrl") as HTMLInputElement | null;
+                    if (photoField) photoField.value = url;
+                    await save({ chiefDoctorPhotoUrl: url });
+                  } catch {
+                    setError("Ошибка загрузки фото главврача");
+                  } finally {
+                    input.value = "";
+                  }
+                }} />
+              </label>
             ) : null}
+            <Field label="О главном враче (RU)">
+              <textarea name="chiefDoctorBioRu" rows={2} className="field" defaultValue={clinic.chiefDoctorBioRu || ""} disabled={locked} />
+            </Field>
+            <Field label="О главном враче (EN)">
+              <textarea name="chiefDoctorBioEn" rows={2} className="field" defaultValue={clinic.chiefDoctorBioEn || ""} disabled={locked} />
+            </Field>
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-lg font-extrabold">Доп. руководители</h3>
+                {!locked ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost text-sm"
+                    onClick={() =>
+                      setLeaders((prev) => [
+                        ...prev,
+                        { name: "", roleRu: "", roleEn: "", bioRu: "", photoUrl: null },
+                      ])
+                    }
+                  >
+                    + Добавить руководителя
+                  </button>
+                ) : null}
+              </div>
+              {leaders.length === 0 ? (
+                <p className="text-sm text-muted">Руководители не добавлены</p>
+              ) : (
+                leaders.map((leader, index) => (
+                  <div key={leader.id || `leader-${index}`} className="grid gap-3 rounded-2xl border border-line p-4 md:grid-cols-2">
+                    <input
+                      className="field"
+                      placeholder="ФИО"
+                      value={leader.name}
+                      disabled={locked}
+                      onChange={(e) =>
+                        setLeaders((prev) =>
+                          prev.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)),
+                        )
+                      }
+                    />
+                    <input
+                      className="field"
+                      placeholder="Должность RU"
+                      value={leader.roleRu || ""}
+                      disabled={locked}
+                      onChange={(e) =>
+                        setLeaders((prev) =>
+                          prev.map((item, i) => (i === index ? { ...item, roleRu: e.target.value } : item)),
+                        )
+                      }
+                    />
+                    <input
+                      className="field"
+                      placeholder="Role EN"
+                      value={leader.roleEn || ""}
+                      disabled={locked}
+                      onChange={(e) =>
+                        setLeaders((prev) =>
+                          prev.map((item, i) => (i === index ? { ...item, roleEn: e.target.value } : item)),
+                        )
+                      }
+                    />
+                    <input
+                      className="field"
+                      placeholder="Фото (URL)"
+                      value={leader.photoUrl || ""}
+                      disabled={locked}
+                      onChange={(e) =>
+                        setLeaders((prev) =>
+                          prev.map((item, i) =>
+                            i === index ? { ...item, photoUrl: e.target.value || null } : item,
+                          ),
+                        )
+                      }
+                    />
+                    <textarea
+                      className="field md:col-span-2"
+                      rows={2}
+                      placeholder="Краткая информация"
+                      value={leader.bioRu || ""}
+                      disabled={locked}
+                      onChange={(e) =>
+                        setLeaders((prev) =>
+                          prev.map((item, i) => (i === index ? { ...item, bioRu: e.target.value } : item)),
+                        )
+                      }
+                    />
+                    {!locked ? (
+                      <div className="flex flex-wrap gap-2 md:col-span-2">
+                        <label className="btn btn-ghost cursor-pointer text-sm">
+                          Загрузить фото
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              const url = await onUpload(file);
+                              setLeaders((prev) =>
+                                prev.map((item, i) => (i === index ? { ...item, photoUrl: url } : item)),
+                              );
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          className="text-sm font-bold text-danger"
+                          onClick={() => setLeaders((prev) => prev.filter((_, i) => i !== index))}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ))
+              )}
+            </div>
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
           </form>
         ) : null}
 
@@ -365,14 +727,26 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     .map((b) => b.nameRu || b.nameEn);
                   return (
                     <li key={d.id} className="flex items-start justify-between gap-3 rounded-xl border border-line p-3">
-                      <div>
-                        <p className="font-bold">{d.nameRu || d.nameEn}</p>
-                        <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
-                        {branchNames.length ? (
-                          <p className="mt-1 text-xs text-muted">Филиалы: {branchNames.join(", ")}</p>
+                      <div className="flex gap-3">
+                        {d.photoUrl ? (
+                          <img src={d.photoUrl} alt="" className="h-12 w-12 rounded-xl object-cover" />
                         ) : (
-                          <p className="mt-1 text-xs text-muted">Филиалы не назначены</p>
+                          <div className="grid h-12 w-12 place-items-center rounded-xl bg-sand text-sm font-extrabold text-muted">
+                            {(d.nameRu || d.nameEn).slice(0, 1)}
+                          </div>
                         )}
+                        <div>
+                          <p className="font-bold">{d.nameRu || d.nameEn}</p>
+                          <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
+                          {d.category ? (
+                            <p className="mt-1 text-xs font-semibold text-primary">категория: {d.category}</p>
+                          ) : null}
+                          {branchNames.length ? (
+                            <p className="mt-1 text-xs text-muted">Филиалы: {branchNames.join(", ")}</p>
+                          ) : (
+                            <p className="mt-1 text-xs text-muted">Филиалы не назначены</p>
+                          )}
+                        </div>
                       </div>
                       {!locked ? (
                         <button
@@ -396,20 +770,36 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 className="soft-card space-y-3 rounded-[1.5rem] bg-white p-6"
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const fd = new FormData(e.currentTarget);
+                  const form = e.currentTarget;
+                  const fd = new FormData(form);
                   const branchIds = fd.getAll("branchIds").map(String);
+                  let photoUrl: string | null = String(fd.get("photoUrl") || "") || null;
+                  const photoFile = (form.elements.namedItem("photoFile") as HTMLInputElement)?.files?.[0];
+                  if (photoFile) {
+                    photoUrl = await onUpload(photoFile);
+                  }
                   await addClinicDoctor(clinic.id, {
                     nameRu: String(fd.get("nameRu")),
                     nameEn: String(fd.get("nameEn")),
                     roleRu: String(fd.get("roleRu") || ""),
                     roleEn: String(fd.get("roleEn") || ""),
+                    category: String(fd.get("category") || "") || undefined,
+                    certsRu: String(fd.get("certsRu") || "") || undefined,
+                    certsEn: String(fd.get("certsEn") || "") || undefined,
+                    continuingEducationRu: String(fd.get("continuingEducationRu") || "") || undefined,
+                    internationalExperienceRu: String(fd.get("internationalExperienceRu") || "") || undefined,
+                    researchActivityRu: String(fd.get("researchActivityRu") || "") || undefined,
+                    awardsRu: String(fd.get("awardsRu") || "") || undefined,
+                    achievementsRu: String(fd.get("achievementsRu") || "") || undefined,
+                    photoUrl,
+                    bioRu: String(fd.get("bioRu") || "") || undefined,
                     experienceYears: fd.get("experienceYears")
                       ? Number(fd.get("experienceYears"))
                       : null,
-                    specialtyIds: specialtyIds.slice(0, 1),
+                    specialtyIds: [String(fd.get("doctorSpecialtyId") || "")].filter(Boolean),
                     branchIds,
                   });
-                  e.currentTarget.reset();
+                  form.reset();
                   await refresh();
                   setMessage("Специалист добавлен");
                 }}
@@ -421,6 +811,29 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   <input name="roleRu" placeholder="Должность RU" className="field" />
                   <input name="roleEn" placeholder="Role EN" className="field" />
                   <input name="experienceYears" type="number" min={0} placeholder="Стаж, лет" className="field" />
+                  <select name="category" className="field" defaultValue="">
+                    {DOCTOR_CATEGORIES.map((c) => (
+                      <option key={c.value || "none"} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select name="doctorSpecialtyId" className="field" defaultValue={specialtyIds[0] || ""}>
+                    <option value="">Специальность врача</option>
+                    {specialties.filter((item) => specialtyIds.includes(item.id)).map((item) => (
+                      <option key={item.id} value={item.id}>{item.nameRu || item.nameEn}</option>
+                    ))}
+                  </select>
+                  <input name="photoUrl" className="field md:col-span-2" placeholder="URL фото или загрузите ниже" />
+                  <input name="photoFile" type="file" accept="image/*" className="field md:col-span-2" />
+                  <textarea name="bioRu" rows={2} className="field md:col-span-2" placeholder="Краткая информация" />
+                  <textarea name="certsRu" rows={2} className="field md:col-span-2" placeholder="Сертификаты / квалификация (RU)" />
+                  <textarea name="certsEn" rows={2} className="field md:col-span-2" placeholder="Certificates (EN)" />
+                  <textarea name="continuingEducationRu" rows={2} className="field md:col-span-2" placeholder="Повышение квалификации" />
+                  <textarea name="internationalExperienceRu" rows={2} className="field md:col-span-2" placeholder="Международный опыт" />
+                  <textarea name="researchActivityRu" rows={2} className="field md:col-span-2" placeholder="Научная деятельность" />
+                  <textarea name="awardsRu" rows={2} className="field md:col-span-2" placeholder="Награды" />
+                  <textarea name="achievementsRu" rows={2} className="field md:col-span-2" placeholder="Достижения" />
                 </div>
                 {(clinic.branches || []).length ? (
                   <fieldset>
@@ -442,6 +855,11 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 </button>
               </form>
             ) : null}
+            {!locked ? (
+              <button type="button" className="btn btn-ghost text-sm" onClick={goNext}>
+                Сохранить и продолжить
+              </button>
+            ) : null}
           </div>
         ) : null}
 
@@ -454,7 +872,13 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 <ul className="mt-2 space-y-2">
                   {(clinic.equipment || []).map((item) => (
                     <li key={item.id} className="flex justify-between gap-3 text-sm">
-                      <span>{item.nameRu || item.nameEn}</span>
+                      <span className="flex items-center gap-2">
+                        {item.photoUrl ? (
+                          <img src={item.photoUrl} alt="" className="h-8 w-8 rounded-lg object-cover" />
+                        ) : null}
+                        {item.nameRu || item.nameEn}
+                        {item.manufacturer ? ` · ${item.manufacturer}` : ""}
+                      </span>
                       {!locked ? (
                         <button
                           type="button"
@@ -469,6 +893,36 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                       ) : null}
                     </li>
                   ))}
+                  {!clinic.equipment?.length ? (
+                    <li className="text-sm text-muted">Оборудование не добавлено</li>
+                  ) : null}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold">Технологии и методики</h3>
+                <ul className="mt-2 space-y-2">
+                  {(clinic.technologies || []).map((item) => (
+                    <li key={item.id || item.nameRu} className="flex justify-between gap-3 text-sm">
+                      <span>{item.nameRu || item.nameEn}</span>
+                      {!locked ? (
+                        <button
+                          type="button"
+                          className="font-bold text-danger"
+                          onClick={async () => {
+                            const next = (clinic.technologies || []).filter(
+                              (t) => (t.id || t.nameRu) !== (item.id || item.nameRu),
+                            );
+                            await save({ technologies: next });
+                          }}
+                        >
+                          Удалить
+                        </button>
+                      ) : null}
+                    </li>
+                  ))}
+                  {!clinic.technologies?.length ? (
+                    <li className="text-sm text-muted">Технологии не добавлены</li>
+                  ) : null}
                 </ul>
               </div>
               <div>
@@ -476,9 +930,21 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 <ul className="mt-2 space-y-2">
                   {(clinic.certificates || []).map((item) => (
                     <li key={item.id} className="flex justify-between gap-3 text-sm">
-                      <span>
+                      <span className="flex items-center gap-2">
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt="" className="h-8 w-8 rounded-lg object-cover" />
+                        ) : null}
                         {item.nameRu || item.nameEn}
                         {item.year ? ` (${item.year})` : ""}
+                        {item.validUntil ? ` · до ${item.validUntil}` : ""}
+                        {item.fileUrl ? (
+                          <>
+                            {" "}
+                            <a href={item.fileUrl} className="font-bold text-primary" target="_blank" rel="noreferrer">
+                              файл
+                            </a>
+                          </>
+                        ) : null}
                       </span>
                       {!locked ? (
                         <button
@@ -498,24 +964,61 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               </div>
             </div>
             {!locked ? (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <form
                   className="soft-card space-y-3 rounded-[1.5rem] bg-white p-5"
                   onSubmit={async (e) => {
                     e.preventDefault();
-                    const fd = new FormData(e.currentTarget);
+                    const form = e.currentTarget;
+                    const fd = new FormData(form);
+                    let photoUrl: string | null = String(fd.get("photoUrl") || "") || null;
+                    const photoFile = (form.elements.namedItem("photoFile") as HTMLInputElement)?.files?.[0];
+                    if (photoFile) photoUrl = await onUpload(photoFile);
                     await addClinicEquipment(clinic.id, {
                       nameRu: String(fd.get("nameRu")),
                       nameEn: String(fd.get("nameEn")),
+                      manufacturer: String(fd.get("manufacturer") || ""),
                       descriptionRu: String(fd.get("descriptionRu") || ""),
+                      photoUrl,
                     });
-                    e.currentTarget.reset();
+                    form.reset();
                     await refresh();
                   }}
                 >
                   <h3 className="font-extrabold">+ Оборудование</h3>
                   <input name="nameRu" required className="field" placeholder="Название RU" />
                   <input name="nameEn" required className="field" placeholder="Name EN" />
+                  <input name="manufacturer" className="field" placeholder="Производитель" />
+                  <input name="descriptionRu" className="field" placeholder="Описание" />
+                  <input name="photoUrl" className="field" placeholder="Фото URL" />
+                  <input name="photoFile" type="file" accept="image/*" className="field" />
+                  <button className="btn btn-primary text-sm" type="submit">
+                    Добавить
+                  </button>
+                </form>
+                <form
+                  className="soft-card space-y-3 rounded-[1.5rem] bg-white p-5"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.currentTarget);
+                    const nameRu = String(fd.get("nameRu") || "").trim();
+                    if (!nameRu) return;
+                    const next = [
+                      ...(clinic.technologies || []),
+                      {
+                        nameRu,
+                        nameEn: String(fd.get("nameEn") || "") || nameRu,
+                        descriptionRu: String(fd.get("descriptionRu") || ""),
+                        descriptionEn: String(fd.get("descriptionEn") || ""),
+                      },
+                    ];
+                    await save({ technologies: next });
+                    e.currentTarget.reset();
+                  }}
+                >
+                  <h3 className="font-extrabold">+ Технология</h3>
+                  <input name="nameRu" required className="field" placeholder="Название RU" />
+                  <input name="nameEn" className="field" placeholder="Name EN" />
                   <input name="descriptionRu" className="field" placeholder="Описание" />
                   <button className="btn btn-primary text-sm" type="submit">
                     Добавить
@@ -525,14 +1028,25 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   className="soft-card space-y-3 rounded-[1.5rem] bg-white p-5"
                   onSubmit={async (e) => {
                     e.preventDefault();
-                    const fd = new FormData(e.currentTarget);
+                    const form = e.currentTarget;
+                    const fd = new FormData(form);
+                    let fileUrl: string | null = null;
+                    let imageUrl: string | null = null;
+                    const file = (form.elements.namedItem("file") as HTMLInputElement)?.files?.[0];
+                    const logo = (form.elements.namedItem("logo") as HTMLInputElement)?.files?.[0];
+                    if (file) fileUrl = await onUpload(file);
+                    if (logo) imageUrl = await onUpload(logo);
                     await addClinicCertificate(clinic.id, {
                       nameRu: String(fd.get("nameRu")),
                       nameEn: String(fd.get("nameEn")),
                       issuerRu: String(fd.get("issuerRu") || ""),
                       year: fd.get("year") ? Number(fd.get("year")) : null,
+                      receivedAt: String(fd.get("receivedAt") || "") || null,
+                      validUntil: String(fd.get("validUntil") || "") || null,
+                      fileUrl,
+                      imageUrl,
                     });
-                    e.currentTarget.reset();
+                    form.reset();
                     await refresh();
                   }}
                 >
@@ -540,12 +1054,20 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   <input name="nameRu" required className="field" placeholder="Название RU" />
                   <input name="nameEn" required className="field" placeholder="Name EN" />
                   <input name="issuerRu" className="field" placeholder="Кем выдан" />
-                  <input name="year" type="number" className="field" placeholder="Год" />
+                  <label className="text-sm font-semibold">Дата получения<input name="receivedAt" type="date" className="field mt-1" /></label>
+                  <label className="text-sm font-semibold">Срок действия<input name="validUntil" type="date" className="field mt-1" /></label>
+                  <input name="logo" type="file" accept="image/*" className="field" title="Логотип" />
+                  <input name="file" type="file" accept="image/*,application/pdf" className="field" title="Файл" />
                   <button className="btn btn-primary text-sm" type="submit">
                     Добавить
                   </button>
                 </form>
               </div>
+            ) : null}
+            {!locked ? (
+              <button type="button" className="btn btn-ghost text-sm" onClick={goNext}>
+                Сохранить и продолжить
+              </button>
             ) : null}
           </div>
         ) : null}
@@ -553,6 +1075,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
         {section === "contacts" ? (
           <form
             className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6"
+            onInput={(e) => queueDraftAutosave(e.currentTarget)}
             onSubmit={async (e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
@@ -565,6 +1088,8 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 whatsapp: String(fd.get("whatsapp") || "") || null,
                 telegram: String(fd.get("telegram") || "") || null,
                 instagram: String(fd.get("instagram") || "") || null,
+                youtube: String(fd.get("youtube") || "") || null,
+                socials: socials.filter((item) => item.label.trim() && item.url.trim()),
                 responseHours: Number(fd.get("responseHours") || 24),
                 languages,
               });
@@ -596,6 +1121,22 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               <Field label="Instagram">
                 <input name="instagram" className="field" defaultValue={clinic.instagram || ""} disabled={locked} />
               </Field>
+              <Field label="YouTube">
+                <input name="youtube" className="field" defaultValue={clinic.youtube || ""} disabled={locked} />
+              </Field>
+              <div className="space-y-2 md:col-span-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-bold">Другие социальные сети</span>
+                  {!locked ? <button type="button" className="btn btn-ghost text-sm" onClick={() => setSocials((items) => [...items, { label: "", url: "" }])}>Добавить</button> : null}
+                </div>
+                {socials.map((item, index) => (
+                  <div key={index} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto]">
+                    <input className="field" value={item.label} disabled={locked} aria-label="Название социальной сети" placeholder="Название" onChange={(event) => setSocials((items) => items.map((current, i) => i === index ? { ...current, label: event.target.value } : current))} />
+                    <input className="field" value={item.url} disabled={locked} aria-label="Ссылка на социальную сеть" placeholder="Ссылка" onChange={(event) => setSocials((items) => items.map((current, i) => i === index ? { ...current, url: event.target.value } : current))} />
+                    {!locked ? <button type="button" className="text-sm font-bold text-danger" aria-label="Удалить социальную сеть" onClick={() => setSocials((items) => items.filter((_, i) => i !== index))}>Удалить</button> : null}
+                  </div>
+                ))}
+              </div>
               <Field label="Время ответа (ч)">
                 <input
                   name="responseHours"
@@ -627,11 +1168,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 ))}
               </div>
             </fieldset>
-            {!locked ? (
-              <button className="btn btn-primary text-sm" type="submit" disabled={saving}>
-                Сохранить
-              </button>
-            ) : null}
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
           </form>
         ) : null}
 
@@ -639,23 +1176,100 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
           <div className="space-y-4">
             <div className="soft-card rounded-[1.5rem] bg-white p-6">
               <h2 className="text-xl font-extrabold">Фотографии</h2>
+              <p className="mt-1 text-sm text-muted">
+                Первое фото — обложка публичной страницы. Меняйте порядок стрелками или назначьте
+                главную.
+              </p>
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {(clinic.photos || []).map((photo) => (
+                {(clinic.photos || []).map((photo, index) => (
                   <div key={photo.id} className="overflow-hidden rounded-xl border border-line">
-                    <img src={photo.url} alt="" className="aspect-video w-full object-cover" />
-                    <div className="flex items-center justify-between gap-2 p-2 text-xs">
-                      <span className="font-bold text-muted">{photo.category}</span>
+                    <div className="relative">
+                      <img src={photo.url} alt="" className="aspect-video w-full object-cover" />
+                      {index === 0 ? (
+                        <span className="absolute left-2 top-2 rounded-lg bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                          Главная
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="space-y-2 p-2 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-muted">{photo.category}</span>
+                        {!locked ? (
+                          <button
+                            type="button"
+                            className="font-bold text-danger"
+                            onClick={async () => {
+                              await deleteClinicPhoto(clinic.id, photo.id);
+                              await refresh();
+                            }}
+                          >
+                            Удалить
+                          </button>
+                        ) : null}
+                      </div>
                       {!locked ? (
-                        <button
-                          type="button"
-                          className="font-bold text-danger"
-                          onClick={async () => {
-                            await deleteClinicPhoto(clinic.id, photo.id);
-                            await refresh();
-                          }}
-                        >
-                          Удалить
-                        </button>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            type="button"
+                            className="rounded-lg border border-line px-2 py-1 font-bold disabled:opacity-40"
+                            disabled={index === 0}
+                            title="Выше"
+                            onClick={async () => {
+                              const ids = (clinic.photos || []).map((p) => p.id);
+                              const next = [...ids];
+                              [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                              await reorderClinicPhotos(clinic.id, next);
+                              await refresh();
+                            }}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="rounded-lg border border-line px-2 py-1 font-bold disabled:opacity-40"
+                            disabled={index >= (clinic.photos?.length || 0) - 1}
+                            title="Ниже"
+                            onClick={async () => {
+                              const ids = (clinic.photos || []).map((p) => p.id);
+                              const next = [...ids];
+                              [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                              await reorderClinicPhotos(clinic.id, next);
+                              await refresh();
+                            }}
+                          >
+                            ↓
+                          </button>
+                          {index !== 0 ? (
+                            <button
+                              type="button"
+                              className="rounded-lg border border-line px-2 py-1 font-bold text-primary"
+                              onClick={async () => {
+                                await setClinicMainPhoto(clinic.id, photo.id);
+                                await refresh();
+                                setMessage("Главное фото обновлено");
+                              }}
+                            >
+                              Главная
+                            </button>
+                          ) : null}
+                          <label className="cursor-pointer rounded-lg border border-line px-2 py-1 font-bold text-primary">
+                            Заменить
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const url = await onUpload(file);
+                                await replaceClinicPhoto(clinic.id, photo.id, { url });
+                                await refresh();
+                                setMessage("Фото заменено");
+                                e.target.value = "";
+                              }}
+                            />
+                          </label>
+                        </div>
                       ) : null}
                     </div>
                   </div>
@@ -697,12 +1311,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 </button>
               </form>
             ) : null}
+            {!locked ? (
+              <button type="button" className="btn btn-ghost text-sm" onClick={goNext}>
+                Сохранить и продолжить
+              </button>
+            ) : null}
           </div>
         ) : null}
 
         {section === "extra" ? (
           <form
             className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6"
+            onInput={(e) => queueDraftAutosave(e.currentTarget)}
             onSubmit={async (e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
@@ -753,15 +1373,72 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             <Field label="Медтуризм — описание (EN)">
               <textarea name="medicalTourismEn" rows={2} className="field" defaultValue={clinic.medicalTourismEn || ""} disabled={locked} />
             </Field>
-            {!locked ? (
-              <button className="btn btn-primary text-sm" type="submit" disabled={saving}>
-                Сохранить
-              </button>
-            ) : null}
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
           </form>
         ) : null}
 
         {section === "preview" ? <ClinicPreview clinic={clinic} /> : null}
+
+        {section === "branches" ? (
+          <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
+            <h2 className="text-xl font-extrabold">Филиалы</h2>
+            <p className="text-sm text-muted">
+              Для модерации нужен хотя бы один филиал с адресом и телефоном.
+            </p>
+            {(clinic.branches || []).length === 0 ? (
+              <p className="rounded-xl bg-warning-soft px-3 py-2 text-sm">Филиалы ещё не добавлены.</p>
+            ) : (
+              <ul className="space-y-2">
+                {clinic.branches!.map((b) => (
+                  <li
+                    key={b.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line px-4 py-3 text-sm"
+                  >
+                    <div>
+                      <p className="font-extrabold">{b.nameRu || b.nameEn}</p>
+                      <p className="text-muted">
+                        {b.city}
+                        {b.phone ? ` · ${b.phone}` : ""}
+                        {b.addressRu ? ` · ${b.addressRu}` : ""}
+                      </p>
+                    </div>
+                    <a
+                      href={`/cabinet/clinics/${clinic.id}/branches/${b.id}`}
+                      className="font-bold text-primary"
+                    >
+                      Редактировать
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <a
+              href={`/cabinet/clinics/${clinic.id}/branches`}
+              className="btn btn-primary inline-flex text-sm"
+            >
+              Управление филиалами
+            </a>
+          </div>
+        ) : null}
+
+        {section === "moderation" ? (
+          <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
+            <h2 className="text-xl font-extrabold">Перед модерацией</h2>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
+              <li>Проверьте название, логотип и описание</li>
+              <li>Выберите направления</li>
+              <li>Добавьте хотя бы один филиал с адресом и телефоном</li>
+              <li>Откройте «Предпросмотр» и сверьте с публичной страницей</li>
+              <li>Кнопка «Отправить на модерацию» — в шапке страницы клиники</li>
+            </ul>
+            {clinic.moderatorNote ? (
+              <p className="rounded-xl bg-danger-soft px-3 py-2 text-sm text-danger">
+                Комментарий модератора: {clinic.moderatorNote}
+              </p>
+            ) : null}
+            <p className="text-sm font-semibold text-muted">Текущий статус: {clinic.status}</p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

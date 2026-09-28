@@ -51,7 +51,8 @@ function EditClinicPage() {
   const canDelete = clinic.data.status === "draft" || clinic.data.status === "needs_changes";
 
   function sectionForField(field: string): WizardSectionId {
-    if (field.startsWith("branches")) return "preview";
+    if (field.startsWith("branches.")) return "branches";
+    if (field === "logo") return "basic";
     if (field === "specialties") return "directions";
     if (field === "phone" || field === "email" || field === "address") return "contacts";
     if (field === "description") return "about";
@@ -143,14 +144,23 @@ function EditClinicPage() {
           <ul className="mt-2 space-y-1">
             {issues.map((item) => (
               <li key={item.field + item.message}>
-                {item.field.startsWith("branches") ? (
-                  <Link
-                    to="/cabinet/clinics/$id/branches"
-                    params={{ id }}
-                    className="font-semibold text-primary underline"
-                  >
-                    {item.message}
-                  </Link>
+                {item.field.startsWith("branches.") ? (
+                  (() => {
+                    const [, branchId, field] = item.field.split(".");
+                    const section = field === "phone" ? "contacts" : field === "specialties" ? "directions" : field === "address" || field === "city" ? "address" : "basic";
+                    return branchId && clinic.data.branches?.some((branch) => branch.id === branchId) ? (
+                      <Link
+                        to="/cabinet/clinics/$id/branches/$branchId"
+                        params={{ id, branchId }}
+                        search={{ section }}
+                        className="font-semibold text-primary underline"
+                      >
+                        {item.message}
+                      </Link>
+                    ) : (
+                      <Link to="/cabinet/clinics/$id/branches" params={{ id }} className="font-semibold text-primary underline">{item.message}</Link>
+                    );
+                  })()
                 ) : (
                   <button
                     type="button"

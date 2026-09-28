@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 import { CITY_LABELS, fetchClinics, fetchSpecialties } from "@/shared/api/client";
 import { SelectField } from "@/shared/ui/SelectField";
+import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 
 export type CatalogSearch = {
   q?: string;
@@ -90,7 +91,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState<CatalogSearch>(search);
   const [q, setQ] = useState(search.q || "");
-  const [city, setCity] = useState(search.city || "");
+  const [city, setCity] = useState(displayCity(search.city));
   const [specialty, setSpecialty] = useState(search.specialty || "");
   const [sort, setSort] = useState(search.sort || "response");
 
@@ -118,7 +119,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
   useEffect(() => {
     setQ(search.q || "");
-    setCity(search.city || "");
+    setCity(displayCity(search.city));
     setSpecialty(search.specialty || "");
     setSort(search.sort || "response");
   }, [search.q, search.city, search.specialty, search.sort]);
@@ -137,10 +138,6 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   }, [modalOpen]);
 
   const advancedCount = countAdvanced(search);
-  const cityOptions = [
-    { value: "", label: "Город" },
-    ...Object.entries(CITY_LABELS).map(([value, label]) => ({ value, label })),
-  ];
   const specialtyOptions = [
     { value: "", label: "Направление" },
     ...(specialties.data || []).map((s) => ({
@@ -153,7 +150,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     e.preventDefault();
     onPatchSearch({
       q: q.trim() || undefined,
-      city: city || undefined,
+      city: city.trim() ? normalizeCity(city) : undefined,
       specialty: specialty || undefined,
       sort: sort || undefined,
     });
@@ -196,7 +193,10 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
-          <SelectField value={city} options={cityOptions} onChange={setCity} />
+          <div>
+            <input className="field" list="catalog-city-options" placeholder="Город" value={city} onChange={(event) => setCity(event.target.value)} />
+            <datalist id="catalog-city-options">{CITY_OPTIONS.map((item) => <option key={item.value} value={item.label} />)}</datalist>
+          </div>
           <SelectField value={specialty} options={specialtyOptions} onChange={setSpecialty} />
           <SelectField value={sort} options={SORT_OPTIONS} onChange={setSort} />
           <button type="button" className="btn btn-ghost px-4 py-2 text-sm" onClick={() => setModalOpen(true)}>
@@ -249,6 +249,13 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
             className="soft-card flex h-full flex-col overflow-hidden rounded-2xl bg-white"
           >
             <div className="relative h-28 shrink-0" style={{ background: clinic.coverColor || "#1570ef" }}>
+              {clinic.photos?.[0]?.url ? (
+                <img
+                  src={clinic.photos[0].url}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : null}
               {clinic.logoUrl ? (
                 <img
                   src={clinic.logoUrl}
@@ -264,9 +271,21 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                 {clinic.branchCount ? ` · филиалов: ${clinic.branchCount}` : ""}
                 {clinic.responseHours ? ` · ответ ~${clinic.responseHours}ч` : ""}
               </p>
+              {(clinic.addressRu || clinic.addressEn) && (
+                <p className="line-clamp-2 text-sm text-muted">{clinic.addressRu || clinic.addressEn}</p>
+              )}
               <p className="line-clamp-3 text-sm text-muted">
                 {clinic.descriptionRu || clinic.descriptionEn}
               </p>
+              {clinic.specialties?.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {clinic.specialties.slice(0, 4).map((s) => (
+                    <span key={s.slug} className="chip">
+                      {s.nameRu || s.nameEn}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <div className="mb-1 flex flex-wrap gap-2 text-xs font-bold text-muted">
                 {clinic.languages?.slice(0, 4).map((lang) => (
                   <span key={lang} className="rounded-full bg-sand px-2 py-1 uppercase">

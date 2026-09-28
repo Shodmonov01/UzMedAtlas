@@ -36,7 +36,7 @@ function ModerationQueuePage() {
           <h1 className="mt-1 text-3xl font-extrabold">Очередь клиник</h1>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link to="/moderation/leads" className="btn btn-ghost text-sm">
+          <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className="btn btn-ghost text-sm">
             Заявки
           </Link>
           <button

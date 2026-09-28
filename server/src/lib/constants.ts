@@ -1,4 +1,20 @@
-export const CITIES = ["tashkent", "samarkand", "bukhara"] as const;
+export const CITIES = [
+  "tashkent",
+  "samarkand",
+  "bukhara",
+  "andijan",
+  "fergana",
+  "namangan",
+  "nukus",
+  "qarshi",
+  "termez",
+  "urgench",
+  "jizzakh",
+  "navoi",
+  "kokand",
+  "margilan",
+  "gulistan",
+] as const;
 export type City = (typeof CITIES)[number];
 
 export const CONTACT_METHODS = [
@@ -60,10 +76,14 @@ export const PHOTO_CATEGORIES = [
   "facade",
   "reception",
   "hall",
+  "waiting",
   "rooms",
   "or",
   "equipment",
   "staff",
+  "leadership",
+  "patients",
+  "team",
   "other",
 ] as const;
 export type PhotoCategory = (typeof PHOTO_CATEGORIES)[number];

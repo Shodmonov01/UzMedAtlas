@@ -1,6 +1,6 @@
 import { siteUrl } from "./site";
 import { cityLabel, localized, parseLanguages } from "./format";
-import type { Locale } from "@/i18n/routing";
+export type Locale = "en" | "ru";
 
 export function clinicJsonLd(
   clinic: {

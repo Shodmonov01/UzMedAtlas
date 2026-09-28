@@ -57,7 +57,7 @@ export function PhotoCarousel({ photos, className = "" }: Props) {
 
   return (
     <>
-      <div className={`relative ${className}`}>
+      <div className={`relative min-w-0 max-w-full ${className}`}>
         {photos.length > 1 ? (
           <>
             <button
@@ -81,14 +81,14 @@ export function PhotoCarousel({ photos, className = "" }: Props) {
 
         <div
           ref={scrollerRef}
-          className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex max-w-full snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {photos.map((photo, index) => (
             <button
               key={photo.id}
               type="button"
               data-photo-card
-              className="group relative w-[min(80vw,280px)] shrink-0 snap-start overflow-hidden rounded-2xl border border-line bg-sand text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[min(42%,320px)] md:w-[calc((100%-1.5rem)/3)]"
+              className="group relative w-[min(100%,280px)] shrink-0 snap-start overflow-hidden rounded-2xl border border-line bg-sand text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[min(48%,300px)] md:w-[calc((100%-1.5rem)/3)]"
               onClick={() => setLightboxIndex(index)}
             >
               <img

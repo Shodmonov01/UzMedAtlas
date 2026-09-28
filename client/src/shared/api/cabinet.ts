@@ -22,8 +22,21 @@ export type CabinetDoctor = {
   nameEn: string;
   roleRu: string;
   roleEn: string;
+  category?: string;
   bioRu: string;
   bioEn: string;
+  certsRu?: string;
+  certsEn?: string;
+  continuingEducationRu?: string;
+  continuingEducationEn?: string;
+  internationalExperienceRu?: string;
+  internationalExperienceEn?: string;
+  researchActivityRu?: string;
+  researchActivityEn?: string;
+  awardsRu?: string;
+  awardsEn?: string;
+  achievementsRu?: string;
+  achievementsEn?: string;
   photoUrl: string | null;
   experienceYears: number | null;
   branchIds: string[];
@@ -44,6 +57,48 @@ export type CabinetService = {
   unit: string;
   specialty?: { id: string; slug: string; nameRu: string; nameEn: string } | null;
 };
+
+export type CabinetEquipment = {
+  id: string;
+  clinicId?: string;
+  branchId?: string | null;
+  nameRu: string;
+  nameEn: string;
+  manufacturer?: string;
+  descriptionRu: string;
+  descriptionEn: string;
+  photoUrl: string | null;
+  sortOrder?: number;
+};
+
+export type AchievementItem = {
+  id?: string;
+  titleRu: string;
+  titleEn?: string;
+  descriptionRu?: string;
+  descriptionEn?: string;
+  year?: number | null;
+};
+
+export type LeaderItem = {
+  id?: string;
+  name: string;
+  roleRu?: string;
+  roleEn?: string;
+  bioRu?: string;
+  bioEn?: string;
+  photoUrl?: string | null;
+};
+
+export type TechnologyItem = {
+  id?: string;
+  nameRu: string;
+  nameEn?: string;
+  descriptionRu?: string;
+  descriptionEn?: string;
+};
+
+export type SocialItem = { label: string; url: string };
 
 export type CabinetClinic = {
   id: string;
@@ -69,12 +124,23 @@ export type CabinetClinic = {
   whatsapp?: string | null;
   telegram?: string | null;
   instagram?: string | null;
+  youtube?: string | null;
+  socials?: SocialItem[];
   languages: string[];
   logoUrl: string | null;
   coverColor: string;
   status: ClinicStatus;
   moderatorNote: string | null;
   published: boolean;
+  founderName?: string | null;
+  founderRoleEn?: string | null;
+  founderRoleRu?: string | null;
+  founderBioEn?: string | null;
+  founderBioRu?: string | null;
+  founderPhotoUrl?: string | null;
+  achievements?: AchievementItem[];
+  leaders?: LeaderItem[];
+  technologies?: TechnologyItem[];
   coordinatorName?: string | null;
   coordinatorRoleEn?: string | null;
   coordinatorRoleRu?: string | null;
@@ -82,6 +148,8 @@ export type CabinetClinic = {
   chiefDoctorRoleEn?: string | null;
   chiefDoctorRoleRu?: string | null;
   chiefDoctorPhotoUrl?: string | null;
+  chiefDoctorBioEn?: string | null;
+  chiefDoctorBioRu?: string | null;
   responseHours: number;
   whyChooseEn?: string | null;
   whyChooseRu?: string | null;
@@ -102,6 +170,7 @@ export type CabinetClinic = {
     id: string;
     nameRu: string;
     nameEn: string;
+    manufacturer?: string;
     descriptionRu: string;
     descriptionEn: string;
     photoUrl: string | null;
@@ -113,7 +182,10 @@ export type CabinetClinic = {
     issuerRu: string;
     issuerEn: string;
     year: number | null;
+    receivedAt?: string | null;
+    validUntil?: string | null;
     imageUrl: string | null;
+    fileUrl?: string | null;
   }[];
   branchCount?: number;
   doctorCount?: number;
@@ -126,6 +198,9 @@ export type CabinetClinic = {
     phone: string;
     addressRu?: string;
     addressEn?: string;
+    lat?: number | null;
+    lng?: number | null;
+    coverUrl?: string | null;
     doctorCount: number;
     serviceCount: number;
     specialtyCount?: number;
@@ -157,10 +232,21 @@ export type ClinicFormPayload = Partial<{
   whatsapp: string | null;
   telegram: string | null;
   instagram: string | null;
+  youtube: string | null;
+  socials: SocialItem[];
   languages: string[];
   coverColor: string;
   logoUrl: string | null;
   specialtyIds: string[];
+  founderName: string | null;
+  founderRoleRu: string | null;
+  founderRoleEn: string | null;
+  founderBioRu: string | null;
+  founderBioEn: string | null;
+  founderPhotoUrl: string | null;
+  achievements: AchievementItem[];
+  leaders: LeaderItem[];
+  technologies: TechnologyItem[];
   coordinatorName: string | null;
   coordinatorRoleRu: string | null;
   coordinatorRoleEn: string | null;
@@ -168,6 +254,8 @@ export type ClinicFormPayload = Partial<{
   chiefDoctorRoleRu: string | null;
   chiefDoctorRoleEn: string | null;
   chiefDoctorPhotoUrl: string | null;
+  chiefDoctorBioRu: string | null;
+  chiefDoctorBioEn: string | null;
   responseHours: number;
   whyChooseRu: string | null;
   whyChooseEn: string | null;
@@ -235,7 +323,13 @@ export async function fetchCabinetBranch(clinicId: string, branchId: string) {
   return data;
 }
 
-export type BranchScheduleDay = { open: string; close: string } | null;
+export type BranchScheduleDay = {
+  open: string;
+  close: string;
+  roundTheClock?: boolean;
+  breakStart?: string | null;
+  breakEnd?: string | null;
+} | null;
 export type BranchSchedule = Partial<
   Record<"mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun", BranchScheduleDay>
 >;
@@ -247,17 +341,30 @@ export type CabinetBranch = {
   nameEn: string;
   nameRu: string;
   city: string;
+  country?: string;
+  region?: string | null;
+  district?: string | null;
+  street?: string | null;
+  building?: string | null;
+  addressExtra?: string | null;
   addressEn: string;
   addressRu: string;
   lat: number | null;
   lng: number | null;
   phone: string;
+  phones?: string[];
   email: string | null;
   whatsapp?: string | null;
   telegram?: string | null;
   website?: string | null;
+  instagram?: string | null;
+  socials?: SocialItem[];
   descriptionEn: string;
   descriptionRu: string;
+  advantagesRu?: string;
+  featuresRu?: string;
+  medicalTourism?: boolean;
+  medicalTourismInfoRu?: string;
   coverUrl: string | null;
   sortOrder: number;
   schedule: BranchSchedule;
@@ -266,8 +373,8 @@ export type CabinetBranch = {
   photos: ClinicPhoto[];
   doctors?: CabinetDoctor[];
   services?: CabinetService[];
-  equipment?: { id: string; nameRu: string; nameEn: string }[];
-  clinic?: { id: string; slug: string; nameRu: string; nameEn: string };
+  equipment?: CabinetEquipment[];
+  clinic?: { id: string; slug: string; nameRu: string; nameEn: string; logoUrl?: string | null };
 };
 
 export type BranchFormPayload = {
@@ -275,17 +382,30 @@ export type BranchFormPayload = {
   nameEn: string;
   slug?: string;
   city: string;
+  country?: string;
+  region?: string | null;
+  district?: string | null;
+  street?: string | null;
+  building?: string | null;
+  addressExtra?: string | null;
   addressRu: string;
   addressEn: string;
   lat?: number | null;
   lng?: number | null;
   phone: string;
+  phones?: string[];
   email?: string | null;
   whatsapp?: string | null;
   telegram?: string | null;
   website?: string | null;
+  instagram?: string | null;
+  socials?: SocialItem[];
   descriptionRu?: string;
   descriptionEn?: string;
+  advantagesRu?: string;
+  featuresRu?: string;
+  medicalTourism?: boolean;
+  medicalTourismInfoRu?: string;
   coverUrl?: string | null;
   specialtyIds: string[];
   schedule?: BranchSchedule;
@@ -348,8 +468,9 @@ export async function submitCabinetClinic(id: string) {
   return data;
 }
 
-export async function uploadCabinetFile(file: File) {
+export async function uploadCabinetFile(file: File, purpose?: "logo") {
   const form = new FormData();
+  if (purpose) form.append("purpose", purpose);
   form.append("file", file);
   const { data } = await api.post<{ url: string }>("/api/cabinet/upload", form);
   return data.url;
@@ -367,6 +488,66 @@ export async function deleteClinicPhoto(clinicId: string, photoId: string) {
   await api.delete(`/api/cabinet/clinics/${clinicId}/photos/${photoId}`);
 }
 
+export async function reorderClinicPhotos(clinicId: string, photoIds: string[]) {
+  const { data } = await api.put<{ items: ClinicPhoto[] }>(
+    `/api/cabinet/clinics/${clinicId}/photos/reorder`,
+    { photoIds },
+  );
+  return data.items;
+}
+
+export async function setClinicMainPhoto(clinicId: string, photoId: string) {
+  const { data } = await api.post<{ items: ClinicPhoto[] }>(
+    `/api/cabinet/clinics/${clinicId}/photos/${photoId}/main`,
+  );
+  return data.items;
+}
+
+export async function replaceClinicPhoto(
+  clinicId: string,
+  photoId: string,
+  payload: { url?: string; category?: string; altRu?: string; altEn?: string },
+) {
+  const { data } = await api.patch<ClinicPhoto>(
+    `/api/cabinet/clinics/${clinicId}/photos/${photoId}`,
+    payload,
+  );
+  return data;
+}
+
+export async function reorderBranchPhotos(clinicId: string, branchId: string, photoIds: string[]) {
+  const { data } = await api.put<{ items: ClinicPhoto[] }>(
+    `/api/cabinet/clinics/${clinicId}/branches/${branchId}/photos/reorder`,
+    { photoIds },
+  );
+  return data.items;
+}
+
+export async function setBranchMainPhoto(clinicId: string, branchId: string, photoId: string) {
+  const { data } = await api.post<{ items: ClinicPhoto[] }>(
+    `/api/cabinet/clinics/${clinicId}/branches/${branchId}/photos/${photoId}/main`,
+  );
+  return data.items;
+}
+
+export async function replaceBranchPhoto(
+  clinicId: string,
+  branchId: string,
+  photoId: string,
+  payload: { url?: string; category?: string; altRu?: string; altEn?: string },
+) {
+  const { data } = await api.patch<ClinicPhoto>(
+    `/api/cabinet/clinics/${clinicId}/branches/${branchId}/photos/${photoId}`,
+    payload,
+  );
+  return data;
+}
+
+export async function suggestSpecialty(clinicId: string, payload: { nameRu: string; nameEn?: string }) {
+  const { data } = await api.post(`/api/cabinet/clinics/${clinicId}/specialty-suggestions`, payload);
+  return data;
+}
+
 export async function addClinicDoctor(
   clinicId: string,
   payload: {
@@ -376,6 +557,19 @@ export async function addClinicDoctor(
     roleEn?: string;
     bioRu?: string;
     bioEn?: string;
+    category?: string;
+    certsRu?: string;
+    certsEn?: string;
+    continuingEducationRu?: string;
+    continuingEducationEn?: string;
+    internationalExperienceRu?: string;
+    internationalExperienceEn?: string;
+    researchActivityRu?: string;
+    researchActivityEn?: string;
+    awardsRu?: string;
+    awardsEn?: string;
+    achievementsRu?: string;
+    achievementsEn?: string;
     photoUrl?: string | null;
     experienceYears?: number | null;
     specialtyIds?: string[];
@@ -396,6 +590,19 @@ export async function updateClinicDoctor(
     roleEn?: string;
     bioRu?: string;
     bioEn?: string;
+    category?: string;
+    certsRu?: string;
+    certsEn?: string;
+    continuingEducationRu?: string;
+    continuingEducationEn?: string;
+    internationalExperienceRu?: string;
+    internationalExperienceEn?: string;
+    researchActivityRu?: string;
+    researchActivityEn?: string;
+    awardsRu?: string;
+    awardsEn?: string;
+    achievementsRu?: string;
+    achievementsEn?: string;
     photoUrl?: string | null;
     experienceYears?: number | null;
     specialtyIds?: string[];
@@ -461,14 +668,54 @@ export async function deleteBranchService(clinicId: string, branchId: string, se
   await api.delete(`/api/cabinet/clinics/${clinicId}/branches/${branchId}/services/${serviceId}`);
 }
 
+export type EquipmentFormPayload = {
+  nameRu: string;
+  nameEn: string;
+  manufacturer?: string;
+  descriptionRu?: string;
+  descriptionEn?: string;
+  photoUrl?: string | null;
+};
+
+export async function addBranchEquipment(
+  clinicId: string,
+  branchId: string,
+  payload: EquipmentFormPayload,
+) {
+  const { data } = await api.post<CabinetEquipment>(
+    `/api/cabinet/clinics/${clinicId}/branches/${branchId}/equipment`,
+    payload,
+  );
+  return data;
+}
+
+export async function updateBranchEquipment(
+  clinicId: string,
+  branchId: string,
+  itemId: string,
+  payload: EquipmentFormPayload,
+) {
+  const { data } = await api.put<CabinetEquipment>(
+    `/api/cabinet/clinics/${clinicId}/branches/${branchId}/equipment/${itemId}`,
+    payload,
+  );
+  return data;
+}
+
+export async function deleteBranchEquipment(clinicId: string, branchId: string, itemId: string) {
+  await api.delete(`/api/cabinet/clinics/${clinicId}/branches/${branchId}/equipment/${itemId}`);
+}
+
 export async function addClinicEquipment(
   clinicId: string,
   payload: {
     nameRu: string;
     nameEn: string;
+    manufacturer?: string;
     descriptionRu?: string;
     descriptionEn?: string;
     photoUrl?: string | null;
+    branchId?: string | null;
   },
 ) {
   const { data } = await api.post(`/api/cabinet/clinics/${clinicId}/equipment`, payload);
@@ -487,7 +734,10 @@ export async function addClinicCertificate(
     issuerRu?: string;
     issuerEn?: string;
     year?: number | null;
+    receivedAt?: string | null;
+    validUntil?: string | null;
     imageUrl?: string | null;
+    fileUrl?: string | null;
   },
 ) {
   const { data } = await api.post(`/api/cabinet/clinics/${clinicId}/certificates`, payload);
@@ -627,7 +877,9 @@ export const WIZARD_SECTIONS = [
   { id: "contacts", label: "Контакты" },
   { id: "photos", label: "Фото" },
   { id: "extra", label: "Дополнительно" },
+  { id: "branches", label: "Филиалы" },
   { id: "preview", label: "Предпросмотр" },
+  { id: "moderation", label: "Модерация" },
 ] as const;
 
 export type WizardSectionId = (typeof WIZARD_SECTIONS)[number]["id"];

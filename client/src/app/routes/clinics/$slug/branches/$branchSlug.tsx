@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CITY_LABELS, fetchClinicBranch } from "@/shared/api/client";
 import { formatServicePrice } from "@/shared/lib/format-price";
+import { formatDayHours, isOpenNow } from "@/shared/lib/schedule";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoCarousel } from "@/shared/ui/PhotoCarousel";
 import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
@@ -32,7 +33,8 @@ function BranchDetailPage() {
   });
 
   if (branch.isLoading) return <p className="text-muted">Загрузка…</p>;
-  if (branch.isError || !branch.data) {
+  if (branch.isError) return <p className="text-danger">Не удалось загрузить страницу филиала</p>;
+  if (!branch.data) {
     return (
       <div>
         <p className="text-danger">Филиал не найден</p>
@@ -46,16 +48,46 @@ function BranchDetailPage() {
   const data = branch.data;
   const schedule = data.schedule || {};
   const hasCoords = data.lat != null && data.lng != null;
+  const openNow = isOpenNow(schedule);
+  const phones: string[] =
+    Array.isArray(data.phones) && data.phones.length
+      ? data.phones
+      : data.phone
+        ? [data.phone]
+        : [];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
-      <div className="space-y-8">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="min-w-0 space-y-8">
         <div>
           <Link to="/clinics/$slug" params={{ slug }} className="text-sm font-semibold text-muted">
             ← {data.clinic?.nameRu || data.clinic?.nameEn || "Клиника"}
           </Link>
-          <h1 className="mt-4 text-4xl font-extrabold">{data.nameRu || data.nameEn}</h1>
-          <p className="mt-2 text-muted">{CITY_LABELS[data.city] || data.city}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {data.clinic?.logoUrl ? (
+              <img
+                src={data.clinic.logoUrl}
+                alt=""
+                className="h-14 w-14 rounded-2xl border border-line object-cover"
+              />
+            ) : null}
+            <div>
+              <h1 className="text-4xl font-extrabold">{data.nameRu || data.nameEn}</h1>
+              <p className="mt-2 text-muted">{CITY_LABELS[data.city] || data.city}</p>
+            </div>
+            {Object.keys(schedule).length ? (
+              <span
+                className={`rounded-xl px-3 py-1 text-sm font-bold ${
+                  openNow ? "bg-mint text-primary" : "bg-sand text-muted"
+                }`}
+              >
+                {openNow ? "Сейчас открыто" : "Сейчас закрыто"}
+              </span>
+            ) : null}
+          </div>
+          {data.coverUrl ? (
+            <img src={data.coverUrl} alt="" className="mt-5 aspect-[16/7] w-full rounded-xl object-cover" />
+          ) : null}
           {(data.descriptionRu || data.descriptionEn) && (
             <p className="mt-6 max-w-3xl leading-relaxed text-muted">
               {data.descriptionRu || data.descriptionEn}
@@ -98,11 +130,38 @@ function BranchDetailPage() {
 
         <section className="space-y-2">
           <h2 className="text-2xl font-extrabold">Контакты</h2>
-          <p className="text-sm">{data.phone}</p>
-          {data.email ? <p className="text-sm text-muted">{data.email}</p> : null}
-          {data.whatsapp ? <p className="text-sm text-muted">WhatsApp: {data.whatsapp}</p> : null}
-          {data.telegram ? <p className="text-sm text-muted">Telegram: {data.telegram}</p> : null}
+          {phones.map((p) => (
+            <p key={p} className="text-sm">
+              <a href={`tel:${p.replace(/\s/g, "")}`} className="font-semibold text-primary hover:underline">
+                {p}
+              </a>
+            </p>
+          ))}
+          {data.email ? <a className="block text-sm text-primary hover:underline" href={`mailto:${data.email}`}>{data.email}</a> : null}
+          {data.whatsapp ? <a className="block text-sm text-primary hover:underline" href={`https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}`}>WhatsApp</a> : null}
+          {data.telegram ? <a className="block text-sm text-primary hover:underline" href={String(data.telegram).startsWith("http") ? data.telegram : `https://t.me/${String(data.telegram).replace(/^@/, "")}`} target="_blank" rel="noreferrer">Telegram</a> : null}
+          {data.instagram ? <a className="block text-sm text-primary hover:underline" href={String(data.instagram).startsWith("http") ? data.instagram : `https://instagram.com/${String(data.instagram).replace(/^@/, "")}`} target="_blank" rel="noreferrer">Instagram</a> : null}
+          {data.website ? <a className="block text-sm text-primary hover:underline" href={String(data.website).startsWith("http") ? data.website : `https://${data.website}`} target="_blank" rel="noreferrer">{data.website}</a> : null}
+          {data.socials?.map((social: { label: string; url: string }, index: number) => (
+            <p key={`${social.label}-${index}`} className="text-sm">
+              <a href={social.url} target="_blank" rel="noreferrer" className="font-semibold text-primary hover:underline">{social.label}</a>
+            </p>
+          ))}
         </section>
+
+        {(data.advantagesRu || data.featuresRu || data.medicalTourism) ? (
+          <section className="space-y-3">
+            <h2 className="text-2xl font-extrabold">Особенности филиала</h2>
+            {data.advantagesRu ? <p className="whitespace-pre-line text-sm leading-relaxed text-muted">{data.advantagesRu}</p> : null}
+            {data.featuresRu ? <p className="whitespace-pre-line text-sm leading-relaxed text-muted">{data.featuresRu}</p> : null}
+            {data.medicalTourism && data.medicalTourismInfoRu ? (
+              <div>
+                <h3 className="font-bold">Медицинский туризм и международное сотрудничество</h3>
+                <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-muted">{data.medicalTourismInfoRu}</p>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
 
         {Object.keys(schedule).length ? (
           <section className="space-y-2">
@@ -113,9 +172,7 @@ function BranchDetailPage() {
                 return (
                   <li key={key} className="flex gap-3">
                     <span className="w-8 font-bold">{label}</span>
-                    <span className="text-muted">
-                      {day ? `${day.open} – ${day.close}` : "выходной"}
-                    </span>
+                    <span className="text-muted">{formatDayHours(day ?? null)}</span>
                   </li>
                 );
               })}
@@ -176,10 +233,28 @@ function BranchDetailPage() {
                   nameEn: string;
                   roleRu?: string;
                   roleEn?: string;
+                  photoUrl?: string | null;
+                  experienceYears?: number | null;
+                  bioRu?: string;
+                  certsRu?: string;
+                  continuingEducationRu?: string;
+                  internationalExperienceRu?: string;
+                  researchActivityRu?: string;
+                  awardsRu?: string;
+                  achievementsRu?: string;
                 }) => (
                   <li key={d.id} className="rounded-2xl border border-line p-4">
-                    <p className="font-bold">{d.nameRu || d.nameEn}</p>
-                    <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
+                    <div className="flex gap-3">
+                      {d.photoUrl ? <img src={d.photoUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" /> : null}
+                      <div>
+                        <p className="font-bold">{d.nameRu || d.nameEn}</p>
+                        <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
+                        {d.experienceYears != null ? <p className="text-xs text-muted">Стаж: {d.experienceYears} лет</p> : null}
+                      </div>
+                    </div>
+                    {[d.bioRu, d.certsRu, d.continuingEducationRu, d.internationalExperienceRu, d.researchActivityRu, d.awardsRu, d.achievementsRu]
+                      .filter(Boolean)
+                      .map((detail, index) => <p key={index} className="mt-2 text-sm text-muted">{detail}</p>)}
                   </li>
                 ),
               )}
@@ -190,10 +265,31 @@ function BranchDetailPage() {
         {data.equipment?.length ? (
           <section className="space-y-3">
             <h2 className="text-2xl font-extrabold">Оборудование</h2>
-            <ul className="list-disc pl-5 text-sm text-muted">
-              {data.equipment.map((e: { id: string; nameRu?: string; nameEn: string }) => (
-                <li key={e.id}>{e.nameRu || e.nameEn}</li>
-              ))}
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {data.equipment.map(
+                (e: {
+                  id: string;
+                  nameRu?: string;
+                  nameEn: string;
+                  descriptionRu?: string;
+                  descriptionEn?: string;
+                  photoUrl?: string | null;
+                }) => (
+                  <li key={e.id} className="rounded-2xl border border-line p-4">
+                    <div className="flex gap-3">
+                      {e.photoUrl ? (
+                        <img src={e.photoUrl} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+                      ) : null}
+                      <div className="min-w-0">
+                        <p className="font-bold">{e.nameRu || e.nameEn}</p>
+                        {(e.descriptionRu || e.descriptionEn) && (
+                          <p className="mt-1 text-sm text-muted">{e.descriptionRu || e.descriptionEn}</p>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ),
+              )}
             </ul>
           </section>
         ) : null}
@@ -212,7 +308,7 @@ function BranchDetailPage() {
         ) : null}
       </div>
 
-      <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+      <aside className="min-w-0 space-y-4 lg:sticky lg:top-24 lg:self-start">
         <LeadForm
           clinicSlug={slug}
           clinicName={data.clinic?.nameRu || data.clinic?.nameEn || data.nameRu || data.nameEn}

@@ -21,12 +21,15 @@ export function validateClinicForModeration(clinic: {
   city: string;
   addressRu: string;
   addressEn: string;
+  logoUrl?: string | null;
   specialties: unknown[];
   branches?: {
+    id?: string;
     city: string;
     addressRu: string;
     addressEn: string;
     phone: string;
+    specialties?: unknown[];
   }[];
 }): ClinicValidationIssue[] {
   const issues: ClinicValidationIssue[] = [];
@@ -51,20 +54,27 @@ export function validateClinicForModeration(clinic: {
   if (!clinic.specialties.length) {
     issues.push({ field: "specialties", message: "Выберите хотя бы одно направление" });
   }
+  if (!clinic.logoUrl) {
+    issues.push({ field: "logo", message: "Загрузите логотип клиники" });
+  }
   const branches = clinic.branches ?? [];
   if (!branches.length) {
     issues.push({ field: "branches", message: "Добавьте хотя бы один филиал" });
   } else {
     branches.forEach((branch, index) => {
       const n = index + 1;
+      const branchField = `branches.${branch.id || index}`;
       if (!branch.city.trim()) {
-        issues.push({ field: `branches.${index}.city`, message: `Филиал ${n}: укажите город` });
+        issues.push({ field: `${branchField}.city`, message: `Филиал ${n}: укажите город` });
       }
       if (!branch.addressRu.trim() && !branch.addressEn.trim()) {
-        issues.push({ field: `branches.${index}.address`, message: `Филиал ${n}: укажите адрес` });
+        issues.push({ field: `${branchField}.address`, message: `Филиал ${n}: укажите адрес` });
       }
       if (!branch.phone.trim()) {
-        issues.push({ field: `branches.${index}.phone`, message: `Филиал ${n}: укажите телефон` });
+        issues.push({ field: `${branchField}.phone`, message: `Филиал ${n}: укажите телефон` });
+      }
+      if (!branch.specialties?.length) {
+        issues.push({ field: `${branchField}.specialties`, message: `Филиал ${n}: выберите направления` });
       }
     });
   }
@@ -85,10 +95,12 @@ export function buildModerationChecklist(clinic: {
   logoUrl?: string | null;
   specialties: unknown[];
   branches?: {
+    id?: string;
     city: string;
     addressRu: string;
     addressEn: string;
     phone: string;
+    specialties?: unknown[];
   }[];
   photos?: unknown[];
   doctors?: unknown[];
@@ -103,19 +115,19 @@ export function buildModerationChecklist(clinic: {
 
   const required = [
     { key: "name", label: "Название клиники", ok: !issueFields.has("name") },
+    { key: "logo", label: "Логотип", ok: !issueFields.has("logo") },
     { key: "description", label: "Описание", ok: !issueFields.has("description") },
     { key: "contacts", label: "Телефон и email", ok: !issueFields.has("phone") && !issueFields.has("email") },
     { key: "address", label: "Город и адрес", ok: !issueFields.has("city") && !issueFields.has("address") },
     { key: "specialties", label: "Направления", ok: !issueFields.has("specialties") },
     {
       key: "branches",
-      label: "Филиал с адресом и телефоном",
+      label: "Филиал с адресом, телефоном и направлением",
       ok: !issues.some((i) => i.field.startsWith("branches")),
     },
   ];
 
   const recommended = [
-    { key: "logo", label: "Логотип", ok: Boolean(clinic.logoUrl) },
     { key: "photos", label: "Фотографии", ok: (clinic.photos?.length ?? 0) > 0 },
     { key: "doctors", label: "Специалисты", ok: (clinic.doctors?.length ?? 0) > 0 },
     { key: "equipment", label: "Оборудование", ok: (clinic.equipment?.length ?? 0) > 0 },

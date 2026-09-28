@@ -28,6 +28,8 @@ npm install
 npm run dev            # http://localhost:5173
 ```
 
+Health Checker uses an OpenAI-compatible chat completion endpoint when `OPENAI_API_KEY` is set in `server/.env`. `OPENAI_MODEL` and `OPENAI_BASE_URL` can select a different model or compatible provider. Without a key, it uses the local symptom-to-specialty fallback.
+
 ## API (черновик)
 
 | Method | Path | Описание |

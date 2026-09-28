@@ -8,6 +8,8 @@ type Props = {
   clinicDoctors: CabinetDoctor[];
   branchDoctorIds: string[];
   specialtyIds: string[];
+  specialtyOptions: { id: string; nameRu: string; nameEn: string }[];
+  onUpload?: (file: File) => Promise<string>;
   locked?: boolean;
   onChanged: () => Promise<void>;
 };
@@ -18,6 +20,8 @@ export function BranchDoctorsPanel({
   clinicDoctors,
   branchDoctorIds,
   specialtyIds,
+  specialtyOptions,
+  onUpload,
   locked,
   onChanged,
 }: Props) {
@@ -101,13 +105,26 @@ export function BranchDoctorsPanel({
             const form = e.currentTarget;
             const fd = new FormData(form);
             try {
+              const photoFile = (form.elements.namedItem("photoFile") as HTMLInputElement)?.files?.[0];
+              const photoUrl = photoFile && onUpload
+                ? await onUpload(photoFile)
+                : String(fd.get("photoUrl") || "") || null;
               await addClinicDoctor(clinicId, {
                 nameRu: String(fd.get("nameRu")),
                 nameEn: String(fd.get("nameEn")),
                 roleRu: String(fd.get("roleRu") || ""),
                 roleEn: String(fd.get("roleEn") || ""),
+                category: String(fd.get("category") || ""),
+                bioRu: String(fd.get("bioRu") || ""),
+                certsRu: String(fd.get("certsRu") || ""),
+                continuingEducationRu: String(fd.get("continuingEducationRu") || ""),
+                internationalExperienceRu: String(fd.get("internationalExperienceRu") || ""),
+                researchActivityRu: String(fd.get("researchActivityRu") || ""),
+                awardsRu: String(fd.get("awardsRu") || ""),
+                achievementsRu: String(fd.get("achievementsRu") || ""),
+                photoUrl,
                 experienceYears: fd.get("experienceYears") ? Number(fd.get("experienceYears")) : null,
-                specialtyIds: specialtyIds.slice(0, 1),
+                specialtyIds: [String(fd.get("specialtyId") || "")].filter(Boolean),
                 branchIds: [branchId],
               });
               form.reset();
@@ -125,6 +142,17 @@ export function BranchDoctorsPanel({
             <input name="roleRu" className="field" placeholder="Должность RU" />
             <input name="roleEn" className="field" placeholder="Role EN" />
             <input name="experienceYears" type="number" min={0} className="field" placeholder="Стаж, лет" />
+            <select name="category" className="field" defaultValue=""><option value="">Категория</option><option value="highest">Высшая</option><option value="first">Первая</option><option value="second">Вторая</option><option value="other">Другая</option></select>
+            <select name="specialtyId" className="field" defaultValue={specialtyIds[0] || ""}><option value="">Специальность</option>{specialtyOptions.filter((specialty) => specialtyIds.includes(specialty.id)).map((specialty) => <option key={specialty.id} value={specialty.id}>{specialty.nameRu || specialty.nameEn}</option>)}</select>
+            <input name="photoUrl" className="field md:col-span-2" placeholder="Ссылка на фото" />
+            {onUpload ? <input name="photoFile" type="file" accept="image/*" className="field md:col-span-2" /> : null}
+            <textarea name="bioRu" rows={2} className="field md:col-span-2" placeholder="Краткая информация" />
+            <textarea name="certsRu" rows={2} className="field md:col-span-2" placeholder="Сертификаты" />
+            <textarea name="continuingEducationRu" rows={2} className="field md:col-span-2" placeholder="Повышение квалификации" />
+            <textarea name="internationalExperienceRu" rows={2} className="field md:col-span-2" placeholder="Международный опыт" />
+            <textarea name="researchActivityRu" rows={2} className="field md:col-span-2" placeholder="Научная деятельность" />
+            <textarea name="awardsRu" rows={2} className="field md:col-span-2" placeholder="Награды" />
+            <textarea name="achievementsRu" rows={2} className="field md:col-span-2" placeholder="Достижения" />
           </div>
           <button type="submit" className="btn btn-primary text-sm">
             Создать

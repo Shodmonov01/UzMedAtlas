@@ -49,6 +49,9 @@ model Clinic {
   whatsapp            String?
   telegram            String?
   instagram           String?
+  youtube             String?
+  /// JSON: [{ label, url }]
+  socialsJson         String            @default("[]")
   languages           String
   logoUrl             String?
   coverColor          String            @default("#1570ef")
@@ -56,6 +59,18 @@ model Clinic {
   status              String            @default("draft")
   moderatorNote       String?
   published           Boolean           @default(false)
+  founderName         String?
+  founderRoleEn       String?
+  founderRoleRu       String?
+  founderBioEn        String?
+  founderBioRu        String?
+  founderPhotoUrl     String?
+  /// JSON achievements: [{ id, titleRu, titleEn, descriptionRu, descriptionEn, year }]
+  achievementsJson    String            @default("[]")
+  /// JSON leaders: [{ id, name, roleRu, roleEn, bioRu, bioEn, photoUrl }]
+  leadersJson         String            @default("[]")
+  /// JSON technologies: [{ id, nameRu, nameEn, descriptionRu, descriptionEn }]
+  technologiesJson    String            @default("[]")
   coordinatorName     String?
   coordinatorRoleEn   String?
   coordinatorRoleRu   String?
@@ -63,6 +78,8 @@ model Clinic {
   chiefDoctorRoleEn   String?
   chiefDoctorRoleRu   String?
   chiefDoctorPhotoUrl String?
+  chiefDoctorBioEn    String?
+  chiefDoctorBioRu    String?
   responseHours       Int               @default(24)
   licenseInfoEn       String?
   licenseInfoRu       String?
@@ -130,17 +147,32 @@ model Branch {
   nameEn         String
   nameRu         String
   city           String
+  country        String            @default("Uzbekistan")
+  region         String?
+  district       String?
+  street         String?
+  building       String?
+  addressExtra   String?
   addressEn      String
   addressRu      String
   lat            Float?
   lng            Float?
   phone          String
+  /// JSON string[] extra phones
+  phonesJson     String            @default("[]")
   email          String?
   whatsapp       String?
   telegram       String?
   website        String?
+  instagram      String?
+  /// JSON: [{ label, url }]
+  socialsJson    String            @default("[]")
   descriptionEn  String            @default("")
   descriptionRu  String            @default("")
+  advantagesRu   String            @default("")
+  featuresRu     String            @default("")
+  medicalTourism Boolean           @default(false)
+  medicalTourismInfoRu String      @default("")
   /// JSON: { mon: { open: "09:00", close: "18:00" } | null, ... }
   scheduleJson   String            @default("{}")
   coverUrl       String?
@@ -185,9 +217,23 @@ model Doctor {
   nameRu          String
   roleEn          String            @default("")
   roleRu          String            @default("")
+  /// highest | first | second | other
+  category        String            @default("")
   photoUrl        String?
   bioEn           String            @default("")
   bioRu           String            @default("")
+  certsEn         String            @default("")
+  certsRu         String            @default("")
+  continuingEducationRu String      @default("")
+  continuingEducationEn String      @default("")
+  internationalExperienceRu String @default("")
+  internationalExperienceEn String @default("")
+  researchActivityRu String         @default("")
+  researchActivityEn String         @default("")
+  awardsRu        String            @default("")
+  awardsEn        String            @default("")
+  achievementsRu  String            @default("")
+  achievementsEn  String            @default("")
   experienceYears Int?
   sortOrder       Int               @default(0)
   clinic          Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
@@ -219,6 +265,7 @@ model Equipment {
   branchId       String?
   nameEn         String
   nameRu         String
+  manufacturer   String  @default("")
   descriptionEn  String  @default("")
   descriptionRu  String  @default("")
   photoUrl       String?
@@ -228,16 +275,19 @@ model Equipment {
 }
 
 model Certificate {
-  id        String  @id @default(cuid())
-  clinicId  String
-  branchId  String?
-  nameEn    String
-  nameRu    String
-  issuerEn  String  @default("")
-  issuerRu  String  @default("")
-  year      Int?
-  imageUrl  String?
-  sortOrder Int     @default(0)
+  id         String  @id @default(cuid())
+  clinicId   String
+  branchId   String?
+  nameEn     String
+  nameRu     String
+  issuerEn   String  @default("")
+  issuerRu   String  @default("")
+  year       Int?
+  receivedAt String?
+  validUntil String?
+  imageUrl   String?
+  fileUrl    String?
+  sortOrder  Int     @default(0)
   clinic    Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   branch    Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
 }

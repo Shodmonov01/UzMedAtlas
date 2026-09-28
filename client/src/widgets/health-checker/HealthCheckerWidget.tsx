@@ -10,7 +10,20 @@ type ChatMessage =
   | { id: string; role: "operator"; kind: "examples" }
   | { id: string; role: "operator"; kind: "result"; result: CheckerResult };
 
-type Step = "symptoms" | "age" | "loading" | "done";
+type Step = "symptoms" | "age" | "gender" | "duration" | "loading" | "done";
+
+const GENDER_OPTIONS = [
+  { value: "female", label: "Женский" },
+  { value: "male", label: "Мужской" },
+  { value: "prefer_not", label: "Предпочитаю не указывать" },
+] as const;
+
+const DURATION_OPTIONS = [
+  { value: "few_days", label: "Несколько дней" },
+  { value: "few_weeks", label: "Несколько недель" },
+  { value: "few_months", label: "Несколько месяцев" },
+  { value: "more_than_year", label: "Больше года" },
+] as const;
 
 const EXAMPLES = [
   "Болит колено при ходьбе",
@@ -47,6 +60,8 @@ export function HealthCheckerWidget() {
   const [step, setStep] = useState<Step>("symptoms");
   const [draft, setDraft] = useState("");
   const [symptoms, setSymptoms] = useState("");
+  const [age, setAge] = useState<number | null>(null);
+  const [gender, setGender] = useState<"female" | "male" | "prefer_not">("prefer_not");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,10 +80,17 @@ export function HealthCheckerWidget() {
     setStep("symptoms");
     setDraft("");
     setSymptoms("");
+    setAge(null);
+    setGender("prefer_not");
     setError(null);
   }
 
-  async function runAnalyze(nextSymptoms: string, age: number) {
+  async function runAnalyze(
+    nextSymptoms: string,
+    nextAge: number,
+    nextGender: "female" | "male" | "prefer_not",
+    nextDuration: "few_days" | "few_weeks" | "few_months" | "more_than_year",
+  ) {
     setStep("loading");
     setError(null);
     setMessages((prev) => [
@@ -78,10 +100,10 @@ export function HealthCheckerWidget() {
     try {
       const result = await analyzeChecker({
         symptoms: nextSymptoms,
-        age,
-        gender: "prefer_not",
-        duration: "few_weeks",
-        forChild: false,
+        age: nextAge,
+        gender: nextGender,
+        duration: nextDuration,
+        forChild: nextAge < 18,
       });
       const top = result.specialties?.[0];
       sessionStorage.setItem("uma_checker_result", JSON.stringify(result));
@@ -91,10 +113,10 @@ export function HealthCheckerWidget() {
         JSON.stringify({
           symptoms: nextSymptoms,
           specialtySlug: top?.slug || undefined,
-          age,
-          gender: "prefer_not",
-          duration: "few_weeks",
-          forChild: false,
+          age: nextAge,
+          gender: nextGender,
+          duration: nextDuration,
+          forChild: nextAge < 18,
         }),
       );
       setMessages((prev) => [...prev, { id: uid(), role: "operator", kind: "result", result }]);
@@ -131,15 +153,37 @@ export function HealthCheckerWidget() {
   }
 
   function submitAge(text: string) {
-    const age = Number.parseInt(text.trim(), 10);
-    if (!Number.isFinite(age) || age < 1 || age > 120) {
+    const nextAge = Number.parseInt(text.trim(), 10);
+    if (!Number.isFinite(nextAge) || nextAge < 1 || nextAge > 120) {
       setError("Укажите возраст от 1 до 120.");
       return;
     }
     setError(null);
-    setMessages((prev) => [...prev, { id: uid(), role: "user", text: String(age) }]);
+    setAge(nextAge);
+    setMessages((prev) => [
+      ...prev,
+      { id: uid(), role: "user", text: String(nextAge) },
+      { id: uid(), role: "operator", text: "Укажите пол (можно пропустить)." },
+    ]);
     setDraft("");
-    void runAnalyze(symptoms, age);
+    setStep("gender");
+  }
+
+  function submitGender(value: string) {
+    const opt = GENDER_OPTIONS.find((o) => o.value === value) || GENDER_OPTIONS[2];
+    setGender(opt.value);
+    setMessages((prev) => [
+      ...prev,
+      { id: uid(), role: "user", text: opt.label },
+      { id: uid(), role: "operator", text: "Как давно беспокоит?" },
+    ]);
+    setStep("duration");
+  }
+
+  function submitDuration(value: string) {
+    const opt = DURATION_OPTIONS.find((o) => o.value === value) || DURATION_OPTIONS[1];
+    setMessages((prev) => [...prev, { id: uid(), role: "user", text: opt.label }]);
+    void runAnalyze(symptoms, age || 30, gender, opt.value);
   }
 
   function onSubmit(event: React.FormEvent) {
@@ -148,9 +192,15 @@ export function HealthCheckerWidget() {
     else if (step === "age") submitAge(draft);
   }
 
-  const inputDisabled = step === "loading" || step === "done";
+  const inputDisabled = step === "loading" || step === "done" || step === "gender" || step === "duration";
   const placeholder =
-    step === "age" ? "Например, 42" : step === "done" ? "Диалог завершён" : "Напишите, что беспокоит…";
+    step === "age"
+      ? "Например, 42"
+      : step === "done"
+        ? "Диалог завершён"
+        : step === "gender" || step === "duration"
+          ? "Выберите вариант ниже"
+          : "Напишите, что беспокоит…";
 
   return (
     <div className="hc-widget pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
@@ -211,6 +261,9 @@ export function HealthCheckerWidget() {
                       <p className="mt-1 text-base font-extrabold text-ink">
                         {top?.nameRu || top?.nameEn || "Уточните у врача"}
                       </p>
+                      {message.result.doctorRecommendation ? (
+                        <p className="mt-1 text-sm font-semibold text-ink">Специалист: {message.result.doctorRecommendation}</p>
+                      ) : null}
                       {(top?.explanationRu || top?.explanationEn) && (
                         <p className="mt-2 text-sm leading-snug text-muted">
                           {top.explanationRu || top.explanationEn}
@@ -218,7 +271,7 @@ export function HealthCheckerWidget() {
                       )}
                       {message.result.redFlags?.length ? (
                         <p className="mt-3 rounded-xl bg-danger-soft px-3 py-2 text-xs font-semibold text-danger">
-                          Обратите внимание: {message.result.redFlags.join(", ")}
+                          Обнаружены признаки возможного неотложного состояния. Немедленно обратитесь за экстренной медицинской помощью.
                         </p>
                       ) : null}
                     </div>
@@ -270,6 +323,34 @@ export function HealthCheckerWidget() {
 
           <form onSubmit={onSubmit} className="border-t border-line bg-white p-3">
             {error ? <p className="mb-2 text-xs font-semibold text-danger">{error}</p> : null}
+            {step === "gender" ? (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {GENDER_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className="rounded-full border border-line bg-sand px-3 py-1.5 text-xs font-bold"
+                    onClick={() => submitGender(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {step === "duration" ? (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {DURATION_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className="rounded-full border border-line bg-sand px-3 py-1.5 text-xs font-bold"
+                    onClick={() => submitDuration(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <div className="flex items-end gap-2">
               <input
                 ref={inputRef}

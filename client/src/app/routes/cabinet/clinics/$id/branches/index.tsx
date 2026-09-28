@@ -60,6 +60,7 @@ function BranchesListPage() {
       </div>
 
       {branches.isLoading ? <p className="text-muted">Загрузка…</p> : null}
+      {branches.isError ? <p className="text-danger">Не удалось загрузить список филиалов</p> : null}
 
       <div className="grid gap-4">
         {(branches.data || []).map((branch) => (
@@ -80,6 +81,7 @@ function BranchesListPage() {
               <Link
                 to="/cabinet/clinics/$id/branches/$branchId"
                 params={{ id, branchId: branch!.id }}
+                search={{ section: undefined }}
                 className="btn btn-primary px-4 py-2 text-sm"
               >
                 {locked ? "Открыть" : "Редактировать"}

@@ -45,6 +45,7 @@ export const branchDetailInclude = {
       slug: true,
       nameRu: true,
       nameEn: true,
+      logoUrl: true,
       status: true,
       published: true,
     },
@@ -58,6 +59,23 @@ export function parseSchedule(scheduleJson: string) {
   } catch {
     return {};
   }
+}
+
+export function parseJsonArray<T = unknown>(raw: string | null | undefined): T[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function parsePhones(phone: string, phonesJson?: string | null): string[] {
+  const extras = parseJsonArray<string>(phonesJson).filter(Boolean);
+  const primary = phone?.trim();
+  const list = primary ? [primary, ...extras.filter((p) => p !== primary)] : extras;
+  return list;
 }
 
 export function serializeService(service: {
@@ -99,9 +117,22 @@ export function serializeDoctor(doctor: {
   nameRu: string;
   roleEn: string;
   roleRu: string;
+  category?: string;
   photoUrl: string | null;
   bioEn: string;
   bioRu: string;
+  certsEn?: string;
+  certsRu?: string;
+  continuingEducationEn?: string;
+  continuingEducationRu?: string;
+  internationalExperienceEn?: string;
+  internationalExperienceRu?: string;
+  researchActivityEn?: string;
+  researchActivityRu?: string;
+  awardsEn?: string;
+  awardsRu?: string;
+  achievementsEn?: string;
+  achievementsRu?: string;
   experienceYears: number | null;
   sortOrder: number;
   specialties?: { specialty: { id: string; slug: string; nameRu: string; nameEn: string } }[];
@@ -115,9 +146,22 @@ export function serializeDoctor(doctor: {
     nameRu: doctor.nameRu,
     roleEn: doctor.roleEn,
     roleRu: doctor.roleRu,
+    category: doctor.category || "",
     photoUrl: doctor.photoUrl,
     bioEn: doctor.bioEn,
     bioRu: doctor.bioRu,
+    certsEn: doctor.certsEn || "",
+    certsRu: doctor.certsRu || "",
+    continuingEducationEn: doctor.continuingEducationEn || "",
+    continuingEducationRu: doctor.continuingEducationRu || "",
+    internationalExperienceEn: doctor.internationalExperienceEn || "",
+    internationalExperienceRu: doctor.internationalExperienceRu || "",
+    researchActivityEn: doctor.researchActivityEn || "",
+    researchActivityRu: doctor.researchActivityRu || "",
+    awardsEn: doctor.awardsEn || "",
+    awardsRu: doctor.awardsRu || "",
+    achievementsEn: doctor.achievementsEn || "",
+    achievementsRu: doctor.achievementsRu || "",
     experienceYears: doctor.experienceYears,
     sortOrder: doctor.sortOrder,
     specialties: doctor.specialties?.map((s) => s.specialty) ?? [],
@@ -131,17 +175,30 @@ export function serializeBranchSummary(branch: {
   nameEn: string;
   nameRu: string;
   city: string;
+  country?: string | null;
+  region?: string | null;
+  district?: string | null;
+  street?: string | null;
+  building?: string | null;
+  addressExtra?: string | null;
   addressEn: string;
   addressRu: string;
   lat: number | null;
   lng: number | null;
   phone: string;
+  phonesJson?: string | null;
   email: string | null;
   whatsapp?: string | null;
   telegram?: string | null;
   website?: string | null;
+  instagram?: string | null;
+  socialsJson?: string | null;
   descriptionEn: string;
   descriptionRu: string;
+  advantagesRu?: string | null;
+  featuresRu?: string | null;
+  medicalTourism?: boolean;
+  medicalTourismInfoRu?: string | null;
   coverUrl: string | null;
   sortOrder: number;
   scheduleJson: string;
@@ -156,17 +213,30 @@ export function serializeBranchSummary(branch: {
     nameEn: branch.nameEn,
     nameRu: branch.nameRu,
     city: branch.city,
+    country: branch.country ?? "Uzbekistan",
+    region: branch.region ?? null,
+    district: branch.district ?? null,
+    street: branch.street ?? null,
+    building: branch.building ?? null,
+    addressExtra: branch.addressExtra ?? null,
     addressEn: branch.addressEn,
     addressRu: branch.addressRu,
     lat: branch.lat,
     lng: branch.lng,
     phone: branch.phone,
+    phones: parsePhones(branch.phone, branch.phonesJson),
     email: branch.email,
     whatsapp: branch.whatsapp ?? null,
     telegram: branch.telegram ?? null,
     website: branch.website ?? null,
+    instagram: branch.instagram ?? null,
+    socials: parseJsonArray(branch.socialsJson),
     descriptionEn: branch.descriptionEn,
     descriptionRu: branch.descriptionRu,
+    advantagesRu: branch.advantagesRu ?? "",
+    featuresRu: branch.featuresRu ?? "",
+    medicalTourism: branch.medicalTourism ?? false,
+    medicalTourismInfoRu: branch.medicalTourismInfoRu ?? "",
     coverUrl: branch.coverUrl,
     sortOrder: branch.sortOrder,
     schedule: parseSchedule(branch.scheduleJson),

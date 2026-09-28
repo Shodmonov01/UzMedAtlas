@@ -47,7 +47,7 @@ function RootLayout() {
                     <Link to="/moderation" className="hover:text-primary">
                       Очередь
                     </Link>
-                    <Link to="/moderation/leads" className="hover:text-primary">
+                    <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className="hover:text-primary">
                       Заявки
                     </Link>
                     <span>Модерация</span>

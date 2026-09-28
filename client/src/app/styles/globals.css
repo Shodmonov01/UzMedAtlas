@@ -96,6 +96,13 @@ h3,
     var(--paper);
 }
 
+/* Yandex Maps must not expand CSS grid/flex parents */
+.branch-map,
+.branch-map > ymaps,
+.branch-map .ymaps-2-1-79-map {
+  max-width: 100% !important;
+}
+
 .card-shadow,
 .textarea-shadow,
 .soft-card {

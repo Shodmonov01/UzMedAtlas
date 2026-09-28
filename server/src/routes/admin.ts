@@ -188,7 +188,13 @@ export async function adminRoutes(app: FastifyInstance) {
     const { id } = request.params as { id: string };
     const clinic = await prisma.clinic.findUnique({
       where: { id },
-      include: { specialties: true, branches: true, photos: true, doctors: true, equipment: true },
+    include: {
+      specialties: true,
+      branches: { include: { specialties: true } },
+      photos: true,
+      doctors: true,
+      equipment: true,
+    },
     });
     if (!clinic) return reply.code(404).send({ error: "not_found" });
     if (clinic.status !== "moderation") {

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { cabinetMe, createCabinetBranch, fetchCabinetClinic } from "@/shared/api/cabinet";
+import { cabinetMe, createCabinetBranch, fetchCabinetClinic, uploadCabinetFile } from "@/shared/api/cabinet";
 import { fetchSpecialties } from "@/shared/api/client";
 import { BranchEditorForm } from "@/widgets/clinic-form/BranchEditorForm";
 
@@ -50,6 +50,7 @@ function NewBranchPage() {
         <BranchEditorForm
           specialties={specialties.data}
           allowedSpecialtyIds={clinic.data.specialtyIds}
+          onUpload={uploadCabinetFile}
           initial={{
             city: clinic.data.city,
             phone: clinic.data.phone,
@@ -63,6 +64,7 @@ function NewBranchPage() {
             void navigate({
               to: "/cabinet/clinics/$id/branches/$branchId",
               params: { id, branchId: created.id },
+              search: { section: undefined },
             });
           }}
         />

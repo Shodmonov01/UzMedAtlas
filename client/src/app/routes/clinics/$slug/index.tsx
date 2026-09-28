@@ -53,7 +53,8 @@ function ClinicDetailPage() {
   });
 
   if (clinic.isLoading) return <p className="text-muted">Загрузка…</p>;
-  if (clinic.isError || !clinic.data) {
+  if (clinic.isError) return <p className="text-danger">Не удалось загрузить страницу клиники</p>;
+  if (!clinic.data) {
     return (
       <div>
         <p className="text-danger">Клиника не найдена</p>
@@ -125,7 +126,9 @@ function ClinicDetailPage() {
               ) : null}
               <div className="min-w-0 flex-1 text-white">
                 <p className="text-sm font-semibold text-white/75">
-                  {cityLabel}
+                  {(data.cities?.length
+                    ? data.cities.map((c: string) => CITY_LABELS[c] || c).join(", ")
+                    : cityLabel)}
                   {data.foundedYear ? ` · с ${data.foundedYear}` : ""}
                   {data.responseHours ? ` · ответ ~${data.responseHours}ч` : ""}
                 </p>
@@ -218,27 +221,128 @@ function ClinicDetailPage() {
             </Section>
           ) : null}
 
-          {data.chiefDoctorName ? (
-            <Section title="Руководство">
+          {(text(data.developmentPlansRu) || text(data.developmentPlansEn)) && (
+            <Section title="Планы развития">
+              <p className="max-w-3xl text-sm leading-relaxed text-muted md:text-base">
+                {text(data.developmentPlansRu) || text(data.developmentPlansEn)}
+              </p>
+            </Section>
+          )}
+
+          {data.founderName ? (
+            <Section title="Основатель">
               <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-5">
-                {data.chiefDoctorPhotoUrl ? (
-                  <img
-                    src={data.chiefDoctorPhotoUrl}
-                    alt=""
-                    className="h-16 w-16 rounded-2xl object-cover"
-                  />
+                {data.founderPhotoUrl ? (
+                  <img src={data.founderPhotoUrl} alt="" className="h-16 w-16 rounded-2xl object-cover" />
                 ) : (
                   <div className="grid h-16 w-16 place-items-center rounded-2xl bg-mint text-lg font-extrabold text-primary">
-                    {(data.chiefDoctorName || "?").slice(0, 1)}
+                    {String(data.founderName).slice(0, 1)}
                   </div>
                 )}
                 <div>
-                  <p className="text-lg font-extrabold text-ink">{data.chiefDoctorName}</p>
-                  <p className="text-sm text-muted">
-                    {data.chiefDoctorRoleRu || data.chiefDoctorRoleEn}
-                  </p>
+                  <p className="text-lg font-extrabold text-ink">{data.founderName}</p>
+                  <p className="text-sm text-muted">{data.founderRoleRu || data.founderRoleEn}</p>
+                  {(data.founderBioRu || data.founderBioEn) && (
+                    <p className="mt-2 text-sm text-muted">{data.founderBioRu || data.founderBioEn}</p>
+                  )}
                 </div>
               </div>
+            </Section>
+          ) : null}
+
+          {Array.isArray(data.achievements) && data.achievements.length ? (
+            <Section title="Достижения">
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {data.achievements.map((a: { id?: string; titleRu?: string; titleEn?: string; descriptionRu?: string; descriptionEn?: string; year?: number | null }) => (
+                  <li key={a.id || a.titleRu} className="rounded-2xl border border-line bg-white p-4">
+                    <p className="font-bold text-ink">{a.titleRu || a.titleEn}</p>
+                    {(a.descriptionRu || a.descriptionEn) ? <p className="mt-1 text-sm text-muted">{a.descriptionRu || a.descriptionEn}</p> : null}
+                    {a.year ? <p className="mt-1 text-sm text-muted">{a.year}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          ) : null}
+
+          {Array.isArray(data.technologies) && data.technologies.length ? (
+            <Section title="Технологии и методики">
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {data.technologies.map(
+                  (t: { id?: string; nameRu?: string; nameEn?: string; descriptionRu?: string; descriptionEn?: string }) => (
+                    <li key={t.id || t.nameRu} className="rounded-2xl border border-line bg-white p-4">
+                      <p className="font-bold text-ink">{t.nameRu || t.nameEn}</p>
+                      {(t.descriptionRu || t.descriptionEn) && (
+                        <p className="mt-2 text-sm text-muted">{t.descriptionRu || t.descriptionEn}</p>
+                      )}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </Section>
+          ) : null}
+
+          {data.chiefDoctorName || (Array.isArray(data.leaders) && data.leaders.length) ? (
+            <Section title="Руководство">
+              {data.chiefDoctorName ? (
+                <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-5">
+                  {data.chiefDoctorPhotoUrl ? (
+                    <img
+                      src={data.chiefDoctorPhotoUrl}
+                      alt=""
+                      className="h-16 w-16 rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-16 w-16 place-items-center rounded-2xl bg-mint text-lg font-extrabold text-primary">
+                      {(data.chiefDoctorName || "?").slice(0, 1)}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-lg font-extrabold text-ink">{data.chiefDoctorName}</p>
+                    <p className="text-sm text-muted">
+                      {data.chiefDoctorRoleRu || data.chiefDoctorRoleEn}
+                    </p>
+                    {(data.chiefDoctorBioRu || data.chiefDoctorBioEn) && (
+                      <p className="mt-2 text-sm leading-relaxed text-muted">
+                        {data.chiefDoctorBioRu || data.chiefDoctorBioEn}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+              {Array.isArray(data.leaders) && data.leaders.length ? (
+                <ul className={`grid gap-3 sm:grid-cols-2 ${data.chiefDoctorName ? "mt-4" : ""}`}>
+                  {data.leaders.map(
+                    (l: {
+                      id?: string;
+                      name: string;
+                      roleRu?: string;
+                      roleEn?: string;
+                      bioRu?: string;
+                      bioEn?: string;
+                      photoUrl?: string | null;
+                    }) => (
+                      <li key={l.id || l.name} className="rounded-2xl border border-line bg-white p-4">
+                        <div className="flex gap-3">
+                          {l.photoUrl ? (
+                            <img src={l.photoUrl} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                          ) : (
+                            <div className="grid h-12 w-12 place-items-center rounded-xl bg-sand text-sm font-extrabold text-muted">
+                              {l.name.slice(0, 1)}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-extrabold text-ink">{l.name}</p>
+                            <p className="text-sm text-muted">{l.roleRu || l.roleEn}</p>
+                            {(l.bioRu || l.bioEn) && (
+                              <p className="mt-1 text-sm text-muted">{l.bioRu || l.bioEn}</p>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              ) : null}
             </Section>
           ) : null}
 
@@ -256,6 +360,14 @@ function ClinicDetailPage() {
                     bioEn?: string;
                     photoUrl?: string | null;
                     experienceYears?: number | null;
+                    category?: string;
+                    certsRu?: string;
+                    certsEn?: string;
+                    continuingEducationRu?: string;
+                    internationalExperienceRu?: string;
+                    researchActivityRu?: string;
+                    awardsRu?: string;
+                    achievementsRu?: string;
                   }) => (
                     <li key={d.id} className="rounded-2xl border border-line bg-white p-5">
                       <div className="flex gap-3">
@@ -273,6 +385,9 @@ function ClinicDetailPage() {
                         <div className="min-w-0">
                           <p className="font-extrabold text-ink">{d.nameRu || d.nameEn}</p>
                           <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
+                          {d.category ? (
+                            <p className="mt-1 text-xs font-semibold text-primary">категория: {d.category}</p>
+                          ) : null}
                           {d.experienceYears != null ? (
                             <p className="mt-1 text-xs font-semibold text-primary">
                               опыт {d.experienceYears} лет
@@ -285,6 +400,14 @@ function ClinicDetailPage() {
                           {d.bioRu || d.bioEn}
                         </p>
                       )}
+                      {(d.certsRu || d.certsEn) && (
+                        <p className="mt-2 text-sm text-muted">{d.certsRu || d.certsEn}</p>
+                      )}
+                      {[d.continuingEducationRu, d.internationalExperienceRu, d.researchActivityRu, d.awardsRu, d.achievementsRu]
+                        .filter(Boolean)
+                        .map((detail, index) => (
+                          <p key={index} className="mt-2 text-sm text-muted">{detail}</p>
+                        ))}
                     </li>
                   ),
                 )}
@@ -351,16 +474,28 @@ function ClinicDetailPage() {
                     id: string;
                     nameRu?: string;
                     nameEn: string;
+                    manufacturer?: string;
                     descriptionRu?: string;
                     descriptionEn?: string;
+                    photoUrl?: string | null;
                   }) => (
                     <li key={e.id} className="rounded-2xl border border-line bg-white p-4">
-                      <p className="font-bold text-ink">{e.nameRu || e.nameEn}</p>
-                      {(e.descriptionRu || e.descriptionEn) && (
-                        <p className="mt-2 text-sm text-muted">
-                          {e.descriptionRu || e.descriptionEn}
-                        </p>
-                      )}
+                      <div className="flex gap-3">
+                        {e.photoUrl ? (
+                          <img src={e.photoUrl} alt="" className="h-14 w-14 rounded-xl object-cover" />
+                        ) : null}
+                        <div>
+                          <p className="font-bold text-ink">{e.nameRu || e.nameEn}</p>
+                          {e.manufacturer ? (
+                            <p className="mt-1 text-xs font-semibold text-primary">{e.manufacturer}</p>
+                          ) : null}
+                          {(e.descriptionRu || e.descriptionEn) && (
+                            <p className="mt-2 text-sm text-muted">
+                              {e.descriptionRu || e.descriptionEn}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ),
                 )}
@@ -379,13 +514,35 @@ function ClinicDetailPage() {
                     issuerRu?: string;
                     issuerEn?: string;
                     year?: number | null;
+                    receivedAt?: string | null;
+                    validUntil?: string | null;
+                    fileUrl?: string | null;
+                    imageUrl?: string | null;
                   }) => (
                     <li key={c.id} className="rounded-2xl border border-line bg-white p-4">
-                      <p className="font-bold text-ink">{c.nameRu || c.nameEn}</p>
-                      <p className="mt-1 text-sm text-muted">
-                        {c.issuerRu || c.issuerEn}
-                        {c.year ? ` · ${c.year}` : ""}
-                      </p>
+                      <div className="flex gap-3">
+                        {c.imageUrl ? (
+                          <img src={c.imageUrl} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                        ) : null}
+                        <div>
+                          <p className="font-bold text-ink">{c.nameRu || c.nameEn}</p>
+                          <p className="mt-1 text-sm text-muted">
+                            {c.issuerRu || c.issuerEn}
+                            {c.receivedAt ? ` · получен ${c.receivedAt}` : c.year ? ` · ${c.year}` : ""}
+                            {c.validUntil ? ` · до ${c.validUntil}` : ""}
+                          </p>
+                          {c.fileUrl ? (
+                            <a
+                              href={c.fileUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-2 inline-block text-sm font-bold text-primary"
+                            >
+                              Открыть файл
+                            </a>
+                          ) : null}
+                        </div>
+                      </div>
                     </li>
                   ),
                 )}
@@ -516,6 +673,26 @@ function ClinicDetailPage() {
               {data.whatsapp ? <p>WhatsApp: {data.whatsapp}</p> : null}
               {data.telegram ? <p>Telegram: {data.telegram}</p> : null}
               {data.instagram ? <p>Instagram: {data.instagram}</p> : null}
+              {data.youtube ? (
+                <a
+                  href={data.youtube}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block truncate hover:underline"
+                >
+                  YouTube
+                </a>
+              ) : null}
+              {data.socials?.map((social: { label: string; url: string }, index: number) => (
+                <a key={`${social.label}-${index}`} href={social.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
+                  {social.label}
+                </a>
+              ))}
+              {data.socials?.map((social: { label: string; url: string }, index: number) => (
+                <a key={`${social.label}-${index}`} href={social.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
+                  {social.label}
+                </a>
+              ))}
             </div>
             {data.coordinatorName ? (
               <div className="mt-5 border-t border-white/15 pt-4">
