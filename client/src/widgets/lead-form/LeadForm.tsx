@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from "react";
 import { submitClinicLead, type LeadPayload } from "@/shared/api/client";
+import { createId } from "@/shared/lib/id";
 
 const COUNTRIES = [
   "Uzbekistan",
@@ -53,7 +54,7 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms }: Props) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  const [idempotencyKey] = useState(() => createId());
   const checker = useMemo(() => readCheckerMeta(), []);
   const symptoms = defaultSymptoms || checker?.symptoms || "";
   const fromChecker = Boolean(symptoms || checker?.specialtySlug);

@@ -93,6 +93,11 @@ function ClinicDetailPage() {
         slug?: string;
       }
     | undefined;
+  const mapLocation = mapBranch || (
+    data.lat != null && data.lng != null && Number.isFinite(data.lat) && Number.isFinite(data.lng)
+      ? { lat: data.lat, lng: data.lng, addressRu: data.addressRu, addressEn: data.addressEn }
+      : undefined
+  );
 
   return (
     <div className="space-y-10">
@@ -556,27 +561,27 @@ function ClinicDetailPage() {
             </Section>
           ) : null}
 
-          {mapBranch ? (
+          {mapLocation ? (
             <Section title="Расположение">
-              {(mapBranch.addressRu || mapBranch.addressEn) && (
-                <p className="text-sm text-muted">{mapBranch.addressRu || mapBranch.addressEn}</p>
+              {(mapLocation.addressRu || mapLocation.addressEn) && (
+                <p className="text-sm text-muted">{mapLocation.addressRu || mapLocation.addressEn}</p>
               )}
               <div className="min-w-0 overflow-hidden">
-                <BranchMap mode="view" lat={mapBranch.lat} lng={mapBranch.lng} className="w-full max-w-full" />
+                <BranchMap mode="view" lat={mapLocation.lat} lng={mapLocation.lng} className="w-full max-w-full" />
               </div>
               <p className="text-xs text-muted">
-                Координаты: {Number(mapBranch.lat).toFixed(6)}, {Number(mapBranch.lng).toFixed(6)}
+                Координаты: {Number(mapLocation.lat).toFixed(6)}, {Number(mapLocation.lng).toFixed(6)}
               </p>
               <div className="flex flex-wrap gap-3">
                 <a
                   className="btn btn-primary"
-                  href={yandexRouteUrl(mapBranch.lat, mapBranch.lng)}
+                  href={yandexRouteUrl(mapLocation.lat, mapLocation.lng)}
                   target="_blank"
                   rel="noreferrer"
                 >
                   Построить маршрут
                 </a>
-                {mapBranch.slug ? (
+                {mapBranch?.slug ? (
                   <Link
                     to="/clinics/$slug/branches/$branchSlug"
                     params={{ slug, branchSlug: mapBranch.slug }}

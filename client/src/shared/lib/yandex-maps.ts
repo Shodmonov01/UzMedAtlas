@@ -28,6 +28,11 @@ export type YMapsPlacemark = {
   };
 };
 
+export type YMapsGeoObject = {
+  getAddressLine: () => string;
+  geometry?: { getCoordinates: () => YMapsCoords };
+};
+
 export type YMapsApi = {
   ready: (cb?: () => void) => Promise<void>;
   Map: new (
@@ -45,7 +50,7 @@ export type YMapsApi = {
     options?: { results?: number; lang?: string },
   ) => Promise<{
     geoObjects: {
-      get: (index: number) => { getAddressLine: () => string } | null;
+      get: (index: number) => YMapsGeoObject | null;
     };
   }>;
 };
@@ -111,6 +116,19 @@ export function yandexPointUrl(lat: number, lng: number) {
 
 export function yandexRouteUrl(lat: number, lng: number) {
   return `https://yandex.ru/maps/?rtext=~${lat},${lng}&rtt=auto`;
+}
+
+export async function geocodeYandexAddress(address: string) {
+  const ymaps = await loadYandexMaps();
+  const result = await ymaps.geocode(address, { results: 1, lang: "ru_RU" });
+  const first = result.geoObjects.get(0);
+  const coordinates = first?.geometry?.getCoordinates();
+  if (!coordinates) throw new Error("Адрес не найден на карте");
+  return {
+    lat: coordinates[0],
+    lng: coordinates[1],
+    addressRu: first?.getAddressLine() || address,
+  };
 }
 
 export { TASHKENT };

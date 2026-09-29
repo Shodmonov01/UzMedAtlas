@@ -50,7 +50,7 @@ function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function HealthCheckerWidget() {
+export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
   const { isOpen, open, close, toggle } = useHealthChecker();
   const panelId = useId();
   const listRef = useRef<HTMLDivElement>(null);
@@ -384,7 +384,7 @@ export function HealthCheckerWidget() {
         </section>
       ) : null}
 
-      {!isOpen ? (
+      {showTip && !isOpen ? (
         <button
           type="button"
           className="hc-tip pointer-events-auto hidden max-w-[220px] rounded-2xl rounded-br-md bg-white px-3.5 py-2 text-left text-xs font-bold leading-snug text-ink shadow-md ring-1 ring-line sm:block"

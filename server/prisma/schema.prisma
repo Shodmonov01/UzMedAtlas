@@ -35,6 +35,8 @@ model Clinic {
   city                String
   addressEn           String
   addressRu           String
+  lat                 Float?
+  lng                 Float?
   descriptionEn       String
   descriptionRu       String
   historyEn           String?

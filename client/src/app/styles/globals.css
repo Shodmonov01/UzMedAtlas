@@ -109,6 +109,85 @@ h3,
   box-shadow: 0 18px 50px -28px rgba(31, 41, 55, 0.28);
 }
 
+.clinic-card {
+  animation: card-rise 0.55s both;
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.clinic-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 54px -28px rgba(24, 73, 169, 0.24);
+}
+
+.home-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 2rem;
+  background:
+    radial-gradient(circle at 79% 48%, rgba(209, 233, 255, 0.92), transparent 31%),
+    linear-gradient(115deg, #eff8ff 0%, #f7faff 48%, #f3f7ff 100%);
+  box-shadow: 0 30px 80px -56px rgba(24, 73, 169, 0.32);
+}
+
+.home-hero::before,
+.home-hero::after {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgba(21, 112, 239, 0.1);
+  border-radius: 999px;
+  content: "";
+  pointer-events: none;
+}
+
+.home-hero::before {
+  width: 35rem;
+  height: 35rem;
+  top: -19rem;
+  right: 12%;
+}
+
+.home-hero::after {
+  width: 43rem;
+  height: 43rem;
+  top: -23rem;
+  right: 8%;
+}
+
+.hero-enter {
+  animation: hero-enter 0.7s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.hero-float {
+  animation: hero-float 5.5s ease-in-out infinite;
+}
+
+.hero-float-delayed {
+  animation: hero-float 5.5s ease-in-out 1.1s infinite;
+}
+
+.clinic-cover-fallback {
+  background:
+    radial-gradient(circle at 76% 20%, rgba(255,255,255,.65) 0 7%, transparent 7.5%),
+    radial-gradient(circle at 80% 29%, rgba(255,255,255,.22) 0 23%, transparent 23.5%),
+    linear-gradient(135deg, var(--primary-deep), var(--primary) 62%, #67a9f5);
+}
+
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-9px) rotate(1deg); }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

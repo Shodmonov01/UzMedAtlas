@@ -52,6 +52,8 @@ const clinicBodySchema = z.object({
   city: z.string().trim().min(2).max(80),
   addressRu: z.string().trim().min(3).max(300),
   addressEn: z.string().trim().min(3).max(300),
+  lat: z.number().min(-90).max(90).optional().nullable(),
+  lng: z.number().min(-180).max(180).optional().nullable(),
   descriptionRu: z.string().trim().min(10).max(5000),
   descriptionEn: z.string().trim().min(10).max(5000),
   historyRu: z.string().trim().max(8000).optional().nullable(),
@@ -75,6 +77,10 @@ const clinicBodySchema = z.object({
   coverColor: z.string().trim().max(20).optional(),
   logoUrl: z.string().trim().max(500).optional().nullable(),
   specialtyIds: z.array(z.string().min(1)).default([]),
+  customSpecialties: z.array(z.object({
+    nameRu: z.string().trim().min(2).max(120),
+    nameEn: z.string().trim().min(2).max(120).optional(),
+  })).max(20).default([]),
   founderName: z.string().trim().max(120).optional().nullable(),
   founderRoleRu: z.string().trim().max(120).optional().nullable(),
   founderRoleEn: z.string().trim().max(120).optional().nullable(),
@@ -158,6 +164,8 @@ function serializeClinic(clinic: any) {
     city: clinic.city,
     addressEn: clinic.addressEn,
     addressRu: clinic.addressRu,
+    lat: clinic.lat ?? null,
+    lng: clinic.lng ?? null,
     descriptionEn: clinic.descriptionEn,
     descriptionRu: clinic.descriptionRu,
     historyEn: clinic.historyEn,
@@ -444,6 +452,8 @@ export async function cabinetRoutes(app: FastifyInstance) {
         city: data.city,
         addressEn: data.addressEn,
         addressRu: data.addressRu,
+        lat: data.lat ?? null,
+        lng: data.lng ?? null,
         descriptionEn: data.descriptionEn,
         descriptionRu: data.descriptionRu,
         historyEn: data.historyEn || null,
@@ -495,7 +505,24 @@ export async function cabinetRoutes(app: FastifyInstance) {
         published: false,
         moderatorNote: null,
         specialties: {
-          create: data.specialtyIds.map((specialtyId) => ({ specialtyId })),
+          create: [
+            ...data.specialtyIds.map((specialtyId) => ({ specialty: { connect: { id: specialtyId } } })),
+            ...data.customSpecialties.map((specialty, index) => ({
+              specialty: {
+                create: {
+                  slug: `custom-${Date.now()}-${index}`,
+                  nameRu: specialty.nameRu,
+                  nameEn: specialty.nameEn || specialty.nameRu,
+                  descriptionEn: "",
+                  descriptionRu: "",
+                  explanationEn: "",
+                  explanationRu: "",
+                  keywords: specialty.nameRu,
+                  sortOrder: 900,
+                },
+              },
+            })),
+          ],
         },
       },
       include: clinicDetailInclude,
@@ -540,6 +567,8 @@ export async function cabinetRoutes(app: FastifyInstance) {
           ...(data.city !== undefined ? { city: data.city } : {}),
           ...(data.addressEn !== undefined ? { addressEn: data.addressEn } : {}),
           ...(data.addressRu !== undefined ? { addressRu: data.addressRu } : {}),
+          ...(data.lat !== undefined ? { lat: data.lat } : {}),
+          ...(data.lng !== undefined ? { lng: data.lng } : {}),
           ...(data.descriptionEn !== undefined ? { descriptionEn: data.descriptionEn } : {}),
           ...(data.descriptionRu !== undefined ? { descriptionRu: data.descriptionRu } : {}),
           ...(data.historyEn !== undefined ? { historyEn: data.historyEn } : {}),
@@ -1913,7 +1942,7 @@ export async function cabinetRoutes(app: FastifyInstance) {
     });
   });
 
-  app.post("/api/cabinet/clinics/:id/specialty-suggestions", async (request, reply) => {
+  app.post("/api/cabinet/clinics/:id/specialties", async (request, reply) => {
     if (!isClinicAuthenticated(request)) return reply.code(401).send({ error: "unauthorized" });
     const { id } = request.params as { id: string };
     const gate = await requireClinicEditable(request, id);
@@ -1930,30 +1959,53 @@ export async function cabinetRoutes(app: FastifyInstance) {
       .safeParse(request.body);
     if (!body.success) return reply.code(400).send({ error: "invalid_payload" });
     const nameEn = body.data.nameEn || body.data.nameRu;
-    const baseSlug = slugify(nameEn || body.data.nameRu);
-    let slug = baseSlug || `specialty-${Date.now()}`;
-    let i = 0;
-    while (await prisma.specialty.findUnique({ where: { slug } })) {
-      i += 1;
-      slug = `${baseSlug}-${i}`;
-    }
-    const specialty = await prisma.specialty.create({
-      data: {
-        slug,
-        nameRu: body.data.nameRu,
-        nameEn,
-        descriptionEn: "",
-        descriptionRu: "",
-        explanationEn: "",
-        explanationRu: "",
-        keywords: body.data.nameRu,
-        sortOrder: 900 + i,
-      },
+    const normalizeName = (value: string) => value.trim().toLocaleLowerCase("ru");
+    const matchesName = (item: { nameRu: string; nameEn: string }) =>
+      normalizeName(item.nameRu) === normalizeName(body.data.nameRu) ||
+      Boolean(body.data.nameEn && normalizeName(item.nameEn) === normalizeName(body.data.nameEn));
+    const attached = await prisma.clinicSpecialty.findMany({ where: { clinicId: id }, include: { specialty: true } });
+    const clinicExisting = attached.find((item) => matchesName(item.specialty))?.specialty;
+    const existing = (await prisma.specialty.findMany({ where: { sortOrder: { lt: 900 } } })).find((item) =>
+      matchesName(item),
+    ) ?? null;
+    const specialtyToAttach = clinicExisting || existing;
+    const sameName = Boolean(specialtyToAttach);
+    const transliteration: Record<string, string> = {
+      а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh", з: "z", и: "i", й: "y",
+      к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f",
+      х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+    };
+    const slugInput = body.data.nameEn || body.data.nameRu.toLocaleLowerCase("ru").replace(/[а-яё]/g, (letter) => transliteration[letter] ?? letter);
+    const baseSlug = slugify(slugInput) || `specialty-${Date.now()}`;
+    const specialty = await prisma.$transaction(async (tx) => {
+      const item = specialtyToAttach || await (async () => {
+        let slug = baseSlug;
+        let suffix = 1;
+        while (await tx.specialty.findUnique({ where: { slug } })) {
+          slug = `${baseSlug}-${suffix++}`;
+        }
+        return tx.specialty.create({
+          data: {
+            slug,
+            nameRu: body.data.nameRu,
+            nameEn,
+            descriptionEn: "",
+            descriptionRu: "",
+            explanationEn: "",
+            explanationRu: "",
+            keywords: body.data.nameRu,
+            sortOrder: 900,
+          },
+        });
+      })();
+      await tx.clinicSpecialty.upsert({
+        where: { clinicId_specialtyId: { clinicId: id, specialtyId: item.id } },
+        create: { clinicId: id, specialtyId: item.id },
+        update: {},
+      });
+      return item;
     });
-    await prisma.clinicSpecialty.create({
-      data: { clinicId: id, specialtyId: specialty.id },
-    });
-    return reply.code(201).send(specialty);
+    return reply.code(sameName ? 200 : 201).send(specialty);
   });
 
   app.get("/api/cabinet/clinics/:id/leads", async (request, reply) => {

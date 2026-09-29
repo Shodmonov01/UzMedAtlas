@@ -66,7 +66,7 @@ function RootLayout() {
           <Outlet />
         </main>
         {!isWorkspace ? <Footer /> : null}
-        {!isWorkspace ? <HealthCheckerWidget /> : null}
+        {!isWorkspace ? <HealthCheckerWidget showTip={pathname !== "/"} /> : null}
       </div>
     </HealthCheckerProvider>
   );

@@ -14,7 +14,7 @@ function HomePage() {
 
   useEffect(() => {
     if (search.specialty || search.q || search.city || search.service) {
-      document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("clinic-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [search.specialty, search.q, search.city, search.service]);
 

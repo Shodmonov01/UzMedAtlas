@@ -6,6 +6,7 @@ import {
   addClinicDoctor,
   addClinicEquipment,
   addClinicPhoto,
+  addClinicSpecialty,
   deleteClinicCertificate,
   deleteClinicDoctor,
   deleteClinicEquipment,
@@ -25,6 +26,8 @@ import {
 } from "@/shared/api/cabinet";
 import { ClinicPreview } from "./ClinicPreview";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
+import { BranchMap } from "@/shared/ui/BranchMap";
+import { AddressMapSearchButton } from "@/shared/ui/AddressMapSearchButton";
 
 const LANGS = ["ru", "en", "uz", "kz", "tr", "ar"];
 const PHOTO_CATS = [
@@ -111,9 +114,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
   const [saving, setSaving] = useState(false);
   const [languages, setLanguages] = useState(clinic.languages?.length ? clinic.languages : ["ru", "en"]);
   const [specialtyIds, setSpecialtyIds] = useState(clinic.specialtyIds || []);
+  const [addedSpecialties, setAddedSpecialties] = useState<Specialty[]>(
+    (clinic.specialties || []).filter((item) => !specialties.some((listed) => listed.id === item.id)),
+  );
+  const [addingSpecialty, setAddingSpecialty] = useState(false);
   const [leaders, setLeaders] = useState<LeaderItem[]>(clinic.leaders || []);
   const [achievements, setAchievements] = useState<AchievementItem[]>(clinic.achievements || []);
   const [socials, setSocials] = useState<SocialItem[]>(clinic.socials || []);
+  const [clinicAddressRu, setClinicAddressRu] = useState(clinic.addressRu || "");
+  const [clinicCoords, setClinicCoords] = useState<{ lat: number | null; lng: number | null }>({
+    lat: clinic.lat ?? null,
+    lng: clinic.lng ?? null,
+  });
   const continueAfterSave = useRef(false);
   const quietSave = useRef(false);
   const skipSpecialtyAutosave = useRef(true);
@@ -452,7 +464,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
           <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
             <h2 className="text-xl font-extrabold">Направления</h2>
             <div className="grid gap-2 md:grid-cols-2">
-              {specialties.map((item) => {
+              {[...specialties, ...addedSpecialties.filter((added) => !specialties.some((item) => item.id === added.id))].map((item) => {
                 const id = item.id || item.slug;
                 return (
                   <label key={id} className="flex items-center gap-2 text-sm font-semibold">
@@ -499,24 +511,39 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 className="space-y-2 rounded-2xl border border-dashed border-line p-4"
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const fd = new FormData(e.currentTarget);
+                  if (addingSpecialty) return;
+                  const form = e.currentTarget;
+                  const fd = new FormData(form);
                   const nameRu = String(fd.get("nameRu") || "").trim();
-                  if (!nameRu) return;
-                  const { suggestSpecialty } = await import("@/shared/api/cabinet");
-                  await suggestSpecialty(clinic.id, {
-                    nameRu,
-                    nameEn: String(fd.get("nameEn") || "") || nameRu,
-                  });
-                  e.currentTarget.reset();
-                  await refresh();
-                  setMessage("Направление предложено и добавлено");
+                  const nameEn = String(fd.get("nameEn") || "").trim();
+                  setAddingSpecialty(true);
+                  setError(null);
+                  setMessage(null);
+                  try {
+                    const specialty = (await addClinicSpecialty(clinic.id, {
+                      nameRu,
+                      ...(nameEn ? { nameEn } : {}),
+                    })) as Specialty;
+                    setAddedSpecialties((prev) => [...prev.filter((item) => item.id !== specialty.id), specialty]);
+                    setSpecialtyIds((prev) => (prev.includes(specialty.id) ? prev : [...prev, specialty.id]));
+                    form.reset();
+                    await refresh();
+                    setMessage("Направление добавлено в клинику");
+                  } catch {
+                    setError("Не удалось добавить направление. Проверьте название и попробуйте ещё раз.");
+                  } finally {
+                    setAddingSpecialty(false);
+                  }
                 }}
               >
-                <p className="text-sm font-bold">Предложить новое направление</p>
-                <input name="nameRu" required className="field" placeholder="Название RU" />
-                <input name="nameEn" className="field" placeholder="Name EN" />
-                <button className="btn btn-ghost text-sm" type="submit">
-                  Предложить
+                <div>
+                  <p className="text-sm font-bold">Добавить своё направление</p>
+                  <p className="mt-1 text-xs text-muted">Оно сразу появится в списке вашей клиники.</p>
+                </div>
+                <input name="nameRu" required minLength={2} maxLength={120} className="field" placeholder="Название на русском" />
+                <input name="nameEn" minLength={2} maxLength={120} className="field" placeholder="Название на английском (необязательно)" />
+                <button className="btn btn-ghost text-sm" type="submit" disabled={addingSpecialty}>
+                  {addingSpecialty ? "Добавляем…" : "Добавить направление"}
                 </button>
               </form>
             ) : null}
@@ -1080,8 +1107,10 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
               await save({
-                addressRu: String(fd.get("addressRu")),
+                addressRu: clinicAddressRu,
                 addressEn: String(fd.get("addressEn")),
+                lat: clinicCoords.lat,
+                lng: clinicCoords.lng,
                 phone: String(fd.get("phone")),
                 email: String(fd.get("email")),
                 website: String(fd.get("website") || "") || null,
@@ -1098,11 +1127,40 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             <h2 className="text-xl font-extrabold">Контакты</h2>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Адрес (RU)">
-                <input name="addressRu" required className="field" defaultValue={clinic.addressRu} disabled={locked} />
+                <div className="space-y-1.5">
+                  <input
+                    name="addressRu"
+                    required
+                    className="field"
+                    value={clinicAddressRu}
+                    disabled={locked}
+                    onChange={(event) => setClinicAddressRu(event.target.value)}
+                  />
+                  <AddressMapSearchButton
+                    address={clinicAddressRu.trim() ? `${clinicAddressRu}, ${displayCity(clinic.city)}` : clinicAddressRu}
+                    disabled={locked}
+                    onFound={({ lat, lng }) => setClinicCoords({ lat, lng })}
+                  />
+                </div>
               </Field>
               <Field label="Адрес (EN)">
                 <input name="addressEn" required className="field" defaultValue={clinic.addressEn} disabled={locked} />
               </Field>
+              <div className="space-y-2 md:col-span-2">
+                <p className="text-sm font-bold">Точка клиники на карте <span className="font-medium text-muted">(необязательно)</span></p>
+                <p className="text-sm text-muted">Нажмите на карту или перетащите метку. Изменения сохраняются кнопкой «Сохранить».</p>
+                <BranchMap
+                  mode={locked ? "view" : "pick"}
+                  lat={clinicCoords.lat}
+                  lng={clinicCoords.lng}
+                  onPick={({ lat, lng }) => setClinicCoords({ lat, lng })}
+                />
+                <p className="text-xs text-muted">
+                  {clinicCoords.lat != null && clinicCoords.lng != null
+                    ? `Выбрано: ${clinicCoords.lat.toFixed(6)}, ${clinicCoords.lng.toFixed(6)}`
+                    : "Точка пока не выбрана"}
+                </p>
+              </div>
               <Field label="Телефон">
                 <input name="phone" required className="field" defaultValue={clinic.phone} disabled={locked} />
               </Field>

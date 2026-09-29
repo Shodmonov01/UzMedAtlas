@@ -45,12 +45,18 @@ function readSignedCookie(request: FastifyRequest, name: string) {
   return safeEqual(sig, sign(exp));
 }
 
+function cookieSecure() {
+  const site = process.env.SITE_URL || "";
+  if (site) return site.startsWith("https://");
+  return process.env.NODE_ENV === "production";
+}
+
 function writeSignedCookie(reply: FastifyReply, name: string) {
   const exp = String(Date.now() + MAX_AGE_SECONDS * 1000);
   reply.setCookie(name, `${exp}.${sign(exp)}`, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: cookieSecure(),
     path: "/",
     maxAge: MAX_AGE_SECONDS,
   });
@@ -98,7 +104,7 @@ export function setClinicSession(reply: FastifyReply, ownerId: string) {
   reply.setCookie(CLINIC_COOKIE, `${payload}.${sign(payload)}`, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: cookieSecure(),
     path: "/",
     maxAge: MAX_AGE_SECONDS,
   });

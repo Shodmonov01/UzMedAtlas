@@ -110,6 +110,8 @@ export type CabinetClinic = {
   city: string;
   addressEn: string;
   addressRu: string;
+  lat?: number | null;
+  lng?: number | null;
   descriptionEn: string;
   descriptionRu: string;
   historyEn?: string | null;
@@ -218,6 +220,8 @@ export type ClinicFormPayload = Partial<{
   city: string;
   addressRu: string;
   addressEn: string;
+  lat: number | null;
+  lng: number | null;
   descriptionRu: string;
   descriptionEn: string;
   historyRu: string | null;
@@ -238,6 +242,7 @@ export type ClinicFormPayload = Partial<{
   coverColor: string;
   logoUrl: string | null;
   specialtyIds: string[];
+  customSpecialties: { nameRu: string; nameEn?: string }[];
   founderName: string | null;
   founderRoleRu: string | null;
   founderRoleEn: string | null;
@@ -543,8 +548,8 @@ export async function replaceBranchPhoto(
   return data;
 }
 
-export async function suggestSpecialty(clinicId: string, payload: { nameRu: string; nameEn?: string }) {
-  const { data } = await api.post(`/api/cabinet/clinics/${clinicId}/specialty-suggestions`, payload);
+export async function addClinicSpecialty(clinicId: string, payload: { nameRu: string; nameEn?: string }) {
+  const { data } = await api.post(`/api/cabinet/clinics/${clinicId}/specialties`, payload);
   return data;
 }
 
