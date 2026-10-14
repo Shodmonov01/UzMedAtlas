@@ -308,7 +308,7 @@ function BranchDetailPage() {
         ) : null}
       </div>
 
-      <aside className="min-w-0 space-y-4 lg:sticky lg:top-24 lg:self-start">
+      <aside className="min-w-0 space-y-4">
         <LeadForm
           clinicSlug={slug}
           clinicName={data.clinic?.nameRu || data.clinic?.nameEn || data.nameRu || data.nameEn}

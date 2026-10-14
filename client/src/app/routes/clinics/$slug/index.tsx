@@ -650,7 +650,7 @@ function ClinicDetailPage() {
           </Section>
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <aside className="min-w-0 space-y-4">
           <div className="rounded-3xl bg-primary-deep p-6 text-white">
             <p className="text-sm text-white/70">Контакты</p>
             <a

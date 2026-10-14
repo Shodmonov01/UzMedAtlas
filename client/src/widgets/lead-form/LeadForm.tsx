@@ -61,7 +61,7 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms }: Props) {
 
   if (done) {
     return (
-      <div className="soft-card rounded-[1.5rem] bg-success-soft p-6 text-sm">
+      <div className="soft-card rounded-[1.5rem] bg-success-soft p-6 text-sm lg:sticky lg:top-24">
         <p className="font-extrabold text-success">Заявка отправлена</p>
         <p className="mt-2 text-muted">
           Координатор {clinicName} свяжется с вами. Это запрос на обратный звонок, не запись к врачу.
@@ -73,7 +73,7 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms }: Props) {
   return (
     <form
       id={formId}
-      className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6"
+      className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-y-contain"
       onSubmit={async (e) => {
         e.preventDefault();
         setLoading(true);
