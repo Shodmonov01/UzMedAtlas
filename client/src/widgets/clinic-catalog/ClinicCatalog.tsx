@@ -191,24 +191,17 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           <span className="hero-cross hero-cross-blue">+</span>
           <span className="hero-cross hero-cross-green">+</span>
         </div>
-        <div className="home-hero-copy">
-          <p className="home-eyebrow">Медицинский атлас Узбекистана</p>
-          <h1>Медицина, которой<br /><span>можно доверять.</span></h1>
-          <p className="home-hero-description">Найдите свою клинику.<br />Выберите заботу о себе.</p>
-          <div className="home-hero-actions">
-            <a href="#catalog" className="btn btn-accent">Найти клинику <span aria-hidden="true">→</span></a>
-            <Link to="/checker" className="home-hero-secondary">Подобрать направление <span aria-hidden="true">↗</span></Link>
+        <div className="home-hero-inner">
+          <div className="home-hero-copy">
+            <p className="home-eyebrow">Медицинский атлас Узбекистана</p>
+            <h1>Медицина, которой<br /><span>можно доверять.</span></h1>
+            <p className="home-hero-description">Клиники, услуги и специалисты Узбекистана — <br className="hidden sm:block" />для понятного выбора в одном месте.</p>
+            <div className="home-hero-actions">
+              <a href="#catalog" className="btn btn-accent">Найти клинику <span aria-hidden="true">→</span></a>
+              <Link to="/checker" className="home-hero-secondary">Подобрать направление <span aria-hidden="true">↗</span></Link>
+            </div>
           </div>
-        </div>
-        <svg className="home-hero-wave" viewBox="0 0 1440 230" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0 0C140 100 160 212 395 172L1440 0V230H0Z" fill="var(--accent)" />
-          <path d="M0 23C140 123 160 229 395 189L1440 18V230H0Z" fill="var(--paper)" />
-        </svg>
-      </div>
-
-      <div className="care-intro-band">
-        <div className="care-intro">
-          <div className="care-illustration" data-reveal aria-hidden="true">
+          <div className="care-illustration home-hero-illustration" aria-hidden="true">
             <svg viewBox="0 0 440 330" fill="none">
               <path d="M91 91C106 20 208 0 257 40L371 139C415 178 377 258 315 271L155 302C75 316 29 247 53 191Z" fill="var(--accent)" />
               <path d="M107 86C122 21 211 16 255 51L362 144C402 179 370 247 309 261L159 289C84 304 45 243 67 193Z" fill="var(--primary)" />
@@ -232,21 +225,18 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <ellipse cx="220" cy="293" rx="133" ry="5" fill="var(--primary)" fillOpacity=".06" />
             </svg>
           </div>
-          <div className="care-intro-copy" data-reveal data-reveal-delay="100">
-            <p className="section-eyebrow">Ориентир в мире медицины</p>
-            <h2>Нужная помощь.<br />Понятный выбор.</h2>
-            <p>Собрали клиники Узбекистана в одном месте. Изучайте направления, сравнивайте услуги и находите то, что подходит именно вам.</p>
-            <p>От первого вопроса до обращения в клинику — двигайтесь в своём темпе.</p>
-            <Link to="/checker" className="care-intro-link">С чего начать? <span aria-hidden="true">→</span></Link>
-          </div>
         </div>
-        <div className="care-steps">
-          <a href="#catalog" data-reveal><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></a>
-          <a href="#clinic-results" data-reveal data-reveal-delay="80"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></a>
-          <Link to="/checker" data-reveal data-reveal-delay="160"><span className="care-step-number">03</span><span><strong>Задайте вопрос</strong><small>Поможем выбрать направление</small></span></Link>
-        </div>
+        <svg className="home-hero-wave" viewBox="0 0 1440 230" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 0C140 100 160 212 395 172L1440 0V230H0Z" fill="var(--accent)" />
+          <path d="M0 23C140 123 160 229 395 189L1440 18V230H0Z" fill="var(--paper)" />
+        </svg>
       </div>
 
+      <div className="care-steps">
+        <a href="#catalog" data-reveal><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></a>
+        <a href="#clinic-results" data-reveal data-reveal-delay="80"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></a>
+        <Link to="/checker" data-reveal data-reveal-delay="160"><span className="care-step-number">03</span><span><strong>Задайте вопрос</strong><small>Поможем выбрать направление</small></span></Link>
+      </div>
       <div className="catalog-content">
         <div id="catalog" className="catalog-search-card scroll-mt-28" data-reveal>
           <div className="catalog-search-heading">
