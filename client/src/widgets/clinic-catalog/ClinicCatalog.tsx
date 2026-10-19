@@ -212,7 +212,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <rect x="143" y="108" width="53" height="53" rx="12" fill="var(--accent)" />
               <path d="M169.5 120V149M155 134.5H184" stroke="white" strokeWidth="7" strokeLinecap="round" />
               <path d="M214 115H298M214 131H279M214 147H288" stroke="#ADCABD" strokeWidth="6" strokeLinecap="round" />
-              <path d="M143 185H171L179 173L191 205L205 181L216 191H251" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              <path className="care-pulse-line" d="M143 185H171L179 173L191 205L205 181L216 191H251" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
               <rect x="276" y="173" width="23" height="38" rx="4" fill="#D5EBDE" />
               <path d="M288 181V202M282 191H294" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" />
               <g className="care-check-badge">

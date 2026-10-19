@@ -651,8 +651,8 @@ function ClinicDetailPage() {
         </div>
 
         <aside className="min-w-0 space-y-4">
-          <div className="rounded-3xl bg-primary-deep p-6 text-white">
-            <p className="text-sm text-white/70">Контакты</p>
+          <div className="rounded-3xl border border-line bg-primary-soft p-6 text-ink">
+            <p className="text-sm text-muted">Контакты</p>
             <a
               href={`tel:${String(data.phone || "").replace(/\s/g, "")}`}
               className="mt-3 block text-lg font-bold hover:underline"
@@ -660,7 +660,7 @@ function ClinicDetailPage() {
               {data.phone}
             </a>
             {data.email ? (
-              <a href={`mailto:${data.email}`} className="mt-2 block text-sm text-white/85 hover:underline">
+              <a href={`mailto:${data.email}`} className="mt-2 block text-sm text-primary hover:underline">
                 {data.email}
               </a>
             ) : null}
@@ -669,12 +669,12 @@ function ClinicDetailPage() {
                 href={data.website}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 block truncate text-sm text-white/85 hover:underline"
+                className="mt-2 block truncate text-sm text-primary hover:underline"
               >
                 {data.website.replace(/^https?:\/\//, "")}
               </a>
             ) : null}
-            <div className="mt-4 space-y-1 text-sm text-white/80">
+            <div className="mt-4 space-y-1 text-sm text-ink">
               {data.whatsapp ? <p>WhatsApp: {data.whatsapp}</p> : null}
               {data.telegram ? <p>Telegram: {data.telegram}</p> : null}
               {data.instagram ? <p>Instagram: {data.instagram}</p> : null}
@@ -700,15 +700,15 @@ function ClinicDetailPage() {
               ))}
             </div>
             {data.coordinatorName ? (
-              <div className="mt-5 border-t border-white/15 pt-4">
-                <p className="text-xs uppercase tracking-wide text-white/55">Координатор</p>
+              <div className="mt-5 border-t border-line pt-4">
+                <p className="text-xs uppercase tracking-wide text-muted">Координатор</p>
                 <p className="mt-1 font-bold">{data.coordinatorName}</p>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-muted">
                   {data.coordinatorRoleRu || data.coordinatorRoleEn}
                 </p>
               </div>
             ) : null}
-            <p className="mt-4 text-sm text-white/60">Ответ около {data.responseHours} ч</p>
+            <p className="mt-4 text-sm text-muted">Ответ около {data.responseHours} ч</p>
           </div>
           <LeadForm
             clinicSlug={data.slug}
