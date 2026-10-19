@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "pretypecheck": "npm run routes:gen",
     "typecheck": "tsc -b --pretty false",
+    "test": "node --test tests/*.test.mjs",
     "lint": "eslint ."
   },
   "dependencies": {
