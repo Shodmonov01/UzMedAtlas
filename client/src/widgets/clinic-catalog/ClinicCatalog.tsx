@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { CITY_LABELS, fetchClinics, fetchSpecialties } from "@/shared/api/client";
 import { SelectField } from "@/shared/ui/SelectField";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
+import { useScrollReveal } from "@/shared/lib/use-scroll-reveal";
 
 export type CatalogSearch = {
   q?: string;
@@ -145,6 +146,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [modalOpen]);
 
+  const revealRef = useScrollReveal<HTMLElement>(clinics.data);
   const advancedCount = countAdvanced(search);
   const specialtyOptions = [
     { value: "", label: "Направление" },
@@ -177,10 +179,18 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   }
 
   return (
-    <section className="reference-home">
+    <section ref={revealRef} className="reference-home">
       <div className="home-hero">
         <img className="home-hero-photo" src="/images/consultation-banner.jpg" alt="" width="1920" height="2876" fetchPriority="high" />
         <div className="home-hero-shade" />
+        <div className="home-hero-accents" aria-hidden="true">
+          <svg className="hero-flow-lines" viewBox="0 0 600 420" fill="none">
+            <path className="hero-flow-blue" pathLength="1" d="M38 310C155 345 108 72 275 107S442 301 574 70" />
+            <path className="hero-flow-green" pathLength="1" d="M70 344C202 370 145 98 300 132S475 310 590 106" />
+          </svg>
+          <span className="hero-cross hero-cross-blue">+</span>
+          <span className="hero-cross hero-cross-green">+</span>
+        </div>
         <div className="home-hero-copy">
           <p className="home-eyebrow">Медицинский атлас Узбекистана</p>
           <h1>Медицина, которой<br /><span>можно доверять.</span></h1>
@@ -198,7 +208,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
       <div className="care-intro-band">
         <div className="care-intro">
-          <div className="care-illustration" aria-hidden="true">
+          <div className="care-illustration" data-reveal aria-hidden="true">
             <svg viewBox="0 0 440 330" fill="none">
               <path d="M91 91C106 20 208 0 257 40L371 139C415 178 377 258 315 271L155 302C75 316 29 247 53 191Z" fill="var(--accent)" />
               <path d="M107 86C122 21 211 16 255 51L362 144C402 179 370 247 309 261L159 289C84 304 45 243 67 193Z" fill="var(--primary)" />
@@ -212,15 +222,17 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <path d="M143 185H171L179 173L191 205L205 181L216 191H251" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
               <rect x="276" y="173" width="23" height="38" rx="4" fill="#D5EBDE" />
               <path d="M288 181V202M282 191H294" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" />
-              <circle cx="326" cy="87" r="28" fill="var(--accent)" />
-              <path d="M315 87L323 95L338 79" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              <g className="care-check-badge">
+                <circle cx="326" cy="87" r="28" fill="var(--accent)" />
+                <path d="M315 87L323 95L338 79" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              </g>
               <rect x="74" y="197" width="65" height="78" rx="8" fill="white" stroke="#B9DACA" strokeWidth="2" />
               <path d="M89 217H122M89 229H112M89 241H119M89 253H104" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" />
               <circle cx="221" cy="242" r="3" fill="#AAC9C0" />
               <ellipse cx="220" cy="293" rx="133" ry="5" fill="var(--primary)" fillOpacity=".06" />
             </svg>
           </div>
-          <div className="care-intro-copy">
+          <div className="care-intro-copy" data-reveal data-reveal-delay="100">
             <p className="section-eyebrow">Ориентир в мире медицины</p>
             <h2>Нужная помощь.<br />Понятный выбор.</h2>
             <p>Собрали клиники Узбекистана в одном месте. Изучайте направления, сравнивайте услуги и находите то, что подходит именно вам.</p>
@@ -229,14 +241,14 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           </div>
         </div>
         <div className="care-steps">
-          <a href="#catalog"><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></a>
-          <a href="#clinic-results"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></a>
-          <Link to="/checker"><span className="care-step-number">03</span><span><strong>Задайте вопрос</strong><small>Поможем выбрать направление</small></span></Link>
+          <a href="#catalog" data-reveal><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></a>
+          <a href="#clinic-results" data-reveal data-reveal-delay="80"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></a>
+          <Link to="/checker" data-reveal data-reveal-delay="160"><span className="care-step-number">03</span><span><strong>Задайте вопрос</strong><small>Поможем выбрать направление</small></span></Link>
         </div>
       </div>
 
       <div className="catalog-content">
-        <div id="catalog" className="catalog-search-card scroll-mt-28">
+        <div id="catalog" className="catalog-search-card scroll-mt-28" data-reveal>
           <div className="catalog-search-heading">
             <div><p className="section-eyebrow">Начните здесь</p><h2>Найдём вашу клинику</h2></div>
             <span className="catalog-search-caption">Город. Направление. Ваш выбор.</span>
@@ -297,7 +309,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       ) : null}
 
       <div id="clinic-results" className="mt-12 scroll-mt-28">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3" data-reveal>
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[.16em] text-primary">Ваш следующий шаг</p>
             <h2 className="mt-1 text-3xl font-black tracking-tight text-ink">Выберите свою клинику</h2>
@@ -326,9 +338,11 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       ) : null}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {clinics.data?.map((clinic) => (
+        {clinics.data?.map((clinic, index) => (
           <article
             key={clinic.id}
+            data-reveal
+            data-reveal-delay={(index % 3) * 70}
             className="clinic-card group soft-card flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-line/70 bg-white"
           >
             <div className="relative h-44 shrink-0 overflow-hidden bg-primary-soft">

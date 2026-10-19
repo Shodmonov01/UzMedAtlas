@@ -2,16 +2,19 @@
 
 /*
   Semantic tokens for UzMedAtlas.
-  Navy, logo-green accents and soft mint surfaces follow the supplied visual reference.
+  Brand colors are taken from Solid.svg; light surfaces are tints of that palette.
 */
 :root {
-  --primary: #0c3b62;
-  --primary-hover: #174f79;
-  --primary-deep: #082f50;
-  --primary-soft: #edf4f8;
-  --primary-soft-2: #dceaf2;
+  --primary: #1a526b;
+  --primary-hover: #005881;
+  --primary-deep: #1a526b;
+  --brand-blue: #0187c5;
+  --brand-sky: #55b6e3;
+  --primary-soft: #eff7fb;
+  --primary-soft-2: #dceff7;
   --accent: #57bf8c;
-  --accent-hover: #70cda0;
+  --accent-hover: #7acda3;
+  --accent-deep: #369265;
   --accent-strong: #327755;
   --success: var(--accent-strong);
   --success-soft: #e7f6ee;
@@ -19,10 +22,10 @@
   --warning-soft: #fff9db;
   --danger: #fa5252;
   --danger-soft: #fff5f5;
-  --info: #228be6;
+  --info: var(--brand-blue);
 
   /* App aliases (kept for existing Tailwind class names) */
-  --ink: #123b57;
+  --ink: var(--primary-deep);
   --teal: var(--primary);
   --teal-deep: var(--primary-deep);
   --sand: #f1f3f5;
@@ -63,6 +66,8 @@
   --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-sky: var(--brand-sky);
   --font-sans: Inter, "Segoe UI", sans-serif;
   --font-display: Inter, "Segoe UI", sans-serif;
 }
@@ -106,7 +111,7 @@ h3,
 .card-shadow,
 .textarea-shadow,
 .soft-card {
-  box-shadow: 0 10px 30px -22px rgba(8, 47, 80, 0.22);
+  box-shadow: 0 10px 30px -22px rgba(26, 82, 107, 0.22);
 }
 
 .clinic-card {
@@ -117,10 +122,10 @@ h3,
 
 .clinic-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 34px -24px rgba(8, 47, 80, 0.28);
+  box-shadow: 0 18px 34px -24px rgba(26, 82, 107, 0.28);
 }
 
-/* Home page: navy photography, a green curved edge, and mint sections. */
+/* Home page: logo-blue photography, a green curved edge, and mint sections. */
 .reference-portal .site-header { background: var(--primary-deep); border-color: #ffffff0d; color: white; }
 .reference-portal .site-header > div { max-width: 1200px; padding-block: 20px; }
 .reference-portal .site-header .text-ink { color: white; }
@@ -135,12 +140,13 @@ h3,
 
 .home-hero { position: relative; isolation: isolate; min-height: 640px; overflow: hidden; background: var(--primary-deep); color: white; }
 .home-hero-photo { position: absolute; z-index: -3; top: 0; right: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 18%; opacity: .7; }
-.home-hero-shade { position: absolute; z-index: -2; inset: 0; background: linear-gradient(90deg, #082f50f5 5%, #0c3b62ca 48%, #0c3b6299 100%); }
+.home-hero-shade { position: absolute; z-index: -2; inset: 0; background: linear-gradient(110deg, #1a526bfa 5%, #1a526be6 48%, #005881b3 100%); }
 .home-hero-copy { position: relative; z-index: 1; max-width: 1200px; margin-inline: auto; padding: 60px 24px 190px; }
 .home-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 27px; color: #c5d9e4; font-size: 12px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; }
 .home-eyebrow::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .home-hero h1 { color: white; font-size: clamp(42px, 4.5vw, 64px); line-height: 1.13; font-weight: 600; letter-spacing: -.045em; }
-.home-hero-description { margin-top: 23px; color: #8de1b4; font-size: 23px; font-weight: 400; line-height: 1.45; letter-spacing: -.015em; }
+.home-hero h1 > span { color: var(--brand-sky); }
+.home-hero-description { margin-top: 23px; color: var(--accent); font-size: 24px; font-weight: 400; line-height: 1.45; letter-spacing: -.015em; }
 .home-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 26px; margin-top: 28px; }
 .btn-accent { gap: 28px; padding: 12px 24px; background: var(--accent); color: var(--primary-deep); font-size: 14px; font-weight: 600; }
 .btn-accent:hover { background: var(--accent-hover); }
@@ -166,7 +172,7 @@ h3,
 .care-steps > a:hover strong { text-decoration: underline; text-underline-offset: 4px; }
 
 .catalog-content { width: calc(100% - 48px); max-width: 1200px; margin: 0 auto; padding-bottom: 80px; }
-.catalog-search-card { position: relative; z-index: 2; padding: 28px; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: 0 10px 35px -24px #082f5033; }
+.catalog-search-card { position: relative; z-index: 2; padding: 28px; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: 0 10px 35px -24px #1a526b33; }
 .catalog-search-heading { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px; margin-bottom: 22px; }
 .catalog-search-heading h2 { margin-top: 7px; font-size: 26px; font-weight: 600; letter-spacing: -.035em; }
 .catalog-search-caption { color: var(--muted); font-size: 12px; }
@@ -182,6 +188,71 @@ h3,
 .clinic-card h3 { font-weight: 600; letter-spacing: -.025em; }
 .clinic-card .bg-success-soft { color: var(--accent-strong); }
 
+/* Motion uses transforms and opacity so it does not move the page layout. */
+.home-hero-photo { animation: hero-photo-breathe 18s ease-in-out infinite alternate; transform-origin: 65% 35%; }
+.home-eyebrow { animation: hero-arrive .7s .05s both; }
+.home-hero h1 { animation: hero-arrive .85s .16s both; }
+.home-hero-description { animation: hero-arrive .8s .3s both; }
+.home-hero-actions { animation: hero-arrive .8s .43s both; }
+.home-hero-wave { width: 104%; left: -2%; transform-origin: center bottom; animation: wave-breathe 10s ease-in-out infinite alternate; }
+.home-hero-accents { position: absolute; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; }
+.hero-flow-lines { position: absolute; top: 8%; right: 4%; width: 41%; height: 70%; opacity: .38; animation: flow-drift 11s ease-in-out infinite alternate; }
+.hero-flow-lines path { stroke-width: 1.5; stroke-dasharray: 1; stroke-dashoffset: 0; animation: flow-draw 2.4s .3s backwards; }
+.hero-flow-blue { stroke: var(--brand-sky); }
+.hero-flow-green { stroke: var(--accent); }
+.hero-cross { position: absolute; font-size: 38px; font-weight: 400; line-height: 1; opacity: .55; animation: cross-drift 7s ease-in-out infinite alternate; }
+.hero-cross-blue { top: 20%; right: 14%; color: var(--brand-sky); }
+.hero-cross-green { top: 48%; right: 35%; color: var(--accent); font-size: 25px; animation-delay: -3s; }
+.care-illustration svg { animation: illustration-float 6s ease-in-out infinite alternate; }
+.care-check-badge { transform-box: fill-box; transform-origin: center; animation: check-breathe 4s ease-in-out infinite; }
+.reveal-pending { opacity: 0; }
+.btn { transition: transform .22s ease, background-color .22s ease, box-shadow .22s ease; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -12px #1a526b55; }
+.btn:active { transform: translateY(0) scale(.97); }
+.btn > span[aria-hidden], .home-hero-secondary > span, .care-intro-link > span { display: inline-block; transition: transform .22s ease; }
+.btn:hover > span[aria-hidden], .home-hero-secondary:hover > span, .care-intro-link:hover > span { transform: translateX(4px); }
+.site-logo-mark { transition: transform .3s ease, border-color .3s ease; }
+.site-header a:hover > .site-logo-mark { transform: rotate(-7deg); border-color: var(--brand-sky); }
+.site-header nav a { position: relative; }
+.site-header nav a::after { content: ''; position: absolute; height: 2px; left: 0; right: 0; bottom: -8px; border-radius: 2px; background: var(--brand-sky); transform: scaleX(0); transform-origin: left; transition: transform .22s ease; }
+.site-header nav a:is(:hover, :focus-visible)::after { transform: scaleX(1); }
+.care-steps > a { transition: transform .25s ease; }
+.care-steps > a:hover { transform: translateY(-4px); }
+.care-step-number { transition: transform .3s ease, background-color .3s ease; }
+.care-steps > a:hover .care-step-number { transform: rotate(-6deg); background: var(--brand-sky); }
+.clinic-card:is(:hover, :focus-within) { transform: translateY(-6px); box-shadow: 0 18px 36px -20px #1a526b40; }
+.catalog-popular > button { transition: color .2s ease, border-color .2s ease; }
+.catalog-popular > button:hover { color: var(--brand-blue); border-color: var(--brand-blue); }
+
+@keyframes hero-arrive {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-photo-breathe {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.075) translate(-.5%, -.5%); }
+}
+@keyframes wave-breathe {
+  from { transform: translateX(-.6%) scaleY(1); }
+  to { transform: translateX(.6%) scaleY(1.05); }
+}
+@keyframes flow-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes flow-drift { from { transform: translateY(-8px) rotate(-3deg); } to { transform: translateY(8px) rotate(3deg); } }
+@keyframes cross-drift { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-14px) rotate(8deg); } }
+@keyframes illustration-float { from { transform: translateY(0); } to { transform: translateY(-7px); } }
+@keyframes check-breathe { 0%, 75%, 100% { transform: scale(1); } 85% { transform: scale(1.09); } }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal-pending { opacity: 1; }
+  .btn:is(:hover, :active), .clinic-card:is(:hover, :focus-within), .care-steps > a:hover,
+  .care-steps > a:hover .care-step-number, .site-header a:hover > .site-logo-mark { transform: none; }
+}
+
 @media (max-width: 1100px) {
   .catalog-search-grid { grid-template-columns: 1.4fr 1fr 1fr; }
   .catalog-search-grid > button { width: 100%; }
@@ -193,11 +264,11 @@ h3,
   .reference-portal .site-header-action { padding: 10px 14px; font-size: 12px; }
   .home-hero { min-height: 550px; }
   .home-hero-photo { width: 100%; object-position: center 25%; }
-  .home-hero-shade { background: linear-gradient(100deg, #082f50f2 5%, #0c3b62ba 100%); }
+  .home-hero-shade { background: linear-gradient(100deg, #1a526bfa 5%, #005881db 100%); }
   .home-hero-copy { padding: 47px 24px 160px; }
   .home-eyebrow { font-size: 9px; letter-spacing: .065em; margin-bottom: 27px; }
   .home-hero h1 { font-size: clamp(30px, 8.2vw, 43px); line-height: 1.18; }
-  .home-hero-description { font-size: 19px; margin-top: 22px; }
+  .home-hero-description { font-size: 19px; margin-top: 22px; color: #a5e1c2; }
   .home-hero-actions { gap: 18px; margin-top: 27px; }
   .btn-accent { padding: 12px 20px; gap: 20px; font-size: 13px; }
   .home-hero-secondary { font-size: 12px; gap: 8px; }
@@ -224,7 +295,7 @@ h3,
   background:
     radial-gradient(circle at 76% 20%, rgba(255,255,255,.65) 0 7%, transparent 7.5%),
     radial-gradient(circle at 80% 29%, rgba(255,255,255,.22) 0 23%, transparent 23.5%),
-    linear-gradient(135deg, var(--primary-deep), var(--primary) 62%, #67a9f5);
+    linear-gradient(135deg, var(--primary-deep), var(--brand-blue) 62%, var(--brand-sky));
 }
 
 .btn {
@@ -289,7 +360,7 @@ button.field {
 .field:focus,
 .field:focus-visible {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(12, 59, 98, 0.12);
+  box-shadow: 0 0 0 3px rgba(26, 82, 107, 0.12);
 }
 
 select.field {
@@ -359,7 +430,7 @@ select.field {
 }
 
 :focus-visible {
-  outline: 3px solid rgba(12, 59, 98, 0.45);
+  outline: 3px solid rgba(26, 82, 107, 0.45);
   outline-offset: 2px;
 }
 

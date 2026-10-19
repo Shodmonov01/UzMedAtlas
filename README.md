@@ -45,5 +45,5 @@ Health Checker uses an OpenAI-compatible chat completion endpoint when `OPENAI_A
 ## Дизайн
 
 - Layout/UI — по референсам Medion (`docs/medion-reference/`)
-- Вариант по присланному референсу: основной тёмно-синий `#0c3b62`, зелёные акценты из лого `#57bf8c`, светлый мятный фон. Первый экран с фотографией под синим слоем и диагональным изогнутым краем. Токены — `client/src/app/styles/globals.css`, источник фото — `client/public/images/README.md`.
+- Вариант по присланному референсу с палитрой Solid.svg: основной `#1a526b`, синие `#005881`, `#0187c5`, `#55b6e3`, зелёные `#57bf8c`, `#369265`, `#327755`. Светлые подложки — оттенки этой палитры. Появление секций при прокрутке, плавное движение фона и отклик элементов отключаются при `prefers-reduced-motion`. Токены — `client/src/app/styles/globals.css`, источник фото — `client/public/images/README.md`.
 - Функционал — `docs/AMO.MD`
