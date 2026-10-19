@@ -2,11 +2,11 @@ import { Link } from "@tanstack/react-router";
 
 export function Footer() {
   return (
-    <footer className="mt-8 bg-primary-deep text-white">
+    <footer className="site-footer mt-8 bg-primary-deep text-white">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <Link to="/" className="inline-flex items-center gap-2 text-lg font-extrabold tracking-tight">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-white/15 text-lg">✚</span>
+            <span className="grid h-8 w-8 place-items-center rounded-xl bg-accent/15 text-lg text-accent">✚</span>
             UzMedAtlas
           </Link>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/65">

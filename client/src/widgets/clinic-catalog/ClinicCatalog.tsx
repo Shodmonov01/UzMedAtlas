@@ -177,98 +177,85 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   }
 
   return (
-    <section className="scroll-mt-24">
-      <div className="home-hero hero-enter mb-10 px-6 pb-6 pt-8 sm:px-10 sm:pt-12 lg:px-14 lg:pb-8 lg:pt-14">
-        <div className="grid items-center gap-5 lg:grid-cols-[1.1fr_.9fr] lg:gap-0">
-          <div className="relative z-10 max-w-2xl pb-5 lg:pb-16">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/75 px-3.5 py-2 text-xs font-extrabold uppercase tracking-[.12em] text-primary shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-clay shadow-[0_0_0_4px_rgba(233,134,92,.14)]" />
-              Медицинский атлас Узбекистана
-            </div>
-            <h1 className="mt-6 max-w-xl text-4xl font-black leading-[1.04] tracking-[-.06em] text-ink sm:text-5xl lg:text-[3.65rem]">
-              Найдите место, где о вас <span className="text-primary">позаботятся</span>
-            </h1>
-            <p className="mt-5 max-w-lg text-base leading-7 text-muted sm:text-lg">
-              Сравните клиники, направления и услуги. Спокойно выберите подходящий вариант и свяжитесь напрямую.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <a href="#catalog-search" className="btn btn-primary rounded-full px-6 py-3.5 shadow-xl shadow-primary/20">
-                Найти клинику <span className="text-lg" aria-hidden="true">↘</span>
-              </a>
-              <Link to="/checker" className="group inline-flex items-center gap-2 rounded-full px-3 py-3 text-sm font-bold text-ink transition hover:bg-white/70">
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-primary shadow-sm transition group-hover:scale-110">✳</span>
-                Не знаете, с чего начать?
-              </Link>
-            </div>
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-muted">
-              <span className="inline-flex items-center gap-1.5"><span className="text-primary">✓</span> Понятные профили клиник</span>
-              <span className="inline-flex items-center gap-1.5"><span className="text-primary">✓</span> Фильтры по вашим критериям</span>
-            </div>
-          </div>
-
-            <div className="relative mx-auto h-[250px] w-full max-w-[420px] sm:h-[310px] lg:h-[390px]" aria-hidden="true">
-            <div className="absolute left-1/2 top-1/2 h-[240px] w-[240px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/50 shadow-[inset_0_0_0_1px_rgba(21,112,239,.1)] sm:h-[320px] sm:w-[320px]" />
-            <div className="absolute left-1/2 top-1/2 h-[195px] w-[195px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-primary/20 sm:h-[265px] sm:w-[265px]" />
-            <div className="absolute left-1/2 top-1/2 grid h-36 w-36 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[2.5rem] bg-gradient-to-br from-primary to-primary-deep text-white shadow-[0_24px_55px_-20px_rgba(24,73,169,.35)] sm:h-48 sm:w-48 sm:rounded-[3.25rem]">
-              <div className="absolute inset-2 rounded-[2rem] border border-white/20 sm:rounded-[2.75rem]" />
-              <svg viewBox="0 0 120 120" className="relative h-24 w-24 sm:h-32 sm:w-32" fill="none" aria-hidden="true">
-                <path d="M60 104c-4.2-3.2-31-24.3-40.5-40.2C4.7 39.8 21.1 17 42 21c8.3 1.6 14.5 7.1 18 13.4C63.5 28.1 69.7 22.6 78 21c20.9-4 37.3 18.8 22.5 42.8C91 79.7 64.2 100.8 60 104Z" fill="currentColor" fillOpacity=".17" stroke="currentColor" strokeWidth="3" />
-                <path d="M54 40h12v14h14v12H66v14H54V66H40V54h14V40Z" fill="currentColor" />
-              </svg>
-              <span className="absolute bottom-4 text-[10px] font-extrabold uppercase tracking-[.2em] text-white/70">UzMedAtlas</span>
-            </div>
-            <div className="hero-float absolute left-0 top-[14%] rounded-2xl border border-white/80 bg-white/90 p-3.5 shadow-xl shadow-primary/10 backdrop-blur sm:left-[2%] sm:p-4">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary-soft text-xl text-primary">⌕</span>
-              <p className="mt-2 text-xs font-extrabold text-ink">Найдите направление</p>
-              <p className="mt-0.5 text-[10px] text-muted">от симптомов к выбору</p>
-            </div>
-            <div className="hero-float-delayed absolute bottom-[12%] right-0 rounded-2xl border border-white/80 bg-white/90 p-3.5 shadow-xl shadow-clay/10 backdrop-blur sm:right-[1%] sm:p-4">
-              <div className="flex items-center gap-2.5">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-warning-soft text-lg text-gold">✦</span>
-                <div><p className="text-xs font-extrabold text-ink">Сравните варианты</p><p className="mt-0.5 text-[10px] text-muted">услуги · врачи · контакты</p></div>
-              </div>
-            </div>
-            <span className="absolute right-[15%] top-[8%] h-3 w-3 rounded-full bg-clay shadow-[0_0_0_7px_rgba(21,112,239,.12)]" />
-            <span className="absolute bottom-[13%] left-[15%] h-2 w-2 rounded-full bg-primary" />
+    <section className="reference-home">
+      <div className="home-hero">
+        <img className="home-hero-photo" src="/images/consultation-banner.jpg" alt="" width="1920" height="2876" fetchPriority="high" />
+        <div className="home-hero-shade" />
+        <div className="home-hero-copy">
+          <p className="home-eyebrow">Медицинский атлас Узбекистана</p>
+          <h1>Медицина, которой<br /><span>можно доверять.</span></h1>
+          <p className="home-hero-description">Найдите свою клинику.<br />Выберите заботу о себе.</p>
+          <div className="home-hero-actions">
+            <a href="#catalog" className="btn btn-accent">Найти клинику <span aria-hidden="true">→</span></a>
+            <Link to="/checker" className="home-hero-secondary">Подобрать направление <span aria-hidden="true">↗</span></Link>
           </div>
         </div>
+        <svg className="home-hero-wave" viewBox="0 0 1440 230" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 0C140 100 160 212 395 172L1440 0V230H0Z" fill="var(--accent)" />
+          <path d="M0 23C140 123 160 229 395 189L1440 18V230H0Z" fill="var(--paper)" />
+        </svg>
+      </div>
 
-        <div id="catalog" className="scroll-mt-28 rounded-[1.5rem] border border-white bg-white/90 p-3 shadow-[0_20px_50px_-25px_rgba(24,73,169,.16)] backdrop-blur sm:p-4">
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-2 px-1">
-            <div>
-              <p className="text-sm font-extrabold text-ink sm:text-base">Подберите клинику под себя</p>
-              <p className="mt-0.5 text-xs text-muted">Ищите по названию, городу или направлению</p>
-            </div>
-              <span className="hidden rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary sm:inline-flex">Ваш выбор — в вашем темпе</span>
+      <div className="care-intro-band">
+        <div className="care-intro">
+          <div className="care-illustration" aria-hidden="true">
+            <svg viewBox="0 0 440 330" fill="none">
+              <path d="M91 91C106 20 208 0 257 40L371 139C415 178 377 258 315 271L155 302C75 316 29 247 53 191Z" fill="var(--accent)" />
+              <path d="M107 86C122 21 211 16 255 51L362 144C402 179 370 247 309 261L159 289C84 304 45 243 67 193Z" fill="var(--primary)" />
+              <rect x="112" y="76" width="221" height="175" rx="11" fill="white" />
+              <rect x="122" y="87" width="201" height="146" rx="4" fill="#EDF7F2" />
+              <path d="M200 251H245L250 270H194Z" fill="#AAC9C0" />
+              <rect x="173" y="270" width="99" height="7" rx="3.5" fill="var(--primary)" />
+              <rect x="143" y="108" width="53" height="53" rx="12" fill="var(--accent)" />
+              <path d="M169.5 120V149M155 134.5H184" stroke="white" strokeWidth="7" strokeLinecap="round" />
+              <path d="M214 115H298M214 131H279M214 147H288" stroke="#ADCABD" strokeWidth="6" strokeLinecap="round" />
+              <path d="M143 185H171L179 173L191 205L205 181L216 191H251" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              <rect x="276" y="173" width="23" height="38" rx="4" fill="#D5EBDE" />
+              <path d="M288 181V202M282 191H294" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" />
+              <circle cx="326" cy="87" r="28" fill="var(--accent)" />
+              <path d="M315 87L323 95L338 79" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              <rect x="74" y="197" width="65" height="78" rx="8" fill="white" stroke="#B9DACA" strokeWidth="2" />
+              <path d="M89 217H122M89 229H112M89 241H119M89 253H104" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" />
+              <circle cx="221" cy="242" r="3" fill="#AAC9C0" />
+              <ellipse cx="220" cy="293" rx="133" ry="5" fill="var(--primary)" fillOpacity=".06" />
+            </svg>
           </div>
-          <form id="catalog-search" className="rounded-2xl bg-white" onSubmit={applyQuick}>
-            <div className="grid gap-2 lg:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))_auto_auto]">
-              <input className="field" placeholder="Например, кардиология…" value={q} onChange={(e) => setQ(e.target.value)} />
-              <div>
-                <input className="field" list="catalog-city-options" placeholder="Город" value={city} onChange={(event) => setCity(event.target.value)} />
-                <datalist id="catalog-city-options">{CITY_OPTIONS.map((item) => <option key={item.value} value={item.label} />)}</datalist>
-              </div>
-              <SelectField value={specialty} options={specialtyOptions} onChange={setSpecialty} />
-              <SelectField value={sort} options={SORT_OPTIONS} onChange={setSort} />
-              <button type="button" className="btn btn-ghost px-4 py-2 text-sm" onClick={() => setModalOpen(true)}>
-                Ещё{advancedCount ? ` · ${advancedCount}` : " фильтров"}
-              </button>
-              <button className="btn btn-primary px-5 py-2 text-sm lg:col-span-6 lg:justify-self-start lg:min-w-[220px]" type="submit">Найти клинику</button>
-            </div>
-          </form>
-          {specialties.data?.length ? (
-            <div className="mt-3 flex flex-wrap items-center gap-2 px-1">
-              <span className="mr-1 text-xs font-bold text-muted">Популярные направления:</span>
-              {specialties.data.slice(0, 4).map((item) => (
-                <button key={item.slug} type="button" className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-bold text-muted transition hover:border-primary/30 hover:bg-primary-soft hover:text-primary" onClick={() => onPatchSearch({ specialty: item.slug })}>
-                  {item.nameRu || item.nameEn}
-                </button>
-              ))}
-            </div>
-          ) : null}
+          <div className="care-intro-copy">
+            <p className="section-eyebrow">Ориентир в мире медицины</p>
+            <h2>Нужная помощь.<br />Понятный выбор.</h2>
+            <p>Собрали клиники Узбекистана в одном месте. Изучайте направления, сравнивайте услуги и находите то, что подходит именно вам.</p>
+            <p>От первого вопроса до обращения в клинику — двигайтесь в своём темпе.</p>
+            <Link to="/checker" className="care-intro-link">С чего начать? <span aria-hidden="true">→</span></Link>
+          </div>
+        </div>
+        <div className="care-steps">
+          <a href="#catalog"><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></a>
+          <a href="#clinic-results"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></a>
+          <Link to="/checker"><span className="care-step-number">03</span><span><strong>Задайте вопрос</strong><small>Поможем выбрать направление</small></span></Link>
         </div>
       </div>
 
+      <div className="catalog-content">
+        <div id="catalog" className="catalog-search-card scroll-mt-28">
+          <div className="catalog-search-heading">
+            <div><p className="section-eyebrow">Начните здесь</p><h2>Найдём вашу клинику</h2></div>
+            <span className="catalog-search-caption">Город. Направление. Ваш выбор.</span>
+          </div>
+          <form id="catalog-search" onSubmit={applyQuick}>
+            <div className="catalog-search-grid">
+              <label className="catalog-query"><span>Клиника или услуга</span><input className="field" placeholder="Например, кардиология…" value={q} onChange={(e) => setQ(e.target.value)} /></label>
+              <label><span>Город</span><input className="field" list="catalog-city-options" placeholder="Все города" value={city} onChange={(event) => setCity(event.target.value)} /></label>
+              <datalist id="catalog-city-options">{CITY_OPTIONS.map((item) => <option key={item.value} value={item.label} />)}</datalist>
+              <label><span>Направление</span><SelectField value={specialty} options={specialtyOptions} onChange={setSpecialty} /></label>
+              <label><span>Сортировать по</span><SelectField value={sort} options={SORT_OPTIONS} onChange={setSort} /></label>
+              <button type="button" className="catalog-more btn btn-ghost" onClick={() => setModalOpen(true)}>Ещё{advancedCount ? ` · ${advancedCount}` : " фильтров"}</button>
+              <button className="catalog-submit btn btn-primary" type="submit">Найти <span aria-hidden="true">→</span></button>
+            </div>
+          </form>
+          {specialties.data?.length ? (
+            <div className="catalog-popular"><span>Популярные направления:</span>{specialties.data.slice(0, 4).map((item) => <button key={item.slug} type="button" onClick={() => onPatchSearch({ specialty: item.slug })}>{item.nameRu || item.nameEn}</button>)}</div>
+          ) : null}
+        </div>
       {search.specialty ? (
         <div className="mb-4 rounded-2xl border border-primary/15 bg-mint px-4 py-3 text-sm">
           <p className="font-bold text-primary">Подборка по Health Checker</p>
@@ -414,6 +401,8 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           </article>
         ))}
       </div>
+      </div>
+
       </div>
 
       {modalOpen ? (
