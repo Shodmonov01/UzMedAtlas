@@ -28,6 +28,7 @@ import { ClinicPreview } from "./ClinicPreview";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { AddressMapSearchButton } from "@/shared/ui/AddressMapSearchButton";
+import { BriefUpload } from "./BriefUpload";
 
 const LANGS = ["ru", "en", "uz", "kz", "tr", "ar"];
 const PHOTO_CATS = [
@@ -107,6 +108,7 @@ function FormActions({
 }
 
 export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSection }: Props) {
+  const editorRoot = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
   const [section, setSection] = useState<WizardSectionId>(initialSection || "basic");
   const [message, setMessage] = useState<string | null>(null);
@@ -219,7 +221,17 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+    <div ref={editorRoot} className="grid gap-6 lg:grid-cols-[220px_1fr]">
+      {!locked && <div className="lg:col-span-2"><BriefUpload onApply={async fields => {
+        if (draftTimer.current) window.clearTimeout(draftTimer.current);
+        await updateCabinetClinic(clinic.id, fields);
+        if (fields.addressRu) setClinicAddressRu(fields.addressRu);
+        await onSaved();
+        editorRoot.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input[name], textarea[name]").forEach(element => {
+          const value = fields[element.name];
+          if (value !== undefined) element.value = element.name === "city" ? displayCity(value) : value;
+        });
+      }} /></div>}
       <nav className="soft-card h-fit space-y-1 rounded-[1.5rem] bg-white p-3">
         {WIZARD_SECTIONS.map((item) => (
           <button

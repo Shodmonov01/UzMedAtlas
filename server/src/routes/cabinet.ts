@@ -26,6 +26,7 @@ import {
   serializeService,
 } from "../lib/clinic-serialize";
 import { saveUploadBuffer } from "../lib/uploads";
+import { extractBrief, parseBrief } from "../lib/brief";
 
 const withIds = <T extends { id?: string }>(items: T[] | undefined) =>
   (items || []).map((item) => ({
@@ -274,6 +275,23 @@ function draftStatusAfterEdit(status: string) {
 
 export async function cabinetRoutes(app: FastifyInstance) {
   await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024 } });
+
+  app.post("/api/cabinet/brief", async (request, reply) => {
+    const ownerId = getClinicOwnerId(request);
+    if (!ownerId) return reply.code(401).send({ error: "unauthorized" });
+    if (!checkRateLimit(`brief:${ownerId}`, 10, 60 * 60 * 1000).ok) return reply.code(429).send({ error: "rate_limit" });
+    if (!process.env.GROQ_API_KEY) return reply.code(503).send({ error: "groq_not_configured" });
+    const file = await request.file();
+    if (!file) return reply.code(400).send({ error: "no_file" });
+    const buffer = await file.toBuffer();
+    let text: string;
+    try { text = await extractBrief(buffer, file.filename); }
+    catch { return reply.code(400).send({ error: "unreadable_brief" }); }
+    if (text.trim().length < 10) return reply.code(400).send({ error: "empty_brief" });
+    if (text.length > 80000) return reply.code(413).send({ error: "brief_too_long" });
+    try { return await parseBrief(text); }
+    catch { return reply.code(502).send({ error: "brief_processing_failed" }); }
+  });
 
   app.post("/api/cabinet/register", async (request, reply) => {
     const sessionId = ensureSessionId(request, reply);

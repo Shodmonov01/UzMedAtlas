@@ -100,7 +100,7 @@ function EditBranchPage() {
           params={{ id }}
           className="text-sm font-bold text-primary"
         >
-          ← Филиалы
+          Филиалы
         </Link>
         <h1 className="mt-2 text-3xl font-extrabold">
           {branch.data.nameRu || branch.data.nameEn}

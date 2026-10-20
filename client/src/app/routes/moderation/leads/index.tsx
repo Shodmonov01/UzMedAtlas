@@ -38,7 +38,7 @@ function AdminLeadsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <Link to="/moderation" className="text-sm font-semibold text-muted">
-            ← Очередь модерации
+            Очередь модерации
           </Link>
           <h1 className="mt-2 text-3xl font-extrabold">Заявки пациентов</h1>
         </div>

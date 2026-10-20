@@ -30,12 +30,13 @@ function NotFoundPage() {
 function RootLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isWorkspace = pathname.startsWith("/cabinet") || pathname.startsWith("/moderation");
+  const isHome = pathname === "/";
 
   return (
     <HealthCheckerProvider>
-      <div className="portal flex min-h-screen flex-col">
+      <div className={`portal flex min-h-screen flex-col ${isHome ? "reference-portal" : ""}`}>
         {!isWorkspace ? <Header /> : null}
-        <main className={`mx-auto w-full max-w-7xl flex-1 px-4 py-8 ${isWorkspace ? "" : "pb-28"}`}>
+        <main className={isHome ? "w-full flex-1" : `mx-auto w-full max-w-7xl flex-1 px-4 py-8 ${isWorkspace ? "" : "pb-28"}`}>
           {isWorkspace ? (
             <div className="mb-6 flex items-center justify-between gap-3">
               <Link to="/" className="font-extrabold text-ink">

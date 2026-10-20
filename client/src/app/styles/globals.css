@@ -2,36 +2,40 @@
 
 /*
   Semantic tokens for UzMedAtlas.
-  Palette source: synapse-animals/client (Mantine designTokens, light scheme).
-  Layout/UI follows Medion; colors do not.
+  Brand colors are taken from Solid.svg; light surfaces are tints of that palette.
 */
 :root {
-  /* Synapse core */
-  --primary: #1570ef;
-  --primary-hover: #175cd3;
-  --primary-deep: #1849a9;
-  --primary-soft: #eff8ff;
-  --primary-soft-2: #d1e9ff;
-  --success: #12b886;
-  --success-soft: #e6fcf5;
+  --primary: #1278a8;
+  --primary-hover: #0d6790;
+  --primary-deep: #1a526b;
+  --brand-blue: #0187c5;
+  --brand-sky: #55b6e3;
+  --primary-soft: #eff7fb;
+  --primary-soft-2: #dceff7;
+  --accent: #57bf8c;
+  --accent-hover: #7acda3;
+  --accent-deep: #369265;
+  --accent-strong: #327755;
+  --success: var(--accent-strong);
+  --success-soft: #e7f6ee;
   --warning: #fab005;
   --warning-soft: #fff9db;
   --danger: #fa5252;
   --danger-soft: #fff5f5;
-  --info: #228be6;
+  --info: var(--brand-blue);
 
   /* App aliases (kept for existing Tailwind class names) */
-  --ink: #1f2937;
+  --ink: var(--primary-deep);
   --teal: var(--primary);
   --teal-deep: var(--primary-deep);
   --sand: #f1f3f5;
-  --paper: #f3f4f6;
+  --paper: #f7fcf9;
   --clay: var(--primary-hover);
   --gold: var(--warning);
-  --muted: #64748b;
-  --line: #dee2e6;
-  --lime: var(--primary-soft-2);
-  --mint: var(--primary-soft);
+  --muted: #5d7a7b;
+  --line: #dbe9e4;
+  --lime: #dcefe4;
+  --mint: #e7f6ee;
   --surface: #ffffff;
   --dimmed: rgba(31, 41, 55, 0.6);
 }
@@ -60,6 +64,10 @@
   --color-warning-soft: var(--warning-soft);
   --color-danger-soft: var(--danger-soft);
   --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-sky: var(--brand-sky);
   --font-sans: Inter, "Segoe UI", sans-serif;
   --font-display: Inter, "Segoe UI", sans-serif;
 }
@@ -90,10 +98,7 @@ h3,
 }
 
 .portal {
-  background:
-    radial-gradient(900px 420px at 8% -10%, rgba(209, 233, 255, 0.7), transparent 55%),
-    radial-gradient(700px 380px at 100% 0%, rgba(21, 112, 239, 0.08), transparent 46%),
-    var(--paper);
+  background: var(--paper);
 }
 
 /* Yandex Maps must not expand CSS grid/flex parents */
@@ -106,86 +111,176 @@ h3,
 .card-shadow,
 .textarea-shadow,
 .soft-card {
-  box-shadow: 0 18px 50px -28px rgba(31, 41, 55, 0.28);
+  box-shadow: 0 10px 30px -22px rgba(26, 82, 107, 0.22);
 }
 
 .clinic-card {
-  animation: card-rise 0.55s both;
   transition: transform 0.24s ease, box-shadow 0.24s ease;
+  border-radius: 14px;
+  border-bottom: 3px solid var(--accent);
 }
 
 .clinic-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 24px 54px -28px rgba(24, 73, 169, 0.24);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 34px -24px rgba(26, 82, 107, 0.28);
 }
 
-.home-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: 2rem;
-  background:
-    radial-gradient(circle at 79% 48%, rgba(209, 233, 255, 0.92), transparent 31%),
-    linear-gradient(115deg, #eff8ff 0%, #f7faff 48%, #f3f7ff 100%);
-  box-shadow: 0 30px 80px -56px rgba(24, 73, 169, 0.32);
+/* Home page: light banner, moving lines, and a green wave. */
+.reference-portal .site-header { background: #ffffffee; border-color: var(--line); color: var(--ink); }
+.reference-portal .site-header > div { max-width: 1200px; padding-block: 16px; }
+.reference-portal .site-header .text-ink { color: var(--ink); }
+.reference-portal .site-header .text-primary { color: var(--brand-blue); }
+.reference-portal .site-header nav { color: var(--muted); font-size: 13px; }
+.reference-portal .site-header nav a:hover { color: var(--brand-blue); }
+.reference-portal .site-logo-mark { background: transparent; border: 0; }
+.reference-portal .site-header-action { background: var(--accent); color: var(--primary-deep); font-weight: 600; }
+.reference-portal .site-header-action:hover { background: var(--accent-hover); }
+.site-footer { border-top: 4px solid var(--accent); }
+.reference-portal .site-footer { margin-top: 0; }
+
+.home-hero { position: relative; isolation: isolate; overflow: hidden; background: linear-gradient(145deg, #f4fbf8 0%, #e7f4fb 52%, #f7fcf9 100%); color: var(--ink); }
+.home-hero-photo { position: absolute; z-index: -3; top: 0; right: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 18%; opacity: .14; }
+.home-hero-shade { position: absolute; z-index: -2; inset: 0; background: linear-gradient(115deg, #f7fcf9f2 0%, #eef8f4e0 46%, #e7f3fbd4 100%); }
+.home-hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; gap: 40px; max-width: 1200px; margin-inline: auto; padding: 32px 24px 80px; }
+.home-hero-copy { min-width: 0; }
+.home-hero h1 { color: var(--primary-deep); font-size: clamp(34px, 3.6vw, 50px); line-height: 1.13; font-weight: 600; letter-spacing: -.045em; }
+.home-hero h1 > span { color: var(--brand-blue); }
+.home-hero-description { margin-top: 16px; color: #3d6b62; font-size: 15px; font-weight: 400; line-height: 1.65; letter-spacing: -.015em; }
+.home-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; margin-top: 22px; }
+.btn-accent { padding: 12px 24px; background: var(--accent); color: var(--primary-deep); font-size: 14px; font-weight: 600; }
+.btn-accent:hover { background: var(--accent-hover); }
+.home-hero-secondary { display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--primary); }
+.home-hero-secondary:hover { color: var(--brand-blue); }
+.home-hero-wave { position: absolute; z-index: 0; left: 0; bottom: -1px; width: 100%; height: 65px; pointer-events: none; }
+.care-illustration { width: 100%; max-width: 390px; }
+.care-illustration svg { display: block; width: 100%; height: auto; }
+.home-hero-illustration { width: 100%; max-width: 330px; justify-self: center; }
+.care-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; width: calc(100% - 48px); max-width: 1152px; margin: 8px auto 24px; }
+.care-steps > a { display: flex; align-items: center; gap: 16px; }
+.care-step-number { display: grid; place-items: center; flex-shrink: 0; width: 38px; height: 38px; border-radius: 12px; background: var(--accent); color: var(--primary-deep); font-size: 14px; font-weight: 500; }
+.care-steps strong { display: block; font-size: 14px; font-weight: 600; }
+.care-steps small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.care-steps > a:hover strong { text-decoration: underline; text-underline-offset: 4px; }
+
+.catalog-content { width: calc(100% - 48px); max-width: 1200px; margin: 0 auto; padding-bottom: 80px; }
+.catalog-search-card { position: relative; z-index: 2; padding: 28px; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: 0 10px 35px -24px #1a526b33; }
+.catalog-search-grid { display: grid; grid-template-columns: 1.4fr .85fr 1fr 1.05fr auto auto; gap: 10px; align-items: end; }
+.catalog-search-grid > label { display: block; min-width: 0; }
+.catalog-search-grid > label > span { display: block; margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 500; }
+.catalog-search-card .field { height: 48px; padding: 12px; border-radius: 8px; background: #f7fbf9; font-size: 13px; }
+.catalog-search-grid > button { height: 48px; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.catalog-submit { min-width: 94px; }
+.catalog-popular { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 20px; color: var(--muted); font-size: 11px; }
+.catalog-popular > button { padding-bottom: 2px; border-bottom: 1px solid #badbca; color: var(--primary); cursor: pointer; }
+.catalog-popular > button:hover { border-color: var(--accent-strong); }
+.clinic-card h3 { font-weight: 600; letter-spacing: -.025em; }
+.clinic-card .bg-success-soft { color: var(--accent-strong); }
+
+/* Motion uses transforms and opacity so it does not move the page layout. */
+.home-hero-photo { animation: hero-photo-breathe 9s ease-in-out infinite alternate; transform-origin: 65% 35%; }
+.home-hero h1 { animation: hero-arrive .65s .1s both; }
+.home-hero-description { animation: hero-arrive .6s .2s both; }
+.home-hero-actions { animation: hero-arrive .6s .3s both; }
+.home-hero-wave { width: 108%; left: -4%; transform-origin: center bottom; animation: wave-breathe 4.2s ease-in-out infinite alternate; }
+.home-hero-accents { position: absolute; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; }
+.hero-flow-lines { position: absolute; top: 6%; right: 2%; width: 46%; height: 74%; opacity: .8; animation: flow-drift 5s ease-in-out infinite alternate; }
+.hero-flow-lines path { stroke-width: 2; stroke-dasharray: .18 .82; animation: flow-travel 2.2s linear infinite; }
+.hero-flow-blue { stroke: var(--brand-sky); }
+.hero-flow-green { stroke: var(--accent); animation-duration: 1.6s; }
+.hero-cross { position: absolute; font-size: 42px; font-weight: 400; line-height: 1; opacity: .55; animation: cross-drift 2.8s ease-in-out infinite alternate; }
+.hero-cross-blue { top: 16%; right: 12%; color: var(--brand-sky); }
+.hero-cross-green { top: 46%; right: 34%; color: var(--accent); font-size: 28px; animation-duration: 2.1s; animation-delay: -.6s; }
+.home-hero-illustration { animation: hero-arrive .7s .18s both; }
+.care-illustration svg { animation: illustration-float 3.1s ease-in-out infinite alternate; }
+.care-check-badge { transform-box: fill-box; transform-origin: center; animation: check-breathe 1.8s ease-in-out infinite; }
+.care-pulse-line { stroke-dasharray: 18 140; animation: pulse-travel 1.35s linear infinite; }
+.reveal-pending { opacity: 0; }
+.btn { transition: transform .22s ease, background-color .22s ease, box-shadow .22s ease; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -12px #1a526b55; }
+.btn:active { transform: translateY(0) scale(.97); }
+.site-logo-mark { transition: transform .3s ease, border-color .3s ease; }
+.site-header a:hover > .site-logo-mark { transform: rotate(-8deg) scale(1.06); }
+.site-header nav a { position: relative; }
+.site-header nav a::after { content: ''; position: absolute; height: 2px; left: 0; right: 0; bottom: -8px; border-radius: 2px; background: var(--brand-sky); transform: scaleX(0); transform-origin: left; transition: transform .22s ease; }
+.site-header nav a:is(:hover, :focus-visible)::after { transform: scaleX(1); }
+.care-steps > a { transition: transform .25s ease; }
+.care-steps > a:hover { transform: translateY(-4px); }
+.care-step-number { transition: transform .3s ease, background-color .3s ease; }
+.care-steps > a:hover .care-step-number { transform: rotate(-6deg); background: var(--brand-sky); }
+.clinic-card:is(:hover, :focus-within) { transform: translateY(-6px); box-shadow: 0 18px 36px -20px #1a526b40; }
+.catalog-popular > button { transition: color .2s ease, border-color .2s ease; }
+.catalog-popular > button:hover { color: var(--brand-blue); border-color: var(--brand-blue); }
+
+@keyframes hero-arrive {
+  0% { opacity: 0; transform: translateY(34px); }
+  65% { opacity: 1; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-photo-breathe {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.14) translate(-1.4%, -1%); }
+}
+@keyframes wave-breathe {
+  from { transform: translateX(-2.2%) scaleY(.9); }
+  to { transform: translateX(2.2%) scaleY(1.2); }
+}
+@keyframes flow-travel { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes flow-drift { from { transform: translateY(-18px) rotate(-7deg); } to { transform: translateY(18px) rotate(7deg); } }
+@keyframes cross-drift { from { transform: translateY(10px) rotate(-18deg) scale(.9); } to { transform: translateY(-24px) rotate(18deg) scale(1.08); } }
+@keyframes illustration-float { from { transform: translateY(8px) rotate(-2deg); } to { transform: translateY(-16px) rotate(2deg); } }
+@keyframes check-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.16); } }
+@keyframes pulse-travel { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -158; } }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
 }
 
-.home-hero::before,
-.home-hero::after {
-  position: absolute;
-  z-index: -1;
-  border: 1px solid rgba(21, 112, 239, 0.1);
-  border-radius: 999px;
-  content: "";
-  pointer-events: none;
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal-pending { opacity: 1; }
+  .btn:is(:hover, :active), .clinic-card:is(:hover, :focus-within), .care-steps > a:hover,
+  .care-steps > a:hover .care-step-number, .site-header a:hover > .site-logo-mark { transform: none; }
+  .home-hero-photo, .home-hero-wave, .hero-flow-lines, .hero-flow-lines path, .hero-cross,
+  .home-hero-illustration, .care-illustration svg, .care-check-badge, .care-pulse-line,
+  .home-hero h1, .home-hero-description, .home-hero-actions { animation: none; }
 }
 
-.home-hero::before {
-  width: 35rem;
-  height: 35rem;
-  top: -19rem;
-  right: 12%;
+@media (max-width: 1100px) {
+  .catalog-search-grid { grid-template-columns: 1.4fr 1fr 1fr; }
+  .catalog-search-grid > button { width: 100%; }
+  .home-hero-inner { gap: 24px; }
 }
 
-.home-hero::after {
-  width: 43rem;
-  height: 43rem;
-  top: -23rem;
-  right: 8%;
+@media (max-width: 767px) {
+  .reference-portal .site-header > div { padding: 14px 20px; }
+  .reference-portal .site-header-action { padding: 10px 14px; font-size: 12px; }
+  .home-hero-photo { width: 100%; object-position: center 25%; }
+  .home-hero-shade { background: linear-gradient(100deg, #f7fcf9f5 0%, #e7f4fbe6 100%); }
+  .home-hero-inner { grid-template-columns: minmax(0, 1fr); padding: 28px 24px 65px; }
+  .home-hero-illustration { display: none; }
+  .home-hero h1 { font-size: clamp(30px, 8.2vw, 43px); line-height: 1.18; }
+  .home-hero-description { font-size: 14px; margin-top: 14px; }
+  .home-hero-actions { gap: 18px; margin-top: 22px; }
+  .btn-accent { padding: 12px 20px; font-size: 13px; }
+  .home-hero-secondary { font-size: 12px; }
+  .home-hero-wave { height: 40px; }
+  .care-steps { gap: 12px; margin: 8px auto 20px; width: calc(100% - 32px); }
+  .care-steps > a { gap: 7px; }
+  .care-step-number { width: 28px; height: 28px; border-radius: 9px; font-size: 11px; }
+  .care-steps strong { font-size: 10px; line-height: 1.5; }
+  .care-steps small { display: none; }
+  .catalog-content { width: calc(100% - 32px); padding-bottom: 50px; }
+  .catalog-search-card { padding: 20px; border-radius: 13px; }
+  .catalog-search-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 10px; }
+  .catalog-query, .catalog-submit { grid-column: 1 / -1; }
+  .catalog-popular > span { width: 100%; }
+  .catalog-popular { gap: 10px 14px; }
 }
-
-.hero-enter {
-  animation: hero-enter 0.7s cubic-bezier(0.2, 0.75, 0.25, 1) both;
-}
-
-.hero-float {
-  animation: hero-float 5.5s ease-in-out infinite;
-}
-
-.hero-float-delayed {
-  animation: hero-float 5.5s ease-in-out 1.1s infinite;
-}
-
 .clinic-cover-fallback {
   background:
     radial-gradient(circle at 76% 20%, rgba(255,255,255,.65) 0 7%, transparent 7.5%),
     radial-gradient(circle at 80% 29%, rgba(255,255,255,.22) 0 23%, transparent 23.5%),
-    linear-gradient(135deg, var(--primary-deep), var(--primary) 62%, #67a9f5);
-}
-
-@keyframes card-rise {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes hero-enter {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes hero-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-9px) rotate(1deg); }
+    linear-gradient(135deg, var(--primary-deep), var(--brand-blue) 62%, var(--brand-sky));
 }
 
 .btn {
@@ -250,7 +345,7 @@ button.field {
 .field:focus,
 .field:focus-visible {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(21, 112, 239, 0.12);
+  box-shadow: 0 0 0 3px rgba(26, 82, 107, 0.12);
 }
 
 select.field {
@@ -274,7 +369,7 @@ select.field {
 
 .pill-ok {
   background: var(--success-soft);
-  color: #0ca678;
+  color: var(--accent-strong);
 }
 
 .pill-wait {
@@ -320,7 +415,7 @@ select.field {
 }
 
 :focus-visible {
-  outline: 3px solid rgba(21, 112, 239, 0.45);
+  outline: 3px solid rgba(26, 82, 107, 0.45);
   outline-offset: 2px;
 }
 

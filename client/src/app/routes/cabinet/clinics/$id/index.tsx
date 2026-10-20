@@ -65,7 +65,7 @@ function EditClinicPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Link to="/cabinet" className="text-sm font-bold text-primary">
-            ← Мои клиники
+            Мои клиники
           </Link>
           <h1 className="mt-2 text-3xl font-extrabold">{clinic.data.nameRu || clinic.data.nameEn}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">

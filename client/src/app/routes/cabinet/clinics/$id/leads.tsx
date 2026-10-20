@@ -60,7 +60,7 @@ function CabinetLeadsPage() {
     <div className="space-y-6">
       <div>
         <Link to="/cabinet/clinics/$id" params={{ id }} className="text-sm font-semibold text-muted">
-          ← {clinic.data?.nameRu || clinic.data?.nameEn || "Клиника"}
+          {clinic.data?.nameRu || clinic.data?.nameEn || "Клиника"}
         </Link>
         <h1 className="mt-2 text-3xl font-extrabold">Заявки</h1>
         <p className="mt-1 text-muted">Обращения пациентов с каталога и Health Checker</p>

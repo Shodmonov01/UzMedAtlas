@@ -41,7 +41,7 @@ function BranchesListPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <Link to="/cabinet/clinics/$id" params={{ id }} className="text-sm font-bold text-primary">
-            ← {clinic.data.nameRu || clinic.data.nameEn}
+            {clinic.data.nameRu || clinic.data.nameEn}
           </Link>
           <h1 className="mt-2 text-3xl font-extrabold">Филиалы</h1>
           <p className="mt-1 text-sm text-muted">

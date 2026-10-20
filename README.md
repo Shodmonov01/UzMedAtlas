@@ -45,5 +45,5 @@ Health Checker uses an OpenAI-compatible chat completion endpoint when `OPENAI_A
 ## Дизайн
 
 - Layout/UI — по референсам Medion (`docs/medion-reference/`)
-- Цвета — токены synapse-animals (`#1570ef` primary)
+- Вариант по присланному референсу с палитрой Solid.svg: основной `#1a526b`, синие `#005881`, `#0187c5`, `#55b6e3`, зелёные `#57bf8c`, `#369265`, `#327755`. Светлые подложки — оттенки этой палитры. Появление секций при прокрутке, плавное движение фона и отклик элементов отключаются при `prefers-reduced-motion`. Токены — `client/src/app/styles/globals.css`, источник фото — `client/public/images/README.md`.
 - Функционал — `docs/AMO.MD`

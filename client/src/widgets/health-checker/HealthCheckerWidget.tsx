@@ -212,18 +212,18 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
           aria-modal="false"
           className="hc-panel pointer-events-auto flex w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-[0_24px_60px_-20px_rgba(31,41,55,0.45)]"
         >
-          <header className="flex items-center gap-3 bg-primary-deep px-4 py-3 text-white">
-            <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/15 text-lg font-extrabold">
+          <header className="flex items-center gap-3 border-b border-line bg-primary-soft px-4 py-3 text-ink">
+            <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-lg font-extrabold text-primary">
               HC
-              <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-primary-deep bg-success" />
+              <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-success" />
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-extrabold">Health Checker</p>
-              <p className="truncate text-xs text-white/70">Онлайн · предварительное направление</p>
+              <p className="truncate text-xs text-muted">Онлайн · предварительное направление</p>
             </div>
             <button
               type="button"
-              className="grid h-9 w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+              className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-white hover:text-ink"
               aria-label="Свернуть"
               onClick={close}
             >

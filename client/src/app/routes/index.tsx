@@ -14,7 +14,8 @@ function HomePage() {
 
   useEffect(() => {
     if (search.specialty || search.q || search.city || search.service) {
-      document.getElementById("clinic-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.getElementById("clinic-results")?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
     }
   }, [search.specialty, search.q, search.city, search.service]);
 

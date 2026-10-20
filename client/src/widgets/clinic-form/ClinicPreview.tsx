@@ -486,16 +486,16 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
           </div>
 
           <aside className="space-y-4 lg:self-start">
-            <div className="rounded-3xl bg-primary-deep p-5 text-white">
-              <p className="text-sm text-white/70">Контакты</p>
+            <div className="rounded-3xl border border-line bg-primary-soft p-5 text-ink">
+              <p className="text-sm text-muted">Контакты</p>
               <p className="mt-3 text-lg font-bold">{clinic.phone}</p>
-              {clinic.email ? <p className="mt-2 text-sm text-white/85">{clinic.email}</p> : null}
+              {clinic.email ? <p className="mt-2 text-sm text-primary">{clinic.email}</p> : null}
               {clinic.website ? (
-                <p className="mt-2 truncate text-sm text-white/85">
+                <p className="mt-2 truncate text-sm text-primary">
                   {clinic.website.replace(/^https?:\/\//, "")}
                 </p>
               ) : null}
-              <div className="mt-4 space-y-1 text-sm text-white/80">
+              <div className="mt-4 space-y-1 text-sm text-ink">
                 {clinic.whatsapp ? <p>WhatsApp: {clinic.whatsapp}</p> : null}
                 {clinic.telegram ? <p>Telegram: {clinic.telegram}</p> : null}
                 {clinic.instagram ? <p>Instagram: {clinic.instagram}</p> : null}
@@ -506,15 +506,15 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                 ) : null}
               </div>
               {clinic.coordinatorName ? (
-                <div className="mt-5 border-t border-white/15 pt-4">
-                  <p className="text-xs uppercase tracking-wide text-white/55">Координатор</p>
+                <div className="mt-5 border-t border-line pt-4">
+                  <p className="text-xs uppercase tracking-wide text-muted">Координатор</p>
                   <p className="mt-1 font-bold">{clinic.coordinatorName}</p>
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-muted">
                     {clinic.coordinatorRoleRu || clinic.coordinatorRoleEn}
                   </p>
                 </div>
               ) : null}
-              <p className="mt-4 text-sm text-white/60">Ответ около {clinic.responseHours} ч</p>
+              <p className="mt-4 text-sm text-muted">Ответ около {clinic.responseHours} ч</p>
             </div>
             <div className="rounded-2xl border border-dashed border-line bg-sand/50 px-4 py-5 text-center text-sm text-muted">
               Форма заявки появится на публичной странице
