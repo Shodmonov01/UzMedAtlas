@@ -14,7 +14,7 @@ mkdir -p "$RELEASE" "$BACKUP"
 activated=0
 smoke_pid=
 swap_current() {
-  ln -s "$1" "$STATE/current.next"
+  ln -sfn "$1" "$STATE/current.next"
   mv -Tf "$STATE/current.next" "$STATE/current"
 }
 finish() {

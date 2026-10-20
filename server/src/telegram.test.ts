@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -8,6 +8,8 @@ import type { PrismaClient } from "@prisma/client";
 
 const directory = mkdtempSync(path.join(tmpdir(), "uzmedatlas-telegram-tests-"));
 const database = path.join(directory, "test.db").replace(/\\/g, "/");
+// Prisma's SQLite engine on Windows expects the target file to exist.
+writeFileSync(database, "");
 process.env.DATABASE_URL = `file:${database}`;
 process.env.NODE_ENV = "test";
 process.env.SITE_URL = "https://uzmedguide.uz";
