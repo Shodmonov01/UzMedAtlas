@@ -16,6 +16,34 @@ function text(value?: string | null) {
   return v || null;
 }
 
+interface SocialLink {
+  label: string;
+  url: string;
+}
+
+interface DedicatedContacts {
+  whatsapp?: string | null;
+  telegram?: string | null;
+  instagram?: string | null;
+  youtube?: string | null;
+}
+
+function extraSocials(socials: SocialLink[] | undefined, contacts: DedicatedContacts) {
+  const covered = new Set<string>();
+  if (contacts.whatsapp?.trim()) covered.add("whatsapp");
+  if (contacts.telegram?.trim()) covered.add("telegram");
+  if (contacts.instagram?.trim()) covered.add("instagram");
+  if (contacts.youtube?.trim()) covered.add("youtube");
+  const seen = new Set<string>();
+  return (socials ?? []).filter((item) => {
+    const label = item.label?.trim().toLowerCase();
+    const url = item.url?.trim();
+    if (!label || !url || covered.has(label) || seen.has(label)) return false;
+    seen.add(label);
+    return true;
+  });
+}
+
 function lines(value?: string | null) {
   const raw = text(value);
   if (!raw) return [];
@@ -688,13 +716,8 @@ function ClinicDetailPage() {
                   YouTube
                 </a>
               ) : null}
-              {data.socials?.map((social: { label: string; url: string }, index: number) => (
-                <a key={`${social.label}-${index}`} href={social.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
-                  {social.label}
-                </a>
-              ))}
-              {data.socials?.map((social: { label: string; url: string }, index: number) => (
-                <a key={`${social.label}-${index}`} href={social.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
+              {extraSocials(data.socials, data).map((social) => (
+                <a key={social.url} href={social.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">
                   {social.label}
                 </a>
               ))}
