@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { adminLogout, adminMe, fetchModerationQueue } from "@/shared/api/cabinet";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
+import { adminProfile } from "@/shared/api/telegram";
 
 export const Route = createFileRoute("/moderation/")({
   component: ModerationQueuePage,
@@ -12,6 +13,7 @@ function ModerationQueuePage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("moderation");
   const auth = useQuery({ queryKey: ["admin-me"], queryFn: adminMe, retry: false });
+  const profile = useQuery({ queryKey: ["admin-profile"], queryFn: adminProfile, enabled: auth.data === true });
   const queue = useQuery({
     queryKey: ["moderation-queue", status],
     queryFn: () => fetchModerationQueue(status),
@@ -36,6 +38,8 @@ function ModerationQueuePage() {
           <h1 className="mt-1 text-3xl font-extrabold">Очередь клиник</h1>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link to="/moderation/telegram" className="btn btn-ghost text-sm">Telegram</Link>
+          {profile.data?.role === "administrator" ? <Link to="/moderation/team" className="btn btn-ghost text-sm">Модераторы</Link> : null}
           <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className="btn btn-ghost text-sm">
             Заявки
           </Link>

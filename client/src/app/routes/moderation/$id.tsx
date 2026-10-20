@@ -10,6 +10,7 @@ import {
   unpublishClinic,
 } from "@/shared/api/cabinet";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
+import { TelegramPanel } from "@/widgets/telegram/TelegramPanel";
 import { ClinicPreview } from "@/widgets/clinic-form/ClinicPreview";
 import axios from "axios";
 
@@ -89,6 +90,7 @@ function ModerationDetailPage() {
 
   return (
     <div className="space-y-6">
+      <TelegramPanel clinicId={id} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Link to="/moderation" className="text-sm font-bold text-primary">

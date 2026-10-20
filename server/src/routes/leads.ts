@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
+import { Prisma } from "@prisma/client";
 import {
   ARRIVAL_TYPES,
   CONTACT_METHODS,
@@ -12,7 +13,7 @@ import { ensureSessionId } from "../lib/auth";
 import { checkRateLimit } from "../lib/rate-limit";
 import { trackEvent } from "../lib/analytics";
 import { isRecentDuplicate } from "../lib/leads";
-import { formatLeadEmail, sendLeadEmails } from "../lib/email";
+import { queueClinicNotification } from "../lib/telegram";
 
 const leadBodySchema = z.object({
   fullName: z.string().trim().min(2).max(120),
@@ -97,21 +98,17 @@ export async function leadsRoutes(app: FastifyInstance) {
     }
 
     let specialtyId: string | null = null;
-    let specialtyName: string | null = null;
     if (parsed.data.specialtySlug) {
       const specialty = await prisma.specialty.findUnique({
         where: { slug: parsed.data.specialtySlug },
       });
       specialtyId = specialty?.id ?? null;
-      specialtyName = specialty?.nameEn ?? specialty?.nameRu ?? null;
     }
 
-    const arrival =
-      parsed.data.arrivalType === "undecided"
-        ? "not decided yet"
-        : `${parsed.data.arrivalType}: ${parsed.data.arrivalDate || ""}`;
-
-    const lead = await prisma.lead.create({
+    let lead: Awaited<ReturnType<typeof prisma.lead.create>>;
+    try {
+      lead = await prisma.$transaction(async tx => {
+      const created = await tx.lead.create({
       data: {
         clinicId: clinic.id,
         fullName: parsed.data.fullName,
@@ -140,32 +137,16 @@ export async function leadsRoutes(app: FastifyInstance) {
         recommendedSpecialtyId: usedChecker ? specialtyId : null,
       },
     });
-
-    await sendLeadEmails({
-      leadId: lead.id,
-      clinicEmail: clinic.email,
-      clinicName: clinic.nameEn,
-      subject: `UzMedAtlas request: ${parsed.data.fullName} → ${clinic.nameEn}`,
-      body: formatLeadEmail({
-        clinicName: clinic.nameEn,
-        fullName: parsed.data.fullName,
-        country: parsed.data.country,
-        phone,
-        email: parsed.data.email,
-        contactMethod: parsed.data.contactMethod,
-        arrival,
-        source: usedChecker ? "symptom checker" : "catalog",
-        specialty: specialtyName,
-        symptoms: usedChecker ? parsed.data.symptoms : null,
-        medicalNeed: parsed.data.medicalNeed,
-        age: usedChecker ? parsed.data.age : null,
-        gender: usedChecker ? parsed.data.gender : null,
-        duration: usedChecker ? parsed.data.duration : null,
-        forChild: usedChecker ? Boolean(parsed.data.forChild) : false,
-        preferredHours: parsed.data.preferredHours,
-        utmSource: parsed.data.utmSource,
-      }),
-    });
+      await queueClinicNotification(tx, { clinic, eventKey: `lead:${created.id}`, title: "Новая заявка пациента", audience: "both", leadId: created.id });
+      return created;
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const existing = await prisma.lead.findUnique({ where: { idempotencyKey } });
+        if (existing) return { ok: true, id: existing.id, duplicate: true };
+      }
+      throw error;
+    }
 
     await trackEvent(
       "lead_submit",

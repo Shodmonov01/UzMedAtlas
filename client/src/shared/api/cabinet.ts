@@ -753,8 +753,8 @@ export async function deleteClinicCertificate(clinicId: string, itemId: string) 
   await api.delete(`/api/cabinet/clinics/${clinicId}/certificates/${itemId}`);
 }
 
-export async function adminLogin(password: string) {
-  await api.post("/api/admin/login", { password });
+export async function adminLogin(password: string, email?: string) {
+  await api.post("/api/admin/login", { password, ...(email ? { email } : {}) });
 }
 
 export async function adminLogout() {

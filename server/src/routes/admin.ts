@@ -6,8 +6,11 @@ import {
   ensureSessionId,
   isAdminAuthenticated,
   setAdminSession,
+  getAdminPrincipal,
+  verifyPassword,
 } from "../lib/auth";
 import { prisma } from "../lib/db";
+import { queueClinicNotification } from "../lib/telegram";
 import { parseLanguages } from "../lib/format";
 import { checkRateLimit } from "../lib/rate-limit";
 import { publishedFromStatus, buildModerationChecklist } from "../lib/clinic-workflow";
@@ -72,11 +75,18 @@ export async function adminRoutes(app: FastifyInstance) {
     if (!limited.ok) {
       return reply.code(429).send({ error: "rate_limit" });
     }
-    const body = z.object({ password: z.string().min(1) }).safeParse(request.body);
-    if (!body.success || !checkAdminPassword(body.data.password)) {
-      return reply.code(401).send({ error: "invalid" });
+    const ipLimited = checkRateLimit(`admin-ip:${request.ip}`, 30, 15 * 60 * 1000);
+    if (!ipLimited.ok) return reply.code(429).send({ error: "rate_limit" });
+    const body = z.object({ password: z.string().min(1).max(120), email: z.string().trim().email().optional() }).safeParse(request.body);
+    if (!body.success) return reply.code(401).send({ error: "invalid" });
+    if (body.data.email) {
+      const staff = await prisma.staffAccount.findUnique({ where: { email: body.data.email.toLowerCase() } });
+      if (!staff?.active || !verifyPassword(body.data.password, staff.passwordHash)) return reply.code(401).send({ error: "invalid" });
+      setAdminSession(reply, staff);
+    } else {
+      if (!checkAdminPassword(body.data.password)) return reply.code(401).send({ error: "invalid" });
+      setAdminSession(reply);
     }
-    setAdminSession(reply);
     return { ok: true };
   });
 
@@ -86,14 +96,14 @@ export async function adminRoutes(app: FastifyInstance) {
   });
 
   app.get("/api/admin/me", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ authenticated: false });
     }
-    return { authenticated: true };
+    return { authenticated: true, principal: await getAdminPrincipal(request) };
   });
 
   app.get("/api/admin/stats", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const [clinics, leads, specialties, moderation] = await Promise.all([
@@ -106,7 +116,7 @@ export async function adminRoutes(app: FastifyInstance) {
   });
 
   app.get("/api/admin/moderation", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const query = request.query as { status?: string };
@@ -133,7 +143,7 @@ export async function adminRoutes(app: FastifyInstance) {
   });
 
   app.get("/api/admin/moderation/:id", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const { id } = request.params as { id: string };
@@ -182,7 +192,7 @@ export async function adminRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/admin/moderation/:id/approve", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const { id } = request.params as { id: string };
@@ -205,8 +215,8 @@ export async function adminRoutes(app: FastifyInstance) {
       return reply.code(400).send({ error: "checklist_failed", checklist });
     }
     const updated = await prisma.$transaction(async (tx) => {
-      await tx.moderationLog.create({ data: { clinicId: id, action: "approve" } });
-      return tx.clinic.update({
+      const log = await tx.moderationLog.create({ data: { clinicId: id, action: "approve" } });
+      const clinicUpdate = await tx.clinic.update({
         where: { id },
         data: {
           status: "approved",
@@ -215,12 +225,14 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника одобрена", audience: "owner" });
+      return clinicUpdate;
     });
     return serialize(updated);
   });
 
   app.post("/api/admin/moderation/:id/reject", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const { id } = request.params as { id: string };
@@ -236,10 +248,10 @@ export async function adminRoutes(app: FastifyInstance) {
       return reply.code(409).send({ error: "invalid_status", status: clinic.status });
     }
     const updated = await prisma.$transaction(async (tx) => {
-      await tx.moderationLog.create({
+      const log = await tx.moderationLog.create({
         data: { clinicId: id, action: "reject", note: body.data.note },
       });
-      return tx.clinic.update({
+      const clinicUpdate = await tx.clinic.update({
         where: { id },
         data: {
           status: "needs_changes",
@@ -248,12 +260,14 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника возвращена на доработку", audience: "owner" });
+      return clinicUpdate;
     });
     return serialize(updated);
   });
 
   app.post("/api/admin/moderation/:id/publish", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const { id } = request.params as { id: string };
@@ -263,8 +277,8 @@ export async function adminRoutes(app: FastifyInstance) {
       return reply.code(409).send({ error: "invalid_status", status: clinic.status });
     }
     const updated = await prisma.$transaction(async (tx) => {
-      await tx.moderationLog.create({ data: { clinicId: id, action: "publish" } });
-      return tx.clinic.update({
+      const log = await tx.moderationLog.create({ data: { clinicId: id, action: "publish" } });
+      const clinicUpdate = await tx.clinic.update({
         where: { id },
         data: {
           status: "published",
@@ -273,20 +287,22 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника опубликована", audience: "owner" });
+      return clinicUpdate;
     });
     return serialize(updated);
   });
 
   app.post("/api/admin/moderation/:id/unpublish", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const { id } = request.params as { id: string };
     const clinic = await prisma.clinic.findUnique({ where: { id } });
     if (!clinic) return reply.code(404).send({ error: "not_found" });
     const updated = await prisma.$transaction(async (tx) => {
-      await tx.moderationLog.create({ data: { clinicId: id, action: "unpublish" } });
-      return tx.clinic.update({
+      const log = await tx.moderationLog.create({ data: { clinicId: id, action: "unpublish" } });
+      const clinicUpdate = await tx.clinic.update({
         where: { id },
         data: {
           status: "approved",
@@ -294,12 +310,14 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника снята с публикации", audience: "owner" });
+      return clinicUpdate;
     });
     return serialize(updated);
   });
 
   app.get("/api/admin/leads", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const query = request.query as { status?: string; source?: string; q?: string };
@@ -358,7 +376,7 @@ export async function adminRoutes(app: FastifyInstance) {
   });
 
   app.get("/api/admin/leads/:id", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const { id } = request.params as { id: string };
@@ -371,7 +389,7 @@ export async function adminRoutes(app: FastifyInstance) {
   });
 
   app.patch("/api/admin/leads/:id", async (request, reply) => {
-    if (!isAdminAuthenticated(request)) {
+    if (!(await isAdminAuthenticated(request))) {
       return reply.code(401).send({ error: "unauthorized" });
     }
     const { id } = request.params as { id: string };

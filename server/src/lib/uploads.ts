@@ -29,7 +29,9 @@ export async function saveUploadBuffer(
           ? "pdf"
           : mimeType.split("/")[1];
   const name = `${Date.now()}-${randomBytes(4).toString("hex")}.${ext}`;
-  const dir = path.join(process.cwd(), "public", folder);
+  const dir = folder === "uploads" && process.env.UPLOADS_DIR
+    ? path.resolve(process.env.UPLOADS_DIR)
+    : path.join(process.cwd(), "public", folder);
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, name), buffer);
   return `/${folder}/${name}`;

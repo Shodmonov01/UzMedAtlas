@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { prisma } from "./db";
 
 const ADMIN_COOKIE = "uma_admin";
 const CLINIC_COOKIE = "uma_clinic";
@@ -71,8 +72,27 @@ export function checkClinicPassword(password: string) {
   return safeEqual(password, process.env.CLINIC_PASSWORD || "clinic123");
 }
 
-export function isAdminAuthenticated(request: FastifyRequest) {
-  return readSignedCookie(request, ADMIN_COOKIE);
+export type AdminPrincipal = { id: string; name: string; role: "administrator" | "moderator" };
+
+export async function getAdminPrincipal(request: FastifyRequest): Promise<AdminPrincipal | null> {
+  const token = request.cookies?.[ADMIN_COOKIE];
+  if (!token) return null;
+  // Keep the existing administrator login while adding individual staff sessions.
+  if (token.split(".").length === 2) {
+    return readSignedCookie(request, ADMIN_COOKIE)
+      ? { id: "administrator", name: "Администратор", role: "administrator" }
+      : null;
+  }
+  const [exp, id, version, sig] = token.split(".");
+  if (!exp || !id || !version || !sig || Number(exp) < Date.now() || !Number.isFinite(Number(exp))) return null;
+  if (!safeEqual(sig, sign(`${exp}.${id}.${version}`))) return null;
+  const staff = await prisma.staffAccount.findUnique({ where: { id } });
+  if (!staff?.active || String(staff.sessionVersion) !== version) return null;
+  return { id: staff.id, name: staff.name, role: staff.role === "administrator" ? "administrator" : "moderator" };
+}
+
+export async function isAdminAuthenticated(request: FastifyRequest) {
+  return Boolean(await getAdminPrincipal(request));
 }
 
 export function getClinicOwnerId(request: FastifyRequest): string | null {
@@ -90,8 +110,13 @@ export function isClinicAuthenticated(request: FastifyRequest) {
   return Boolean(getClinicOwnerId(request));
 }
 
-export function setAdminSession(reply: FastifyReply) {
-  writeSignedCookie(reply, ADMIN_COOKIE);
+export function setAdminSession(reply: FastifyReply, staff?: { id: string; sessionVersion: number }) {
+  if (!staff) return writeSignedCookie(reply, ADMIN_COOKIE);
+  const exp = String(Date.now() + MAX_AGE_SECONDS * 1000);
+  const payload = `${exp}.${staff.id}.${staff.sessionVersion}`;
+  reply.setCookie(ADMIN_COOKIE, `${payload}.${sign(payload)}`, {
+    httpOnly: true, sameSite: "lax", secure: cookieSecure(), path: "/", maxAge: MAX_AGE_SECONDS,
+  });
 }
 
 export function clearAdminSession(reply: FastifyReply) {

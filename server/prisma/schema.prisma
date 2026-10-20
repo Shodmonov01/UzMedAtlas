@@ -109,6 +109,8 @@ model Clinic {
   equipment           Equipment[]
   certificates        Certificate[]
   moderationLogs      ModerationLog[]
+  telegramConnections TelegramConnection[]
+  telegramInvites     TelegramInvite[]
 }
 
 model ClinicOwner {
@@ -119,6 +121,8 @@ model ClinicOwner {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   clinics      Clinic[]
+  telegramConnections TelegramConnection[]
+  telegramInvites     TelegramInvite[]
 }
 
 model ClinicPhoto {
@@ -373,4 +377,86 @@ model EmailLog {
   error     String?
   createdAt DateTime @default(now())
   lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+}
+
+model StaffAccount {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  passwordHash   String
+  role           String   @default("moderator")
+  active         Boolean  @default(true)
+  sessionVersion Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  connections    TelegramConnection[]
+  invites        TelegramInvite[]
+}
+
+model TelegramConnection {
+  id          String   @id @default(cuid())
+  subject     String   @unique
+  kind        String
+  userId      String
+  chatId      String
+  displayName String
+  username    String?
+  staffId     String?
+  ownerId     String?
+  clinicId    String?
+  active      Boolean  @default(true)
+  connectedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  staff       StaffAccount? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  owner       ClinicOwner? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  clinic      Clinic? @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  deliveries  TelegramDelivery[]
+
+  @@index([userId, active])
+  @@index([clinicId, active])
+}
+
+model TelegramInvite {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  subject   String
+  kind      String
+  staffId   String?
+  ownerId   String?
+  clinicId  String?
+  issuedBy  String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+  revokedAt DateTime?
+  staff     StaffAccount? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  owner     ClinicOwner? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  clinic    Clinic? @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([subject, expiresAt])
+}
+
+model TelegramDelivery {
+  id                String   @id @default(cuid())
+  dedupeKey         String   @unique
+  connectionId      String?
+  chatId            String
+  text              String
+  url               String?
+  status            String   @default("pending")
+  attempts          Int      @default(0)
+  nextAttemptAt     DateTime @default(now())
+  leaseUntil        DateTime?
+  telegramMessageId String?
+  lastError         String?
+  createdAt         DateTime @default(now())
+  sentAt            DateTime?
+  connection        TelegramConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+
+  @@index([status, nextAttemptAt])
+}
+
+model TelegramUpdate {
+  id         String   @id
+  receivedAt DateTime @default(now())
 }

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { adminLogin } from "@/shared/api/cabinet";
 
 export const Route = createFileRoute("/moderation/login")({
@@ -8,6 +9,9 @@ export const Route = createFileRoute("/moderation/login")({
 
 function ModerationLoginPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [mode, setMode] = useState<"administrator" | "staff">("administrator");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -17,10 +21,11 @@ function ModerationLoginPage() {
     setLoading(true);
     setError(null);
     try {
-      await adminLogin(password);
+      await adminLogin(password, mode === "staff" ? email : undefined);
+      qc.clear();
       void navigate({ to: "/moderation" });
     } catch {
-      setError("Неверный пароль");
+      setError("Не удалось войти. Проверьте данные или обратитесь к администратору.");
     } finally {
       setLoading(false);
     }
@@ -31,14 +36,20 @@ function ModerationLoginPage() {
       <h1 className="text-3xl font-extrabold">Модерация</h1>
       <p className="mt-2 text-muted">Вход для проверки клиник</p>
       <form onSubmit={onSubmit} className="soft-card mt-6 space-y-4 rounded-[1.75rem] bg-white p-6">
+        <div className="flex gap-2">
+          <button type="button" className={`btn ${mode === "administrator" ? "btn-primary" : "btn-ghost"} text-sm`} onClick={() => setMode("administrator")}>Администратор</button>
+          <button type="button" className={`btn ${mode === "staff" ? "btn-primary" : "btn-ghost"} text-sm`} onClick={() => setMode("staff")}>Модератор</button>
+        </div>
+        {mode === "staff" ? <label className="block text-sm font-bold">Email<input type="email" autoComplete="username" className="field mt-1" value={email} onChange={e => setEmail(e.target.value)} required /></label> : null}
         <label className="block text-sm font-bold">
-          Пароль модератора
+          Пароль
           <input
             type="password"
             className="field mt-1"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
             autoFocus
           />
         </label>

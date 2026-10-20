@@ -12,6 +12,7 @@ import {
 } from "../lib/auth";
 import { PHOTO_CATEGORIES, SERVICE_LANGUAGES } from "../lib/constants";
 import { prisma } from "../lib/db";
+import { queueClinicNotification } from "../lib/telegram";
 import { parseLanguages } from "../lib/format";
 import { checkRateLimit } from "../lib/rate-limit";
 import { slugify, validateClinicForModeration } from "../lib/clinic-workflow";
@@ -680,7 +681,7 @@ export async function cabinetRoutes(app: FastifyInstance) {
       where: { id },
       include: { specialties: true, branches: { include: { specialties: true } } },
     });
-    if (!clinic) return reply.code(404).send({ error: "not_found" });
+    if (!clinic || clinic.ownerId !== getClinicOwnerId(request)) return reply.code(404).send({ error: "not_found" });
     if (!["draft", "needs_changes"].includes(clinic.status)) {
       return reply.code(409).send({ error: "invalid_status", status: clinic.status });
     }
@@ -691,10 +692,10 @@ export async function cabinetRoutes(app: FastifyInstance) {
     }
 
     const updated = await prisma.$transaction(async (tx) => {
-      await tx.moderationLog.create({
+      const log = await tx.moderationLog.create({
         data: { clinicId: id, action: "submit", note: null },
       });
-      return tx.clinic.update({
+      const clinicUpdate = await tx.clinic.update({
         where: { id },
         data: {
           status: "moderation",
@@ -703,6 +704,8 @@ export async function cabinetRoutes(app: FastifyInstance) {
         },
         include: clinicDetailInclude,
       });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника отправлена на модерацию", audience: "staff" });
+      return clinicUpdate;
     });
     return serializeClinic(updated);
   });

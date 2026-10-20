@@ -39,8 +39,9 @@ function RootLayout() {
         <main className={isHome ? "w-full flex-1" : `mx-auto w-full max-w-7xl flex-1 px-4 py-8 ${isWorkspace ? "" : "pb-28"}`}>
           {isWorkspace ? (
             <div className="mb-6 flex items-center justify-between gap-3">
-              <Link to="/" className="font-extrabold text-ink">
-                UzMedAtlas
+              <Link to="/" className="inline-flex items-center gap-2 font-extrabold text-ink">
+                <img src="/medguide-uz.svg" alt="" className="h-8 w-8 rounded-full bg-white object-contain" />
+                MEDGUIDE UZ
               </Link>
               <div className="flex items-center gap-3 text-sm font-bold text-muted">
                 {pathname.startsWith("/moderation") ? (

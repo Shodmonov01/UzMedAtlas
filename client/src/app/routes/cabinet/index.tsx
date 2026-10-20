@@ -9,6 +9,7 @@ import {
 } from "@/shared/api/cabinet";
 import { CITY_LABELS } from "@/shared/api/client";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
+import { OwnerTelegramPanel } from "@/widgets/telegram/TelegramPanel";
 
 export const Route = createFileRoute("/cabinet/")({
   component: CabinetHomePage,
@@ -62,6 +63,7 @@ function CabinetHomePage() {
       </div>
 
       {clinics.isLoading ? <p className="text-muted">Загрузка…</p> : null}
+      <OwnerTelegramPanel />
       {clinics.isError ? <p className="text-danger">Не удалось загрузить клиники</p> : null}
 
       <div className="grid gap-4 md:grid-cols-2">

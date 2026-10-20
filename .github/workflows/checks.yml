@@ -1,0 +1,39 @@
+name: Application checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+      - name: Validate deploy scripts
+        run: |
+          bash -n deploy/install.sh deploy/watch-main.sh deploy/release.sh
+          node --check deploy/verify.mjs
+      - name: Check API
+        working-directory: server
+        env:
+          DATABASE_URL: file:./ci.db
+        run: |
+          npm ci --no-audit --no-fund
+          npm run prisma:generate
+          npm test
+          npm run build
+      - name: Check website
+        working-directory: client
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+          npm run build
