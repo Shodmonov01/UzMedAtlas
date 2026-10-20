@@ -46,7 +46,7 @@ function AdminLeadDetailPage() {
       <div>
         <p className="text-danger">Заявка не найдена</p>
         <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className="mt-4 inline-block font-bold text-primary">
-          ← К списку
+          К списку
         </Link>
       </div>
     );
@@ -58,7 +58,7 @@ function AdminLeadDetailPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className="text-sm font-semibold text-muted">
-          ← Все заявки
+          Все заявки
         </Link>
         <h1 className="mt-2 text-3xl font-extrabold">{data.fullName}</h1>
         <p className="mt-1 text-muted">

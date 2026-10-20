@@ -39,7 +39,7 @@ function BranchDetailPage() {
       <div>
         <p className="text-danger">Филиал не найден</p>
         <Link to="/clinics/$slug" params={{ slug }} className="mt-4 inline-block font-bold text-primary">
-          ← К клинике
+          К клинике
         </Link>
       </div>
     );
@@ -61,7 +61,7 @@ function BranchDetailPage() {
       <div className="min-w-0 space-y-8">
         <div>
           <Link to="/clinics/$slug" params={{ slug }} className="text-sm font-semibold text-muted">
-            ← {data.clinic?.nameRu || data.clinic?.nameEn || "Клиника"}
+            {data.clinic?.nameRu || data.clinic?.nameEn || "Клиника"}
           </Link>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             {data.clinic?.logoUrl ? (

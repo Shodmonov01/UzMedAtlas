@@ -13,7 +13,7 @@ export function Header() {
           <Link to="/checker" className="transition hover:text-primary">Подобрать направление</Link>
         </nav>
         <Link to="/cabinet/login" className="site-header-action btn btn-primary px-5 py-2.5 text-sm">
-          Для клиник <span aria-hidden="true">↗</span>
+          Для клиник
         </Link>
       </div>
     </header>

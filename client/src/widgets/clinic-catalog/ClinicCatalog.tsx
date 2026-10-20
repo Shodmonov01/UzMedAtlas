@@ -193,12 +193,11 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
         </div>
         <div className="home-hero-inner">
           <div className="home-hero-copy">
-            <p className="home-eyebrow">Медицинский атлас Узбекистана</p>
             <h1>Медицина, которой<br /><span>можно доверять.</span></h1>
             <p className="home-hero-description">Клиники, услуги и специалисты Узбекистана — <br className="hidden sm:block" />для понятного выбора в одном месте.</p>
             <div className="home-hero-actions">
-              <a href="#catalog" className="btn btn-accent">Найти клинику <span aria-hidden="true">→</span></a>
-              <Link to="/checker" className="home-hero-secondary">Подобрать направление <span aria-hidden="true">↗</span></Link>
+              <a href="#catalog" className="btn btn-accent">Найти клинику</a>
+              <Link to="/checker" className="home-hero-secondary">Подобрать направление</Link>
             </div>
           </div>
           <div className="care-illustration home-hero-illustration" aria-hidden="true">
@@ -239,10 +238,6 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       </div>
       <div className="catalog-content">
         <div id="catalog" className="catalog-search-card scroll-mt-28" data-reveal>
-          <div className="catalog-search-heading">
-            <div><p className="section-eyebrow">Начните здесь</p><h2>Найдём вашу клинику</h2></div>
-            <span className="catalog-search-caption">Город. Направление. Ваш выбор.</span>
-          </div>
           <form id="catalog-search" onSubmit={applyQuick}>
             <div className="catalog-search-grid">
               <label className="catalog-query"><span>Клиника или услуга</span><input className="field" placeholder="Например, кардиология…" value={q} onChange={(e) => setQ(e.target.value)} /></label>
@@ -251,7 +246,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <label><span>Направление</span><SelectField value={specialty} options={specialtyOptions} onChange={setSpecialty} /></label>
               <label><span>Сортировать по</span><SelectField value={sort} options={SORT_OPTIONS} onChange={setSort} /></label>
               <button type="button" className="catalog-more btn btn-ghost" onClick={() => setModalOpen(true)}>Ещё{advancedCount ? ` · ${advancedCount}` : " фильтров"}</button>
-              <button className="catalog-submit btn btn-primary" type="submit">Найти <span aria-hidden="true">→</span></button>
+              <button className="catalog-submit btn btn-primary" type="submit">Найти</button>
             </div>
           </form>
           {specialties.data?.length ? (
@@ -301,9 +296,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       <div id="clinic-results" className="mt-12 scroll-mt-28">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3" data-reveal>
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[.16em] text-primary">Ваш следующий шаг</p>
-            <h2 className="mt-1 text-3xl font-black tracking-tight text-ink">Выберите свою клинику</h2>
-            <p className="mt-1 text-sm text-muted">Сравните профили и найдите то, что важно именно вам.</p>
+            <h2 className="text-3xl font-black tracking-tight text-ink">Выберите свою клинику</h2>
           </div>
           {!clinics.isLoading && clinics.data ? (
               <span className="rounded-full border border-line bg-white px-4 py-2 text-sm font-bold text-ink shadow-sm">
@@ -329,11 +322,14 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {clinics.data?.map((clinic, index) => (
-          <article
+          <Link
             key={clinic.id}
+            to="/clinics/$slug"
+            params={{ slug: clinic.slug }}
             data-reveal
             data-reveal-delay={(index % 3) * 70}
-            className="clinic-card group soft-card flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-line/70 bg-white"
+            aria-label={clinic.nameRu || clinic.nameEn}
+            className="clinic-card group soft-card flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-line/70 bg-white no-underline"
           >
             <div className="relative h-44 shrink-0 overflow-hidden bg-primary-soft">
               {clinic.photos?.[0]?.url ? (
@@ -387,22 +383,15 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                   ))}
                 </div>
               ) : null}
-              <div className="mb-2 flex flex-wrap gap-2 text-[10px] font-extrabold text-muted">
+              <div className="flex flex-wrap gap-2 text-[10px] font-extrabold text-muted">
                 {clinic.languages?.slice(0, 4).map((lang) => (
                   <span key={lang} className="rounded-full border border-line bg-white px-2.5 py-1.5 uppercase tracking-wide">
                     {lang}
                   </span>
                 ))}
               </div>
-              <Link
-                to="/clinics/$slug"
-                params={{ slug: clinic.slug }}
-                className="mt-auto inline-flex w-full items-center justify-between rounded-2xl bg-primary-soft px-4 py-3 text-sm font-extrabold text-primary-deep transition group-hover:bg-primary group-hover:text-white"
-              >
-                Смотреть клинику <span className="text-lg transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
-              </Link>
             </div>
-          </article>
+          </Link>
         ))}
       </div>
       </div>

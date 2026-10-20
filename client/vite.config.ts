@@ -3,13 +3,30 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import tanstackRouter from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type ProxyOptions } from "vite";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function apiOrigin(raw: string) {
+  return raw.trim().replace(/\/+$/, "").replace(/\/api$/, "");
+}
+
+function proxyCommon(target: string): Pick<ProxyOptions, "target" | "changeOrigin" | "configure"> {
+  return {
+    target,
+    changeOrigin: true,
+    configure(proxy) {
+      proxy.on("proxyReq", (proxyReq) => {
+        // Прод отклоняет чужой Origin (CORS → 500). Без заголовка API отвечает.
+        proxyReq.removeHeader("origin");
+      });
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, dirname, "VITE_");
-  const apiTarget = (env.VITE_API_URL || "http://localhost:4000").replace(/\/$/, "");
+  const env = loadEnv(mode, dirname, "");
+  const apiTarget = apiOrigin(env.API_PROXY_TARGET || env.VITE_API_URL || "http://localhost:4000");
 
   return {
     plugins: [
@@ -30,18 +47,11 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       proxy: {
-        "/api": {
-          target: apiTarget,
-          changeOrigin: true,
-        },
-        "/uploads": {
-          target: apiTarget,
-          changeOrigin: true,
-        },
+        "/api": proxyCommon(apiTarget),
+        "/uploads": proxyCommon(apiTarget),
         // Only static clinic media — SPA owns /clinics/:slug pages
         "/clinics": {
-          target: apiTarget,
-          changeOrigin: true,
+          ...proxyCommon(apiTarget),
           bypass(req) {
             const url = req.url || "";
             if (req.headers.accept?.includes("text/html")) return url;
@@ -52,17 +62,10 @@ export default defineConfig(({ mode }) => {
     },
     preview: {
       proxy: {
-        "/api": {
-          target: apiTarget,
-          changeOrigin: true,
-        },
-        "/uploads": {
-          target: apiTarget,
-          changeOrigin: true,
-        },
+        "/api": proxyCommon(apiTarget),
+        "/uploads": proxyCommon(apiTarget),
         "/clinics": {
-          target: apiTarget,
-          changeOrigin: true,
+          ...proxyCommon(apiTarget),
           bypass(req) {
             const url = req.url || "";
             if (req.headers.accept?.includes("text/html")) return url;

@@ -59,7 +59,7 @@ function ClinicDetailPage() {
       <div>
         <p className="text-danger">Клиника не найдена</p>
         <Link to="/" className="mt-4 inline-block font-bold text-primary">
-          ← К каталогу
+          К каталогу
         </Link>
       </div>
     );
@@ -103,7 +103,7 @@ function ClinicDetailPage() {
     <div className="space-y-10">
       <div>
         <Link to="/" className="text-sm font-semibold text-muted hover:text-primary">
-          ← Каталог
+          Каталог
         </Link>
       </div>
 
@@ -587,7 +587,7 @@ function ClinicDetailPage() {
                     params={{ slug, branchSlug: mapBranch.slug }}
                     className="inline-flex items-center text-sm font-bold text-primary"
                   >
-                    {mapBranch.nameRu || mapBranch.nameEn || "Филиал"} →
+                    {mapBranch.nameRu || mapBranch.nameEn || "Филиал"}
                   </Link>
                 ) : null}
               </div>
