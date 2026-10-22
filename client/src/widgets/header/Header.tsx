@@ -6,7 +6,10 @@ export function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5">
         <Link to="/" className="group flex items-center gap-3 font-extrabold text-ink">
           <img src="/brand/logo.png" alt="" width={44} height={44} className="site-logo-mark h-11 w-11 object-contain" />
-          <span className="text-lg tracking-tight">UzMed<span className="text-primary">Atlas</span></span>
+          <span className="flex flex-col text-[13px] leading-[1.15] tracking-tight sm:text-[15px]">
+            <span>Ассоциация</span>
+            <span className="text-primary">медицинских организаций</span>
+          </span>
         </Link>
         <nav className="hidden items-center gap-7 text-sm font-medium text-muted md:flex" aria-label="Главная навигация">
           <a href="/#catalog" className="transition hover:text-primary">Клиники</a>

@@ -7,7 +7,7 @@ export function Footer() {
         <div>
           <Link to="/" className="inline-flex items-center gap-2 text-lg font-extrabold tracking-tight">
             <img src="/brand/logo.png" alt="" width={36} height={36} className="h-9 w-9 object-contain" />
-            UzMedAtlas
+            Ассоциация медицинских организаций
           </Link>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
             Помогаем сориентироваться в клиниках Узбекистана и найти подходящее направление лечения.

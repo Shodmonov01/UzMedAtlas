@@ -5,6 +5,7 @@ import { CITY_LABELS, fetchClinics, fetchSpecialties } from "@/shared/api/client
 import { SelectField } from "@/shared/ui/SelectField";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 import { useScrollReveal } from "@/shared/lib/use-scroll-reveal";
+import { CountryFilm } from "@/widgets/country-film/CountryFilm";
 
 export type CatalogSearch = {
   q?: string;
@@ -230,6 +231,8 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           <path d="M0 23C140 123 160 229 395 189L1440 18V230H0Z" fill="var(--paper)" />
         </svg>
       </div>
+
+      <CountryFilm />
 
       <div className="care-steps">
         <a href="#catalog" data-reveal><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></a>
