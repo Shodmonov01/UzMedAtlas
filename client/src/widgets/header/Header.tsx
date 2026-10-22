@@ -1,8 +1,18 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
 export function Header() {
+  // On the home page the header sits over the hero photo; it gets a solid background once scrolled.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 24);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
   return (
-    <header className="site-header sticky top-0 z-30 border-b border-line/70 bg-white/95 backdrop-blur-xl">
+    <header className={`site-header${scrolled ? " is-scrolled" : ""} sticky top-0 z-30 border-b border-line/70 bg-white/95 backdrop-blur-xl`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5">
         <Link to="/" className="group flex items-center gap-3 font-extrabold text-ink">
           <img src="/brand/logo.png" alt="" width={44} height={44} className="site-logo-mark h-11 w-11 object-contain" />

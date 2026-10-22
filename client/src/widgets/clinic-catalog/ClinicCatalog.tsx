@@ -182,16 +182,16 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   return (
     <section ref={revealRef} className="reference-home">
       <div className="home-hero">
-        <img className="home-hero-photo" src="/images/consultation-banner.jpg" alt="" width="1920" height="2876" fetchPriority="high" />
-        <div className="home-hero-shade" />
-        <div className="home-hero-accents" aria-hidden="true">
-          <svg className="hero-flow-lines" viewBox="0 0 600 420" fill="none">
-            <path className="hero-flow-blue" pathLength="1" d="M38 310C155 345 108 72 275 107S442 301 574 70" />
-            <path className="hero-flow-green" pathLength="1" d="M70 344C202 370 145 98 300 132S475 310 590 106" />
-          </svg>
-          <span className="hero-cross hero-cross-blue">+</span>
-          <span className="hero-cross hero-cross-green">+</span>
-        </div>
+        <img
+          className="home-hero-photo"
+          src="/images/hero-bukhara.webp"
+          srcSet="/images/hero-bukhara-960.webp 960w, /images/hero-bukhara.webp 1467w"
+          sizes="100vw"
+          alt=""
+          width="1467"
+          height="823"
+          fetchPriority="high"
+        />
         <div className="home-hero-inner">
           <div className="home-hero-copy">
             <h1>Медицина, которой<br /><span>можно доверять.</span></h1>
@@ -201,33 +201,8 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <Link to="/checker" className="home-hero-secondary">Подобрать направление</Link>
             </div>
           </div>
-          <div className="care-illustration home-hero-illustration" aria-hidden="true">
-            <svg viewBox="0 0 440 330" fill="none">
-              <path d="M91 91C106 20 208 0 257 40L371 139C415 178 377 258 315 271L155 302C75 316 29 247 53 191Z" fill="var(--accent)" />
-              <path d="M107 86C122 21 211 16 255 51L362 144C402 179 370 247 309 261L159 289C84 304 45 243 67 193Z" fill="var(--primary)" />
-              <rect x="112" y="76" width="221" height="175" rx="11" fill="white" />
-              <rect x="122" y="87" width="201" height="146" rx="4" fill="#EDF7F2" />
-              <path d="M200 251H245L250 270H194Z" fill="#AAC9C0" />
-              <rect x="173" y="270" width="99" height="7" rx="3.5" fill="var(--primary)" />
-              <rect x="143" y="108" width="53" height="53" rx="12" fill="var(--accent)" />
-              <path d="M169.5 120V149M155 134.5H184" stroke="white" strokeWidth="7" strokeLinecap="round" />
-              <path d="M214 115H298M214 131H279M214 147H288" stroke="#ADCABD" strokeWidth="6" strokeLinecap="round" />
-              <path className="care-pulse-line" d="M143 185H171L179 173L191 205L205 181L216 191H251" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-              <rect x="276" y="173" width="23" height="38" rx="4" fill="#D5EBDE" />
-              <path d="M288 181V202M282 191H294" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" />
-              <g className="care-check-badge">
-                <circle cx="326" cy="87" r="28" fill="var(--accent)" />
-                <path d="M315 87L323 95L338 79" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-              </g>
-              <rect x="74" y="197" width="65" height="78" rx="8" fill="white" stroke="#B9DACA" strokeWidth="2" />
-              <path d="M89 217H122M89 229H112M89 241H119M89 253H104" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" />
-              <circle cx="221" cy="242" r="3" fill="#AAC9C0" />
-              <ellipse cx="220" cy="293" rx="133" ry="5" fill="var(--primary)" fillOpacity=".06" />
-            </svg>
-          </div>
         </div>
         <svg className="home-hero-wave" viewBox="0 0 1440 230" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0 0C140 100 160 212 395 172L1440 0V230H0Z" fill="var(--accent)" />
           <path d="M0 23C140 123 160 229 395 189L1440 18V230H0Z" fill="var(--paper)" />
         </svg>
       </div>

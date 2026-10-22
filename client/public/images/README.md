@@ -1,3 +1,8 @@
+# Hero background
+
+`hero-bukhara.webp` (1467w) and `hero-bukhara-960.webp` (phones): Bukhara old town at sunset,
+supplied by the site owner.
+
 # Consultation background
 
 `consultation-banner.jpg`: Pavel Danilyuk, "Doctors Talking in Office", Pexels.
