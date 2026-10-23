@@ -1,0 +1,193 @@
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { LogoTiles } from "@/shared/ui/LogoTiles";
+import { Reveal } from "@/shared/ui/Reveal";
+
+type Photo = { src: string; title: string; srcSet?: string; width?: number; height?: number };
+
+/** Photos of the country deck, each titled after a phrase of the statement. */
+const COUNTRY_PHOTOS: Photo[] = [
+  { src: "uz-mountains", title: "Величественные горы" },
+  { src: "uz-mosque", title: "Богатая культура" },
+  { src: "uz-registan", title: "Самарканд · Регистан" },
+  { src: "uz-khiva", title: "Древняя история" },
+  { src: "uz-dome", title: "Искусство мастеров" },
+  { src: "uz-tashkent", title: "Современное развитие" },
+  { src: "uz-travellers", title: "Путешественники со всего мира" },
+].map((photo) => ({ ...photo, srcSet: `/images/${photo.src}-800.webp 800w, /images/${photo.src}.webp 1460w`, width: 1460, height: 816 }));
+
+/** Frames from the tourism film for the medical tourism deck (852×478 masters). */
+const MED_PHOTOS: Photo[] = [
+  { src: "med-therapy", title: "Высокотехнологичное лечение" },
+  { src: "med-surgeons", title: "Опытные хирурги" },
+  { src: "med-robot", title: "Роботизированная хирургия" },
+  { src: "med-mri", title: "Современная диагностика" },
+  { src: "med-reception", title: "Комфортные палаты" },
+  { src: "med-rehab", title: "Реабилитация" },
+  { src: "med-sanatorium", title: "Санатории и отдых" },
+  { src: "med-consult", title: "Сопровождение пациентов" },
+].map((photo) => ({ ...photo, width: 852, height: 478 }));
+
+export function UzDeck() {
+  return (
+    <PhotoWheel
+      id="country"
+      eyebrow="Наша страна"
+      photos={COUNTRY_PHOTOS}
+      tiles={[["tl", 3], ["br", 7]]}
+      title={<><em>Узбекистан</em> — край, где гармонично сочетаются древняя история, богатая культура и современное развитие.</>}
+      text="Расположенная в самом сердце Великого шёлкового пути, эта страна покоряет путешественников со всего мира жемчужинами Самарканда, Бухары и Хивы, величественными горами и неповторимой природой."
+    />
+  );
+}
+
+export function MedDeck() {
+  return (
+    <PhotoWheel
+      id="medtourism"
+      eyebrow="Медицинский туризм"
+      photos={MED_PHOTOS}
+      tiles={[["tr", 13], ["bl", 17]]}
+      mirrored
+      title={<><em>Лечение в Узбекистане</em> — современная медицина рядом с древними городами.</>}
+      text="Клиники с новым оборудованием и опытными врачами принимают пациентов из разных стран: диагностика, операции и реабилитация по понятным ценам, а восстановиться можно в санаториях среди гор."
+    />
+  );
+}
+
+type WheelProps = {
+  id: string;
+  eyebrow: string;
+  title: ReactNode;
+  text: string;
+  photos: Photo[];
+  tiles: [corner: "tl" | "tr" | "bl" | "br", seed: number][];
+  /** Wheel on the left, statement on the right. */
+  mirrored?: boolean;
+};
+
+/** A statement beside photo cards riding a wheel (the country deck after the hero, the medical tourism deck).
+ *  While the stage is pinned the scroll turns the wheel once around: each card swings in from below, rests in front
+ *  and swings out above. Whenever the scroll rests, the wheel keeps turning on its own, endlessly.
+ *  Reduced motion: the statement and the first card, without the pinned stage. */
+function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false }: WheelProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current!;
+    const cards = [...section.querySelectorAll<HTMLElement>(".uz-card")];
+    const count = section.querySelector<HTMLElement>(".uz-count-current")!;
+    const caption = section.querySelector<HTMLElement>(".uz-count-title")!;
+    const query = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    const n = cards.length;
+    let raf = 0;
+    let read = 0;
+    // Cards dealt by themselves, and when the page last scrolled.
+    let auto = 0;
+    let autoTarget = 0;
+    let lastScroll = 0;
+
+    const update = () => {
+      raf = 0;
+      const scrollable = section.offsetHeight - window.innerHeight;
+      const readTarget = query.matches && scrollable > 0 ? span(-section.getBoundingClientRect().top / scrollable, 0, 1) : 0;
+      read = approach(read, readTarget, 0.14);
+      auto = approach(auto, autoTarget, 0.07);
+      if (read !== readTarget || auto !== autoTarget) schedule();
+
+      // The scroll turns the wheel once around, resting a moment on each card; the auto steps add on top.
+      const turned = span(read, 0.04, 0.92) * (n - 1);
+      const turn = Math.floor(turned) + ease(turned - Math.floor(turned)) + auto;
+      cards.forEach((card, i) => {
+        // Steps from the front (-1 below, 0 front, 1 above), wrapped into -n/2..n/2 so the ring is endless;
+        // the wrap happens out of sight.
+        const away = ((((turn - i) % n) + n + n / 2) % n) - n / 2;
+        card.style.setProperty("--d", away.toFixed(4));
+        card.style.setProperty("--s", (1 - Math.min(1, Math.abs(away)) * 0.12).toFixed(4));
+        card.style.opacity = String(Math.max(0, 1 - Math.abs(away) * 0.55));
+        card.style.zIndex = String(10 - Math.round(Math.abs(away) * 2));
+      });
+      const front = ((Math.round(turn) % n) + n) % n;
+      count.textContent = String(front + 1).padStart(2, "0");
+      caption.textContent = photos[front].title;
+    };
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    const onScroll = () => {
+      lastScroll = performance.now();
+      schedule();
+    };
+    // While the deck is on screen and the scroll rests, it deals one card every few seconds.
+    const tick = window.setInterval(() => {
+      const box = section.getBoundingClientRect();
+      const onScreen = box.top < window.innerHeight / 2 && box.bottom > window.innerHeight / 2;
+      if (query.matches && onScreen && !document.hidden && performance.now() - lastScroll > 1500) {
+        autoTarget += 1;
+        schedule();
+      }
+    }, 3200);
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", schedule);
+    query.addEventListener("change", schedule);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearInterval(tick);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", schedule);
+      query.removeEventListener("change", schedule);
+    };
+  }, [photos]);
+
+  return (
+    <section ref={sectionRef} id={id} className={`uz${mirrored ? " is-mirrored" : ""}`}>
+      <div className="uz-stage">
+        {tiles.map(([corner, seed]) => (
+          <LogoTiles key={corner} corner={corner} seed={seed} />
+        ))}
+        <Reveal className="uz-copy">
+          <p className="uz-eyebrow">{eyebrow}</p>
+          <h2 className="uz-title">{title}</h2>
+          <p className="uz-text">{text}</p>
+          <p className="uz-count" aria-hidden="true">
+            <span className="uz-count-current">01</span>
+            <span className="uz-count-total"> / {String(photos.length).padStart(2, "0")}</span>
+            <span className="uz-count-title">{photos[0].title}</span>
+          </p>
+        </Reveal>
+
+        <div className="uz-deck">
+          {photos.map((photo, i) => (
+            <figure key={photo.src} className="uz-card" style={{ "--d": -i, opacity: i ? 0 : 1 } as CSSProperties}>
+              <img
+                src={`/images/${photo.src}.webp`}
+                srcSet={photo.srcSet}
+                sizes={photo.srcSet ? "(max-width: 899px) 90vw, 50vw" : undefined}
+                alt={photo.title}
+                width={photo.width}
+                height={photo.height}
+                loading="lazy"
+              />
+              <figcaption>{photo.title}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function span(p: number, from: number, to: number) {
+  return Math.min(1, Math.max(0, (p - from) / (to - from)));
+}
+
+function ease(t: number) {
+  return t * t * (3 - 2 * t);
+}
+
+/** One smoothing step toward `target`; snaps when close enough. */
+function approach(value: number, target: number, rate: number) {
+  const next = value + (target - value) * rate;
+  return Math.abs(target - next) < 0.0005 ? target : next;
+}

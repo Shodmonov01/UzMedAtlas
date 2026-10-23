@@ -40,7 +40,7 @@ function RootLayout() {
           {isWorkspace ? (
             <div className="mb-6 flex items-center justify-between gap-3">
               <Link to="/" className="inline-flex items-center gap-2 font-extrabold text-ink">
-                <img src="/medguide-uz.svg" alt="" className="h-8 w-8 rounded-full bg-white object-contain" />
+                <img src="/brand/logo.svg" alt="" className="h-8 w-8 object-contain" />
                 MEDGUIDE UZ
               </Link>
               <div className="flex items-center gap-3 text-sm font-bold text-muted">
@@ -68,7 +68,7 @@ function RootLayout() {
           <Outlet />
         </main>
         {!isWorkspace ? <Footer /> : null}
-        {!isWorkspace ? <HealthCheckerWidget showTip={pathname !== "/"} /> : null}
+        {!isWorkspace ? <HealthCheckerWidget showTip={!isHome} hideOverHero={isHome} /> : null}
       </div>
     </HealthCheckerProvider>
   );

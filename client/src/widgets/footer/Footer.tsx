@@ -1,24 +1,55 @@
 import { Link } from "@tanstack/react-router";
+import { LogoTiles } from "@/shared/ui/LogoTiles";
+import { motion } from "motion/react";
+import { RevealGroup, revealItem } from "@/shared/ui/Reveal";
 
 export function Footer() {
   return (
-    <footer className="site-footer mt-8 bg-white text-ink">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[1fr_auto] md:items-end">
-        <div>
-          <Link to="/" className="inline-flex items-center gap-2 text-lg font-extrabold tracking-tight">
-            <img src="/brand/logo.png" alt="" width={36} height={36} className="h-9 w-9 object-contain" />
-            Ассоциация медицинских организаций
-          </Link>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-            Помогаем сориентироваться в клиниках Узбекистана и найти подходящее направление лечения.
-          </p>
-          <p className="mt-2 text-xs text-muted">Health Checker помогает с выбором направления и не ставит диагноз.</p>
-        </div>
-        <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-bold">
-          <a href="/#catalog" className="text-muted transition hover:text-primary">Клиники</a>
-          <Link to="/checker" className="text-muted transition hover:text-primary">Подобрать направление</Link>
-          <Link to="/cabinet/login" className="text-muted transition hover:text-primary">Для клиник</Link>
-          <Link to="/moderation/login" className="text-muted transition hover:text-primary">Кабинет модератора</Link>
+    <footer className="site-footer">
+      <LogoTiles corner="tr" seed={5} />
+      <div className="site-footer-inner">
+        <RevealGroup className="site-footer-top">
+          <motion.div className="site-footer-about" variants={revealItem}>
+            <Link to="/" className="site-footer-brand">
+              <img src="/brand/logo.svg" alt="" width={44} height={44} />
+              <span>
+                <strong>Ассоциация</strong>
+                <span>медицинских организаций</span>
+              </span>
+            </Link>
+            <p>Помогаем сориентироваться в клиниках Узбекистана и найти подходящее направление лечения.</p>
+          </motion.div>
+
+          <motion.nav className="site-footer-links" aria-label="Разделы сайта" variants={revealItem}>
+            <div>
+              <p>Пациентам</p>
+              <a href="/#catalog">Каталог клиник</a>
+              <Link to="/checker">Подобрать направление</Link>
+            </div>
+            <div>
+              <p>Клиникам</p>
+              <Link to="/cabinet/login">Личный кабинет</Link>
+              <Link to="/moderation/login">Кабинет модератора</Link>
+            </div>
+          </motion.nav>
+
+          <motion.div className="site-footer-cta" variants={revealItem}>
+            <p className="site-footer-cta-title">Вы представляете клинику?</p>
+            <p>Разместите клинику в каталоге и получайте заявки от пациентов.</p>
+            <Link to="/cabinet/login" className="site-footer-cta-action">
+              Подключить клинику
+              <span aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </Link>
+          </motion.div>
+        </RevealGroup>
+
+        <div className="site-footer-bottom">
+          <span>© {new Date().getFullYear()} Ассоциация медицинских организаций</span>
+          <span>Health Checker помогает с выбором направления и не ставит диагноз.</span>
         </div>
       </div>
     </footer>

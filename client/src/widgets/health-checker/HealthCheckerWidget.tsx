@@ -50,7 +50,7 @@ function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
+export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { showTip?: boolean; hideOverHero?: boolean }) {
   const { isOpen, open, close, toggle } = useHealthChecker();
   const panelId = useId();
   const listRef = useRef<HTMLDivElement>(null);
@@ -63,12 +63,40 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
   const [age, setAge] = useState<number | null>(null);
   const [gender, setGender] = useState<"female" | "male" | "prefer_not">("prefer_not");
   const [error, setError] = useState<string | null>(null);
+  // On the home page the launcher stays out of the hero film and shows up once the film is scrolled past.
+  const [overHero, setOverHero] = useState(hideOverHero);
+
+  useEffect(() => {
+    if (!hideOverHero) {
+      setOverHero(false);
+      return;
+    }
+    const update = () => setOverHero(window.scrollY < window.innerHeight - 80);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [hideOverHero]);
 
   useEffect(() => {
     if (!isOpen) return;
     const t = window.setTimeout(() => inputRef.current?.focus(), 180);
     return () => window.clearTimeout(t);
   }, [isOpen, step]);
+
+  // On phones the open chat covers the page, so scrolling the page on past it closes the chat. Scrolls right after
+  // opening are ignored (the keyboard coming up can nudge the page), and so are scrolls inside the chat itself.
+  useEffect(() => {
+    if (!isOpen || !window.matchMedia("(max-width: 767px)").matches) return;
+    const openedAt = performance.now();
+    const startY = window.scrollY;
+    const onScroll = () => {
+      if (performance.now() - openedAt < 700 || Math.abs(window.scrollY - startY) < 60) return;
+      (document.activeElement as HTMLElement | null)?.blur();
+      close();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isOpen, close]);
 
   useEffect(() => {
     if (!listRef.current) return;
@@ -203,27 +231,27 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
           : "Напишите, что беспокоит…";
 
   return (
-    <div className="hc-widget pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className={`hc-widget pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6${overHero && !isOpen ? " is-tucked" : ""}`}>
       {isOpen ? (
         <section
           id={panelId}
           role="dialog"
           aria-label="Health Checker"
           aria-modal="false"
-          className="hc-panel pointer-events-auto flex w-[min(100vw-2rem,380px)] flex-col overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-[0_24px_60px_-20px_rgba(31,41,55,0.45)]"
+          className="hc-panel pointer-events-auto flex w-[min(100vw-2rem,390px)] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_0_0_1px_var(--line),0_30px_70px_-24px_rgba(11,42,61,0.55)]"
         >
-          <header className="flex items-center gap-3 border-b border-line bg-primary-soft px-4 py-3 text-ink">
-            <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-lg font-extrabold text-primary">
-              HC
-              <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-success" />
+          <header className="hc-header flex items-center gap-3 px-4 py-3.5 text-white">
+            <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white">
+              <img src="/brand/logo.svg" alt="" width={30} height={30} />
+              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0b2a3d] bg-accent" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-extrabold">Health Checker</p>
-              <p className="truncate text-xs text-muted">Онлайн · предварительное направление</p>
+              <p className="truncate text-[15px] font-semibold tracking-tight">Health Checker</p>
+              <p className="truncate text-xs text-white/65">Онлайн · предварительное направление</p>
             </div>
             <button
               type="button"
-              className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-white hover:text-ink"
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
               aria-label="Свернуть"
               onClick={close}
             >
@@ -233,7 +261,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
             </button>
           </header>
 
-          <div ref={listRef} className="flex max-h-[min(58vh,420px)] flex-col gap-3 overflow-y-auto bg-[#f7f9fc] px-3 py-4">
+          <div ref={listRef} className="flex max-h-[min(58vh,420px)] flex-col gap-3 overflow-y-auto bg-paper px-3.5 py-4">
             {messages.map((message) => {
               if ("kind" in message && message.kind === "examples") {
                 return (
@@ -242,7 +270,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                       <button
                         key={example}
                         type="button"
-                        className="rounded-full border border-line bg-white px-3 py-1.5 text-left text-xs font-semibold text-ink transition hover:border-primary hover:bg-mint"
+                        className="rounded-full bg-white px-3 py-1.5 text-left text-xs font-medium text-ink ring-1 ring-line transition hover:bg-[#57bf8c1f] hover:text-accent-strong hover:ring-[#57bf8c80]"
                         onClick={() => submitSymptoms(example)}
                       >
                         {example}
@@ -256,9 +284,9 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                 const top = message.result.specialties?.[0];
                 return (
                   <div key={message.id} className="max-w-[92%] space-y-2">
-                    <div className="rounded-2xl rounded-tl-md bg-white px-3.5 py-3 text-sm shadow-sm ring-1 ring-line">
-                      <p className="text-xs font-bold uppercase tracking-wide text-primary">Рекомендация</p>
-                      <p className="mt-1 text-base font-extrabold text-ink">
+                    <div className="rounded-[20px] rounded-tl-md bg-white px-4 py-3.5 text-sm ring-1 ring-line">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Рекомендация</p>
+                      <p className="mt-1.5 text-lg font-semibold tracking-tight text-accent-deep">
                         {top?.nameRu || top?.nameEn || "Уточните у врача"}
                       </p>
                       {message.result.doctorRecommendation ? (
@@ -279,12 +307,12 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                       <Link
                         to="/"
                         search={top?.slug ? { specialty: top.slug } : {}}
-                        className="btn btn-primary px-4 py-2 text-sm"
+                        className="hc-action"
                         onClick={close}
                       >
                         Найти клиники
                       </Link>
-                      <button type="button" className="btn btn-ghost px-4 py-2 text-sm" onClick={resetChat}>
+                      <button type="button" className="hc-action is-ghost" onClick={resetChat}>
                         Ещё раз
                       </button>
                     </div>
@@ -299,9 +327,9 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                   className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-snug shadow-sm ${
+                    className={`max-w-[85%] rounded-[20px] px-4 py-2.5 text-sm leading-relaxed ${
                       isUser
-                        ? "rounded-tr-md bg-primary text-white"
+                        ? "rounded-tr-md bg-ink text-white"
                         : "rounded-tl-md bg-white text-ink ring-1 ring-line"
                     }`}
                   >
@@ -312,7 +340,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
             })}
             {step === "loading" ? (
               <div className="flex justify-start">
-                <div className="flex items-center gap-1 rounded-2xl rounded-tl-md bg-white px-3.5 py-3 ring-1 ring-line">
+                <div className="flex items-center gap-1 rounded-[20px] rounded-tl-md bg-white px-4 py-3.5 ring-1 ring-line">
                   <span className="hc-dot" />
                   <span className="hc-dot" />
                   <span className="hc-dot" />
@@ -329,7 +357,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                   <button
                     key={opt.value}
                     type="button"
-                    className="rounded-full border border-line bg-sand px-3 py-1.5 text-xs font-bold"
+                    className="hc-option"
                     onClick={() => submitGender(opt.value)}
                   >
                     {opt.label}
@@ -343,7 +371,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                   <button
                     key={opt.value}
                     type="button"
-                    className="rounded-full border border-line bg-sand px-3 py-1.5 text-xs font-bold"
+                    className="hc-option"
                     onClick={() => submitDuration(opt.value)}
                   >
                     {opt.label}
@@ -351,10 +379,10 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                 ))}
               </div>
             ) : null}
-            <div className="flex items-end gap-2">
+            <div className="hc-composer">
               <input
                 ref={inputRef}
-                className="field min-h-11 flex-1 rounded-2xl py-2.5 text-sm"
+                className="min-w-0 flex-1 bg-transparent px-3 text-sm text-ink outline-none placeholder:text-muted disabled:cursor-not-allowed"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={placeholder}
@@ -363,7 +391,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
               />
               <button
                 type="submit"
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[image:var(--brand-gradient)] text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={inputDisabled || !draft.trim()}
                 aria-label="Отправить"
               >
@@ -387,7 +415,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
       {showTip && !isOpen ? (
         <button
           type="button"
-          className="hc-tip pointer-events-auto hidden max-w-[220px] rounded-2xl rounded-br-md bg-white px-3.5 py-2 text-left text-xs font-bold leading-snug text-ink shadow-md ring-1 ring-line sm:block"
+          className="hc-tip pointer-events-auto hidden max-w-[230px] rounded-[18px] rounded-br-md bg-white px-4 py-2.5 text-left text-xs font-semibold leading-snug text-ink shadow-[0_16px_36px_-20px_rgba(11,42,61,0.5)] ring-1 ring-line sm:block"
           onClick={open}
         >
           Нужна помощь с направлением? Напишите оператору
@@ -396,7 +424,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
 
       <button
         type="button"
-        className="hc-fab pointer-events-auto relative grid h-14 w-14 place-items-center rounded-full bg-primary text-white shadow-[0_16px_40px_-12px_rgba(21,112,239,0.7)] transition hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="hc-fab pointer-events-auto relative grid h-14 w-14 place-items-center rounded-full bg-[image:var(--brand-gradient)] text-white shadow-[0_18px_40px_-14px_rgba(11,42,61,0.7)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         aria-expanded={isOpen}
         aria-controls={panelId}
         aria-label={isOpen ? "Закрыть Health Checker" : "Открыть Health Checker"}
@@ -417,7 +445,7 @@ export function HealthCheckerWidget({ showTip = true }: { showTip?: boolean }) {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1 text-[10px] font-extrabold">
+            <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-white px-1 text-[10px] font-bold text-ink ring-2 ring-[#57bf8c]">
               1
             </span>
           </>

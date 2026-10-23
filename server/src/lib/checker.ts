@@ -92,8 +92,12 @@ export function scoreSpecialty(text: string, keywords: string) {
   let score = 0;
   for (const keyword of parts) {
     if (!keyword) continue;
-    if (haystack.includes(` ${keyword} `) || haystack.includes(keyword)) {
-      score += keyword.length >= 6 ? 3 : keyword.length >= 4 ? 2 : 1;
+    const weight = keyword.length >= 6 ? 3 : keyword.length >= 4 ? 2 : 1;
+    if (haystack.includes(` ${keyword} `)) {
+      // A whole-word hit is clear even for a short keyword ("зуб", "eye").
+      score += Math.max(2, weight);
+    } else if (haystack.includes(keyword)) {
+      score += weight;
     }
   }
   return score;
@@ -159,7 +163,8 @@ export function rankSpecialties<T extends SpecialtyLike>(
   const picked = ranked.filter(
     (item) => item.score > 0 && item.score >= Math.max(2, best * 0.55),
   );
-  return picked.slice(0, 3);
+  // A single weak match is still the best lead; never answer with nothing when something matched.
+  return (picked.length ? picked : ranked.slice(0, 1)).slice(0, 3);
 }
 
 export function pickSpecialty<T extends SpecialtyLike>(

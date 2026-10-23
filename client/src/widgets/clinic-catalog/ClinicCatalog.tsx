@@ -4,8 +4,12 @@ import { useEffect, useId, useState } from "react";
 import { CITY_LABELS, fetchClinics, fetchSpecialties } from "@/shared/api/client";
 import { SelectField } from "@/shared/ui/SelectField";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
-import { useScrollReveal } from "@/shared/lib/use-scroll-reveal";
+import { motion } from "motion/react";
+import { Reveal, RevealGroup, revealItem } from "@/shared/ui/Reveal";
 import { CountryFilm } from "@/widgets/country-film/CountryFilm";
+import { HeroBuild } from "@/widgets/hero-build/HeroBuild";
+import { MedDeck, UzDeck } from "@/widgets/uz-deck/UzDeck";
+import { LogoTiles } from "@/shared/ui/LogoTiles";
 
 export type CatalogSearch = {
   q?: string;
@@ -147,7 +151,6 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [modalOpen]);
 
-  const revealRef = useScrollReveal<HTMLElement>(clinics.data);
   const advancedCount = countAdvanced(search);
   const specialtyOptions = [
     { value: "", label: "Направление" },
@@ -180,42 +183,48 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   }
 
   return (
-    <section ref={revealRef} className="reference-home">
-      <div className="home-hero">
-        <img
-          className="home-hero-photo"
-          src="/images/hero-bukhara.webp"
-          srcSet="/images/hero-bukhara-960.webp 960w, /images/hero-bukhara.webp 1467w"
-          sizes="100vw"
-          alt=""
-          width="1467"
-          height="823"
-          fetchPriority="high"
-        />
-        <div className="home-hero-inner">
-          <div className="home-hero-copy">
-            <h1>Медицина, которой<br /><span>можно доверять.</span></h1>
-            <p className="home-hero-description">Клиники, услуги и специалисты Узбекистана — <br className="hidden sm:block" />для понятного выбора в одном месте.</p>
-            <div className="home-hero-actions">
-              <a href="#catalog" className="btn btn-accent">Найти клинику</a>
-              <Link to="/checker" className="home-hero-secondary">Подобрать направление</Link>
-            </div>
-          </div>
-        </div>
-        <svg className="home-hero-wave" viewBox="0 0 1440 230" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0 23C140 123 160 229 395 189L1440 18V230H0Z" fill="var(--paper)" />
-        </svg>
-      </div>
+    <section className="reference-home">
+      <HeroBuild />
+
+      <UzDeck />
+
+      <section id="tourism" className="tourism">
+        <LogoTiles corner="tl" seed={9} />
+        <Reveal className="tourism-head">
+          <p className="tourism-eyebrow">Туризм</p>
+          <h2>Новые маршруты <em>по всей стране</em></h2>
+        </Reveal>
+        <Reveal className="tourism-copy" delay={0.12}>
+          <p>
+            За последнее десятилетие туристическая карта Узбекистана значительно расширилась. Появились новые маршруты,
+            активно развиваются горный, экологический, гастрономический и паломнический туризм.
+          </p>
+          <p>
+            Узбекистан также стал площадкой для крупных международных туристических форумов и выставок, укрепляя свои
+            позиции на мировой туристической арене.
+          </p>
+          <RevealGroup className="tourism-kinds" role="list">
+            {["Горный", "Экологический", "Гастрономический", "Паломнический"].map((kind) => (
+              <motion.div key={kind} role="listitem" variants={revealItem}>
+                {kind}
+              </motion.div>
+            ))}
+          </RevealGroup>
+        </Reveal>
+      </section>
 
       <CountryFilm />
 
-      <div className="care-steps">
-        <a href="#catalog" data-reveal><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></a>
-        <a href="#clinic-results" data-reveal data-reveal-delay="80"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></a>
-        <Link to="/checker" data-reveal data-reveal-delay="160"><span className="care-step-number">03</span><span><strong>Задайте вопрос</strong><small>Поможем выбрать направление</small></span></Link>
-      </div>
+      <MedDeck />
+
+      <RevealGroup className="care-steps">
+        <motion.a variants={revealItem} href="#catalog"><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></motion.a>
+        <motion.a variants={revealItem} href="#clinic-results"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></motion.a>
+        <motion.div variants={revealItem}><Link to="/checker"><span className="care-step-number">03</span><span><strong>Задайте вопрос</strong><small>Поможем выбрать направление</small></span></Link></motion.div>
+      </RevealGroup>
       <div className="catalog-content">
-        <div id="catalog" className="catalog-search-card scroll-mt-28" data-reveal>
+        <LogoTiles corner="tr" seed={11} />
+        <Reveal id="catalog" className="catalog-search-card scroll-mt-28">
           <form id="catalog-search" onSubmit={applyQuick}>
             <div className="catalog-search-grid">
               <label className="catalog-query"><span>Клиника или услуга</span><input className="field" placeholder="Например, кардиология…" value={q} onChange={(e) => setQ(e.target.value)} /></label>
@@ -223,14 +232,22 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <datalist id="catalog-city-options">{CITY_OPTIONS.map((item) => <option key={item.value} value={item.label} />)}</datalist>
               <label><span>Направление</span><SelectField value={specialty} options={specialtyOptions} onChange={setSpecialty} /></label>
               <label><span>Сортировать по</span><SelectField value={sort} options={SORT_OPTIONS} onChange={setSort} /></label>
-              <button type="button" className="catalog-more btn btn-ghost" onClick={() => setModalOpen(true)}>Ещё{advancedCount ? ` · ${advancedCount}` : " фильтров"}</button>
-              <button className="catalog-submit btn btn-primary" type="submit">Найти</button>
+              <button type="button" className="catalog-more" onClick={() => setModalOpen(true)}>Ещё{advancedCount ? ` · ${advancedCount}` : " фильтров"}</button>
+              <button className="catalog-submit" type="submit">
+                Найти
+                <span aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2.2" />
+                    <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </button>
             </div>
           </form>
           {specialties.data?.length ? (
             <div className="catalog-popular"><span>Популярные направления:</span>{specialties.data.slice(0, 4).map((item) => <button key={item.slug} type="button" onClick={() => onPatchSearch({ specialty: item.slug })}>{item.nameRu || item.nameEn}</button>)}</div>
           ) : null}
-        </div>
+        </Reveal>
       {search.specialty ? (
         <div className="mb-4 rounded-2xl border border-primary/15 bg-mint px-4 py-3 text-sm">
           <p className="font-bold text-primary">Подборка по Health Checker</p>
@@ -272,16 +289,17 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       ) : null}
 
       <div id="clinic-results" className="mt-12 scroll-mt-28">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3" data-reveal>
+        <Reveal className="catalog-heading">
           <div>
-            <h2 className="text-3xl font-black tracking-tight text-ink">Выберите свою клинику</h2>
+            <p className="catalog-eyebrow">Каталог</p>
+            <h2>Выберите свою клинику</h2>
           </div>
           {!clinics.isLoading && clinics.data ? (
-              <span className="rounded-full border border-line bg-white px-4 py-2 text-sm font-bold text-ink shadow-sm">
+            <span className="catalog-count">
               {clinics.data.length} {clinicWord(clinics.data.length)}
             </span>
           ) : null}
-        </div>
+        </Reveal>
 
       {clinics.isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -298,80 +316,70 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
         </div>
       ) : null}
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {clinics.data?.map((clinic, index) => (
+      <RevealGroup className="clinic-grid" key={clinics.dataUpdatedAt}>
+        {clinics.data?.map((clinic) => (
+          <motion.div key={clinic.id} variants={revealItem} className="clinic-grid-item">
           <Link
-            key={clinic.id}
             to="/clinics/$slug"
             params={{ slug: clinic.slug }}
-            data-reveal
-            data-reveal-delay={(index % 3) * 70}
             aria-label={clinic.nameRu || clinic.nameEn}
-            className="clinic-card group soft-card flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-line/70 bg-white no-underline"
+            className="clinic-card"
           >
-            <div className="relative h-44 shrink-0 overflow-hidden bg-primary-soft">
-              {clinic.photos?.[0]?.url ? (
-                <img
-                  src={clinic.photos[0].url}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                />
+            <div className="clinic-card-cover">
+              {hasPhoto(clinic.photos?.[0]?.url) ? (
+                <img src={clinic.photos![0].url} alt="" className="clinic-card-photo" />
               ) : (
-                <div className="clinic-cover-fallback absolute inset-0 grid place-items-center" style={{ backgroundColor: clinic.coverColor || "#1570ef" }}>
-                  <svg viewBox="0 0 100 100" className="h-24 w-24 text-white/90 drop-shadow-lg transition duration-500 group-hover:scale-110" fill="none" aria-hidden="true">
-                    <path d="M50 8v84M8 50h84" stroke="currentColor" strokeWidth="13" strokeLinecap="round" />
-                    <circle cx="50" cy="50" r="40" stroke="currentColor" strokeOpacity=".28" strokeWidth="2" />
-                  </svg>
+                <div className="clinic-card-placeholder">
+                  <img src="/brand/logo.svg" alt="" width={56} height={56} />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-primary-deep/45 via-transparent to-ink/5" />
-              <span className="absolute left-4 top-4 rounded-full border border-white/60 bg-white/90 px-3 py-1 text-[11px] font-extrabold text-primary-deep shadow-sm backdrop-blur">
-                {CITY_LABELS[clinic.city] || clinic.city}
-              </span>
-              {clinic.medicalTourism ? <span className="absolute right-4 top-4 rounded-full bg-warning-soft px-3 py-1 text-[11px] font-extrabold text-[#8a6100]">Для гостей страны</span> : null}
-              {clinic.logoUrl ? (
-                <img
-                  src={clinic.logoUrl}
-                  alt=""
-                  className="absolute bottom-3 left-4 h-14 w-14 rounded-2xl border-2 border-white bg-white object-cover shadow-lg"
-                />
-              ) : null}
+              <span className="clinic-card-city">{CITY_LABELS[clinic.city] || clinic.city}</span>
+              {clinic.logoUrl && hasPhoto(clinic.photos?.[0]?.url) ? <img src={clinic.logoUrl} alt="" className="clinic-card-logo" /> : null}
             </div>
-            <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="text-xl font-extrabold leading-tight text-ink">{clinic.nameRu || clinic.nameEn}</h3>
-                {clinic.responseHours ? <span className="shrink-0 rounded-xl bg-success-soft px-2.5 py-1 text-[11px] font-extrabold text-[#087f5b]">~{clinic.responseHours} ч</span> : null}
+            <div className="clinic-card-body">
+              <div className="clinic-card-head">
+                <h3>{clinic.nameRu || clinic.nameEn}</h3>
+                {clinic.responseHours ? <span className="clinic-card-reply">~{clinic.responseHours} ч</span> : null}
               </div>
-              <p className="text-xs font-semibold text-muted">
+              <p className="clinic-card-meta">
                 {clinic.branchCount ? `${clinic.branchCount} филиала` : "Профиль клиники"}
                 {clinic.fromPrice != null ? ` · услуги от $${clinic.fromPrice}` : ""}
               </p>
               {(clinic.addressRu || clinic.addressEn) && (
-                <p className="line-clamp-2 inline-flex items-start gap-2 text-sm text-muted"><span className="mt-0.5 text-clay">⌖</span>{clinic.addressRu || clinic.addressEn}</p>
+                <p className="clinic-card-address">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" stroke="currentColor" strokeWidth="2" />
+                    <circle cx="12" cy="9.5" r="2.5" stroke="currentColor" strokeWidth="2" />
+                  </svg>
+                  {clinic.addressRu || clinic.addressEn}
+                </p>
               )}
-              <p className="line-clamp-3 text-sm leading-6 text-muted">
-                {clinic.descriptionRu || clinic.descriptionEn}
-              </p>
+              <p className="clinic-card-text">{clinic.descriptionRu || clinic.descriptionEn}</p>
               {clinic.specialties?.length ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="clinic-card-tags">
                   {clinic.specialties.slice(0, 4).map((s) => (
-                    <span key={s.slug} className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary-deep">
-                      {s.nameRu || s.nameEn}
-                    </span>
+                    <span key={s.slug}>{s.nameRu || s.nameEn}</span>
                   ))}
                 </div>
               ) : null}
-              <div className="flex flex-wrap gap-2 text-[10px] font-extrabold text-muted">
-                {clinic.languages?.slice(0, 4).map((lang) => (
-                  <span key={lang} className="rounded-full border border-line bg-white px-2.5 py-1.5 uppercase tracking-wide">
-                    {lang}
+              <div className="clinic-card-foot">
+                <span className="clinic-card-langs">
+                  {clinic.languages?.slice(0, 4).map((lang) => <span key={lang}>{lang}</span>)}
+                </span>
+                <span className="clinic-card-more">
+                  Подробнее
+                  <span aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </span>
-                ))}
+                </span>
               </div>
             </div>
           </Link>
+          </motion.div>
         ))}
-      </div>
+      </RevealGroup>
       </div>
 
       </div>
@@ -515,4 +523,9 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       ) : null}
     </section>
   );
+}
+
+/** A real cover photo; the seeded SVG drawings stand in for missing photos and get the brand cover instead. */
+function hasPhoto(url?: string | null): url is string {
+  return Boolean(url) && !url!.toLowerCase().endsWith(".svg");
 }

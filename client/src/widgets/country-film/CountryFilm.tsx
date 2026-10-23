@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { Reveal } from "@/shared/ui/Reveal";
 
-// The country film (mountains, Samarkand, Bukhara, Khiva, Tashkent at night), cut down from the 4K
-// master: 1080p for desktop, a lighter 720p for phones. Muted on a loop until the sound is turned on.
-const FILM = "/videos/uzbekistan.mp4";
-const FILM_MOBILE = "/videos/uzbekistan-720.mp4";
-const POSTER = "/videos/uzbekistan-poster.jpg";
+// The tourism film. Its master is 852×478, so one file serves desktop and phones alike.
+// Muted on a loop until the sound is turned on.
+const FILM = "/videos/tourism.mp4";
+const FILM_MOBILE = FILM;
+const POSTER = "/videos/tourism-poster.jpg";
 
 // Space (px) left around the opened 16:9 card on desktop.
 const GAP = 16;
@@ -92,7 +93,7 @@ export function CountryFilm() {
   }
 
   return (
-    <div className="country-film">
+    <div id="film" className="country-film">
       <div ref={pinRef} className="country-film-pin">
         <div className="country-film-stage">
           <div ref={frameRef} className="country-film-frame">
@@ -118,15 +119,15 @@ export function CountryFilm() {
       </div>
 
       <div className="country-film-caption">
-        <div data-reveal>
+        <Reveal>
           <p className="country-film-eyebrow">Наша страна</p>
           <h2>Узбекистан</h2>
-        </div>
-        <p className="country-film-text" data-reveal data-reveal-delay="80">
+        </Reveal>
+        <Reveal className="country-film-text" delay={0.12}>
           Узбекистан — край, где гармонично сочетаются древняя история, богатая культура и современное
           развитие. Расположенная в самом сердце Великого шёлкового пути, эта страна покоряет путешественников
           со всего мира жемчужинами Самарканда, Бухары и Хивы, величественными горами и неповторимой природой.
-        </p>
+        </Reveal>
       </div>
     </div>
   );

@@ -12,3 +12,9 @@ Source: https://www.pexels.com/photo/doctors-talking-in-office-7108327/
 License: https://www.pexels.com/license/
 
 Used as an illustrative background, without identifying the models as physicians of a listed clinic.
+
+# Hero layers and story cards
+
+`hero-sketch.webp` (pencil sketch) and `hero-clay.webp` (white model) are generated from
+`hero-bukhara.webp` with OpenCV; the home hero cross-fades them into the photo on scroll.
+`card-*.webp` are 4:5 stills cut from the country film in `public/videos/`.

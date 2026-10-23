@@ -17,6 +17,8 @@ const queryClient = new QueryClient({
 const router = createRouter({
   routeTree,
   context: { queryClient },
+  // Keep the reader's place on reload and on back/forward.
+  scrollRestoration: true,
 });
 
 declare module "@tanstack/react-router" {

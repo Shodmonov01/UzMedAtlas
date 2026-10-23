@@ -28,6 +28,8 @@ function HomePage() {
         }
         return next;
       },
+      // Filters change the URL only; the page stays where the reader is.
+      resetScroll: false,
     });
   }
 
@@ -35,7 +37,7 @@ function HomePage() {
     <ClinicCatalog
       search={search}
       onPatchSearch={patchSearch}
-      onClearSearch={() => void navigate({ search: {} })}
+      onClearSearch={() => void navigate({ search: {}, resetScroll: false })}
     />
   );
 }
