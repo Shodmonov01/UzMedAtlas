@@ -92,7 +92,8 @@ export function HeroBuild() {
     const syncFilm = () => {
       if (film.paused) void film.play().catch(() => {});
     };
-    window.addEventListener("touchstart", syncFilm, { passive: true, once: true });
+    window.addEventListener("touchend", syncFilm, { passive: true });
+    window.addEventListener("click", syncFilm);
     document.addEventListener("visibilitychange", syncFilm);
 
     update();
@@ -103,7 +104,8 @@ export function HeroBuild() {
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(tick);
-      window.removeEventListener("touchstart", syncFilm);
+      window.removeEventListener("touchend", syncFilm);
+      window.removeEventListener("click", syncFilm);
       document.removeEventListener("visibilitychange", syncFilm);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", schedule);
