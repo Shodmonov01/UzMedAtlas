@@ -360,19 +360,22 @@ h3,
 .uz.is-mirrored .uz-card { transform-origin: calc(50% - var(--hub)) 50%; transform: rotate(calc(var(--d, 0) * var(--step) * -1)) scale(var(--s, 1)); }
 .uz-card > img { width: 100%; height: 100%; object-fit: cover; }
 .uz-card figcaption { position: absolute; bottom: 20px; left: 22px; padding: 8px 14px; border-radius: 999px; background: #0b1a2b66; color: white; font-size: 13px; font-weight: 600; backdrop-filter: blur(8px); }
+/* Phones and tablets: no pinned wheel. The statement, then a swipeable row of cards that snap into place
+   (UzDeck nudges it on to the next card every few seconds while the reader leaves it alone). */
 @media (max-width: 899px) {
-  .uz { height: 380svh; border-radius: 24px 24px 0 0; }
-  .uz-stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; align-items: start; gap: 8px; padding-top: 88px; }
+  .uz { height: auto; border-radius: 24px 24px 0 0; }
+  .uz-stage { position: relative; display: block; height: auto; padding: 72px 0 56px; overflow: visible; }
+  .uz-copy { padding: 0 16px; }
   .uz-title { margin-top: 14px; font-size: clamp(22px, 6vw, 30px); line-height: 1.25; }
   .uz-text { margin-top: 14px; font-size: 15px; line-height: 1.65; }
   .uz-count { margin-top: 18px; padding-top: 14px; }
   .uz-count-current { font-size: 24px; }
-  /* The wheel stays inside its own band under the text, edge to edge. */
-  .uz-deck { --hub: clamp(420px, 120vw, 700px); --step: 30deg; align-items: center; margin: 0 -16px; padding: 0 16px; overflow: hidden; }
-  .uz.is-mirrored .uz-stage { grid-template-columns: minmax(0, 1fr); }
-  .uz.is-mirrored .uz-copy { order: 0; }
-  /* Phones: taller cards so the photos read well. */
-  .uz-card { aspect-ratio: 5 / 4; border-radius: 20px; }
+  .uz-deck { display: flex; gap: 12px; height: auto; margin-top: 24px; padding: 8px 16px 28px; overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory; scroll-padding: 0 16px; scrollbar-width: none; }
+  .uz-deck::-webkit-scrollbar { display: none; }
+  .uz-card, .uz.is-mirrored .uz-card { flex: 0 0 86%; aspect-ratio: 4 / 3; border-radius: 22px; scroll-snap-align: center;
+    transform: none !important; opacity: 1 !important; filter: none; box-shadow: 0 24px 40px -28px #0b2a3db3, 0 0 0 1px #ffffff1f; }
+  .uz-card figcaption { bottom: 14px; left: 14px; font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .uz { height: auto; margin-top: 0; border-radius: 0; }

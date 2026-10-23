@@ -84,23 +84,27 @@ export function HeroBuild() {
         schedule();
       }
     }, 3000);
-    // The hero film only plays when motion is welcome; otherwise its poster frame stands in.
+    // The hero film is a muted ambient loop and always plays. iOS checks the muted *attribute* (React only sets the
+    // property) and some phones refuse autoplay (low power mode), so it is retried on the first touch or return to the tab.
+    const film = videoRef.current!;
+    film.muted = true;
+    film.setAttribute("muted", "");
     const syncFilm = () => {
-      const video = videoRef.current!;
-      if (query.matches) void video.play().catch(() => {});
-      else video.pause();
+      if (film.paused) void film.play().catch(() => {});
     };
+    window.addEventListener("touchstart", syncFilm, { passive: true, once: true });
+    document.addEventListener("visibilitychange", syncFilm);
 
     update();
     syncFilm();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", schedule);
     query.addEventListener("change", schedule);
-    query.addEventListener("change", syncFilm);
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(tick);
-      query.removeEventListener("change", syncFilm);
+      window.removeEventListener("touchstart", syncFilm);
+      document.removeEventListener("visibilitychange", syncFilm);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", schedule);
       query.removeEventListener("change", schedule);
@@ -111,7 +115,7 @@ export function HeroBuild() {
     <>
       <section ref={heroRef} className="hero-build">
         <div className="hero-build-stage">
-          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero-poster.jpg" muted loop playsInline preload="auto" aria-hidden="true">
+          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero-poster.jpg" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
             <source src="/videos/hero-720.mp4" type="video/mp4" media="(max-width: 767px)" />
             <source src="/videos/hero-1080.mp4" type="video/mp4" />
           </video>

@@ -31,6 +31,9 @@ export function CountryFilm() {
   useEffect(() => {
     const video = videoRef.current!;
     video.muted = !sound;
+    // iOS reads the muted attribute for autoplay; React only sets the property.
+    if (!sound) video.setAttribute("muted", "");
+    else video.removeAttribute("muted");
     if (visible) {
       if (!video.getAttribute("src")) {
         video.src = window.matchMedia("(max-width: 767px)").matches ? FILM_MOBILE : FILM;

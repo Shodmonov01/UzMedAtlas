@@ -68,6 +68,7 @@ type WheelProps = {
 /** A statement beside photo cards riding a wheel (the country deck after the hero, the medical tourism deck).
  *  While the stage is pinned the scroll turns the wheel once around: each card swings in from below, rests in front
  *  and swings out above. Whenever the scroll rests, the wheel keeps turning on its own, endlessly.
+ *  Phones and tablets get a swipeable row of cards instead, nudged on to the next card every few seconds.
  *  Reduced motion: the statement and the first card, without the pinned stage. */
 function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false }: WheelProps) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -78,6 +79,8 @@ function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false 
     const count = section.querySelector<HTMLElement>(".uz-count-current")!;
     const caption = section.querySelector<HTMLElement>(".uz-count-title")!;
     const query = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    const narrow = window.matchMedia("(max-width: 899px)");
+    const deck = section.querySelector<HTMLElement>(".uz-deck")!;
     const n = cards.length;
     let raf = 0;
     let read = 0;
@@ -86,8 +89,31 @@ function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false 
     let autoTarget = 0;
     let lastScroll = 0;
 
+    const showCard = (front: number) => {
+      count.textContent = String(front + 1).padStart(2, "0");
+      caption.textContent = photos[front].title;
+    };
+    // Narrow screens: the card nearest the middle of the row is the current one.
+    const frontOfRow = () => {
+      const middle = deck.scrollLeft + deck.clientWidth / 2;
+      let best = 0;
+      cards.forEach((card, i) => {
+        const centre = card.offsetLeft + card.offsetWidth / 2;
+        if (Math.abs(centre - middle) < Math.abs(cards[best].offsetLeft + cards[best].offsetWidth / 2 - middle)) best = i;
+      });
+      return best;
+    };
+    let lastSwipe = 0;
+    const onDeckScroll = () => {
+      if (narrow.matches) showCard(frontOfRow());
+    };
+    const onTouch = () => {
+      lastSwipe = performance.now();
+    };
+
     const update = () => {
       raf = 0;
+      if (narrow.matches) return;
       const scrollable = section.offsetHeight - window.innerHeight;
       const readTarget = query.matches && scrollable > 0 ? span(-section.getBoundingClientRect().top / scrollable, 0, 1) : 0;
       read = approach(read, readTarget, 0.14);
@@ -106,9 +132,7 @@ function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false 
         card.style.opacity = String(Math.max(0, 1 - Math.abs(away) * 0.55));
         card.style.zIndex = String(10 - Math.round(Math.abs(away) * 2));
       });
-      const front = ((Math.round(turn) % n) + n) % n;
-      count.textContent = String(front + 1).padStart(2, "0");
-      caption.textContent = photos[front].title;
+      showCard(((Math.round(turn) % n) + n) % n);
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -121,7 +145,13 @@ function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false 
     const tick = window.setInterval(() => {
       const box = section.getBoundingClientRect();
       const onScreen = box.top < window.innerHeight / 2 && box.bottom > window.innerHeight / 2;
-      if (query.matches && onScreen && !document.hidden && performance.now() - lastScroll > 1500) {
+      if (!query.matches || !onScreen || document.hidden) return;
+      if (narrow.matches) {
+        // Leave the row alone for a while after the reader swipes it.
+        if (performance.now() - lastSwipe < 5000) return;
+        const next = cards[(frontOfRow() + 1) % n];
+        deck.scrollTo({ left: next.offsetLeft - (deck.clientWidth - next.offsetWidth) / 2, behavior: "smooth" });
+      } else if (performance.now() - lastScroll > 1500) {
         autoTarget += 1;
         schedule();
       }
@@ -131,9 +161,15 @@ function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", schedule);
     query.addEventListener("change", schedule);
+    narrow.addEventListener("change", schedule);
+    deck.addEventListener("scroll", onDeckScroll, { passive: true });
+    deck.addEventListener("touchstart", onTouch, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(tick);
+      narrow.removeEventListener("change", schedule);
+      deck.removeEventListener("scroll", onDeckScroll);
+      deck.removeEventListener("touchstart", onTouch);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", schedule);
       query.removeEventListener("change", schedule);
