@@ -83,19 +83,27 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
     return () => window.clearTimeout(t);
   }, [isOpen, step]);
 
-  // On phones the open chat covers the page, so scrolling the page on past it closes the chat. Scrolls right after
-  // opening are ignored (the keyboard coming up can nudge the page), and so are scrolls inside the chat itself.
+  // On phones the open chat covers the page, so a real swipe of the page past it closes the chat. Only a finger moving
+  // on the page counts: the keyboard opening (typing in the chat) also scrolls the page, and that must not close it.
   useEffect(() => {
     if (!isOpen || !window.matchMedia("(max-width: 767px)").matches) return;
-    const openedAt = performance.now();
-    const startY = window.scrollY;
-    const onScroll = () => {
-      if (performance.now() - openedAt < 700 || Math.abs(window.scrollY - startY) < 60) return;
-      (document.activeElement as HTMLElement | null)?.blur();
+    let startY: number | null = null;
+    const onStart = (event: TouchEvent) => {
+      const insideChat = (event.target as Element | null)?.closest(".hc-widget");
+      startY = insideChat ? null : event.touches[0].clientY;
+    };
+    const onMove = (event: TouchEvent) => {
+      if (startY === null || Math.abs(event.touches[0].clientY - startY) < 40) return;
+      startY = null;
+      if (document.activeElement?.closest(".hc-widget")) (document.activeElement as HTMLElement).blur();
       close();
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onStart);
+      window.removeEventListener("touchmove", onMove);
+    };
   }, [isOpen, close]);
 
   useEffect(() => {

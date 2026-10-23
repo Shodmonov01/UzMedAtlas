@@ -18,7 +18,7 @@ export function CountryFilm() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [sound, setSound] = useState(false);
   const [visible, setVisible] = useState(false);
-  // The phone refused to start the film on its own (power or data saving); a play button is offered instead.
+  // The phone refused to start the film on its own (power or data saving); it is retried on the next tap.
   const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
@@ -38,6 +38,7 @@ export function CountryFilm() {
     else video.removeAttribute("muted");
     if (visible) {
       if (!video.getAttribute("src")) {
+        for (const name of ["playsinline", "webkit-playsinline", "autoplay", "loop"]) video.setAttribute(name, "");
         video.src = window.matchMedia("(max-width: 767px)").matches ? FILM_MOBILE : FILM;
         video.load();
       }
@@ -45,15 +46,17 @@ export function CountryFilm() {
     } else video.pause();
   }, [visible, sound]);
 
-  // Power and data saving modes block autoplay but allow play inside a tap, so the first tap anywhere starts the film.
+  // Power and data saving modes block autoplay but allow play inside a tap, so any tap or swipe starts the film.
   useEffect(() => {
     if (!blocked || !visible) return;
     const video = videoRef.current!;
     const retry = () => void video.play().then(() => setBlocked(false), () => {});
     window.addEventListener("touchend", retry, { passive: true });
+    window.addEventListener("touchstart", retry, { passive: true });
     window.addEventListener("click", retry);
     return () => {
       window.removeEventListener("touchend", retry);
+      window.removeEventListener("touchstart", retry);
       window.removeEventListener("click", retry);
     };
   }, [blocked, visible]);
@@ -126,18 +129,6 @@ export function CountryFilm() {
               className="country-film-video"
             />
             <span className="country-film-shade" />
-            {blocked ? (
-              <button
-                type="button"
-                className="country-film-play"
-                aria-label="Смотреть фильм"
-                onClick={() => void videoRef.current!.play().then(() => setBlocked(false), () => {})}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" />
-                </svg>
-              </button>
-            ) : null}
             <div className="country-film-box">
               <button type="button" className="country-film-sound" onClick={toggleSound} aria-pressed={sound}>
                 {sound ? <SpeakerOn /> : <SpeakerOff />}
