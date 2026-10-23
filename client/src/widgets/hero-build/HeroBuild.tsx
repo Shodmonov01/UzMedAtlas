@@ -84,11 +84,19 @@ export function HeroBuild() {
         schedule();
       }
     }, 3000);
-    // The hero film is a muted ambient loop and always plays. iOS checks the muted *attribute* (React only sets the
-    // property) and some phones refuse autoplay (low power mode), so it is retried on the first touch or return to the tab.
+    // The hero film is a muted ambient loop and always plays. iOS decides on autoplay from the attributes present when
+    // the source is set, and React never writes the muted attribute, so the element is prepared here first and only
+    // then given its source (also picked here: <source media> is ignored by some Android browsers). Phones that still
+    // refuse (low power or data saving) get another try on every tap and on return to the tab.
     const film = videoRef.current!;
     film.muted = true;
-    film.setAttribute("muted", "");
+    film.defaultMuted = true;
+    for (const name of ["muted", "playsinline", "webkit-playsinline", "autoplay", "loop"]) film.setAttribute(name, "");
+    if (!film.getAttribute("src")) {
+      film.src = window.matchMedia("(max-width: 767px)").matches ? "/videos/hero-720.mp4" : "/videos/hero-1080.mp4";
+      film.load();
+    }
+    void film.play().catch(() => {});
     const syncFilm = () => {
       if (film.paused) void film.play().catch(() => {});
     };
@@ -117,10 +125,7 @@ export function HeroBuild() {
     <>
       <section ref={heroRef} className="hero-build">
         <div className="hero-build-stage">
-          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero-poster.jpg" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
-            <source src="/videos/hero-720.mp4" type="video/mp4" media="(max-width: 767px)" />
-            <source src="/videos/hero-1080.mp4" type="video/mp4" />
-          </video>
+          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero-poster.jpg" muted loop playsInline preload="auto" aria-hidden="true" />
           <span className="hero-build-shade" />
 
           <motion.div
