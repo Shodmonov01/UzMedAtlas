@@ -6,7 +6,12 @@ import { SelectField } from "@/shared/ui/SelectField";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 import { motion } from "motion/react";
 import { Reveal, RevealGroup, revealItem } from "@/shared/ui/Reveal";
-import { CountryFilm } from "@/widgets/country-film/CountryFilm";
+import { AssociationFilm, CountryFilm } from "@/widgets/country-film/CountryFilm";
+import { AgencyMeeting } from "@/widgets/agency-meeting/AgencyMeeting";
+import { AchsiPartner } from "@/widgets/achsi-partner/AchsiPartner";
+import { CaseFilms } from "@/widgets/case-films/CaseFilms";
+import { PresidentNews } from "@/widgets/president-news/PresidentNews";
+import { LegalActs } from "@/widgets/legal-acts/LegalActs";
 import { HeroBuild } from "@/widgets/hero-build/HeroBuild";
 import { MedDeck, UzDeck } from "@/widgets/uz-deck/UzDeck";
 import { LogoTiles } from "@/shared/ui/LogoTiles";
@@ -42,10 +47,10 @@ const SERVICE_OPTIONS = [
 ];
 
 const SORT_OPTIONS = [
+  { value: "name", label: "По алфавиту" },
   { value: "response", label: "Быстрый ответ" },
   { value: "price", label: "Цена" },
   { value: "city", label: "Город" },
-  { value: "name", label: "Название" },
 ];
 
 const LANG_OPTIONS = [
@@ -88,7 +93,7 @@ function hasAnyFilter(search: CatalogSearch) {
       search.priceMax ||
       search.responseMax ||
       search.medicalTourism ||
-      (search.sort && search.sort !== "response"),
+      (search.sort && search.sort !== "name"),
   );
 }
 
@@ -107,7 +112,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   const [q, setQ] = useState(search.q || "");
   const [city, setCity] = useState(displayCity(search.city));
   const [specialty, setSpecialty] = useState(search.specialty || "");
-  const [sort, setSort] = useState(search.sort || "response");
+  const [sort, setSort] = useState(search.sort || "name");
 
   const specialties = useQuery({
     queryKey: ["specialties"],
@@ -122,7 +127,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
         city: search.city,
         specialty: search.specialty,
         lang: search.lang,
-        sort: search.sort || "response",
+        sort: search.sort || "name",
         service: search.service,
         priceMin: search.priceMin,
         priceMax: search.priceMax,
@@ -135,7 +140,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     setQ(search.q || "");
     setCity(displayCity(search.city));
     setSpecialty(search.specialty || "");
-    setSort(search.sort || "response");
+    setSort(search.sort || "name");
   }, [search.q, search.city, search.specialty, search.sort]);
 
   useEffect(() => {
@@ -215,7 +220,19 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
       <CountryFilm />
 
+      <AssociationFilm />
+
+      <PresidentNews />
+
+      <LegalActs />
+
+      <CaseFilms />
+
       <MedDeck />
+
+      <AchsiPartner />
+
+      <AgencyMeeting />
 
       <RevealGroup className="care-steps">
         <motion.a variants={revealItem} href="#catalog"><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></motion.a>

@@ -1,11 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Reveal } from "@/shared/ui/Reveal";
 
-// The tourism film. Its master is 852×478, so one file serves desktop and phones alike.
+// The films are 852×478 masters, so one file serves desktop and phones alike.
 // Muted on a loop until the sound is turned on.
-const FILM = "/videos/tourism.mp4";
-const FILM_MOBILE = FILM;
-const POSTER = "/videos/tourism-poster.jpg";
+type FilmProps = {
+  id: string;
+  src: string;
+  poster: string;
+  label: string;
+  eyebrow: string;
+  title: string;
+  children: ReactNode;
+};
 
 // Space (px) left around the opened 16:9 card on desktop.
 const GAP = 16;
@@ -13,6 +19,32 @@ const GAP = 16;
 /** Desktop: the stage sticks to the screen while the frame opens from a card into the largest 16:9
  *  card that fits. Phones and reduced motion: an inline 16:9 frame. */
 export function CountryFilm() {
+  return (
+    <Film id="film" src="/videos/tourism/tourism.mp4" poster="/videos/tourism/tourism-poster.jpg" label="Фильм об Узбекистане" eyebrow="Наша страна" title="Узбекистан">
+      Узбекистан — край, где гармонично сочетаются древняя история, богатая культура и современное
+      развитие. Расположенная в самом сердце Великого шёлкового пути, эта страна покоряет путешественников
+      со всего мира жемчужинами Самарканда, Бухары и Хивы, величественными горами и неповторимой природой.
+    </Film>
+  );
+}
+
+export function AssociationFilm() {
+  return (
+    <Film
+      id="association-film"
+      src="/videos/association/association.mp4"
+      poster="/videos/association/association-poster.jpg"
+      label="Видео о встрече"
+      eyebrow="Ассоциация"
+      title="Встреча с клиниками долины"
+    >
+      Представители Ассоциации медицинских организаций встретились с руководителями частных медицинских
+      клиник, работающих в Андижанской, Ферганской и Наманганской областях.
+    </Film>
+  );
+}
+
+function Film({ id, src, poster, label, eyebrow, title, children }: FilmProps) {
   const pinRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -39,12 +71,12 @@ export function CountryFilm() {
     if (visible) {
       if (!video.getAttribute("src")) {
         for (const name of ["playsinline", "webkit-playsinline", "autoplay", "loop"]) video.setAttribute(name, "");
-        video.src = window.matchMedia("(max-width: 767px)").matches ? FILM_MOBILE : FILM;
+        video.src = src;
         video.load();
       }
       void video.play().then(() => setBlocked(false), () => setBlocked(true));
     } else video.pause();
-  }, [visible, sound]);
+  }, [visible, sound, src]);
 
   // Power and data saving modes block autoplay but allow play inside a tap, so any tap or swipe starts the film.
   useEffect(() => {
@@ -114,18 +146,18 @@ export function CountryFilm() {
   }
 
   return (
-    <div id="film" className="country-film">
+    <div id={id} className="country-film">
       <div ref={pinRef} className="country-film-pin">
         <div className="country-film-stage">
           <div ref={frameRef} className="country-film-frame">
             <video
               ref={videoRef}
-              poster={POSTER}
+              poster={poster}
               muted
               loop
               playsInline
               preload="none"
-              aria-label="Фильм об Узбекистане"
+              aria-label={label}
               className="country-film-video"
             />
             <span className="country-film-shade" />
@@ -141,13 +173,11 @@ export function CountryFilm() {
 
       <div className="country-film-caption">
         <Reveal>
-          <p className="country-film-eyebrow">Наша страна</p>
-          <h2>Узбекистан</h2>
+          <p className="country-film-eyebrow">{eyebrow}</p>
+          <h2>{title}</h2>
         </Reveal>
         <Reveal className="country-film-text" delay={0.12}>
-          Узбекистан — край, где гармонично сочетаются древняя история, богатая культура и современное
-          развитие. Расположенная в самом сердце Великого шёлкового пути, эта страна покоряет путешественников
-          со всего мира жемчужинами Самарканда, Бухары и Хивы, величественными горами и неповторимой природой.
+          {children}
         </Reveal>
       </div>
     </div>

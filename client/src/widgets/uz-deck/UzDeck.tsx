@@ -6,25 +6,25 @@ type Photo = { src: string; title: string; srcSet?: string; width?: number; heig
 
 /** Photos of the country deck, each titled after a phrase of the statement. */
 const COUNTRY_PHOTOS: Photo[] = [
-  { src: "uz-mountains", title: "Величественные горы" },
-  { src: "uz-mosque", title: "Богатая культура" },
-  { src: "uz-registan", title: "Самарканд · Регистан" },
-  { src: "uz-khiva", title: "Древняя история" },
-  { src: "uz-dome", title: "Искусство мастеров" },
-  { src: "uz-tashkent", title: "Современное развитие" },
-  { src: "uz-travellers", title: "Путешественники со всего мира" },
+  { src: "uzbekistan/uz-mountains", title: "Величественные горы" },
+  { src: "uzbekistan/uz-mosque", title: "Богатая культура" },
+  { src: "uzbekistan/uz-registan", title: "Самарканд · Регистан" },
+  { src: "uzbekistan/uz-khiva", title: "Древняя история" },
+  { src: "uzbekistan/uz-dome", title: "Искусство мастеров" },
+  { src: "uzbekistan/uz-tashkent", title: "Современное развитие" },
+  { src: "uzbekistan/uz-travellers", title: "Путешественники со всего мира" },
 ].map((photo) => ({ ...photo, srcSet: `/images/${photo.src}-800.webp 800w, /images/${photo.src}.webp 1460w`, width: 1460, height: 816 }));
 
 /** Frames from the tourism film for the medical tourism deck (852×478 masters). */
 const MED_PHOTOS: Photo[] = [
-  { src: "med-therapy", title: "Высокотехнологичное лечение" },
-  { src: "med-surgeons", title: "Опытные хирурги" },
-  { src: "med-robot", title: "Роботизированная хирургия" },
-  { src: "med-mri", title: "Современная диагностика" },
-  { src: "med-reception", title: "Комфортные палаты" },
-  { src: "med-rehab", title: "Реабилитация" },
-  { src: "med-sanatorium", title: "Санатории и отдых" },
-  { src: "med-consult", title: "Сопровождение пациентов" },
+  { src: "medtourism/med-therapy", title: "Высокотехнологичное лечение" },
+  { src: "medtourism/med-surgeons", title: "Опытные хирурги" },
+  { src: "medtourism/med-robot", title: "Роботизированная хирургия" },
+  { src: "medtourism/med-mri", title: "Современная диагностика" },
+  { src: "medtourism/med-reception", title: "Комфортные палаты" },
+  { src: "medtourism/med-rehab", title: "Реабилитация" },
+  { src: "medtourism/med-sanatorium", title: "Санатории и отдых" },
+  { src: "medtourism/med-consult", title: "Сопровождение пациентов" },
 ].map((photo) => ({ ...photo, width: 852, height: 478 }));
 
 export function UzDeck() {

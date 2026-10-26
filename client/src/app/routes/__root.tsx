@@ -4,6 +4,9 @@ import { Footer } from "@/widgets/footer/Footer";
 import { HealthCheckerProvider } from "@/widgets/health-checker/HealthCheckerContext";
 import { HealthCheckerWidget } from "@/widgets/health-checker/HealthCheckerWidget";
 
+// The AI helper bubble is switched off for now; set to true to bring it back.
+const SHOW_HEALTH_CHECKER = false;
+
 export const Route = createRootRoute({
   component: RootLayout,
   notFoundComponent: NotFoundPage,
@@ -68,7 +71,7 @@ function RootLayout() {
           <Outlet />
         </main>
         {!isWorkspace ? <Footer /> : null}
-        {!isWorkspace ? <HealthCheckerWidget showTip={!isHome} hideOverHero={isHome} /> : null}
+        {!isWorkspace && SHOW_HEALTH_CHECKER ? <HealthCheckerWidget showTip={!isHome} hideOverHero={isHome} /> : null}
       </div>
     </HealthCheckerProvider>
   );
