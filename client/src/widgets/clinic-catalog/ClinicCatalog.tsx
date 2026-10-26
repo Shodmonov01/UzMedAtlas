@@ -6,12 +6,7 @@ import { SelectField } from "@/shared/ui/SelectField";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 import { motion } from "motion/react";
 import { Reveal, RevealGroup, revealItem } from "@/shared/ui/Reveal";
-import { AssociationFilm, CountryFilm } from "@/widgets/country-film/CountryFilm";
-import { AgencyMeeting } from "@/widgets/agency-meeting/AgencyMeeting";
-import { AchsiPartner } from "@/widgets/achsi-partner/AchsiPartner";
-import { CaseFilms } from "@/widgets/case-films/CaseFilms";
-import { PresidentNews } from "@/widgets/president-news/PresidentNews";
-import { LegalActs } from "@/widgets/legal-acts/LegalActs";
+import { CountryFilm } from "@/widgets/country-film/CountryFilm";
 import { HeroBuild } from "@/widgets/hero-build/HeroBuild";
 import { MedDeck, UzDeck } from "@/widgets/uz-deck/UzDeck";
 import { LogoTiles } from "@/shared/ui/LogoTiles";
@@ -219,21 +214,9 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       </section>
 
       <CountryFilm />
-
-      <AssociationFilm />
-
-      <PresidentNews />
-
-      <LegalActs />
-
-      <CaseFilms />
-
+
       <MedDeck />
-
-      <AchsiPartner />
-
-      <AgencyMeeting />
-
+
       <RevealGroup className="care-steps">
         <motion.a variants={revealItem} href="#catalog"><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></motion.a>
         <motion.a variants={revealItem} href="#clinic-results"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></motion.a>
