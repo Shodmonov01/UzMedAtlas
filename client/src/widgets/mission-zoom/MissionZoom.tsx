@@ -51,8 +51,8 @@ export function MissionZoom() {
         </div>
         <figure className="mission-photo">
           <img
-            src="/images/mission-registan.webp"
-            srcSet="/images/mission-registan-1280.webp 1280w, /images/mission-registan.webp 2560w"
+            src="/images/mission/mission-registan.webp"
+            srcSet="/images/mission/mission-registan-1280.webp 1280w, /images/mission/mission-registan.webp 2560w"
             sizes="100vw"
             alt="Площадь Регистан в Самарканде вечером"
             width="2560"

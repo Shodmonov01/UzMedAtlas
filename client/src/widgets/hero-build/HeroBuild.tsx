@@ -86,22 +86,25 @@ export function HeroBuild() {
     }, 3000);
     // The hero film is a muted ambient loop and always plays. iOS decides on autoplay from the attributes present when
     // the source is set, and React never writes the muted attribute, so the element is prepared here first and only
-    // then given its source (also picked here: <source media> is ignored by some Android browsers). Phones that still
-    // refuse (low power or data saving) get another try on every tap and on return to the tab.
+    // then given its source (also picked here: <source media> is ignored by some Android browsers). Phones get a
+    // light portrait cut, so the first frames arrive quickly. Phones that still refuse (low power or data saving) get
+    // another try once data has arrived, on every touch and on return to the tab.
     const film = videoRef.current!;
     film.muted = true;
     film.defaultMuted = true;
     for (const name of ["muted", "playsinline", "webkit-playsinline", "autoplay", "loop"]) film.setAttribute(name, "");
     if (!film.getAttribute("src")) {
-      film.src = window.matchMedia("(max-width: 767px)").matches ? "/videos/hero-720.mp4" : "/videos/hero-1080.mp4";
+      film.src = window.matchMedia("(max-width: 767px)").matches ? "/videos/hero/hero-mobile.mp4" : "/videos/hero/hero-1080.mp4";
       film.load();
     }
     void film.play().catch(() => {});
     const syncFilm = () => {
-      if (film.paused) void film.play().catch(() => {});
+      if (film.paused && !document.hidden) void film.play().catch(() => {});
     };
-    window.addEventListener("touchend", syncFilm, { passive: true });
-    window.addEventListener("click", syncFilm);
+    const gestures = ["touchstart", "touchend", "pointerdown", "click", "keydown"] as const;
+    gestures.forEach((name) => window.addEventListener(name, syncFilm, { passive: true }));
+    film.addEventListener("loadeddata", syncFilm);
+    film.addEventListener("canplay", syncFilm);
     document.addEventListener("visibilitychange", syncFilm);
 
     update();
@@ -112,8 +115,9 @@ export function HeroBuild() {
     return () => {
       cancelAnimationFrame(raf);
       window.clearInterval(tick);
-      window.removeEventListener("touchend", syncFilm);
-      window.removeEventListener("click", syncFilm);
+      gestures.forEach((name) => window.removeEventListener(name, syncFilm));
+      film.removeEventListener("loadeddata", syncFilm);
+      film.removeEventListener("canplay", syncFilm);
       document.removeEventListener("visibilitychange", syncFilm);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", schedule);
@@ -125,7 +129,7 @@ export function HeroBuild() {
     <>
       <section ref={heroRef} className="hero-build">
         <div className="hero-build-stage">
-          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero-poster.jpg" muted loop playsInline preload="auto" aria-hidden="true" />
+          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero/hero-poster.jpg" muted loop playsInline preload="auto" aria-hidden="true" />
           <span className="hero-build-shade" />
 
           <motion.div

@@ -1,20 +1,20 @@
-# Hero background
+# Site media
 
-`hero-bukhara.webp` (1467w) and `hero-bukhara-960.webp` (phones): Bukhara old town at sunset,
-supplied by the site owner.
+One folder per home-page section, under `images/` and `videos/`:
 
-# Consultation background
+| Section | Images | Videos |
+| --- | --- | --- |
+| Hero | — | `videos/hero/` (1080p for desktop, portrait `hero-mobile.mp4` for phones) |
+| Uzbekistan deck | `images/uzbekistan/` | — |
+| Mission | `images/mission/` | — |
+| Tourism film | — | `videos/tourism/` |
+| Meeting with the valley's clinics | — | `videos/association/` |
+| President's healthcare presentation | `images/president-news/` | — |
+| Legal acts (Нормативная база) | `images/legal-acts/` | — |
+| Clinic cases | — | `videos/cases/` |
+| Medical tourism deck | `images/medtourism/` | — |
+| ACHSI partnership | `images/achsi/` | — |
+| Agency meeting | `images/agency/` | `videos/agency/` |
 
-`consultation-banner.jpg`: Pavel Danilyuk, "Doctors Talking in Office", Pexels.
-
-Source: https://www.pexels.com/photo/doctors-talking-in-office-7108327/
-
-License: https://www.pexels.com/license/
-
-Used as an illustrative background, without identifying the models as physicians of a listed clinic.
-
-# Hero layers and story cards
-
-`hero-sketch.webp` (pencil sketch) and `hero-clay.webp` (white model) are generated from
-`hero-bukhara.webp` with OpenCV; the home hero cross-fades them into the photo on scroll.
-`card-*.webp` are 4:5 stills cut from the country film in `public/videos/`.
+Photos and films were supplied by the site owner. Videos are H.264 MP4 with `+faststart`; each has a
+`*-poster.jpg` beside it. The original, uncompressed files are kept outside the repo.
