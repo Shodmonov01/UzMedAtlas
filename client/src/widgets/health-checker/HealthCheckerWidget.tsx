@@ -315,6 +315,9 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                       <Link
                         to="/"
                         search={top?.slug ? { specialty: top.slug } : {}}
+                        // Straight to the clinic list, not back to the top of the home page.
+                        hash="clinic-results"
+                        resetScroll={false}
                         className="hc-action"
                         onClick={close}
                       >
