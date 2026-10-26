@@ -203,7 +203,7 @@ function PhotoWheel({ id, eyebrow, title, text, photos, tiles, mirrored = false 
                 alt={photo.title}
                 width={photo.width}
                 height={photo.height}
-                loading="lazy"
+                decoding="async"
               />
               <figcaption>{photo.title}</figcaption>
             </figure>

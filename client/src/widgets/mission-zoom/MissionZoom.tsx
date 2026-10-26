@@ -57,7 +57,7 @@ export function MissionZoom() {
             alt="Площадь Регистан в Самарканде вечером"
             width="2560"
             height="1440"
-            loading="lazy"
+            decoding="async"
           />
           <figcaption>Самарканд · Регистан</figcaption>
         </figure>
