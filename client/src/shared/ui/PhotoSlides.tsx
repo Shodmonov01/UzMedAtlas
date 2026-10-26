@@ -31,7 +31,7 @@ export function PhotoSlides({ photos, className = "" }: { photos: Slide[]; class
             src={photo.src}
             alt={photo.alt}
             aria-hidden={i !== current}
-            loading={i === 0 ? "lazy" : undefined}
+            decoding="async"
             className={i === current ? "is-active" : undefined}
             style={{ objectPosition: photo.position }}
           />
