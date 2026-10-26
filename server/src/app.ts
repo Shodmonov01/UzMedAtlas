@@ -19,6 +19,14 @@ const clientOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173,http:
 const publicRoot = path.join(process.cwd(), "public");
 const clientDist = path.join(process.cwd(), "..", "client", "dist");
 
+/** Hashed bundles never change; site photos and films are served from cache and refreshed in the background. */
+function cacheHeaders(res: { setHeader(name: string, value: string): void }, filePath: string) {
+  const file = filePath.replace(/\\/g, "/");
+  if (file.includes("/assets/")) res.setHeader("cache-control", "public, max-age=31536000, immutable");
+  else if (/\.(jpe?g|png|webp|avif|svg|mp4|webm|woff2?)$/i.test(file)) res.setHeader("cache-control", "public, max-age=86400, stale-while-revalidate=2592000");
+  else res.setHeader("cache-control", "no-cache");
+}
+
 export async function buildApp(options: { logger?: boolean } = {}) {
   const app = Fastify({ logger: options.logger ?? true, trustProxy: "127.0.0.1" });
 
@@ -63,6 +71,8 @@ export async function buildApp(options: { logger?: boolean } = {}) {
       prefix: "/",
       wildcard: false,
       decorateReply: true,
+      cacheControl: false,
+      setHeaders: cacheHeaders,
     });
     app.setNotFoundHandler((request, reply) => {
       if (request.method !== "GET" && request.method !== "HEAD") {

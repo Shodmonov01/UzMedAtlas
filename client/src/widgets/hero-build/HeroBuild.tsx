@@ -170,7 +170,7 @@ export function HeroBuild() {
               {ABOUT_PHOTOS.map((src, i) => (
                 <figure key={i} className={`about-card${src ? "" : " is-empty"}`} style={{ "--d": -i } as CSSProperties}>
                   {src ? (
-                    <img src={src} alt="" width="1000" height="1250" loading="lazy" />
+                    <img src={src} alt="" width="1000" height="1250" decoding="async" />
                   ) : (
                     <span className="about-card-slot" aria-hidden="true">
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
