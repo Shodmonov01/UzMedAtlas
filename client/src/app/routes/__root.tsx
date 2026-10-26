@@ -5,7 +5,7 @@ import { HealthCheckerProvider } from "@/widgets/health-checker/HealthCheckerCon
 import { HealthCheckerWidget } from "@/widgets/health-checker/HealthCheckerWidget";
 
 // The AI helper bubble is switched off for now; set to true to bring it back.
-const SHOW_HEALTH_CHECKER = false;
+const SHOW_HEALTH_CHECKER = true;
 
 export const Route = createRootRoute({
   component: RootLayout,
