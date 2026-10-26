@@ -51,7 +51,7 @@ export function LegalActs() {
               <img
                 src={act.image}
                 alt=""
-                decoding="async"
+                loading="lazy"
                 width={960}
                 height={621}
                 className="legal-act-image"
