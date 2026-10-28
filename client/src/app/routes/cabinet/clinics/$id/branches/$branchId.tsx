@@ -43,6 +43,17 @@ type BranchPageSectionId = (typeof BRANCH_PAGE_SECTIONS)[number]["id"];
 
 const CORE_IDS = new Set<string>(BRANCH_CORE_SECTIONS.map((s) => s.id));
 
+const PHOTO_CATEGORY_LABELS: Record<string, string> = {
+  facade: "Фасад",
+  reception: "Ресепшен",
+  hall: "Холл",
+  rooms: "Кабинеты",
+  or: "Операционная",
+  equipment: "Оборудование",
+  staff: "Сотрудники",
+  other: "Другое",
+};
+
 function EditBranchPage() {
   const { id, branchId } = Route.useParams();
   const search = Route.useSearch();
@@ -218,7 +229,7 @@ function EditBranchPage() {
                     ) : null}
                   </div>
                   <div className="space-y-2 p-2 text-xs">
-                    <p className="font-bold text-muted">{photo.category}</p>
+                    <p className="font-bold text-muted">{PHOTO_CATEGORY_LABELS[photo.category] || photo.category}</p>
                     {!locked ? (
                       <div className="flex flex-wrap gap-1">
                         <button

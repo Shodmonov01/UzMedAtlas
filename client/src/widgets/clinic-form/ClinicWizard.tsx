@@ -63,17 +63,24 @@ type Props = {
 
 function Field({
   label,
+  hint,
   children,
 }: {
   label: string;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
     <label className="block text-sm font-bold">
       {label}
       <div className="mt-1">{children}</div>
+      {hint ? <p className="mt-1 text-xs font-normal text-muted">{hint}</p> : null}
     </label>
   );
+}
+
+function photoCategoryLabel(value: string) {
+  return PHOTO_CATS.find((cat) => cat.value === value)?.label || value;
 }
 
 function FormActions({
@@ -303,7 +310,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   disabled={locked}
                 />
               </Field>
-              <Field label="Slug">
+              <Field label="Адрес страницы" hint="uzmedguide.uz/clinics/… — латиница, цифры и дефис">
                 <input name="slug" className="field" defaultValue={clinic.slug} disabled={locked} />
               </Field>
               <Field label="Город">
@@ -319,7 +326,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   disabled={locked}
                 />
               </Field>
-              <Field label="URL логотипа">
+              <Field label="Логотип (ссылка)" hint="Или загрузите файл кнопкой «Загрузить лого» ниже — до 2 МБ">
                 <input name="logoUrl" className="field" defaultValue={clinic.logoUrl || ""} disabled={locked} />
               </Field>
             </div>
@@ -1263,7 +1270,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     </div>
                     <div className="space-y-2 p-2 text-xs">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-muted">{photo.category}</span>
+                        <span className="font-bold text-muted">{photoCategoryLabel(photo.category)}</span>
                         {!locked ? (
                           <button
                             type="button"
@@ -1366,18 +1373,31 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   setMessage("Фото добавлено");
                 }}
               >
-                <h3 className="font-extrabold">Загрузить фото</h3>
-                <select name="category" className="field" defaultValue="other">
-                  {PHOTO_CATS.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-                <input name="altRu" className="field" placeholder="Подпись" />
-                <input name="file" type="file" accept="image/*" required className="field" />
+                <div>
+                  <h3 className="font-extrabold">Добавить фото</h3>
+                  <p className="mt-1 text-sm text-muted">
+                    Выберите, что на снимке, добавьте подпись и файл. Новое фото встанет в конец списка — сделать его главным можно кнопкой «Главная».
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="Что на фото">
+                    <select name="category" className="field" defaultValue="other">
+                      {PHOTO_CATS.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Подпись" hint="Необязательно">
+                    <input name="altRu" className="field" placeholder="Например, вход в клинику" />
+                  </Field>
+                </div>
+                <Field label="Файл" hint="JPG, PNG или WEBP. Лучше горизонтальное фото от 1200 px по ширине.">
+                  <input name="file" type="file" accept="image/*" required className="field" />
+                </Field>
                 <button className="btn btn-primary text-sm" type="submit">
-                  Загрузить
+                  Загрузить фото
                 </button>
               </form>
             ) : null}

@@ -63,7 +63,6 @@ function CabinetHomePage() {
       </div>
 
       {clinics.isLoading ? <p className="text-muted">Загрузка…</p> : null}
-      <OwnerTelegramPanel />
       {clinics.isError ? <p className="text-danger">Не удалось загрузить клиники</p> : null}
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -155,8 +154,18 @@ function CabinetHomePage() {
       </div>
 
       {clinics.data?.length === 0 ? (
-        <p className="text-muted">Пока нет клиник. Создайте первую.</p>
+        <div className="rounded-[1.5rem] border border-dashed border-line bg-white px-6 py-10 text-center">
+          <p className="text-lg font-extrabold text-ink">Пока нет клиник</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-muted">
+            Создайте профиль клиники по шагам: название, адрес, контакты и направления. Фото, филиалы и врачей можно добавить после создания.
+          </p>
+          <Link to="/cabinet/clinics/new" className="btn btn-primary mt-5 text-sm">
+            + Добавить клинику
+          </Link>
+        </div>
       ) : null}
+
+      <OwnerTelegramPanel />
     </div>
   );
 }
