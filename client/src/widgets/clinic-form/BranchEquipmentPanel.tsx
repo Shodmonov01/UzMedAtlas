@@ -6,6 +6,7 @@ import {
   updateBranchEquipment,
   uploadCabinetFile,
 } from "@/shared/api/cabinet";
+import { Field } from "./FormField";
 
 type Props = {
   clinicId: string;
@@ -52,33 +53,45 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                   }
                 }}
               >
-                <div className="grid gap-2 md:grid-cols-2">
-                  <input name="nameRu" required className="field" defaultValue={item.nameRu} />
-                  <input name="nameEn" required className="field" defaultValue={item.nameEn} />
-                  <input
-                    name="manufacturer"
-                    className="field md:col-span-2"
-                    defaultValue={item.manufacturer || ""}
-                    placeholder="Производитель"
-                  />
-                  <textarea
-                    name="descriptionRu"
-                    rows={2}
-                    className="field md:col-span-2"
-                    defaultValue={item.descriptionRu || ""}
-                  />
-                  <textarea
-                    name="descriptionEn"
-                    rows={2}
-                    className="field md:col-span-2"
-                    defaultValue={item.descriptionEn || ""}
-                  />
-                  <input
-                    name="photoUrl"
-                    className="field md:col-span-2"
-                    defaultValue={item.photoUrl || ""}
-                    placeholder="URL фото"
-                  />
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="Название (RU) *">
+                    <input name="nameRu" required className="field" defaultValue={item.nameRu} />
+                  </Field>
+                  <Field label="Название (EN) *">
+                    <input name="nameEn" required className="field" defaultValue={item.nameEn} />
+                  </Field>
+                  <Field label="Производитель" wide>
+                    <input
+                      name="manufacturer"
+                      className="field"
+                      defaultValue={item.manufacturer || ""}
+                      placeholder="Siemens, GE, Philips…"
+                    />
+                  </Field>
+                  <Field label="Описание (RU)" wide>
+                    <textarea
+                      name="descriptionRu"
+                      rows={2}
+                      className="field"
+                      defaultValue={item.descriptionRu || ""}
+                    />
+                  </Field>
+                  <Field label="Описание (EN)" wide>
+                    <textarea
+                      name="descriptionEn"
+                      rows={2}
+                      className="field"
+                      defaultValue={item.descriptionEn || ""}
+                    />
+                  </Field>
+                  <Field label="Фото (ссылка)" wide>
+                    <input
+                      name="photoUrl"
+                      className="field"
+                      defaultValue={item.photoUrl || ""}
+                      placeholder="https://…"
+                    />
+                  </Field>
                 </div>
                 <div className="flex gap-2">
                   <button type="submit" className="btn btn-primary text-sm">
@@ -177,27 +190,42 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
             }
           }}
         >
-          <h3 className="font-extrabold">+ Добавить оборудование</h3>
-          <div className="grid gap-2 md:grid-cols-2">
-            <input name="nameRu" required className="field" placeholder="Название RU" />
-            <input name="nameEn" required className="field" placeholder="Name EN" />
-            <input name="manufacturer" className="field md:col-span-2" placeholder="Производитель" />
-            <textarea
-              name="descriptionRu"
-              rows={2}
-              className="field md:col-span-2"
-              placeholder="Описание RU"
-            />
-            <textarea
-              name="descriptionEn"
-              rows={2}
-              className="field md:col-span-2"
-              placeholder="Description EN"
-            />
-            <input name="file" type="file" accept="image/*" className="field md:col-span-2" />
+          <div>
+            <h3 className="font-extrabold">Добавить оборудование</h3>
+            <p className="mt-1 text-sm text-muted">Поля со звёздочкой обязательны.</p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Field label="Название (RU) *">
+              <input name="nameRu" required className="field" placeholder="Например, МРТ 3 Тесла" />
+            </Field>
+            <Field label="Название (EN) *">
+              <input name="nameEn" required className="field" placeholder="For example, 3T MRI" />
+            </Field>
+            <Field label="Производитель" wide>
+              <input name="manufacturer" className="field" placeholder="Siemens, GE, Philips…" />
+            </Field>
+            <Field label="Описание (RU)" wide>
+              <textarea
+                name="descriptionRu"
+                rows={2}
+                className="field"
+                placeholder="Для чего используется"
+              />
+            </Field>
+            <Field label="Описание (EN)" wide>
+              <textarea
+                name="descriptionEn"
+                rows={2}
+                className="field"
+                placeholder="What it is used for"
+              />
+            </Field>
+            <Field label="Фото аппарата" wide>
+              <input name="file" type="file" accept="image/*" className="field" />
+            </Field>
           </div>
           <button type="submit" className="btn btn-primary text-sm" disabled={uploading}>
-            {uploading ? "Загрузка…" : "Добавить"}
+            {uploading ? "Загрузка…" : "Добавить оборудование"}
           </button>
         </form>
       ) : null}

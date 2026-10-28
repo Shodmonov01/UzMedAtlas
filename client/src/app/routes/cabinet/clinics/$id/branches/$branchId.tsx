@@ -23,6 +23,7 @@ import {
 } from "@/widgets/clinic-form/BranchEditorForm";
 import { BranchEquipmentPanel } from "@/widgets/clinic-form/BranchEquipmentPanel";
 import { BranchServicesPanel } from "@/widgets/clinic-form/BranchServicesPanel";
+import { Field } from "@/widgets/clinic-form/FormField";
 
 export const Route = createFileRoute("/cabinet/clinics/$id/branches/$branchId")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -324,17 +325,22 @@ function EditBranchPage() {
                   setMessage("Фото добавлено");
                 }}
               >
-                <select name="category" className="field" defaultValue="facade">
-                  <option value="facade">Фасад</option>
-                  <option value="reception">Ресепшен</option>
-                  <option value="hall">Холл</option>
-                  <option value="rooms">Кабинеты</option>
-                  <option value="or">Операционная</option>
-                  <option value="equipment">Оборудование</option>
-                  <option value="staff">Сотрудники</option>
-                  <option value="other">Другое</option>
-                </select>
-                <input name="file" type="file" accept="image/*" required className="field" />
+                <div>
+                  <h3 className="font-extrabold">Добавить фото филиала</h3>
+                  <p className="mt-1 text-sm text-muted">Новое фото встанет в конец списка — сделать его главным можно кнопкой «Главная».</p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="Что на фото">
+                    <select name="category" className="field" defaultValue="facade">
+                      {Object.entries(PHOTO_CATEGORY_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Файл" hint="JPG, PNG или WEBP, лучше горизонтальное">
+                    <input name="file" type="file" accept="image/*" required className="field" />
+                  </Field>
+                </div>
                 <button className="btn btn-primary text-sm" type="submit">
                   Загрузить фото
                 </button>

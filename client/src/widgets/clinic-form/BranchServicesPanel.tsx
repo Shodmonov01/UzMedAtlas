@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CabinetService } from "@/shared/api/cabinet";
 import { addBranchService, deleteBranchService, updateBranchService } from "@/shared/api/cabinet";
+import { Field } from "./FormField";
 
 type SpecialtyOption = { id: string; nameRu: string; nameEn: string };
 
@@ -19,6 +20,49 @@ function formatPrice(service: CabinetService) {
   const currency = service.currency === "USD" ? "$" : "сум";
   const unit = service.unit ? ` / ${service.unit}` : "";
   return service.currency === "USD" ? `$${amount}${unit}` : `${amount} ${currency}${unit}`;
+}
+
+/** The labelled fields of a service, empty for a new one or filled from `service` when editing. */
+function ServiceFields({ service, specialties }: { service?: CabinetService; specialties: SpecialtyOption[] }) {
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      <Field label="Название (RU) *">
+        <input name="nameRu" required className="field" defaultValue={service?.nameRu} placeholder="Например, МРТ головного мозга" />
+      </Field>
+      <Field label="Название (EN) *">
+        <input name="nameEn" required className="field" defaultValue={service?.nameEn} placeholder="For example, brain MRI" />
+      </Field>
+      <Field label="Направление *" wide>
+        <select name="specialtyId" required={!service} className="field" defaultValue={service ? service.specialtyId : specialties[0]?.id}>
+          {specialties.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.nameRu || s.nameEn}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Цена" hint="Можно оставить пустым">
+        <input name="priceUsd" type="number" min={0} className="field" defaultValue={service?.priceUsd ?? ""} placeholder="500000" />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Валюта">
+          <select name="currency" className="field" defaultValue={service?.currency || "UZS"}>
+            <option value="UZS">UZS</option>
+            <option value="USD">USD</option>
+          </select>
+        </Field>
+        <Field label="За что">
+          <input name="unit" className="field" defaultValue={service?.unit || ""} placeholder="приём, сеанс…" />
+        </Field>
+      </div>
+      <Field label="Описание (RU)" wide>
+        <textarea name="descriptionRu" rows={2} className="field" defaultValue={service?.descriptionRu} placeholder="Что входит в услугу" />
+      </Field>
+      <Field label="Описание (EN)" wide>
+        <textarea name="descriptionEn" rows={2} className="field" defaultValue={service?.descriptionEn} placeholder="What the service includes" />
+      </Field>
+    </div>
+  );
 }
 
 export function BranchServicesPanel({
@@ -74,42 +118,7 @@ export function BranchServicesPanel({
                   }
                 }}
               >
-                <div className="grid gap-2 md:grid-cols-2">
-                  <input name="nameRu" required className="field" defaultValue={service.nameRu} />
-                  <input name="nameEn" required className="field" defaultValue={service.nameEn} />
-                  <select name="specialtyId" className="field" defaultValue={service.specialtyId}>
-                    {specialties.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.nameRu || s.nameEn}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    name="priceUsd"
-                    type="number"
-                    min={0}
-                    className="field"
-                    defaultValue={service.priceUsd ?? ""}
-                    placeholder="Цена"
-                  />
-                  <select name="currency" className="field" defaultValue={service.currency || "UZS"}>
-                    <option value="UZS">UZS</option>
-                    <option value="USD">USD</option>
-                  </select>
-                  <input name="unit" className="field" defaultValue={service.unit || ""} placeholder="Ед. изм." />
-                  <textarea
-                    name="descriptionRu"
-                    rows={2}
-                    className="field md:col-span-2"
-                    defaultValue={service.descriptionRu}
-                  />
-                  <textarea
-                    name="descriptionEn"
-                    rows={2}
-                    className="field md:col-span-2"
-                    defaultValue={service.descriptionEn}
-                  />
-                </div>
+                <ServiceFields service={service} specialties={specialties} />
                 <div className="flex gap-2">
                   <button type="submit" className="btn btn-primary text-sm">
                     Сохранить
@@ -186,26 +195,11 @@ export function BranchServicesPanel({
             }
           }}
         >
-          <h3 className="font-extrabold">+ Добавить услугу</h3>
-          <div className="grid gap-2 md:grid-cols-2">
-            <input name="nameRu" required className="field" placeholder="Название RU" />
-            <input name="nameEn" required className="field" placeholder="Name EN" />
-            <select name="specialtyId" required className="field" defaultValue={specialties[0]?.id}>
-              {specialties.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nameRu || s.nameEn}
-                </option>
-              ))}
-            </select>
-            <input name="priceUsd" type="number" min={0} className="field" placeholder="Цена" />
-            <select name="currency" className="field" defaultValue="UZS">
-              <option value="UZS">UZS</option>
-              <option value="USD">USD</option>
-            </select>
-            <input name="unit" className="field" placeholder="Ед. изм. (необяз.)" />
-            <textarea name="descriptionRu" rows={2} className="field md:col-span-2" placeholder="Описание RU" />
-            <textarea name="descriptionEn" rows={2} className="field md:col-span-2" placeholder="Description EN" />
+          <div>
+            <h3 className="font-extrabold">Добавить услугу</h3>
+            <p className="mt-1 text-sm text-muted">Поля со звёздочкой обязательны, цену можно не указывать.</p>
           </div>
+          <ServiceFields specialties={specialties} />
           <button type="submit" className="btn btn-primary text-sm">
             Добавить услугу
           </button>

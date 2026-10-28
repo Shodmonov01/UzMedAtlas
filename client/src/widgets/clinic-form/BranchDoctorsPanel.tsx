@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CabinetDoctor } from "@/shared/api/cabinet";
 import { addClinicDoctor, setBranchDoctors } from "@/shared/api/cabinet";
+import { Field, FormGroup } from "./FormField";
 
 type Props = {
   clinicId: string;
@@ -135,27 +136,68 @@ export function BranchDoctorsPanel({
             }
           }}
         >
-          <h3 className="font-extrabold">+ Создать специалиста</h3>
-          <div className="grid gap-2 md:grid-cols-2">
-            <input name="nameRu" required className="field" placeholder="Имя RU" />
-            <input name="nameEn" required className="field" placeholder="Name EN" />
-            <input name="roleRu" className="field" placeholder="Должность RU" />
-            <input name="roleEn" className="field" placeholder="Role EN" />
-            <input name="experienceYears" type="number" min={0} className="field" placeholder="Стаж, лет" />
-            <select name="category" className="field" defaultValue=""><option value="">Категория</option><option value="highest">Высшая</option><option value="first">Первая</option><option value="second">Вторая</option><option value="other">Другая</option></select>
-            <select name="specialtyId" className="field" defaultValue={specialtyIds[0] || ""}><option value="">Специальность</option>{specialtyOptions.filter((specialty) => specialtyIds.includes(specialty.id)).map((specialty) => <option key={specialty.id} value={specialty.id}>{specialty.nameRu || specialty.nameEn}</option>)}</select>
-            <input name="photoUrl" className="field md:col-span-2" placeholder="Ссылка на фото" />
-            {onUpload ? <input name="photoFile" type="file" accept="image/*" className="field md:col-span-2" /> : null}
-            <textarea name="bioRu" rows={2} className="field md:col-span-2" placeholder="Краткая информация" />
-            <textarea name="certsRu" rows={2} className="field md:col-span-2" placeholder="Сертификаты" />
-            <textarea name="continuingEducationRu" rows={2} className="field md:col-span-2" placeholder="Повышение квалификации" />
-            <textarea name="internationalExperienceRu" rows={2} className="field md:col-span-2" placeholder="Международный опыт" />
-            <textarea name="researchActivityRu" rows={2} className="field md:col-span-2" placeholder="Научная деятельность" />
-            <textarea name="awardsRu" rows={2} className="field md:col-span-2" placeholder="Награды" />
-            <textarea name="achievementsRu" rows={2} className="field md:col-span-2" placeholder="Достижения" />
+          <div>
+            <h3 className="font-extrabold">Новый специалист</h3>
+            <p className="mt-1 text-sm text-muted">Его не было в списке выше? Создайте — он сразу появится в этом филиале. Поля со звёздочкой обязательны.</p>
           </div>
+          <FormGroup title="Кто это">
+            <Field label="Имя и фамилия (RU) *">
+              <input name="nameRu" required className="field" placeholder="Например, Алишер Рахимов" />
+            </Field>
+            <Field label="Имя и фамилия (EN) *">
+              <input name="nameEn" required className="field" placeholder="For example, Alisher Rakhimov" />
+            </Field>
+            <Field label="Должность (RU)">
+              <input name="roleRu" className="field" placeholder="Например, кардиолог" />
+            </Field>
+            <Field label="Должность (EN)">
+              <input name="roleEn" className="field" placeholder="For example, cardiologist" />
+            </Field>
+            <Field label="Стаж, лет">
+              <input name="experienceYears" type="number" min={0} className="field" placeholder="10" />
+            </Field>
+            <Field label="Врачебная категория">
+              <select name="category" className="field" defaultValue=""><option value="">Без категории</option><option value="highest">Высшая</option><option value="first">Первая</option><option value="second">Вторая</option><option value="other">Другая</option></select>
+            </Field>
+            <Field label="Специальность" hint="Из направлений клиники">
+              <select name="specialtyId" className="field" defaultValue={specialtyIds[0] || ""}><option value="">Не выбрана</option>{specialtyOptions.filter((specialty) => specialtyIds.includes(specialty.id)).map((specialty) => <option key={specialty.id} value={specialty.id}>{specialty.nameRu || specialty.nameEn}</option>)}</select>
+            </Field>
+          </FormGroup>
+          <FormGroup title="Фото">
+            {onUpload ? (
+              <Field label="Загрузить файл" hint="Портрет, лучше квадратный">
+                <input name="photoFile" type="file" accept="image/*" className="field" />
+              </Field>
+            ) : null}
+            <Field label={onUpload ? "Или ссылка на фото" : "Ссылка на фото"}>
+              <input name="photoUrl" className="field" placeholder="https://…" />
+            </Field>
+          </FormGroup>
+          <FormGroup title="О специалисте">
+            <Field label="Кратко о враче" wide>
+              <textarea name="bioRu" rows={2} className="field" placeholder="Чем занимается, с какими случаями работает" />
+            </Field>
+            <Field label="Сертификаты">
+              <textarea name="certsRu" rows={2} className="field" />
+            </Field>
+            <Field label="Повышение квалификации">
+              <textarea name="continuingEducationRu" rows={2} className="field" />
+            </Field>
+            <Field label="Международный опыт">
+              <textarea name="internationalExperienceRu" rows={2} className="field" />
+            </Field>
+            <Field label="Научная деятельность">
+              <textarea name="researchActivityRu" rows={2} className="field" />
+            </Field>
+            <Field label="Награды">
+              <textarea name="awardsRu" rows={2} className="field" />
+            </Field>
+            <Field label="Достижения">
+              <textarea name="achievementsRu" rows={2} className="field" />
+            </Field>
+          </FormGroup>
           <button type="submit" className="btn btn-primary text-sm">
-            Создать
+            Создать специалиста
           </button>
         </form>
       ) : null}

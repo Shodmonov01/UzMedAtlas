@@ -194,8 +194,8 @@ export function BranchEditorForm({
             <input name="nameEn" required className="field mt-1" defaultValue={initial?.nameEn} disabled={locked} />
           </label>
           <label className="text-sm font-bold">
-            Slug
-            <input name="slug" className="field mt-1" defaultValue={initial?.slug} disabled={locked} placeholder="auto" />
+            Адрес страницы
+            <input name="slug" className="field mt-1" defaultValue={initial?.slug} disabled={locked} placeholder="сгенерируется автоматически" />
           </label>
           <label className="text-sm font-bold">
             Город
@@ -203,7 +203,7 @@ export function BranchEditorForm({
             <datalist id="branch-city-options">{CITY_OPTIONS.map((city) => <option key={city.value} value={city.label} />)}</datalist>
           </label>
           <label className="text-sm font-bold md:col-span-2">
-            Cover URL
+            Обложка филиала (ссылка или загрузите файл ниже)
             <input name="coverUrl" className="field mt-1" value={coverUrl} onChange={(event) => setCoverUrl(event.target.value)} disabled={locked} />
           </label>
           {!locked && onUpload ? (

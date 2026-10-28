@@ -29,6 +29,7 @@ import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { AddressMapSearchButton } from "@/shared/ui/AddressMapSearchButton";
 import { BriefUpload } from "./BriefUpload";
+import { Field, FormGroup } from "./FormField";
 
 const LANGS = ["ru", "en", "uz", "kz", "tr", "ar"];
 const PHOTO_CATS = [
@@ -60,24 +61,6 @@ type Props = {
   onSaved: () => Promise<void>;
   initialSection?: WizardSectionId;
 };
-
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block text-sm font-bold">
-      {label}
-      <div className="mt-1">{children}</div>
-      {hint ? <p className="mt-1 text-xs font-normal text-muted">{hint}</p> : null}
-    </label>
-  );
-}
 
 function photoCategoryLabel(value: string) {
   return PHOTO_CATS.find((cat) => cat.value === value)?.label || value;
@@ -425,7 +408,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               <Field label="Должность (EN)">
                 <input name="founderRoleEn" className="field" defaultValue={clinic.founderRoleEn || ""} disabled={locked} />
               </Field>
-              <Field label="Фото основателя (URL)">
+              <Field label="Фото основателя (ссылка)" hint="Или загрузите файл кнопкой ниже">
                 <input name="founderPhotoUrl" className="field" defaultValue={clinic.founderPhotoUrl || ""} disabled={locked} />
               </Field>
             </div>
@@ -606,7 +589,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               <Field label="Должность (EN)">
                 <input name="chiefDoctorRoleEn" className="field" defaultValue={clinic.chiefDoctorRoleEn || ""} disabled={locked} />
               </Field>
-              <Field label="Фото главврача (URL)">
+              <Field label="Фото главврача (ссылка)" hint="Или загрузите файл кнопкой ниже">
                 <input name="chiefDoctorPhotoUrl" className="field" defaultValue={clinic.chiefDoctorPhotoUrl || ""} disabled={locked} />
               </Field>
               <Field label="Координатор">
@@ -668,64 +651,74 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               ) : (
                 leaders.map((leader, index) => (
                   <div key={leader.id || `leader-${index}`} className="grid gap-3 rounded-2xl border border-line p-4 md:grid-cols-2">
-                    <input
-                      className="field"
-                      placeholder="ФИО"
-                      value={leader.name}
-                      disabled={locked}
-                      onChange={(e) =>
-                        setLeaders((prev) =>
-                          prev.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)),
-                        )
-                      }
-                    />
-                    <input
-                      className="field"
-                      placeholder="Должность RU"
-                      value={leader.roleRu || ""}
-                      disabled={locked}
-                      onChange={(e) =>
-                        setLeaders((prev) =>
-                          prev.map((item, i) => (i === index ? { ...item, roleRu: e.target.value } : item)),
-                        )
-                      }
-                    />
-                    <input
-                      className="field"
-                      placeholder="Role EN"
-                      value={leader.roleEn || ""}
-                      disabled={locked}
-                      onChange={(e) =>
-                        setLeaders((prev) =>
-                          prev.map((item, i) => (i === index ? { ...item, roleEn: e.target.value } : item)),
-                        )
-                      }
-                    />
-                    <input
-                      className="field"
-                      placeholder="Фото (URL)"
-                      value={leader.photoUrl || ""}
-                      disabled={locked}
-                      onChange={(e) =>
-                        setLeaders((prev) =>
-                          prev.map((item, i) =>
-                            i === index ? { ...item, photoUrl: e.target.value || null } : item,
-                          ),
-                        )
-                      }
-                    />
-                    <textarea
-                      className="field md:col-span-2"
-                      rows={2}
-                      placeholder="Краткая информация"
-                      value={leader.bioRu || ""}
-                      disabled={locked}
-                      onChange={(e) =>
-                        setLeaders((prev) =>
-                          prev.map((item, i) => (i === index ? { ...item, bioRu: e.target.value } : item)),
-                        )
-                      }
-                    />
+                    <Field label="ФИО">
+                      <input
+                        className="field"
+                        placeholder="Например, Дилноза Юсупова"
+                        value={leader.name}
+                        disabled={locked}
+                        onChange={(e) =>
+                          setLeaders((prev) =>
+                            prev.map((item, i) => (i === index ? { ...item, name: e.target.value } : item)),
+                          )
+                        }
+                      />
+                    </Field>
+                    <Field label="Должность (RU)">
+                      <input
+                        className="field"
+                        placeholder="Например, медицинский директор"
+                        value={leader.roleRu || ""}
+                        disabled={locked}
+                        onChange={(e) =>
+                          setLeaders((prev) =>
+                            prev.map((item, i) => (i === index ? { ...item, roleRu: e.target.value } : item)),
+                          )
+                        }
+                      />
+                    </Field>
+                    <Field label="Должность (EN)">
+                      <input
+                        className="field"
+                        placeholder="For example, medical director"
+                        value={leader.roleEn || ""}
+                        disabled={locked}
+                        onChange={(e) =>
+                          setLeaders((prev) =>
+                            prev.map((item, i) => (i === index ? { ...item, roleEn: e.target.value } : item)),
+                          )
+                        }
+                      />
+                    </Field>
+                    <Field label="Фото (ссылка)">
+                      <input
+                        className="field"
+                        placeholder="https://… или кнопка «Загрузить фото»"
+                        value={leader.photoUrl || ""}
+                        disabled={locked}
+                        onChange={(e) =>
+                          setLeaders((prev) =>
+                            prev.map((item, i) =>
+                              i === index ? { ...item, photoUrl: e.target.value || null } : item,
+                            ),
+                          )
+                        }
+                      />
+                    </Field>
+                    <Field label="Кратко о руководителе" wide>
+                      <textarea
+                        className="field"
+                        rows={2}
+                        placeholder="Опыт, образование, чем руководит"
+                        value={leader.bioRu || ""}
+                        disabled={locked}
+                        onChange={(e) =>
+                          setLeaders((prev) =>
+                            prev.map((item, i) => (i === index ? { ...item, bioRu: e.target.value } : item)),
+                          )
+                        }
+                      />
+                    </Field>
                     {!locked ? (
                       <div className="flex flex-wrap gap-2 md:col-span-2">
                         <label className="btn btn-ghost cursor-pointer text-sm">
@@ -785,7 +778,9 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                           <p className="font-bold">{d.nameRu || d.nameEn}</p>
                           <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
                           {d.category ? (
-                            <p className="mt-1 text-xs font-semibold text-primary">категория: {d.category}</p>
+                            <p className="mt-1 text-xs font-semibold text-primary">
+                              Категория: {DOCTOR_CATEGORIES.find((c) => c.value === d.category)?.label || d.category}
+                            </p>
                           ) : null}
                           {branchNames.length ? (
                             <p className="mt-1 text-xs text-muted">Филиалы: {branchNames.join(", ")}</p>
@@ -850,40 +845,81 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   setMessage("Специалист добавлен");
                 }}
               >
-                <h3 className="font-extrabold">Добавить специалиста</h3>
-                <div className="grid gap-3 md:grid-cols-2">
-                  <input name="nameRu" required placeholder="Имя RU" className="field" />
-                  <input name="nameEn" required placeholder="Name EN" className="field" />
-                  <input name="roleRu" placeholder="Должность RU" className="field" />
-                  <input name="roleEn" placeholder="Role EN" className="field" />
-                  <input name="experienceYears" type="number" min={0} placeholder="Стаж, лет" className="field" />
-                  <select name="category" className="field" defaultValue="">
-                    {DOCTOR_CATEGORIES.map((c) => (
-                      <option key={c.value || "none"} value={c.value}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select name="doctorSpecialtyId" className="field" defaultValue={specialtyIds[0] || ""}>
-                    <option value="">Специальность врача</option>
-                    {specialties.filter((item) => specialtyIds.includes(item.id)).map((item) => (
-                      <option key={item.id} value={item.id}>{item.nameRu || item.nameEn}</option>
-                    ))}
-                  </select>
-                  <input name="photoUrl" className="field md:col-span-2" placeholder="URL фото или загрузите ниже" />
-                  <input name="photoFile" type="file" accept="image/*" className="field md:col-span-2" />
-                  <textarea name="bioRu" rows={2} className="field md:col-span-2" placeholder="Краткая информация" />
-                  <textarea name="certsRu" rows={2} className="field md:col-span-2" placeholder="Сертификаты / квалификация (RU)" />
-                  <textarea name="certsEn" rows={2} className="field md:col-span-2" placeholder="Certificates (EN)" />
-                  <textarea name="continuingEducationRu" rows={2} className="field md:col-span-2" placeholder="Повышение квалификации" />
-                  <textarea name="internationalExperienceRu" rows={2} className="field md:col-span-2" placeholder="Международный опыт" />
-                  <textarea name="researchActivityRu" rows={2} className="field md:col-span-2" placeholder="Научная деятельность" />
-                  <textarea name="awardsRu" rows={2} className="field md:col-span-2" placeholder="Награды" />
-                  <textarea name="achievementsRu" rows={2} className="field md:col-span-2" placeholder="Достижения" />
+                <div>
+                  <h3 className="font-extrabold">Добавить специалиста</h3>
+                  <p className="mt-1 text-sm text-muted">Поля со звёздочкой обязательны, остальное можно дополнить позже.</p>
                 </div>
+                <FormGroup title="Кто это">
+                  <Field label="Имя и фамилия (RU) *">
+                    <input name="nameRu" required placeholder="Например, Алишер Рахимов" className="field" />
+                  </Field>
+                  <Field label="Имя и фамилия (EN) *">
+                    <input name="nameEn" required placeholder="For example, Alisher Rakhimov" className="field" />
+                  </Field>
+                  <Field label="Должность (RU)">
+                    <input name="roleRu" placeholder="Например, кардиолог" className="field" />
+                  </Field>
+                  <Field label="Должность (EN)">
+                    <input name="roleEn" placeholder="For example, cardiologist" className="field" />
+                  </Field>
+                  <Field label="Стаж, лет">
+                    <input name="experienceYears" type="number" min={0} placeholder="10" className="field" />
+                  </Field>
+                  <Field label="Врачебная категория">
+                    <select name="category" className="field" defaultValue="">
+                      {DOCTOR_CATEGORIES.map((c) => (
+                        <option key={c.value || "none"} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Специальность" hint="Из направлений клиники">
+                    <select name="doctorSpecialtyId" className="field" defaultValue={specialtyIds[0] || ""}>
+                      <option value="">Не выбрана</option>
+                      {specialties.filter((item) => specialtyIds.includes(item.id)).map((item) => (
+                        <option key={item.id} value={item.id}>{item.nameRu || item.nameEn}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </FormGroup>
+                <FormGroup title="Фото">
+                  <Field label="Загрузить файл" hint="Портрет, лучше квадратный">
+                    <input name="photoFile" type="file" accept="image/*" className="field" />
+                  </Field>
+                  <Field label="Или ссылка на фото">
+                    <input name="photoUrl" className="field" placeholder="https://…" />
+                  </Field>
+                </FormGroup>
+                <FormGroup title="О специалисте">
+                  <Field label="Кратко о враче" wide>
+                    <textarea name="bioRu" rows={2} className="field" placeholder="Чем занимается, с какими случаями работает" />
+                  </Field>
+                  <Field label="Сертификаты и квалификация (RU)">
+                    <textarea name="certsRu" rows={2} className="field" />
+                  </Field>
+                  <Field label="Certificates (EN)">
+                    <textarea name="certsEn" rows={2} className="field" />
+                  </Field>
+                  <Field label="Повышение квалификации">
+                    <textarea name="continuingEducationRu" rows={2} className="field" />
+                  </Field>
+                  <Field label="Международный опыт">
+                    <textarea name="internationalExperienceRu" rows={2} className="field" />
+                  </Field>
+                  <Field label="Научная деятельность">
+                    <textarea name="researchActivityRu" rows={2} className="field" />
+                  </Field>
+                  <Field label="Награды">
+                    <textarea name="awardsRu" rows={2} className="field" />
+                  </Field>
+                  <Field label="Достижения" wide>
+                    <textarea name="achievementsRu" rows={2} className="field" />
+                  </Field>
+                </FormGroup>
                 {(clinic.branches || []).length ? (
                   <fieldset>
-                    <legend className="text-sm font-bold">Филиалы</legend>
+                    <legend className="text-sm font-bold">В каких филиалах принимает</legend>
                     <div className="mt-2 grid gap-2 md:grid-cols-2">
                       {(clinic.branches || []).map((b) => (
                         <label key={b.id} className="flex items-center gap-2 text-sm font-semibold">
@@ -897,7 +933,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   <p className="text-sm text-muted">Сначала добавьте филиал — потом можно привязать специалиста.</p>
                 )}
                 <button className="btn btn-primary text-sm" type="submit">
-                  Добавить
+                  Добавить специалиста
                 </button>
               </form>
             ) : null}
@@ -1031,15 +1067,30 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     await refresh();
                   }}
                 >
-                  <h3 className="font-extrabold">+ Оборудование</h3>
-                  <input name="nameRu" required className="field" placeholder="Название RU" />
-                  <input name="nameEn" required className="field" placeholder="Name EN" />
-                  <input name="manufacturer" className="field" placeholder="Производитель" />
-                  <input name="descriptionRu" className="field" placeholder="Описание" />
-                  <input name="photoUrl" className="field" placeholder="Фото URL" />
-                  <input name="photoFile" type="file" accept="image/*" className="field" />
+                  <div>
+                    <h3 className="font-extrabold">Добавить оборудование</h3>
+                    <p className="mt-1 text-xs text-muted">Аппараты для диагностики и лечения: МРТ, КТ, УЗИ и т. п.</p>
+                  </div>
+                  <Field label="Название (RU) *">
+                    <input name="nameRu" required className="field" placeholder="Например, МРТ 3 Тесла" />
+                  </Field>
+                  <Field label="Название (EN) *">
+                    <input name="nameEn" required className="field" placeholder="For example, 3T MRI" />
+                  </Field>
+                  <Field label="Производитель">
+                    <input name="manufacturer" className="field" placeholder="Siemens, GE, Philips…" />
+                  </Field>
+                  <Field label="Описание">
+                    <input name="descriptionRu" className="field" placeholder="Для чего используется" />
+                  </Field>
+                  <Field label="Фото аппарата">
+                    <input name="photoFile" type="file" accept="image/*" className="field" />
+                  </Field>
+                  <Field label="Или ссылка на фото">
+                    <input name="photoUrl" className="field" placeholder="https://…" />
+                  </Field>
                   <button className="btn btn-primary text-sm" type="submit">
-                    Добавить
+                    Добавить оборудование
                   </button>
                 </form>
                 <form
@@ -1062,12 +1113,21 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     e.currentTarget.reset();
                   }}
                 >
-                  <h3 className="font-extrabold">+ Технология</h3>
-                  <input name="nameRu" required className="field" placeholder="Название RU" />
-                  <input name="nameEn" className="field" placeholder="Name EN" />
-                  <input name="descriptionRu" className="field" placeholder="Описание" />
+                  <div>
+                    <h3 className="font-extrabold">Добавить технологию</h3>
+                    <p className="mt-1 text-xs text-muted">Методики и подходы к лечению, которыми гордится клиника.</p>
+                  </div>
+                  <Field label="Название (RU) *">
+                    <input name="nameRu" required className="field" placeholder="Например, лапароскопия" />
+                  </Field>
+                  <Field label="Название (EN)" hint="Если пусто — возьмём русское">
+                    <input name="nameEn" className="field" placeholder="For example, laparoscopy" />
+                  </Field>
+                  <Field label="Описание">
+                    <input name="descriptionRu" className="field" placeholder="Коротко, в чём польза для пациента" />
+                  </Field>
                   <button className="btn btn-primary text-sm" type="submit">
-                    Добавить
+                    Добавить технологию
                   </button>
                 </form>
                 <form
@@ -1096,16 +1156,33 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     await refresh();
                   }}
                 >
-                  <h3 className="font-extrabold">+ Сертификат</h3>
-                  <input name="nameRu" required className="field" placeholder="Название RU" />
-                  <input name="nameEn" required className="field" placeholder="Name EN" />
-                  <input name="issuerRu" className="field" placeholder="Кем выдан" />
-                  <label className="text-sm font-semibold">Дата получения<input name="receivedAt" type="date" className="field mt-1" /></label>
-                  <label className="text-sm font-semibold">Срок действия<input name="validUntil" type="date" className="field mt-1" /></label>
-                  <input name="logo" type="file" accept="image/*" className="field" title="Логотип" />
-                  <input name="file" type="file" accept="image/*,application/pdf" className="field" title="Файл" />
+                  <div>
+                    <h3 className="font-extrabold">Добавить сертификат</h3>
+                    <p className="mt-1 text-xs text-muted">Лицензии, аккредитации и знаки качества.</p>
+                  </div>
+                  <Field label="Название (RU) *">
+                    <input name="nameRu" required className="field" placeholder="Например, аккредитация JCI" />
+                  </Field>
+                  <Field label="Название (EN) *">
+                    <input name="nameEn" required className="field" placeholder="For example, JCI accreditation" />
+                  </Field>
+                  <Field label="Кем выдан">
+                    <input name="issuerRu" className="field" placeholder="Организация" />
+                  </Field>
+                  <Field label="Дата получения">
+                    <input name="receivedAt" type="date" className="field" />
+                  </Field>
+                  <Field label="Действует до">
+                    <input name="validUntil" type="date" className="field" />
+                  </Field>
+                  <Field label="Логотип или знак" hint="Картинка, которую покажем рядом с названием">
+                    <input name="logo" type="file" accept="image/*" className="field" />
+                  </Field>
+                  <Field label="Скан документа" hint="PDF или фото — пациент сможет открыть">
+                    <input name="file" type="file" accept="image/*,application/pdf" className="field" />
+                  </Field>
                   <button className="btn btn-primary text-sm" type="submit">
-                    Добавить
+                    Добавить сертификат
                   </button>
                 </form>
               </div>

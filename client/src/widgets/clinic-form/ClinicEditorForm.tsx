@@ -255,7 +255,7 @@ export function ClinicEditorForm({
             <input name="city" list="clinic-city-options" required minLength={2} maxLength={80} className="field" value={city} onChange={(event) => setCity(event.target.value)} disabled={locked} />
             <datalist id="clinic-city-options">{CITY_OPTIONS.map((city) => <option key={city.value} value={city.label} />)}</datalist>
           </Field>
-          <Field label="Slug" hint="необязательно">
+          <Field label="Адрес страницы" hint="необязательно">
             <input
               name="slug"
               minLength={2}
