@@ -653,7 +653,7 @@ h3,
 .uz + .care-steps, .country-film + .care-steps { margin-top: 24px; padding-top: 40px; border-top: 1px solid var(--line); }
 .care-steps > div { display: flex; }
 .care-steps > div > a { flex: 1; }
-.care-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; width: calc(100% - 48px); max-width: var(--page-width); margin: 0 auto 32px; }
+.care-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; width: calc(100% - 48px); max-width: var(--page-width); margin: 72px auto 24px; }
 .care-steps a { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: 20px; background: white; box-shadow: inset 0 0 0 1px var(--line); transition: transform .25s ease, box-shadow .25s ease; }
 .care-steps a:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px var(--line), 0 18px 36px -24px #0b2a3d59; }
 .care-step-number { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: var(--brand-gradient); color: white; font-size: 14px; font-weight: 600; }
@@ -667,12 +667,16 @@ h3,
 .catalog-search-grid > label > span { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; font-weight: 600; }
 .catalog-search-card .field { height: 52px; padding: 0 16px; border: 0; border-radius: 14px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; }
 .catalog-search-card .field:focus, .catalog-search-card .field:focus-visible { background: white; box-shadow: inset 0 0 0 1.5px var(--primary), 0 0 0 4px #0187c51f; }
+.catalog-search-card input.field::placeholder { color: var(--muted); opacity: 1; }
+.catalog-search-grid > label > .catalog-query-box { position: relative; display: block; margin-bottom: 0; }
+.catalog-query-box > svg { position: absolute; top: 50%; left: 16px; color: var(--muted); transform: translateY(-50%); pointer-events: none; }
+.catalog-query-box > .field { width: 100%; padding-left: 44px; }
 .catalog-more { height: 52px; padding: 0 20px; border-radius: 999px; background: white; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color .2s ease; }
 .catalog-more:hover { background: var(--paper); }
 .catalog-submit { display: inline-flex; align-items: center; gap: 12px; height: 52px; padding: 0 6px 0 22px; border-radius: 999px; background: var(--ink); color: white; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color .2s ease; }
 .catalog-submit:hover { background: #134058; }
 .catalog-submit > span { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--brand-gradient); }
-.catalog-popular { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; color: var(--muted); font-size: 13px; }
+.catalog-popular { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 .catalog-popular > span { margin-right: 4px; }
 .catalog-popular > button { padding: 7px 14px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color .2s ease, color .2s ease, box-shadow .2s ease; }
 .catalog-popular > button:hover { background: #57bf8c1f; box-shadow: inset 0 0 0 1px #57bf8c80; color: var(--accent-strong); }
@@ -723,7 +727,7 @@ h3,
   .clinic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
-  .care-steps { grid-template-columns: minmax(0, 1fr); gap: 10px; width: calc(100% - 32px); }
+  .care-steps { grid-template-columns: minmax(0, 1fr); gap: 10px; width: calc(100% - 32px); margin-top: 40px; }
   .care-steps a { padding: 14px 16px; }
   .catalog-content { width: calc(100% - 32px); padding-bottom: 64px; }
   .catalog-search-card { padding: 18px; border-radius: 22px; }

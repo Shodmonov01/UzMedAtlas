@@ -194,7 +194,16 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
         <Reveal id="catalog" className="catalog-search-card scroll-mt-28">
           <form id="catalog-search" onSubmit={applyQuick}>
             <div className="catalog-search-grid">
-              <label className="catalog-query"><span>Клиника или услуга</span><input className="field" placeholder="Например, кардиология…" value={q} onChange={(e) => setQ(e.target.value)} /></label>
+              <label className="catalog-query">
+                <span>Клиника или услуга</span>
+                <span className="catalog-query-box">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+                    <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  <input className="field" placeholder="Например, кардиология…" value={q} onChange={(e) => setQ(e.target.value)} />
+                </span>
+              </label>
               <label><span>Город</span><input className="field" list="catalog-city-options" placeholder="Все города" value={city} onChange={(event) => setCity(event.target.value)} /></label>
               <datalist id="catalog-city-options">{CITY_OPTIONS.map((item) => <option key={item.value} value={item.label} />)}</datalist>
               <label><span>Направление</span><SelectField value={specialty} options={specialtyOptions} onChange={setSpecialty} /></label>

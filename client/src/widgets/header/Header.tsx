@@ -1,10 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-// Sections of the home page, in page order.
-const SECTIONS = [
-  { id: "catalog", label: "Клиники" },
-];
+// Sections of the home page, in page order. None are linked from the nav for now.
+const SECTIONS: { id: string; label: string }[] = [];
 
 export function Header() {
   // On the home page the header is see-through over the hero film and turns white once the film is scrolled past.
@@ -85,13 +83,15 @@ export function Header() {
             <span>медицинских организаций</span>
           </span>
         </Link>
-        <nav className="site-nav" aria-label="Разделы">
-          {SECTIONS.map((section) => (
-            <a key={section.id} href={`/#${section.id}`} className={active === section.id ? "is-active" : undefined}>
-              {section.label}
-            </a>
-          ))}
-        </nav>
+        {SECTIONS.length ? (
+          <nav className="site-nav" aria-label="Разделы">
+            {SECTIONS.map((section) => (
+              <a key={section.id} href={`/#${section.id}`} className={active === section.id ? "is-active" : undefined}>
+                {section.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
         <div className="site-header-end">
           <Link to="/cabinet/login" className="site-header-action">
             Для клиник
