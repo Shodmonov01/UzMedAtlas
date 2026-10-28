@@ -1,6 +1,7 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { motion } from "motion/react";
 import { revealItem } from "@/shared/ui/Reveal";
+import { SoundToggle } from "@/shared/ui/SoundToggle";
 
 const STATEMENT =
   "Ассоциация объединяет клиники Узбекистана, чтобы выбор врача был таким же понятным, как дорога домой: проверенные данные, честные цены и живые контакты — в одном месте.";
@@ -20,6 +21,8 @@ export function HeroBuild() {
   const heroRef = useRef<HTMLElement>(null);
   const storyRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // The film starts muted (browsers only autoplay silent video); the sound button turns its audio on and off.
+  const [sound, setSound] = useState(false);
 
   useEffect(() => {
     const hero = heroRef.current!;
@@ -49,6 +52,11 @@ export function HeroBuild() {
       if (covered !== coveredTarget || read !== readTarget || auto !== autoTarget) schedule();
 
       hero.style.setProperty("--hp", covered.toFixed(4));
+      // Once the next layer has covered the hero, its sound goes quiet again.
+      if (coveredTarget >= 1 && !film.muted) {
+        film.muted = true;
+        setSound(false);
+      }
       words.forEach((word, i) => {
         const at = 0.04 + (i / words.length) * 0.4;
         word.style.opacity = String(0.16 + 0.84 * span(read, at, at + 0.06));
@@ -94,7 +102,7 @@ export function HeroBuild() {
     film.defaultMuted = true;
     for (const name of ["muted", "playsinline", "webkit-playsinline", "autoplay", "loop"]) film.setAttribute(name, "");
     if (!film.getAttribute("src")) {
-      film.src = window.matchMedia("(max-width: 767px)").matches ? "/videos/hero/hero-mobile.mp4" : "/videos/hero/hero-1080.mp4";
+      film.src = window.matchMedia("(max-width: 767px)").matches ? "/videos/hero/meet-mobile.mp4" : "/videos/hero/meet-1080.mp4";
       film.load();
     }
     void film.play().catch(() => {});
@@ -125,11 +133,18 @@ export function HeroBuild() {
     };
   }, []);
 
+  function toggleSound() {
+    const film = videoRef.current!;
+    film.muted = !film.muted;
+    if (!film.muted) void film.play().catch(() => {});
+    setSound(!film.muted);
+  }
+
   return (
     <>
       <section ref={heroRef} className="hero-build">
         <div className="hero-build-stage">
-          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero/hero-poster.jpg" muted loop playsInline preload="auto" aria-hidden="true" />
+          <video ref={videoRef} className="hero-build-photo" poster="/videos/hero/meet-poster.jpg" muted loop playsInline preload="auto" aria-hidden="true" />
           <span className="hero-build-shade" />
 
           <motion.div
@@ -146,10 +161,7 @@ export function HeroBuild() {
             </motion.h1>
             <motion.p className="hero-build-lead" variants={revealItem}>Клиники, услуги и специалисты Узбекистана — в одном месте, чтобы выбор был понятным и спокойным.</motion.p>
           </motion.div>
-          <a href="#catalog" className="hero-build-scroll">
-            <span className="hero-build-mouse" aria-hidden="true"><span /></span>
-            Листайте вниз
-          </a>
+          <SoundToggle on={sound} onToggle={toggleSound} className="hero-build-sound" />
         </div>
       </section>
 
