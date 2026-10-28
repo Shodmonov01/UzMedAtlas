@@ -3,10 +3,6 @@ import { useEffect, useState } from "react";
 
 // Sections of the home page, in page order.
 const SECTIONS = [
-  { id: "country", label: "Наша страна" },
-  { id: "tourism", label: "Туризм" },
-  { id: "film", label: "Фильм" },
-  { id: "medtourism", label: "Медтуризм" },
   { id: "catalog", label: "Клиники" },
 ];
 

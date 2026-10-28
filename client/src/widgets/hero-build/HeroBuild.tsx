@@ -146,7 +146,7 @@ export function HeroBuild() {
             </motion.h1>
             <motion.p className="hero-build-lead" variants={revealItem}>Клиники, услуги и специалисты Узбекистана — в одном месте, чтобы выбор был понятным и спокойным.</motion.p>
           </motion.div>
-          <a href="#country" className="hero-build-scroll">
+          <a href="#catalog" className="hero-build-scroll">
             <span className="hero-build-mouse" aria-hidden="true"><span /></span>
             Листайте вниз
           </a>

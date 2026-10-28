@@ -6,9 +6,7 @@ import { SelectField } from "@/shared/ui/SelectField";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 import { motion } from "motion/react";
 import { Reveal, RevealGroup, revealItem } from "@/shared/ui/Reveal";
-import { CountryFilm } from "@/widgets/country-film/CountryFilm";
 import { HeroBuild } from "@/widgets/hero-build/HeroBuild";
-import { MedDeck, UzDeck } from "@/widgets/uz-deck/UzDeck";
 import { LogoTiles } from "@/shared/ui/LogoTiles";
 
 export type CatalogSearch = {
@@ -186,37 +184,6 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     <section className="reference-home">
       <HeroBuild />
 
-      <UzDeck />
-
-      <section id="tourism" className="tourism">
-        <LogoTiles corner="tl" seed={9} />
-        <Reveal className="tourism-head">
-          <p className="tourism-eyebrow">Туризм</p>
-          <h2>Новые маршруты <em>по всей стране</em></h2>
-        </Reveal>
-        <Reveal className="tourism-copy" delay={0.12}>
-          <p>
-            За последнее десятилетие туристическая карта Узбекистана значительно расширилась. Появились новые маршруты,
-            активно развиваются горный, экологический, гастрономический и паломнический туризм.
-          </p>
-          <p>
-            Узбекистан также стал площадкой для крупных международных туристических форумов и выставок, укрепляя свои
-            позиции на мировой туристической арене.
-          </p>
-          <RevealGroup className="tourism-kinds" role="list">
-            {["Горный", "Экологический", "Гастрономический", "Паломнический"].map((kind) => (
-              <motion.div key={kind} role="listitem" variants={revealItem}>
-                {kind}
-              </motion.div>
-            ))}
-          </RevealGroup>
-        </Reveal>
-      </section>
-
-      <CountryFilm />
-
-      <MedDeck />
-
       <RevealGroup className="care-steps">
         <motion.a variants={revealItem} href="#catalog"><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></motion.a>
         <motion.a variants={revealItem} href="#clinic-results"><span className="care-step-number">02</span><span><strong>Сравните варианты</strong><small>Услуги, специалисты и контакты</small></span></motion.a>
