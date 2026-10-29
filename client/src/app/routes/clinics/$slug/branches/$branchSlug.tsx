@@ -7,6 +7,8 @@ import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoCarousel } from "@/shared/ui/PhotoCarousel";
 import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
+import { ClinicLogo } from "@/shared/ui/ClinicLogo";
+import { FitImage } from "@/shared/ui/FitImage";
 
 export const Route = createFileRoute("/clinics/$slug/branches/$branchSlug")({
   component: BranchDetailPage,
@@ -65,10 +67,11 @@ function BranchDetailPage() {
           </Link>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             {data.clinic?.logoUrl ? (
-              <img
+              <ClinicLogo
                 src={data.clinic.logoUrl}
-                alt=""
-                className="h-14 w-14 rounded-2xl border border-line object-cover"
+                name={data.clinic.nameRu || data.clinic.nameEn || ""}
+                className="h-14 rounded-2xl"
+                wide
               />
             ) : null}
             <div>
@@ -86,7 +89,7 @@ function BranchDetailPage() {
             ) : null}
           </div>
           {data.coverUrl ? (
-            <img src={data.coverUrl} alt="" className="mt-5 aspect-[16/7] w-full rounded-xl object-cover" />
+            <FitImage src={data.coverUrl} className="mt-5 aspect-[16/9] w-full rounded-[22px]" loading="eager" />
           ) : null}
           {(data.descriptionRu || data.descriptionEn) && (
             <p className="mt-6 max-w-3xl leading-relaxed text-muted">

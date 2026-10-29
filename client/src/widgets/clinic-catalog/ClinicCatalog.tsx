@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 import { CITY_LABELS, fetchClinics, fetchSpecialties } from "@/shared/api/client";
 import { SelectField } from "@/shared/ui/SelectField";
+import { ClinicLogo } from "@/shared/ui/ClinicLogo";
+import { FitImage } from "@/shared/ui/FitImage";
 import { CITY_OPTIONS, displayCity, normalizeCity } from "@/shared/lib/cities";
 import { motion } from "motion/react";
 import { Reveal, RevealGroup, revealItem } from "@/shared/ui/Reveal";
@@ -305,14 +307,16 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           >
             <div className="clinic-card-cover">
               {hasPhoto(clinic.photos?.[0]?.url) ? (
-                <img src={clinic.photos![0].url} alt="" className="clinic-card-photo" />
+                <FitImage src={clinic.photos![0].url} className="clinic-card-photo" />
               ) : (
                 <div className="clinic-card-placeholder">
                   <img src="/brand/logo.svg" alt="" width={56} height={56} />
                 </div>
               )}
               <span className="clinic-card-city">{CITY_LABELS[clinic.city] || clinic.city}</span>
-              {clinic.logoUrl && hasPhoto(clinic.photos?.[0]?.url) ? <img src={clinic.logoUrl} alt="" className="clinic-card-logo" /> : null}
+              {clinic.logoUrl && hasPhoto(clinic.photos?.[0]?.url) ? (
+                <ClinicLogo src={clinic.logoUrl} name={clinic.nameRu || clinic.nameEn} className="clinic-card-logo" wide />
+              ) : null}
             </div>
             <div className="clinic-card-body">
               <div className="clinic-card-head">

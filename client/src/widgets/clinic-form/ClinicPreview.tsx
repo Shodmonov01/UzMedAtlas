@@ -2,6 +2,7 @@ import type { CabinetClinic } from "@/shared/api/cabinet";
 import { CITY_LABELS } from "@/shared/api/client";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoCarousel } from "@/shared/ui/PhotoCarousel";
+import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 
 function text(value?: string | null) {
   const v = value?.trim();
@@ -67,17 +68,12 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/25 to-transparent" />
             <div className="relative flex min-h-[180px] flex-col justify-end gap-3 p-5 md:p-6">
               <div className="flex flex-wrap items-end gap-3">
-                {clinic.logoUrl ? (
-                  <img
-                    src={clinic.logoUrl}
-                    alt=""
-                    className="h-14 w-14 rounded-2xl border border-white/40 bg-white object-cover shadow-lg"
-                  />
-                ) : (
-                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/20 text-xl font-extrabold text-white">
-                    {(clinic.nameRu || clinic.nameEn).slice(0, 1)}
-                  </div>
-                )}
+                <ClinicLogo
+                  src={clinic.logoUrl}
+                  name={clinic.nameRu || clinic.nameEn}
+                  className="h-14 rounded-2xl shadow-lg"
+                  wide
+                />
                 <div className="min-w-0 flex-1 text-white">
                   <p className="text-sm font-semibold text-white/75">
                     {cityLabel}

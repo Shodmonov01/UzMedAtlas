@@ -10,6 +10,7 @@ import {
 import { CITY_LABELS } from "@/shared/api/client";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { OwnerTelegramPanel } from "@/widgets/telegram/TelegramPanel";
+import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 
 export const Route = createFileRoute("/cabinet/")({
   component: CabinetHomePage,
@@ -72,17 +73,7 @@ function CabinetHomePage() {
           return (
             <article key={clinic.id} className="soft-card overflow-hidden rounded-[1.5rem] bg-white">
               <div className="flex gap-4 p-5">
-                {clinic.logoUrl ? (
-                  <img
-                    src={clinic.logoUrl}
-                    alt=""
-                    className="h-16 w-16 shrink-0 rounded-2xl border border-line object-cover"
-                  />
-                ) : (
-                  <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-primary text-xl font-extrabold text-white">
-                    {(clinic.nameRu || clinic.nameEn).slice(0, 1)}
-                  </div>
-                )}
+                <ClinicLogo src={clinic.logoUrl} name={clinic.nameRu || clinic.nameEn} className="h-16 w-16 rounded-2xl" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="text-xl font-extrabold">{clinic.nameRu || clinic.nameEn}</h2>
