@@ -37,9 +37,9 @@ function RootLayout() {
 
   return (
     <HealthCheckerProvider>
-      <div className={`portal flex min-h-screen flex-col ${isHome ? "reference-portal" : ""}`}>
+      <div className={`portal flex min-h-screen flex-col ${isHome ? "reference-portal" : ""} ${isWorkspace ? "is-workspace" : ""}`}>
         {!isWorkspace ? <Header /> : null}
-        <main className={isHome ? "w-full flex-1" : `mx-auto w-full max-w-7xl flex-1 px-4 py-8 ${isWorkspace ? "" : "pb-28"}`}>
+        <main className={isHome ? "w-full flex-1" : `mx-auto w-full flex-1 px-4 py-8 ${isWorkspace ? "max-w-7xl" : "max-w-[calc(var(--page-width)+2rem)] pb-28"}`}>
           {isWorkspace ? (
             <div className="mb-6 flex items-center justify-between gap-3">
               <Link to="/" className="inline-flex items-center gap-2 font-extrabold text-ink">

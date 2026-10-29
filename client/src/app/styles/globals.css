@@ -125,8 +125,8 @@ h3,
 .site-header-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 72px; padding: 0 max(16px, calc((100% - var(--page-width)) / 2));
   background: #fff; box-shadow: 0 1px 0 var(--line); pointer-events: auto;
   transition: transform .45s cubic-bezier(.2, .7, .2, 1), height .3s ease, background-color .3s ease, box-shadow .3s ease; }
-/* Inner pages use the wider 1280px column (max-w-7xl with px-4), so the bar follows it there. */
-.portal:not(.reference-portal) .site-header-bar { padding: 0 max(16px, calc((100% - 1248px) / 2)); }
+/* Cabinet and moderation keep the narrower 1280px column (max-w-7xl with px-4); public pages use --page-width everywhere. */
+.portal.is-workspace .site-header-bar { padding: 0 max(16px, calc((100% - 1248px) / 2)); }
 .site-header.is-open .site-header-bar { box-shadow: none; }
 .site-header.is-scrolled .site-header-bar { height: 64px; box-shadow: 0 1px 0 var(--line), 0 10px 30px -18px #0b2a3d4d; }
 /* Slid away while scrolling down; stays put while something in it has keyboard focus. */
@@ -214,7 +214,7 @@ h3,
   background: radial-gradient(50% 80% at 0% 0%, #0187c533, transparent 70%), radial-gradient(45% 70% at 100% 100%, #36926540, transparent 70%), var(--ink); }
 .reference-portal .site-footer { margin-top: 0; }
 .site-footer-inner { width: calc(100% - 32px); max-width: var(--page-width); margin: 0 auto; }
-.portal:not(.reference-portal) .site-footer-inner { max-width: 1248px; }
+.portal.is-workspace .site-footer-inner { max-width: 1248px; }
 .site-footer-top { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 48px; padding: 72px 0 56px; }
 .site-footer-brand { display: inline-flex; align-items: center; gap: 12px; color: white; }
 .site-footer-brand > span { display: flex; flex-direction: column; gap: 2px; line-height: 1.15; }
@@ -836,6 +836,7 @@ h3,
   padding: 0.75rem 0.95rem;
   outline: none;
   font: inherit;
+  font-weight: 500;
   color: var(--ink);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -1175,3 +1176,11 @@ select.field {
 a.clinic-contact-row:hover { color: white; }
 .clinic-contact-row > svg { flex-shrink: 0; color: var(--accent); }
 .clinic-contact-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Phones and tablets zoom the page in when a focused field's text is under 16px; keep every typed-in field at 16px there,
+   whatever text size it inherits from its label (pinch-zoom stays available). */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea { font-size: 16px !important; }
+}

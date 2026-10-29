@@ -303,7 +303,7 @@ function ClinicDetailPage() {
       </header>
       <PhotoLightbox photos={gallery} index={lightboxIndex} onIndexChange={setLightboxIndex} />
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_440px]">
         <div className="min-w-0 space-y-14">
           {description || history || mission || specialties.length ? (
             <Section id="about" title="О клинике">

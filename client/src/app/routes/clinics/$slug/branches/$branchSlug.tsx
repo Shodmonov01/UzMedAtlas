@@ -59,7 +59,7 @@ function BranchDetailPage() {
         : [];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_440px]">
       <div className="min-w-0 space-y-8">
         <div>
           <Link to="/clinics/$slug" params={{ slug }} className="text-sm font-semibold text-muted">

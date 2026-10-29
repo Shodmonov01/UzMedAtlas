@@ -61,7 +61,7 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms }: Props) {
 
   if (done) {
     return (
-      <div className="soft-card rounded-[1.5rem] bg-success-soft p-6 text-sm lg:sticky lg:top-24">
+      <div className="soft-card rounded-[1.5rem] bg-success-soft p-6 text-sm">
         <p className="font-extrabold text-success">Заявка отправлена</p>
         <p className="mt-2 text-muted">
           Координатор {clinicName} свяжется с вами. Это запрос на обратный звонок, не запись к врачу.
@@ -73,7 +73,7 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms }: Props) {
   return (
     <form
       id={formId}
-      className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-y-contain"
+      className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6 md:p-7"
       onSubmit={async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -111,8 +111,10 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms }: Props) {
         }
       }}
     >
-      <h2 className="text-xl font-extrabold">Оставить заявку</h2>
-      <p className="text-sm text-muted">Координатор клиники свяжется удобным способом.</p>
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight text-ink">Оставить заявку</h2>
+        <p className="mt-1 text-sm text-muted">Координатор клиники свяжется удобным способом.</p>
+      </div>
       {fromChecker ? (
         <p className="rounded-xl bg-mint px-3 py-2 text-xs font-semibold text-primary">
           Заявка с учётом Health Checker
@@ -123,66 +125,73 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms }: Props) {
       {/* honeypot */}
       <input name="company" className="hidden" tabIndex={-1} autoComplete="off" />
 
-      <label className="block text-sm font-bold">
+      <label className="block text-sm font-semibold text-ink">
         Имя
-        <input name="fullName" required minLength={2} className="field mt-1" />
+        <input name="fullName" required minLength={2} autoComplete="name" className="field mt-1.5" />
       </label>
-      <label className="block text-sm font-bold">
-        Страна
-        <select name="country" className="field mt-1" defaultValue="Uzbekistan">
-          {COUNTRIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="block text-sm font-bold">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-semibold text-ink">
+          Страна
+          <select name="country" className="field mt-1.5" defaultValue="Uzbekistan">
+            {COUNTRIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm font-semibold text-ink">
+          Способ связи
+          <select name="contactMethod" className="field mt-1.5" defaultValue="whatsapp">
+            <option value="whatsapp">WhatsApp</option>
+            <option value="telegram">Telegram</option>
+            <option value="phone">Звонок</option>
+            <option value="email">Email</option>
+          </select>
+        </label>
+      </div>
+      <label className="block text-sm font-semibold text-ink">
         Телефон (с кодом страны)
         <input
           name="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
           required
-          className="field mt-1"
+          className="field mt-1.5"
           placeholder="+998901234567"
           defaultValue="+998"
         />
       </label>
-      <label className="block text-sm font-bold">
+      <label className="block text-sm font-semibold text-ink">
         Email
-        <input name="email" type="email" className="field mt-1" />
+        <input name="email" type="email" autoComplete="email" className="field mt-1.5" />
       </label>
-      <label className="block text-sm font-bold">
-        Способ связи
-        <select name="contactMethod" className="field mt-1" defaultValue="whatsapp">
-          <option value="whatsapp">WhatsApp</option>
-          <option value="telegram">Telegram</option>
-          <option value="phone">Звонок</option>
-          <option value="email">Email</option>
-        </select>
-      </label>
-      <label className="block text-sm font-bold">
-        Когда планируете приезд
-        <select name="arrivalType" className="field mt-1" defaultValue="undecided">
-          <option value="undecided">Пока не решил</option>
-          <option value="approximate">Примерно</option>
-          <option value="exact">Точные даты</option>
-        </select>
-      </label>
-      <label className="block text-sm font-bold">
-        Удобное время
-        <select name="preferredHours" className="field mt-1" defaultValue="anytime">
-          <option value="anytime">Любое</option>
-          <option value="morning">Утро</option>
-          <option value="afternoon">День</option>
-          <option value="evening">Вечер</option>
-        </select>
-      </label>
-      <label className="block text-sm font-bold">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-semibold text-ink">
+          Сроки приезда
+          <select name="arrivalType" className="field mt-1.5" defaultValue="undecided">
+            <option value="undecided">Пока не решил</option>
+            <option value="approximate">Примерно</option>
+            <option value="exact">Точные даты</option>
+          </select>
+        </label>
+        <label className="block text-sm font-semibold text-ink">
+          Удобное время
+          <select name="preferredHours" className="field mt-1.5" defaultValue="anytime">
+            <option value="anytime">Любое</option>
+            <option value="morning">Утро</option>
+            <option value="afternoon">День</option>
+            <option value="evening">Вечер</option>
+          </select>
+        </label>
+      </div>
+      <label className="block text-sm font-semibold text-ink">
         Что нужно
         <textarea
           name="medicalNeed"
-          rows={3}
-          className="field mt-1"
+          rows={4}
+          className="field mt-1.5"
           defaultValue={symptoms}
           placeholder="Кратко опишите запрос"
           required={!fromChecker}
