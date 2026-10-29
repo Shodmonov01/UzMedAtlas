@@ -2,27 +2,43 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CITY_LABELS, fetchClinicBranch } from "@/shared/api/client";
 import { formatServicePrice } from "@/shared/lib/format-price";
-import { formatDayHours, isOpenNow } from "@/shared/lib/schedule";
+import { formatDayHours, isOpenNow, type DayHours } from "@/shared/lib/schedule";
 import { BranchMap } from "@/shared/ui/BranchMap";
-import { PhotoCarousel } from "@/shared/ui/PhotoCarousel";
-import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
-import { LeadForm } from "@/widgets/lead-form/LeadForm";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
+import { LogoTiles } from "@/shared/ui/LogoTiles";
+import { PhotoCarousel, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
+import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
+import { LeadForm } from "@/widgets/lead-form/LeadForm";
+import { ContactCard, DoctorList, Icon, PhotoMosaic, ProfileSection, type ProfileDoctor } from "@/widgets/clinic-profile/ClinicProfile";
 
 export const Route = createFileRoute("/clinics/$slug/branches/$branchSlug")({
   component: BranchDetailPage,
 });
 
 const DAY_LABELS: Record<string, string> = {
-  mon: "Пн",
-  tue: "Вт",
-  wed: "Ср",
-  thu: "Чт",
-  fri: "Пт",
-  sat: "Сб",
-  sun: "Вс",
+  mon: "Понедельник",
+  tue: "Вторник",
+  wed: "Среда",
+  thu: "Четверг",
+  fri: "Пятница",
+  sat: "Суббота",
+  sun: "Воскресенье",
 };
+
+function todayKey() {
+  const weekday = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Tashkent", weekday: "short" }).format(new Date());
+  return weekday.slice(0, 3).toLowerCase();
+}
+
+/** "JCI; университетская клиника; робот-центр." → ["JCI", "Университетская клиника", "Робот-центр"] */
+function points(value?: string | null) {
+  return (value || "")
+    .split(/[;\n]/)
+    .map((item) => item.replace(/^[•\-\*]\s*/, "").replace(/\.$/, "").trim())
+    .filter(Boolean)
+    .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
+}
 
 function BranchDetailPage() {
   const { slug, branchSlug } = Route.useParams();
@@ -48,276 +64,348 @@ function BranchDetailPage() {
   }
 
   const data = branch.data;
-  const schedule = data.schedule || {};
-  const hasCoords = data.lat != null && data.lng != null;
+  const name: string = data.nameRu || data.nameEn;
+  const clinicName: string = data.clinic?.nameRu || data.clinic?.nameEn || "Клиника";
+  const description: string | null = data.descriptionRu || data.descriptionEn || null;
+  const address: string | null = data.addressRu || data.addressEn || null;
+  const schedule: Record<string, DayHours> = data.schedule || {};
+  const hasSchedule = Object.keys(schedule).length > 0;
+  const allDay = hasSchedule && Object.keys(DAY_LABELS).every((key) => schedule[key]?.roundTheClock);
   const openNow = isOpenNow(schedule);
+  const today = todayKey();
+  const lat = data.lat != null ? Number(data.lat) : null;
+  const lng = data.lng != null ? Number(data.lng) : null;
+  const hasCoords = lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng);
+  const mapsUrl = hasCoords
+    ? yandexPointUrl(lat, lng)
+    : address
+      ? `https://yandex.uz/maps/?text=${encodeURIComponent(address)}`
+      : null;
   const phones: string[] =
-    Array.isArray(data.phones) && data.phones.length
-      ? data.phones
-      : data.phone
-        ? [data.phone]
-        : [];
+    Array.isArray(data.phones) && data.phones.length ? data.phones : data.phone ? [data.phone] : [];
+  const gallery: GalleryPhoto[] = (data.photos || []).map(
+    (p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
+      id: p.id,
+      url: p.url,
+      alt: p.altRu || p.altEn || "",
+    }),
+  );
+  if (data.coverUrl && !gallery.some((p) => p.url === data.coverUrl)) {
+    gallery.unshift({ id: "cover", url: data.coverUrl, alt: name });
+  }
+  const advantages = points(data.advantagesRu || data.advantagesEn);
+  const features = points(data.featuresRu || data.featuresEn);
+  const specialties: { slug: string; nameRu?: string; nameEn: string }[] = data.specialties || [];
+  const doctors: ProfileDoctor[] = data.doctors || [];
+  const hoursLabel = allDay ? "Круглосуточно, без выходных" : hasSchedule ? `Сегодня: ${formatDayHours(schedule[today] ?? null)}` : null;
+  const stats = [
+    doctors.length ? { value: doctors.length, label: "специалистов" } : null,
+    specialties.length ? { value: specialties.length, label: "направлений" } : null,
+    data.services?.length ? { value: data.services.length, label: "услуг" } : null,
+    allDay ? { value: "24/7", label: "без выходных" } : null,
+  ].filter(Boolean) as { value: number | string; label: string }[];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_440px]">
-      <div className="min-w-0 space-y-8">
-        <div>
-          <Link to="/clinics/$slug" params={{ slug }} className="text-sm font-semibold text-muted">
-            {data.clinic?.nameRu || data.clinic?.nameEn || "Клиника"}
-          </Link>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            {data.clinic?.logoUrl ? (
-              <ClinicLogo
-                src={data.clinic.logoUrl}
-                name={data.clinic.nameRu || data.clinic.nameEn || ""}
-                className="h-14 rounded-2xl"
-                wide
-              />
-            ) : null}
-            <div>
-              <h1 className="text-4xl font-extrabold">{data.nameRu || data.nameEn}</h1>
-              <p className="mt-2 text-muted">{CITY_LABELS[data.city] || data.city}</p>
-            </div>
-            {Object.keys(schedule).length ? (
-              <span
-                className={`rounded-xl px-3 py-1 text-sm font-bold ${
-                  openNow ? "bg-mint text-primary" : "bg-sand text-muted"
-                }`}
-              >
-                {openNow ? "Сейчас открыто" : "Сейчас закрыто"}
+    <div className="space-y-12">
+      <nav className="flex min-w-0 items-center gap-2 text-sm font-semibold text-muted">
+        <Link to="/" className="shrink-0 hover:text-primary">
+          Каталог
+        </Link>
+        <span aria-hidden="true">/</span>
+        <Link to="/clinics/$slug" params={{ slug }} className="min-w-0 truncate hover:text-primary">
+          {clinicName}
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span className="hidden truncate text-ink sm:inline">{name}</span>
+      </nav>
+
+      <header className="clinic-hero">
+        <div className="clinic-hero-body">
+          <div className="flex items-center gap-4">
+            <ClinicLogo src={data.clinic?.logoUrl} name={clinicName} className="h-[72px] rounded-[20px] md:h-20" wide />
+            <div className="clinic-hero-eyebrow">
+              <span className="inline-flex items-center gap-1.5">
+                <Icon name="pin" size={15} />
+                {CITY_LABELS[data.city] || data.city}
               </span>
-            ) : null}
+              <span>филиал клиники</span>
+            </div>
           </div>
-          {data.coverUrl ? (
-            <FitImage src={data.coverUrl} className="mt-5 aspect-[16/9] w-full rounded-[22px]" loading="eager" />
-          ) : null}
-          {(data.descriptionRu || data.descriptionEn) && (
-            <p className="mt-6 max-w-3xl leading-relaxed text-muted">
-              {data.descriptionRu || data.descriptionEn}
-            </p>
-          )}
-        </div>
 
-        <section className="space-y-3">
-          <h2 className="text-2xl font-extrabold">Расположение</h2>
-          <p className="text-sm text-muted">{data.addressRu || data.addressEn}</p>
-          {hasCoords ? (
-            <>
-              <div className="min-w-0 overflow-hidden">
-                <BranchMap mode="view" lat={data.lat} lng={data.lng} className="w-full max-w-full" />
-              </div>
-              <p className="text-xs text-muted">
-                Координаты: {Number(data.lat).toFixed(6)}, {Number(data.lng).toFixed(6)}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <a
-                  className="btn btn-primary"
-                  href={yandexRouteUrl(Number(data.lat), Number(data.lng))}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Построить маршрут
-                </a>
-                <a
-                  className="inline-flex items-center text-sm font-bold text-primary"
-                  href={yandexPointUrl(Number(data.lat), Number(data.lng))}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Открыть в Яндекс.Картах
-                </a>
-              </div>
-            </>
-          ) : null}
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-2xl font-extrabold">Контакты</h2>
-          {phones.map((p) => (
-            <p key={p} className="text-sm">
-              <a href={`tel:${p.replace(/\s/g, "")}`} className="font-semibold text-primary hover:underline">
-                {p}
-              </a>
-            </p>
-          ))}
-          {data.email ? <a className="block text-sm text-primary hover:underline" href={`mailto:${data.email}`}>{data.email}</a> : null}
-          {data.whatsapp ? <a className="block text-sm text-primary hover:underline" href={`https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}`}>WhatsApp</a> : null}
-          {data.telegram ? <a className="block text-sm text-primary hover:underline" href={String(data.telegram).startsWith("http") ? data.telegram : `https://t.me/${String(data.telegram).replace(/^@/, "")}`} target="_blank" rel="noreferrer">Telegram</a> : null}
-          {data.instagram ? <a className="block text-sm text-primary hover:underline" href={String(data.instagram).startsWith("http") ? data.instagram : `https://instagram.com/${String(data.instagram).replace(/^@/, "")}`} target="_blank" rel="noreferrer">Instagram</a> : null}
-          {data.website ? <a className="block text-sm text-primary hover:underline" href={String(data.website).startsWith("http") ? data.website : `https://${data.website}`} target="_blank" rel="noreferrer">{data.website}</a> : null}
-          {data.socials?.map((social: { label: string; url: string }, index: number) => (
-            <p key={`${social.label}-${index}`} className="text-sm">
-              <a href={social.url} target="_blank" rel="noreferrer" className="font-semibold text-primary hover:underline">{social.label}</a>
-            </p>
-          ))}
-        </section>
-
-        {(data.advantagesRu || data.featuresRu || data.medicalTourism) ? (
-          <section className="space-y-3">
-            <h2 className="text-2xl font-extrabold">Особенности филиала</h2>
-            {data.advantagesRu ? <p className="whitespace-pre-line text-sm leading-relaxed text-muted">{data.advantagesRu}</p> : null}
-            {data.featuresRu ? <p className="whitespace-pre-line text-sm leading-relaxed text-muted">{data.featuresRu}</p> : null}
-            {data.medicalTourism && data.medicalTourismInfoRu ? (
-              <div>
-                <h3 className="font-bold">Медицинский туризм и международное сотрудничество</h3>
-                <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-muted">{data.medicalTourismInfoRu}</p>
+          <div className="space-y-4">
+            <h1>{name}</h1>
+            {hasSchedule ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`clinic-status ${openNow ? "is-open" : ""}`}>{openNow ? "Сейчас открыто" : "Сейчас закрыто"}</span>
+                {hoursLabel ? <span className="text-sm font-semibold text-muted">{hoursLabel}</span> : null}
               </div>
             ) : null}
-          </section>
-        ) : null}
+            {description ? <p className="clinic-hero-lead">{description}</p> : null}
+          </div>
 
-        {Object.keys(schedule).length ? (
-          <section className="space-y-2">
-            <h2 className="text-2xl font-extrabold">Режим работы</h2>
-            <ul className="space-y-1 text-sm">
-              {Object.entries(DAY_LABELS).map(([key, label]) => {
-                const day = schedule[key];
-                return (
-                  <li key={key} className="flex gap-3">
-                    <span className="w-8 font-bold">{label}</span>
-                    <span className="text-muted">{formatDayHours(day ?? null)}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ) : null}
-
-        {data.specialties?.length ? (
-          <section className="space-y-3">
-            <h2 className="text-2xl font-extrabold">Направления</h2>
+          {specialties.length ? (
             <div className="flex flex-wrap gap-2">
-              {data.specialties.map((s: { slug: string; nameRu?: string; nameEn: string }) => (
-                <span key={s.slug} className="chip">
+              {specialties.slice(0, 5).map((s) => (
+                <span key={s.slug} className="clinic-tag">
                   {s.nameRu || s.nameEn}
                 </span>
               ))}
+              {specialties.length > 5 ? (
+                <a href="#specialties" className="clinic-tag is-accent">
+                  +{specialties.length - 5}
+                </a>
+              ) : null}
             </div>
-          </section>
-        ) : null}
+          ) : null}
 
-        {data.services?.length ? (
-          <section className="space-y-3">
-            <h2 className="text-2xl font-extrabold">Услуги</h2>
-            <ul className="space-y-2">
-              {data.services.map(
-                (s: {
-                  id: string;
-                  nameRu?: string;
-                  nameEn: string;
-                  priceUsd?: number | null;
-                  currency?: string;
-                  unit?: string;
-                }) => {
-                  const price = formatServicePrice(s);
-                  return (
-                    <li
-                      key={s.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-line px-4 py-3 text-sm"
-                    >
-                      <span className="font-semibold">{s.nameRu || s.nameEn}</span>
-                      {price ? <span className="text-muted">{price}</span> : null}
-                    </li>
-                  );
-                },
-              )}
-            </ul>
-          </section>
-        ) : null}
+          {stats.length ? (
+            <div className="clinic-stats">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
 
-        {data.doctors?.length ? (
-          <section className="space-y-3">
-            <h2 className="text-2xl font-extrabold">Специалисты</h2>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {data.doctors.map(
-                (d: {
-                  id: string;
-                  nameRu?: string;
-                  nameEn: string;
-                  roleRu?: string;
-                  roleEn?: string;
-                  photoUrl?: string | null;
-                  experienceYears?: number | null;
-                  bioRu?: string;
-                  certsRu?: string;
-                  continuingEducationRu?: string;
-                  internationalExperienceRu?: string;
-                  researchActivityRu?: string;
-                  awardsRu?: string;
-                  achievementsRu?: string;
-                }) => (
-                  <li key={d.id} className="rounded-2xl border border-line p-4">
-                    <div className="flex gap-3">
-                      {d.photoUrl ? <img src={d.photoUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" /> : null}
-                      <div>
-                        <p className="font-bold">{d.nameRu || d.nameEn}</p>
-                        <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
-                        {d.experienceYears != null ? <p className="text-xs text-muted">Стаж: {d.experienceYears} лет</p> : null}
-                      </div>
-                    </div>
-                    {[d.bioRu, d.certsRu, d.continuingEducationRu, d.internationalExperienceRu, d.researchActivityRu, d.awardsRu, d.achievementsRu]
-                      .filter(Boolean)
-                      .map((detail, index) => <p key={index} className="mt-2 text-sm text-muted">{detail}</p>)}
-                  </li>
-                ),
-              )}
-            </ul>
-          </section>
-        ) : null}
+          <div className="clinic-hero-actions">
+            <a href="#lead" className="btn btn-primary">
+              Оставить заявку
+            </a>
+            {phones[0] ? (
+              <a href={`tel:${phones[0].replace(/[^\d+]/g, "")}`} className="btn btn-ghost">
+                <Icon name="phone" size={16} />
+                {phones[0]}
+              </a>
+            ) : null}
+          </div>
+        </div>
 
-        {data.equipment?.length ? (
-          <section className="space-y-3">
-            <h2 className="text-2xl font-extrabold">Оборудование</h2>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {data.equipment.map(
-                (e: {
-                  id: string;
-                  nameRu?: string;
-                  nameEn: string;
-                  descriptionRu?: string;
-                  descriptionEn?: string;
-                  photoUrl?: string | null;
-                }) => (
-                  <li key={e.id} className="rounded-2xl border border-line p-4">
-                    <div className="flex gap-3">
-                      {e.photoUrl ? (
-                        <img src={e.photoUrl} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
-                      ) : null}
+        {gallery.length ? (
+          <PhotoMosaic photos={gallery} />
+        ) : (
+          <div className="clinic-hero-facts">
+            <LogoTiles corner="br" seed={17} />
+            <p className="clinic-label text-accent">Как добраться</p>
+            {address ? (
+              <div className="clinic-hero-fact">
+                <Icon name="pin" />
+                <div>
+                  <p className="text-white/60">Адрес</p>
+                  <p>{address}</p>
+                </div>
+              </div>
+            ) : null}
+            {hoursLabel ? (
+              <div className="clinic-hero-fact">
+                <Icon name="clock" />
+                <div>
+                  <p className="text-white/60">Режим работы</p>
+                  <p>{hoursLabel}</p>
+                </div>
+              </div>
+            ) : null}
+            {phones.length ? (
+              <div className="clinic-hero-fact">
+                <Icon name="phone" />
+                <div>
+                  <p className="text-white/60">Телефон</p>
+                  {phones.slice(0, 2).map((phone) => (
+                    <a key={phone} href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="block hover:underline">
+                      {phone}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {mapsUrl ? (
+              <a href={hasCoords ? yandexRouteUrl(lat, lng) : mapsUrl} target="_blank" rel="noreferrer" className="btn btn-accent mt-auto self-start">
+                <Icon name="route" size={16} />
+                {hasCoords ? "Построить маршрут" : "Открыть на карте"}
+              </a>
+            ) : null}
+          </div>
+        )}
+      </header>
+
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_440px]">
+        <div className="min-w-0 space-y-14">
+          {advantages.length || features.length || (data.medicalTourism && data.medicalTourismInfoRu) ? (
+            <ProfileSection title="Особенности филиала">
+              <div className="grid gap-4 md:grid-cols-2">
+                {advantages.length ? (
+                  <div className="clinic-panel p-6">
+                    <p className="clinic-label">Преимущества</p>
+                    <ul className="mt-4 space-y-2.5">
+                      {advantages.map((item) => (
+                        <li key={item} className="flex gap-2.5 text-sm leading-relaxed text-ink">
+                          <span className="mt-0.5 shrink-0 text-accent-strong"><Icon name="check" size={16} /></span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {features.length ? (
+                  <div className="clinic-panel p-6">
+                    <p className="clinic-label">Что есть в филиале</p>
+                    <ul className="mt-4 space-y-2.5">
+                      {features.map((item) => (
+                        <li key={item} className="flex gap-2.5 text-sm leading-relaxed text-ink">
+                          <span className="mt-0.5 shrink-0 text-accent-strong"><Icon name="check" size={16} /></span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+              {data.medicalTourism && data.medicalTourismInfoRu ? (
+                <div className="rounded-[22px] bg-mint px-6 py-5">
+                  <p className="clinic-label">Медицинский туризм и международное сотрудничество</p>
+                  <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink">{data.medicalTourismInfoRu}</p>
+                </div>
+              ) : null}
+            </ProfileSection>
+          ) : null}
+
+          {specialties.length ? (
+            <ProfileSection id="specialties" title="Направления" count={specialties.length}>
+              <div className="clinic-panel flex flex-wrap gap-2 p-6">
+                {specialties.map((s) => (
+                  <span key={s.slug} className="clinic-tag">
+                    {s.nameRu || s.nameEn}
+                  </span>
+                ))}
+              </div>
+            </ProfileSection>
+          ) : null}
+
+          {doctors.length ? (
+            <ProfileSection id="doctors" title="Специалисты" count={doctors.length}>
+              <DoctorList doctors={doctors} />
+            </ProfileSection>
+          ) : null}
+
+          {data.services?.length ? (
+            <ProfileSection title="Услуги и цены" count={data.services.length}>
+              <ul className="clinic-panel divide-y divide-line overflow-hidden">
+                {data.services.map(
+                  (s: { id: string; nameRu?: string; nameEn: string; descriptionRu?: string; descriptionEn?: string; priceUsd?: number | null; currency?: string; unit?: string }) => {
+                    const price = formatServicePrice(s);
+                    return (
+                      <li key={s.id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-ink">{s.nameRu || s.nameEn}</p>
+                          {(s.descriptionRu || s.descriptionEn) && (
+                            <p className="mt-1 text-sm text-muted">{s.descriptionRu || s.descriptionEn}</p>
+                          )}
+                        </div>
+                        {price ? <p className="shrink-0 text-sm font-bold text-accent-strong">{price}</p> : null}
+                      </li>
+                    );
+                  },
+                )}
+              </ul>
+            </ProfileSection>
+          ) : null}
+
+          {data.equipment?.length ? (
+            <ProfileSection title="Оборудование">
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {data.equipment.map(
+                  (e: { id: string; nameRu?: string; nameEn: string; manufacturer?: string; descriptionRu?: string; descriptionEn?: string; photoUrl?: string | null }) => (
+                    <li key={e.id} className="clinic-panel flex gap-4 p-4">
+                      {e.photoUrl ? <FitImage src={e.photoUrl} className="h-20 w-20 shrink-0 rounded-xl" tolerance={0.2} /> : null}
                       <div className="min-w-0">
-                        <p className="font-bold">{e.nameRu || e.nameEn}</p>
+                        <p className="font-semibold text-ink">{e.nameRu || e.nameEn}</p>
+                        {e.manufacturer ? <p className="mt-1 clinic-label">{e.manufacturer}</p> : null}
                         {(e.descriptionRu || e.descriptionEn) && (
-                          <p className="mt-1 text-sm text-muted">{e.descriptionRu || e.descriptionEn}</p>
+                          <p className="mt-2 text-sm text-muted">{e.descriptionRu || e.descriptionEn}</p>
                         )}
                       </div>
-                    </div>
-                  </li>
-                ),
-              )}
-            </ul>
-          </section>
-        ) : null}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </ProfileSection>
+          ) : null}
 
-        {data.photos?.length ? (
-          <section className="space-y-3">
-            <h2 className="text-2xl font-extrabold">Фотографии</h2>
-            <PhotoCarousel
-              photos={data.photos.map((p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
-                id: p.id,
-                url: p.url,
-                alt: p.altRu || p.altEn || "",
-              }))}
-            />
-          </section>
-        ) : null}
+          {gallery.length > 3 ? (
+            <ProfileSection title="Фотографии" count={gallery.length}>
+              <PhotoCarousel photos={gallery} />
+            </ProfileSection>
+          ) : null}
+
+          {address || hasCoords ? (
+            <ProfileSection title="Расположение">
+              {hasCoords ? (
+                <div className="min-w-0 overflow-hidden rounded-[22px]">
+                  <BranchMap mode="view" lat={lat} lng={lng} className="w-full max-w-full" />
+                </div>
+              ) : null}
+              <div className="clinic-panel flex flex-wrap items-center justify-between gap-4 p-5">
+                <p className="flex min-w-0 items-start gap-3 text-sm text-ink">
+                  <span className="mt-0.5 shrink-0 text-primary"><Icon name="pin" /></span>
+                  {address || "Адрес уточняйте у координатора"}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {hasCoords ? (
+                    <a className="btn btn-primary text-sm" href={yandexRouteUrl(lat, lng)} target="_blank" rel="noreferrer">
+                      Построить маршрут
+                    </a>
+                  ) : null}
+                  {mapsUrl ? (
+                    <a className="btn btn-ghost text-sm" href={mapsUrl} target="_blank" rel="noreferrer">
+                      Открыть в Яндекс.Картах
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            </ProfileSection>
+          ) : null}
+        </div>
+
+        <aside className="min-w-0 space-y-4">
+          <ContactCard
+            logoUrl={data.clinic?.logoUrl}
+            name={name}
+            label="Контакты филиала"
+            phones={phones}
+            email={data.email}
+            website={data.website}
+            whatsapp={data.whatsapp}
+            telegram={data.telegram}
+            instagram={data.instagram}
+            socials={data.socials}
+          >
+            {hasSchedule ? (
+              <div className="border-t border-white/10 px-6 py-5">
+                <p className="text-xs font-semibold uppercase tracking-[.12em] text-white/60">Режим работы</p>
+                {allDay ? (
+                  <p className="mt-2 flex items-center gap-2 text-sm font-semibold">
+                    <span className="text-accent"><Icon name="clock" size={16} /></span>
+                    Круглосуточно, без выходных
+                  </p>
+                ) : (
+                  <ul className="mt-3 space-y-1.5 text-sm">
+                    {Object.entries(DAY_LABELS).map(([key, label]) => (
+                      <li key={key} className={`flex justify-between gap-4 ${key === today ? "font-semibold text-white" : "text-white/70"}`}>
+                        <span>{label}</span>
+                        <span>{formatDayHours(schedule[key] ?? null)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : null}
+          </ContactCard>
+          <div id="lead" className="scroll-mt-28">
+            <LeadForm clinicSlug={slug} clinicName={clinicName} defaultSymptoms={symptoms} />
+          </div>
+        </aside>
       </div>
-
-      <aside className="min-w-0 space-y-4">
-        <LeadForm
-          clinicSlug={slug}
-          clinicName={data.clinic?.nameRu || data.clinic?.nameEn || data.nameRu || data.nameEn}
-          defaultSymptoms={symptoms}
-        />
-      </aside>
     </div>
   );
 }

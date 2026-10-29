@@ -1184,3 +1184,15 @@ a.clinic-contact-row:hover { color: white; }
   select,
   textarea { font-size: 16px !important; }
 }
+
+/* Branch page: open/closed badge, and the "how to get there" panel that takes the photos' place when there are none. */
+.clinic-status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: var(--sand); color: var(--muted); font-size: 13px; font-weight: 600; }
+.clinic-status::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: currentColor; }
+.clinic-status.is-open { background: #57bf8c24; color: var(--accent-strong); }
+.clinic-status.is-open::before { box-shadow: 0 0 0 4px #57bf8c33; }
+.clinic-hero-facts { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; gap: 24px; min-height: 300px; margin: 8px; padding: 32px; border-radius: 20px; color: white;
+  background: radial-gradient(60% 70% at 100% 0%, #55b6e340, transparent 70%), radial-gradient(60% 70% at 0% 100%, #57bf8c33, transparent 70%), linear-gradient(135deg, #0b2a3d, #0f4a63); }
+.clinic-hero-fact { display: flex; gap: 14px; max-width: 460px; font-size: 18px; font-weight: 500; line-height: 1.45; letter-spacing: -.015em; }
+.clinic-hero-fact > svg { flex-shrink: 0; margin-top: 2px; color: var(--accent); }
+.clinic-hero-fact p:first-child { margin-bottom: 4px; font-size: 12px; font-weight: 600; letter-spacing: .04em; }
+@media (max-width: 767px) { .clinic-hero-facts { min-height: 0; padding: 24px; } }

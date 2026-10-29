@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { CITY_LABELS, fetchClinic } from "@/shared/api/client";
 import { formatServicePrice } from "@/shared/lib/format-price";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
-import { PhotoCarousel, PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
+import { PhotoCarousel, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { yandexRouteUrl } from "@/shared/lib/yandex-maps";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
+import { ContactCard, DoctorList, Icon, PhotoMosaic, ProfileSection, initials } from "@/widgets/clinic-profile/ClinicProfile";
 
 export const Route = createFileRoute("/clinics/$slug/")({
   component: ClinicDetailPage,
@@ -17,34 +17,6 @@ export const Route = createFileRoute("/clinics/$slug/")({
 function text(value?: string | null) {
   const v = value?.trim();
   return v || null;
-}
-
-interface SocialLink {
-  label: string;
-  url: string;
-}
-
-interface DedicatedContacts {
-  whatsapp?: string | null;
-  telegram?: string | null;
-  instagram?: string | null;
-  youtube?: string | null;
-}
-
-function extraSocials(socials: SocialLink[] | undefined, contacts: DedicatedContacts) {
-  const covered = new Set<string>();
-  if (contacts.whatsapp?.trim()) covered.add("whatsapp");
-  if (contacts.telegram?.trim()) covered.add("telegram");
-  if (contacts.instagram?.trim()) covered.add("instagram");
-  if (contacts.youtube?.trim()) covered.add("youtube");
-  const seen = new Set<string>();
-  return (socials ?? []).filter((item) => {
-    const label = item.label?.trim().toLowerCase();
-    const url = item.url?.trim();
-    if (!label || !url || covered.has(label) || seen.has(label)) return false;
-    seen.add(label);
-    return true;
-  });
 }
 
 function lines(value?: string | null) {
@@ -56,83 +28,10 @@ function lines(value?: string | null) {
     .filter(Boolean);
 }
 
-function socialHref(kind: "telegram" | "instagram" | "whatsapp", value: string) {
-  const v = value.trim();
-  if (/^https?:\/\//i.test(v)) return v;
-  const handle = v.replace(/^@/, "");
-  if (kind === "telegram") return `https://t.me/${handle}`;
-  if (kind === "instagram") return `https://instagram.com/${handle}`;
-  return `https://wa.me/${v.replace(/\D/g, "")}`;
-}
-
-/** "https://t.me/sinomed_uz" → "@sinomed_uz"; a phone or a handle stays as typed. */
-function socialLabel(value: string) {
-  const v = value.trim();
-  const path = v.match(/^https?:\/\/(?:www\.)?[^/]+\/([^/?#]+)/i)?.[1];
-  return path ? `@${path}` : v;
-}
-
-function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word.slice(0, 1).toUpperCase())
-    .join("");
-}
-
-const ICONS = {
-  phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2",
-  mail: "M4 6h16v12H4zM4 7l8 6 8-6",
-  globe: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3",
-  send: "M21 4 3 11l6 2.5M21 4l-4 16-8-6.5M21 4 9 13.5V19l3-3",
-  camera: "M4 8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M17 7h.01",
-  chat: "M4 20l1.4-4.2A8 8 0 1 1 8.4 18.7z",
-  play: "M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM10 9l5 3-5 3z",
-  link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
-  clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M12 7v5l3 2",
-  pin: "M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21ZM12 7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5",
-  photos: "M4 6h16v12H4zM4 15l4-4 4 4 3-3 5 5",
-} as const;
-
-function Icon({ name, size = 18 }: { name: keyof typeof ICONS; size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d={ICONS[name]} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function Section({
-  id,
-  title,
-  count,
-  children,
-}: {
-  id?: string;
-  title: string;
-  count?: number;
-  children: React.ReactNode;
-}) {
-  return (
-    <section id={id} className="min-w-0 scroll-mt-28 space-y-5">
-      <h2 className="clinic-section-title flex items-baseline gap-3">
-        {title}
-        {count ? <span className="text-base font-semibold text-muted">{count}</span> : null}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-const DOCTORS_PREVIEW = 6;
-
 function ClinicDetailPage() {
   const { slug } = Route.useParams();
   const symptoms =
     typeof window !== "undefined" ? sessionStorage.getItem("uma_last_symptoms") || "" : "";
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [allDoctors, setAllDoctors] = useState(false);
 
   const clinic = useQuery({
     queryKey: ["clinic", slug],
@@ -165,7 +64,6 @@ function ClinicDetailPage() {
   if (!gallery.length && data.branches?.[0]?.coverUrl) {
     gallery.push({ id: "branch-cover", url: data.branches[0].coverUrl, alt: name });
   }
-  const mosaic = gallery.slice(0, 3);
   const history = text(data.historyRu) || text(data.historyEn);
   const mission = text(data.missionRu) || text(data.missionEn);
   const advantagesRu = lines(data.advantagesRu);
@@ -199,7 +97,6 @@ function ClinicDetailPage() {
     ? data.cities.map((c: string) => CITY_LABELS[c] || c).join(", ")
     : cityLabel;
   const doctors = data.doctors || [];
-  const shownDoctors = allDoctors ? doctors : doctors.slice(0, DOCTORS_PREVIEW);
   const specialties: { slug: string; nameRu?: string; nameEn: string }[] = data.specialties || [];
   const phoneHref = data.phone ? `tel:${String(data.phone).replace(/\s/g, "")}` : null;
   const stats = [
@@ -276,37 +173,19 @@ function ClinicDetailPage() {
           </div>
         </div>
 
-        {mosaic.length ? (
-          <div className={`clinic-mosaic has-${mosaic.length}`}>
-            {mosaic.map((photo, index) => (
-              <button
-                key={photo.id}
-                type="button"
-                aria-label={`Открыть фото ${index + 1}`}
-                onClick={() => setLightboxIndex(index)}
-              >
-                <FitImage src={photo.url} alt={photo.alt} tolerance={0.2} loading={index === 0 ? "eager" : "lazy"} />
-                {index === mosaic.length - 1 && gallery.length > 1 ? (
-                  <span className="clinic-mosaic-all">
-                    <Icon name="photos" size={16} />
-                    Все фото · {gallery.length}
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </div>
+        {gallery.length ? (
+          <PhotoMosaic photos={gallery} />
         ) : (
           <div className="clinic-mosaic-empty" aria-hidden="true">
             <img src="/brand/logo.svg" alt="" width={72} height={72} />
           </div>
         )}
       </header>
-      <PhotoLightbox photos={gallery} index={lightboxIndex} onIndexChange={setLightboxIndex} />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_440px]">
         <div className="min-w-0 space-y-14">
           {description || history || mission || specialties.length ? (
-            <Section id="about" title="О клинике">
+            <ProfileSection id="about" title="О клинике">
               {description ? (
                 <p className="max-w-3xl text-base leading-relaxed text-muted md:text-[17px]">{description}</p>
               ) : null}
@@ -348,17 +227,17 @@ function ClinicDetailPage() {
                   ) : null}
                 </div>
               ) : null}
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {gallery.length > 3 ? (
-            <Section title="Фотографии" count={gallery.length}>
+            <ProfileSection title="Фотографии" count={gallery.length}>
               <PhotoCarousel photos={gallery} />
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {advantages.length ? (
-            <Section title="Преимущества">
+            <ProfileSection title="Преимущества">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {advantages.map((item) => (
                   <li key={item} className="clinic-panel flex gap-3 px-5 py-4 text-sm leading-relaxed text-ink">
@@ -367,25 +246,25 @@ function ClinicDetailPage() {
                   </li>
                 ))}
               </ul>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {why ? (
-            <Section title="Почему выбирают">
+            <ProfileSection title="Почему выбирают">
               <p className="max-w-3xl text-sm leading-relaxed text-muted md:text-base">{why}</p>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {(text(data.developmentPlansRu) || text(data.developmentPlansEn)) && (
-            <Section title="Планы развития">
+            <ProfileSection title="Планы развития">
               <p className="max-w-3xl text-sm leading-relaxed text-muted md:text-base">
                 {text(data.developmentPlansRu) || text(data.developmentPlansEn)}
               </p>
-            </Section>
+            </ProfileSection>
           )}
 
           {data.founderName ? (
-            <Section title="Основатель">
+            <ProfileSection title="Основатель">
               <div className="clinic-panel flex flex-wrap items-center gap-4 p-5">
                 <span className="clinic-avatar h-16 w-16 rounded-2xl text-lg">
                   {data.founderPhotoUrl ? <img src={data.founderPhotoUrl} alt="" /> : initials(data.founderName)}
@@ -398,11 +277,11 @@ function ClinicDetailPage() {
                   )}
                 </div>
               </div>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {Array.isArray(data.achievements) && data.achievements.length ? (
-            <Section title="Достижения">
+            <ProfileSection title="Достижения">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {data.achievements.map((a: { id?: string; titleRu?: string; titleEn?: string; descriptionRu?: string; descriptionEn?: string; year?: number | null }) => (
                   <li key={a.id || a.titleRu} className="clinic-panel p-5">
@@ -412,11 +291,11 @@ function ClinicDetailPage() {
                   </li>
                 ))}
               </ul>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {Array.isArray(data.technologies) && data.technologies.length ? (
-            <Section title="Технологии и методики">
+            <ProfileSection title="Технологии и методики">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {data.technologies.map(
                   (t: { id?: string; nameRu?: string; nameEn?: string; descriptionRu?: string; descriptionEn?: string }) => (
@@ -429,11 +308,11 @@ function ClinicDetailPage() {
                   ),
                 )}
               </ul>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {data.chiefDoctorName || (Array.isArray(data.leaders) && data.leaders.length) ? (
-            <Section title="Руководство">
+            <ProfileSection title="Руководство">
               {data.chiefDoctorName ? (
                 <div className="clinic-panel flex flex-wrap items-center gap-4 p-5">
                   <span className="clinic-avatar h-16 w-16 rounded-2xl text-lg">
@@ -476,72 +355,17 @@ function ClinicDetailPage() {
                   )}
                 </ul>
               ) : null}
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {doctors.length ? (
-            <Section id="doctors" title="Специалисты" count={doctors.length}>
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {shownDoctors.map(
-                  (d: {
-                    id: string;
-                    nameRu?: string;
-                    nameEn: string;
-                    roleRu?: string;
-                    roleEn?: string;
-                    bioRu?: string;
-                    bioEn?: string;
-                    photoUrl?: string | null;
-                    experienceYears?: number | null;
-                    category?: string;
-                    certsRu?: string;
-                    certsEn?: string;
-                    continuingEducationRu?: string;
-                    internationalExperienceRu?: string;
-                    researchActivityRu?: string;
-                    awardsRu?: string;
-                    achievementsRu?: string;
-                  }) => (
-                    <li key={d.id} className="clinic-panel flex gap-4 p-5">
-                      <span className="clinic-avatar h-14 w-14 rounded-2xl text-base">
-                        {d.photoUrl ? <img src={d.photoUrl} alt="" loading="lazy" /> : initials(d.nameRu || d.nameEn)}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold leading-snug text-ink">{d.nameRu || d.nameEn}</p>
-                        {(d.roleRu || d.roleEn) && (
-                          <p className="mt-1 text-sm leading-snug text-muted">{d.roleRu || d.roleEn}</p>
-                        )}
-                        {d.category || d.experienceYears != null ? (
-                          <div className="mt-2.5 flex flex-wrap gap-1.5">
-                            {d.experienceYears != null ? (
-                              <span className="clinic-tag is-accent">опыт {d.experienceYears} лет</span>
-                            ) : null}
-                            {d.category ? <span className="clinic-tag">категория: {d.category}</span> : null}
-                          </div>
-                        ) : null}
-                        {(d.bioRu || d.bioEn) && (
-                          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">{d.bioRu || d.bioEn}</p>
-                        )}
-                        {[d.certsRu || d.certsEn, d.continuingEducationRu, d.internationalExperienceRu, d.researchActivityRu, d.awardsRu, d.achievementsRu]
-                          .filter(Boolean)
-                          .map((detail, index) => (
-                            <p key={index} className="mt-2 text-sm text-muted">{detail}</p>
-                          ))}
-                      </div>
-                    </li>
-                  ),
-                )}
-              </ul>
-              {doctors.length > DOCTORS_PREVIEW ? (
-                <button type="button" className="btn btn-ghost w-full text-sm" onClick={() => setAllDoctors((v) => !v)}>
-                  {allDoctors ? "Свернуть" : `Показать всех специалистов · ${doctors.length}`}
-                </button>
-              ) : null}
-            </Section>
+            <ProfileSection id="doctors" title="Специалисты" count={doctors.length}>
+              <DoctorList doctors={doctors} />
+            </ProfileSection>
           ) : null}
 
           {data.services?.length ? (
-            <Section title="Услуги и цены">
+            <ProfileSection title="Услуги и цены">
               <ul className="clinic-panel divide-y divide-line overflow-hidden">
                 {data.services.map(
                   (s: {
@@ -579,11 +403,11 @@ function ClinicDetailPage() {
                   </ul>
                 </div>
               ) : null}
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {data.equipment?.length ? (
-            <Section title="Оборудование">
+            <ProfileSection title="Оборудование">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {data.equipment.map(
                   (e: {
@@ -608,11 +432,11 @@ function ClinicDetailPage() {
                   ),
                 )}
               </ul>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {data.certificates?.length ? (
-            <Section title="Сертификаты и лицензии">
+            <ProfileSection title="Сертификаты и лицензии">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {data.certificates.map(
                   (c: {
@@ -646,17 +470,17 @@ function ClinicDetailPage() {
                   ),
                 )}
               </ul>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {tourism ? (
-            <Section title="Медицинский туризм">
+            <ProfileSection title="Медицинский туризм">
               <p className="max-w-3xl text-sm leading-relaxed text-muted md:text-base">{tourism}</p>
-            </Section>
+            </ProfileSection>
           ) : null}
 
           {mapLocation ? (
-            <Section title="Расположение">
+            <ProfileSection title="Расположение">
               {(mapLocation.addressRu || mapLocation.addressEn) && (
                 <p className="flex items-start gap-2 text-sm text-muted">
                   <span className="mt-0.5 text-primary"><Icon name="pin" size={16} /></span>
@@ -685,10 +509,10 @@ function ClinicDetailPage() {
                   </Link>
                 ) : null}
               </div>
-            </Section>
+            </ProfileSection>
           ) : null}
 
-          <Section id="branches" title="Филиалы" count={data.branches?.length}>
+          <ProfileSection id="branches" title="Филиалы" count={data.branches?.length}>
             {(data.branches || []).length === 0 ? (
               <p className="text-sm text-muted">Филиалы не указаны</p>
             ) : (
@@ -748,74 +572,23 @@ function ClinicDetailPage() {
                 )}
               </div>
             )}
-          </Section>
+          </ProfileSection>
         </div>
 
         <aside className="min-w-0 space-y-4">
-          <div className="clinic-contact">
-            <div className="flex items-center gap-3 border-b border-white/10 p-6">
-              <ClinicLogo src={data.logoUrl} name={name} className="h-12 w-12 rounded-2xl" />
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[.12em] text-white/60">Контакты</p>
-                <p className="truncate font-semibold">{name}</p>
-              </div>
-            </div>
-            <div className="px-6 py-2">
-              {phoneHref ? (
-                <a href={phoneHref} className="clinic-contact-row">
-                  <Icon name="phone" />
-                  <span className="text-base font-semibold text-white">{data.phone}</span>
-                </a>
-              ) : null}
-              {data.email ? (
-                <a href={`mailto:${data.email}`} className="clinic-contact-row">
-                  <Icon name="mail" />
-                  <span>{data.email}</span>
-                </a>
-              ) : null}
-              {data.website ? (
-                <a href={data.website} target="_blank" rel="noreferrer" className="clinic-contact-row">
-                  <Icon name="globe" />
-                  <span>{data.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
-                </a>
-              ) : null}
-              {data.whatsapp ? (
-                <a href={socialHref("whatsapp", data.whatsapp)} target="_blank" rel="noreferrer" className="clinic-contact-row">
-                  <Icon name="chat" />
-                  <span>WhatsApp · {socialLabel(data.whatsapp)}</span>
-                </a>
-              ) : null}
-              {data.telegram ? (
-                <a href={socialHref("telegram", data.telegram)} target="_blank" rel="noreferrer" className="clinic-contact-row">
-                  <Icon name="send" />
-                  <span>Telegram · {socialLabel(data.telegram)}</span>
-                </a>
-              ) : null}
-              {data.instagram ? (
-                <a href={socialHref("instagram", data.instagram)} target="_blank" rel="noreferrer" className="clinic-contact-row">
-                  <Icon name="camera" />
-                  <span>Instagram · {socialLabel(data.instagram)}</span>
-                </a>
-              ) : null}
-              {data.youtube ? (
-                <a href={data.youtube} target="_blank" rel="noreferrer" className="clinic-contact-row">
-                  <Icon name="play" />
-                  <span>YouTube</span>
-                </a>
-              ) : null}
-              {extraSocials(data.socials, data).map((social) => (
-                <a key={social.url} href={social.url} target="_blank" rel="noreferrer" className="clinic-contact-row">
-                  <Icon name="link" />
-                  <span>{social.label}</span>
-                </a>
-              ))}
-              {data.responseHours ? (
-                <p className="clinic-contact-row">
-                  <Icon name="clock" />
-                  <span>Отвечают примерно за {data.responseHours} ч</span>
-                </p>
-              ) : null}
-            </div>
+          <ContactCard
+            logoUrl={data.logoUrl}
+            name={name}
+            phones={data.phone ? [data.phone] : []}
+            email={data.email}
+            website={data.website}
+            whatsapp={data.whatsapp}
+            telegram={data.telegram}
+            instagram={data.instagram}
+            youtube={data.youtube}
+            socials={data.socials}
+            responseHours={data.responseHours}
+          >
             {data.coordinatorName ? (
               <div className="border-t border-white/10 px-6 py-5">
                 <p className="text-xs font-semibold uppercase tracking-[.12em] text-white/60">Координатор</p>
@@ -823,7 +596,7 @@ function ClinicDetailPage() {
                 <p className="text-sm text-white/70">{data.coordinatorRoleRu || data.coordinatorRoleEn}</p>
               </div>
             ) : null}
-          </div>
+          </ContactCard>
           <div id="lead" className="scroll-mt-28">
             <LeadForm clinicSlug={data.slug} clinicName={name} defaultSymptoms={symptoms} />
           </div>
