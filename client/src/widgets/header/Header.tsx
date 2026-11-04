@@ -1,8 +1,22 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
-// Sections of the home page, in page order. None are linked from the nav for now.
-const SECTIONS: { id: string; label: string }[] = [];
+// Sections of the home page, in page order, linked from the nav.
+const SECTIONS: { id: string; label: string }[] = [
+  { id: "medtourism", label: "Медтуризм" },
+  { id: "team", label: "Команда" },
+  { id: "catalog", label: "Каталог клиник" },
+];
+
+/** On the home page a section link glides to its section and leaves the URL (and the catalog filters in it) alone.
+ *  Elsewhere the click goes through and the router opens the home page at that section. */
+function goToSection(event: MouseEvent<HTMLAnchorElement>, id: string) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  event.preventDefault();
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+}
 
 export function Header() {
   // On the home page the header is see-through over the hero film and turns white once the film is scrolled past.
@@ -83,15 +97,22 @@ export function Header() {
             <span>медицинских организаций</span>
           </span>
         </Link>
-        {SECTIONS.length ? (
-          <nav className="site-nav" aria-label="Разделы">
-            {SECTIONS.map((section) => (
-              <a key={section.id} href={`/#${section.id}`} className={active === section.id ? "is-active" : undefined}>
-                {section.label}
-              </a>
-            ))}
-          </nav>
-        ) : null}
+        <nav className="site-nav" aria-label="Разделы">
+          {SECTIONS.map((section) => (
+            <Link
+              key={section.id}
+              to="/"
+              hash={section.id}
+              className={active === section.id ? "is-active" : undefined}
+              onClick={(event) => goToSection(event, section.id)}
+            >
+              {section.label}
+            </Link>
+          ))}
+          <Link to="/checker" activeProps={{ className: "is-active" }}>
+            Подбор направления
+          </Link>
+        </nav>
         <div className="site-header-end">
           <Link to="/cabinet/login" className="site-header-action">
             Для клиник
@@ -117,19 +138,26 @@ export function Header() {
       <div className="site-menu-backdrop" hidden={!menuOpen} onClick={() => setMenuOpen(false)} />
       <nav id="site-menu" className="site-menu" aria-label="Разделы" hidden={!menuOpen}>
         {SECTIONS.map((section, i) => (
-          <a
+          <Link
             key={section.id}
-            href={`/#${section.id}`}
+            to="/"
+            hash={section.id}
             className={active === section.id ? "is-active" : undefined}
-            onClick={() => setMenuOpen(false)}
+            onClick={(event) => {
+              setMenuOpen(false);
+              goToSection(event, section.id);
+            }}
           >
             <span className="site-menu-index">{String(i + 1).padStart(2, "0")}</span>
             {section.label}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
+            <MenuArrow />
+          </Link>
         ))}
+        <Link to="/checker" activeProps={{ className: "is-active" }} onClick={() => setMenuOpen(false)}>
+          <span className="site-menu-index">{String(SECTIONS.length + 1).padStart(2, "0")}</span>
+          Подбор направления
+          <MenuArrow />
+        </Link>
         <Link to="/cabinet/login" className="site-menu-action" onClick={() => setMenuOpen(false)}>
           Для клиник
           <span aria-hidden="true">
@@ -140,5 +168,13 @@ export function Header() {
         </Link>
       </nav>
     </header>
+  );
+}
+
+function MenuArrow() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

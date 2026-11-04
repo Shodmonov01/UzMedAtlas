@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import { Reveal, RevealGroup, revealItem } from "@/shared/ui/Reveal";
 import { HeroBuild } from "@/widgets/hero-build/HeroBuild";
 import { MedTourism } from "@/widgets/med-tourism/MedTourism";
+import { Team } from "@/widgets/team/Team";
 import { LogoTiles } from "@/shared/ui/LogoTiles";
 
 export type CatalogSearch = {
@@ -187,6 +188,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     <section className="reference-home">
       <HeroBuild />
       <MedTourism />
+      <Team />
 
       <RevealGroup className="care-steps">
         <motion.a variants={revealItem} href="#catalog"><span className="care-step-number">01</span><span><strong>Найдите клинику</strong><small>По городу и направлению</small></span></motion.a>
