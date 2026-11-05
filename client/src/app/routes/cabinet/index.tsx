@@ -63,7 +63,7 @@ function CabinetHomePage() {
         </div>
       </div>
 
-      {clinics.isLoading ? <p className="text-muted">Загрузка…</p> : null}
+      {clinics.isLoading ? <p className="text-muted">Загрузка...</p> : null}
       {clinics.isError ? <p className="text-danger">Не удалось загрузить клиники</p> : null}
 
       <div className="grid gap-4 md:grid-cols-2">

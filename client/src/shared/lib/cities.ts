@@ -32,3 +32,29 @@ export function displayCity(input: string | null | undefined) {
   if (!input) return "";
   return CITY_OPTIONS.find(({ value }) => value === input)?.label || input;
 }
+
+/** City names for the public pages, in each site language (Uzbek in Latin script). */
+const CITY_NAMES: Record<string, { uz: string; en: string }> = {
+  tashkent: { uz: "Toshkent", en: "Tashkent" },
+  samarkand: { uz: "Samarqand", en: "Samarkand" },
+  bukhara: { uz: "Buxoro", en: "Bukhara" },
+  andijan: { uz: "Andijon", en: "Andijan" },
+  fergana: { uz: "Fargʻona", en: "Fergana" },
+  namangan: { uz: "Namangan", en: "Namangan" },
+  nukus: { uz: "Nukus", en: "Nukus" },
+  qarshi: { uz: "Qarshi", en: "Qarshi" },
+  termez: { uz: "Termiz", en: "Termez" },
+  urgench: { uz: "Urganch", en: "Urgench" },
+  jizzakh: { uz: "Jizzax", en: "Jizzakh" },
+  navoi: { uz: "Navoiy", en: "Navoi" },
+  kokand: { uz: "Qoʻqon", en: "Kokand" },
+  margilan: { uz: "Margʻilon", en: "Margilan" },
+  gulistan: { uz: "Guliston", en: "Gulistan" },
+};
+
+/** A city's name in the given site language (Russian is the stored label); unknown cities come back as they are. */
+export function cityName(lang: "ru" | "uz" | "en", input: string | null | undefined) {
+  if (!input) return "";
+  if (lang !== "ru" && CITY_NAMES[input]) return CITY_NAMES[input][lang];
+  return displayCity(input);
+}

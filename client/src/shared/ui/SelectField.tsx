@@ -81,7 +81,7 @@ export function SelectField({
         <ul
           role="listbox"
           aria-labelledby={id}
-          className="absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-auto rounded-[1.15rem] border border-line bg-white p-1.5 shadow-[0_18px_40px_-20px_rgba(31,41,55,0.45)]"
+          className="select-list absolute left-0 right-0 z-40 mt-2 max-h-72 overflow-auto rounded-[22px] bg-white p-1.5 shadow-[0_0_0_1px_var(--line),0_24px_48px_-24px_rgba(11,42,61,0.45)]"
         >
           {options.map((option) => {
             const active = option.value === value;
@@ -91,10 +91,8 @@ export function SelectField({
                   type="button"
                   role="option"
                   aria-selected={active}
-                  className={`flex w-full rounded-[0.85rem] px-3 py-2.5 text-left text-sm font-semibold transition ${
-                    active
-                      ? "bg-primary text-white"
-                      : "text-ink hover:bg-mint"
+                  className={`flex w-full rounded-full px-4 py-2.5 text-left text-sm font-semibold transition ${
+                    active ? "bg-ink text-white" : "text-ink hover:bg-paper"
                   }`}
                   onClick={() => {
                     onChange(option.value);

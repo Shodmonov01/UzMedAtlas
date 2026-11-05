@@ -1,22 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { catalogSearchSchema } from "@/shared/lib/catalog-search";
+import { glideTo } from "@/shared/lib/gsap";
 import { ClinicCatalog, type CatalogSearch } from "@/widgets/clinic-catalog/ClinicCatalog";
+import { HomeHero } from "@/widgets/home/HomeHero";
+import { Manifesto } from "@/widgets/home/Manifesto";
+import { CareJourney } from "@/widgets/home/CareJourney";
+import { TourismFilm } from "@/widgets/home/TourismFilm";
+import { Directions } from "@/widgets/home/Directions";
+import { FinalCta } from "@/widgets/home/FinalCta";
+import { Team } from "@/widgets/team/Team";
+import { Contacts } from "@/widgets/home/Contacts";
 
 export const Route = createFileRoute("/")({
   validateSearch: catalogSearchSchema,
   component: HomePage,
 });
 
+/** The home page tells the medical-tourism story top to bottom: the film, why Uzbekistan, how a trip for treatment
+ *  goes, treatment and rest, the directions, the clinic catalog, the team, an invitation to start and the contacts. */
 function HomePage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
+  // A new search glides to the results, clear of the fixed header (96px above their top).
   useEffect(() => {
-    if (search.specialty || search.q || search.city || search.service) {
-      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      document.getElementById("clinic-results")?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
-    }
+    if (search.specialty || search.q || search.city || search.service) glideTo("clinic-results", 96);
   }, [search.specialty, search.q, search.city, search.service]);
 
   function patchSearch(patch: Partial<CatalogSearch>) {
@@ -34,10 +43,16 @@ function HomePage() {
   }
 
   return (
-    <ClinicCatalog
-      search={search}
-      onPatchSearch={patchSearch}
-      onClearSearch={() => void navigate({ search: {}, resetScroll: false })}
-    />
+    <div className="home">
+      <HomeHero />
+      <Manifesto />
+      <CareJourney />
+      <TourismFilm />
+      <Directions onPick={(specialty) => patchSearch({ specialty })} />
+      <ClinicCatalog search={search} onPatchSearch={patchSearch} onClearSearch={() => void navigate({ search: {}, resetScroll: false })} />
+      <Team />
+      <FinalCta />
+      <Contacts />
+    </div>
   );
 }

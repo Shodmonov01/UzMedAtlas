@@ -4,7 +4,7 @@ One folder per home-page section, under `images/` and `videos/`:
 
 | Section | Images | Videos |
 | --- | --- | --- |
-| Hero | — | `videos/hero/` (1080p for desktop, portrait `hero-mobile.mp4` for phones) |
+| Hero | `images/hero/` (Khiva at sunset in two layers: `khiva-sky.webp`, and `khiva-city.webp`, the city cut out of the same photo with a transparent sky; the word UZBEKISTAN sits between them) | — |
 | Uzbekistan deck | `images/uzbekistan/` | — |
 | Mission | `images/mission/` | — |
 | Tourism film | — | `videos/tourism/` |
