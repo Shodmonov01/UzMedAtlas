@@ -8,7 +8,7 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { CITY_OPTIONS, cityName } from "@/shared/lib/cities";
 import { countWord, pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
-import { MOTION_OK, ScrollTrigger, gsap, useGSAP } from "@/shared/lib/gsap";
+import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
 
 export type CatalogSearch = {
   q?: string;
@@ -157,12 +157,14 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        gsap.from([".catalog-head > *", ".search-main", ".search-chips > *"], {
+        gsap.from([".catalog-head > *", ".search-main", ".search-chips > *", ".catalog-quick"], {
           y: 32,
           autoAlpha: 0,
           duration: 1.1,
           stagger: 0.06,
           ease: "expo.out",
+          // Leave no transform behind: a transformed chip would paint over the open dropdown of the chip before it.
+          clearProps: "transform",
           scrollTrigger: { trigger: root.current, start: "top 75%", once: true },
         });
       });
@@ -170,27 +172,20 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     { scope: root },
   );
 
-  // Tiles rise in, in batches as they reach the screen; a tile that has risen once is marked and left alone, so
-  // "show more" animates only the new ones. (The page below is measured again by the shared page-height observer in
-  // shared/lib/gsap, at a quiet moment, so it never interrupts an animation.)
+  // New tiles (a fresh result set, or the next page from "show more") rise in right away, one after another. Nothing
+  // waits for the scroll: hidden-until-scrolled tiles could stay hidden when the page shifts under their triggers
+  // (arriving from the Health Checker, the catalog loading late). A tile that has risen once is marked and left alone.
   useGSAP(
     () => {
       if (!clinics.data?.length) return;
+      const fresh = gsap.utils.toArray<HTMLElement>(".clinic-tile:not([data-shown])");
+      fresh.forEach((tile) => tile.setAttribute("data-shown", ""));
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        const fresh = ".clinic-tile:not([data-shown])";
-        gsap.set(fresh, { y: 48, autoAlpha: 0 });
-        ScrollTrigger.batch(fresh, {
-          start: "top 92%",
-          once: true,
-          onEnter: (batch) => {
-            batch.forEach((tile) => tile.setAttribute("data-shown", ""));
-            gsap.to(batch, { y: 0, autoAlpha: 1, duration: 1.1, stagger: 0.08, ease: "expo.out", overwrite: true });
-          },
-        });
+        gsap.from(fresh, { y: 32, autoAlpha: 0, duration: 0.9, stagger: 0.06, ease: "expo.out", clearProps: "transform,opacity,visibility" });
       });
     },
-    { scope: root, dependencies: [clinics.dataUpdatedAt, shown], revertOnUpdate: true },
+    { scope: root, dependencies: [clinics.dataUpdatedAt, shown] },
   );
 
   const advancedCount = countAdvanced(search);
@@ -280,15 +275,15 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           <div className="search-chips">
             <div className="search-chip">
               <span>{t({ ru: "Город", uz: "Shahar", en: "City" })}</span>
-              <SelectField value={search.city || ""} options={cityOptions} onChange={(value) => onPatchSearch({ city: value || undefined })} />
+              <SelectField title={t({ ru: "Город", uz: "Shahar", en: "City" })} value={search.city || ""} options={cityOptions} onChange={(value) => onPatchSearch({ city: value || undefined })} />
             </div>
             <div className="search-chip">
               <span>{t({ ru: "Направление", uz: "Yoʻnalish", en: "Specialty" })}</span>
-              <SelectField value={search.specialty || ""} options={specialtyOptions} onChange={(value) => onPatchSearch({ specialty: value || undefined })} />
+              <SelectField title={t({ ru: "Направление", uz: "Yoʻnalish", en: "Specialty" })} value={search.specialty || ""} options={specialtyOptions} onChange={(value) => onPatchSearch({ specialty: value || undefined })} />
             </div>
             <div className="search-chip">
               <span>{t({ ru: "Сортировка", uz: "Saralash", en: "Sort" })}</span>
-              <SelectField value={search.sort || "name"} options={inLang(lang, SORT_OPTIONS)} onChange={(value) => onPatchSearch({ sort: value === "name" ? undefined : value })} />
+              <SelectField title={t({ ru: "Сортировка", uz: "Saralash", en: "Sort" })} value={search.sort || "name"} options={inLang(lang, SORT_OPTIONS)} onChange={(value) => onPatchSearch({ sort: value === "name" ? undefined : value })} />
             </div>
             <button type="button" className="search-chip is-button" onClick={() => setModalOpen(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
