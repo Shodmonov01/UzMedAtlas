@@ -10,6 +10,8 @@ export type Specialty = {
   slug: string;
   nameEn: string;
   nameRu: string;
+  descriptionEn?: string;
+  descriptionRu?: string;
   explanationEn?: string;
   explanationRu?: string;
 };
