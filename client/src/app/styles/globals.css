@@ -915,3 +915,28 @@ a.clinic-contact-row:hover { color: white; }
 .clinic-hero-fact > svg { flex-shrink: 0; margin-top: 2px; color: var(--accent); }
 .clinic-hero-fact p:first-child { margin-bottom: 4px; font-size: 12px; font-weight: 600; letter-spacing: .04em; }
 @media (max-width: 767px) { .clinic-hero-facts { min-height: 0; padding: 24px; } }
+
+/* SelectField options. Wider screens: a white card under the field. Phones: a sheet from the bottom over a dimmed page
+   (solid dim, no blur). Rows are rounded; the picked one sits on paper with a green check. An open field is lifted
+   above its neighbours so its card never slides under the next field. */
+.select-field.is-open { z-index: 60; }
+.select-card { position: absolute; top: calc(100% + 8px); left: 0; z-index: 60; min-width: max(100%, 240px); max-width: min(360px, calc(100vw - 32px)); padding: 6px; border-radius: 20px; background: white;
+  box-shadow: 0 0 0 1px #0b2a3d14, 0 28px 56px -24px #0b2a3d66; animation: select-in .22s var(--ease-out, ease-out); }
+.select-options { display: grid; gap: 2px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; }
+.select-options button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 13px; color: var(--ink); font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; transition: background-color .2s ease; }
+.select-options button:hover { background: var(--paper); }
+.select-options button.is-active { background: var(--paper); }
+.select-check { flex-shrink: 0; color: var(--accent-deep); opacity: 0; }
+.select-options button.is-active .select-check { opacity: 1; }
+.select-backdrop { position: fixed; inset: 0; z-index: 90; background: #0b2a3d73; animation: select-fade .25s ease-out; }
+.select-sheet { position: fixed; inset: auto 0 0; z-index: 91; display: flex; flex-direction: column; max-height: 78svh; padding: 8px 12px max(16px, env(safe-area-inset-bottom)); border-radius: 28px 28px 0 0; background: white;
+  box-shadow: 0 -20px 50px -20px #0b2a3d66; animation: select-sheet-in .35s var(--ease-out, ease-out); }
+.select-sheet-handle { align-self: center; width: 40px; height: 5px; margin-bottom: 6px; border-radius: 999px; background: var(--line); }
+.select-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 6px 10px; }
+.select-sheet-head > p { color: var(--ink); font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+.select-sheet-close { display: grid; flex-shrink: 0; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--paper); color: var(--ink); cursor: pointer; }
+.select-sheet .select-options { max-height: none; overflow-y: auto; }
+.select-sheet .select-options button { min-height: 52px; padding: 12px 14px; font-size: 16px; }
+@keyframes select-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes select-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes select-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
