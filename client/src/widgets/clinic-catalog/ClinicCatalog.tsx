@@ -8,7 +8,6 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { CITY_OPTIONS, cityName } from "@/shared/lib/cities";
 import { countWord, pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
-import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
 
 export type CatalogSearch = {
   q?: string;
@@ -125,9 +124,12 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     setQ(search.q || "");
   }, [search.q]);
 
+  // Back to the first page only when the search itself changes. Not on every refetch (react-query refetches when the
+  // window regains focus), or the list would collapse back to one page under the reader.
+  const searchKey = JSON.stringify(search);
   useEffect(() => {
     setShown(PAGE);
-  }, [clinics.dataUpdatedAt]);
+  }, [searchKey]);
 
   useEffect(() => {
     if (modalOpen) setDraft(search);
@@ -153,40 +155,8 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
     };
   }, [modalOpen]);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.from([".catalog-head > *", ".search-main", ".search-chips > *", ".catalog-quick"], {
-          y: 32,
-          autoAlpha: 0,
-          duration: 1.1,
-          stagger: 0.06,
-          ease: "expo.out",
-          // Leave no transform behind: a transformed chip would paint over the open dropdown of the chip before it.
-          clearProps: "transform",
-          scrollTrigger: { trigger: root.current, start: "top 75%", once: true },
-        });
-      });
-    },
-    { scope: root },
-  );
-
-  // New tiles (a fresh result set, or the next page from "show more") rise in right away, one after another. Nothing
-  // waits for the scroll: hidden-until-scrolled tiles could stay hidden when the page shifts under their triggers
-  // (arriving from the Health Checker, the catalog loading late). A tile that has risen once is marked and left alone.
-  useGSAP(
-    () => {
-      if (!clinics.data?.length) return;
-      const fresh = gsap.utils.toArray<HTMLElement>(".clinic-tile:not([data-shown])");
-      fresh.forEach((tile) => tile.setAttribute("data-shown", ""));
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.from(fresh, { y: 32, autoAlpha: 0, duration: 0.9, stagger: 0.06, ease: "expo.out", clearProps: "transform,opacity,visibility" });
-      });
-    },
-    { scope: root, dependencies: [clinics.dataUpdatedAt, shown] },
-  );
+  // No entrance animation here: the catalog and its tiles are simply there (animations tied to the scroll could leave
+  // tiles hidden when the page shifted, so they were removed).
 
   const advancedCount = countAdvanced(search);
   const specialtyOptions = [
