@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "./home.css";
+@import "./workspace.css";
+@import "./clinic-page.css";
 
 /*
   Semantic tokens for UzMedAtlas.
@@ -112,9 +114,15 @@ h3,
 }
 
 .card-shadow,
-.textarea-shadow,
-.soft-card {
+.textarea-shadow {
   box-shadow: 0 10px 30px -22px rgba(11, 42, 61, 0.22);
+}
+
+/* A white card like the home page's tiles: a hairline ring and a long soft shadow, 24px corners. */
+.soft-card {
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 0 0 1px #0b2a3d0f, 0 24px 48px -36px #0b2a3d59;
 }
 
 
@@ -394,9 +402,6 @@ h3,
 
 /* Motion uses transforms and opacity so it does not move the page layout. */
 .reveal-pending { opacity: 0; }
-.btn { transition: transform .22s ease, background-color .22s ease, box-shadow .22s ease; }
-.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -12px #0b2a3d55; }
-.btn:active { transform: translateY(0) scale(.97); }
 
 
 /* In-page links glide on inner pages. The home page scrolls without it: its pinned sections are measured by
@@ -408,7 +413,7 @@ h3,
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal-pending { opacity: 1; }
-  .btn:is(:hover, :active), .clinic-card:is(:hover, :focus-within) { transform: none; }
+  .clinic-card:is(:hover, :focus-within) { transform: none; }
 }
 
 @media (max-width: 767px) {
@@ -456,123 +461,100 @@ h3,
   .tourism-kinds > * { font-size: 15px; }
 }
 
-
-.clinic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.clinic-grid-item { display: flex; }
-.clinic-grid-item > .clinic-card { flex: 1; }
-.clinic-card { display: flex; flex-direction: column; overflow: hidden; border-radius: 24px; background: white; color: inherit; box-shadow: inset 0 0 0 1px var(--line);
-  transition: transform .3s ease, box-shadow .3s ease; }
-.clinic-card:is(:hover, :focus-within) { transform: translateY(-6px); box-shadow: inset 0 0 0 1px var(--line), 0 28px 50px -30px #0b2a3d66; }
-.clinic-card-cover { position: relative; aspect-ratio: 16 / 10; margin: 8px 8px 0; overflow: hidden; border-radius: 18px; background: var(--ink); }
-.clinic-card-cover > .clinic-card-photo { position: absolute; inset: 0; transition: transform .6s ease; }
-.clinic-card:hover .clinic-card-photo { transform: scale(1.05); }
-/* No photo yet: the logo on the brand gradient. */
-.clinic-card-placeholder { position: absolute; inset: 0; display: grid; place-items: center;
-  background: radial-gradient(60% 80% at 80% 10%, #55b6e366, transparent 70%), radial-gradient(60% 80% at 10% 100%, #57bf8c59, transparent 70%), linear-gradient(135deg, #0b2a3d, #0f4a63); }
-.clinic-card-placeholder > img { width: 64px; height: 64px; opacity: .95; transition: transform .6s ease; }
-.clinic-card:hover .clinic-card-placeholder > img { transform: scale(1.08) rotate(-6deg); }
-.clinic-card-city { position: absolute; top: 12px; left: 12px; padding: 6px 12px; border-radius: 999px; background: white; color: var(--ink); font-size: 12px; font-weight: 600; }
-.clinic-card-logo { position: absolute; bottom: 12px; left: 12px; height: 52px; border-radius: 14px; box-shadow: 0 0 0 2px white, 0 10px 24px -12px #0b2a3d99; }
-.clinic-card-body { display: flex; flex: 1; flex-direction: column; gap: 10px; padding: 20px 22px 22px; }
-.clinic-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.clinic-card-head h3 { color: var(--ink); font-size: 20px; font-weight: 600; line-height: 1.2; letter-spacing: -.025em; }
-.clinic-card-reply { flex-shrink: 0; padding: 4px 10px; border-radius: 999px; background: #57bf8c1f; color: var(--accent-strong); font-size: 12px; font-weight: 600; }
-.clinic-card-meta { color: var(--muted); font-size: 13px; font-weight: 500; }
-.clinic-card-address { display: flex; align-items: flex-start; gap: 6px; color: var(--muted); font-size: 14px; line-height: 1.45; }
-.clinic-card-address svg { flex-shrink: 0; margin-top: 2px; color: var(--primary); }
-.clinic-card-text { display: -webkit-box; overflow: hidden; color: var(--muted); font-size: 14px; line-height: 1.6; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.clinic-card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.clinic-card-tags > span { padding: 5px 11px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 12px; font-weight: 500; }
-.clinic-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
-.clinic-card-langs { display: flex; gap: 4px; }
-.clinic-card-langs > span { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.clinic-card-langs > span + span::before { content: "·"; margin-right: 4px; }
-.clinic-card-more { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 13px; font-weight: 600; }
-.clinic-card-more > span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); transition: background .25s ease, color .25s ease, transform .25s ease; }
-.clinic-card:hover .clinic-card-more > span { background: var(--brand-gradient); box-shadow: none; color: white; transform: rotate(-45deg); }
-
-@media (max-width: 1100px) {
-  .clinic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 767px) {
-  .clinic-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-}
-
-.clinic-cover-fallback {
-  background:
-    radial-gradient(circle at 76% 20%, rgba(255,255,255,.65) 0 7%, transparent 7.5%),
-    radial-gradient(circle at 80% 29%, rgba(255,255,255,.22) 0 23%, transparent 23.5%),
-    linear-gradient(135deg, var(--primary-deep), var(--brand-blue) 62%, var(--brand-sky));
-}
-
+/* Buttons are pills, as everywhere on the site: ink for the main action, white with a hairline for the rest.
+   Hover only changes the fill; a press shrinks the pill a hair. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
   border-radius: 999px;
-  font-weight: 700;
-  transition: 0.15s ease;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-align: center;
   cursor: pointer;
+  transition: background-color .25s ease, color .25s ease, box-shadow .25s ease, scale .2s ease;
 }
+.btn:active:not(:disabled) { scale: .97; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
-.btn-primary {
-  background: var(--primary);
-  color: #fff;
-  padding: 0.85rem 1.35rem;
-}
+.btn-primary { background: var(--ink); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #134058; }
 
-.btn-primary:hover {
-  background: var(--primary-hover);
-}
+.btn-ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.btn-ghost:hover:not(:disabled) { background: var(--paper); box-shadow: inset 0 0 0 1px #b9d3dc; }
 
-.btn-ghost {
-  background: var(--surface);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  padding: 0.85rem 1.35rem;
-}
+.btn-clay { background: var(--primary-deep); color: #fff; }
+.btn-clay:hover:not(:disabled) { background: #134058; }
 
-.btn-ghost:hover {
-  background: var(--mint);
-}
+/* Destructive actions: a quiet outline pill that only turns red under the pointer. */
+.btn.is-danger { color: var(--danger); }
+.btn-ghost.is-danger:hover:not(:disabled) { background: var(--danger-soft); box-shadow: inset 0 0 0 1px #fa525259; }
 
-.btn-clay {
-  background: var(--primary-deep);
-  color: #fff;
-  padding: 0.85rem 1.35rem;
-}
-
-.btn-clay:hover {
-  background: var(--primary-hover);
-}
-
+/* Text fields: paper with a hairline ring, white with a blue ring and halo while typing (as in the catalog filters). */
 .field {
   width: 100%;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  border-radius: 1rem;
-  padding: 0.75rem 0.95rem;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 16px;
   outline: none;
+  background-color: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--line);
   font: inherit;
+  font-size: 15px;
   font-weight: 500;
+  line-height: 1.45;
   color: var(--ink);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color .2s ease, box-shadow .2s ease;
 }
+:where(input, select, button).field { height: 50px; padding-block: 0; }
+textarea.field { line-height: 1.6; resize: vertical; }
+.field::placeholder { color: #8ba1ad; opacity: 1; }
+.field:hover:not(:disabled):not(:focus) { box-shadow: inset 0 0 0 1px #b9d3dc; }
+.field:disabled, .field[readonly] { cursor: not-allowed; opacity: .65; }
+.field[readonly] { cursor: text; opacity: 1; }
+input[type="color"].field { width: 72px; padding: 5px; cursor: pointer; }
+input[type="color"].field::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"].field::-webkit-color-swatch { border: 0; border-radius: 11px; }
+input[type="number"].field { appearance: textfield; -moz-appearance: textfield; }
+input[type="number"].field::-webkit-outer-spin-button, input[type="number"].field::-webkit-inner-spin-button { margin: 0; -webkit-appearance: none; }
 
 button.field {
   cursor: pointer;
   text-align: left;
 }
 
+/* Checkboxes and radios drawn in the site's colours: a rounded square (or a ring) that fills with ink and a white check.
+   Zero specificity, so any component that draws its own control (the catalog's switch) keeps it. */
+:where(input[type="checkbox"], input[type="radio"]) {
+  flex-shrink: 0; width: 20px; height: 20px; margin: 0; vertical-align: middle;
+  border-radius: 6px; background: white no-repeat center / 14px; box-shadow: inset 0 0 0 1.5px #a9c2cc;
+  appearance: none; -webkit-appearance: none; cursor: pointer; transition: background-color .2s ease, box-shadow .2s ease;
+}
+:where(input[type="radio"]) { border-radius: 999px; }
+:where(input[type="checkbox"]):where(:checked) {
+  background-color: var(--ink); box-shadow: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+:where(input[type="radio"]):where(:checked) { background-color: white; box-shadow: inset 0 0 0 6px var(--ink); }
+:where(input[type="checkbox"], input[type="radio"]):where(:hover:not(:disabled):not(:checked)) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+:where(input[type="checkbox"], input[type="radio"]):where(:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+:where(input[type="checkbox"], input[type="radio"]):where(:disabled) { cursor: not-allowed; opacity: .5; }
+
 /* File pickers read as a drop area with a clear button instead of the browser's bare control. */
 input[type="file"]:not(.hidden) {
   width: 100%;
-  min-height: 56px;
+  min-height: 60px;
   padding: 8px;
   border: 1.5px dashed #0187c566;
-  border-radius: 1rem;
+  border-radius: 18px;
   background: #0187c50a;
+  box-shadow: none;
   color: var(--muted);
   font: inherit;
   font-size: 13px;
@@ -591,8 +573,9 @@ input[type="file"]:not(.hidden):disabled {
 }
 
 input[type="file"]::file-selector-button {
+  height: 40px;
   margin-right: 14px;
-  padding: 10px 18px;
+  padding: 0 18px;
   border: 0;
   border-radius: 999px;
   background: var(--ink);
@@ -605,16 +588,18 @@ input[type="file"]::file-selector-button {
 
 .field:focus,
 .field:focus-visible {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(11, 42, 61, 0.12);
+  outline: none;
+  background-color: white;
+  box-shadow: inset 0 0 0 1.5px var(--primary), 0 0 0 4px #0187c51f;
 }
 
 select.field {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%235c7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.9rem center;
-  padding-right: 2.4rem;
+  background-position: right 16px center;
+  padding-right: 44px;
+  cursor: pointer;
 }
 
 .chip {
@@ -847,55 +832,6 @@ select.field {
 .clinic-logo.is-portrait > img { width: 66%; height: 84%; }
 .clinic-logo.is-empty { background: var(--brand-gradient); box-shadow: none; color: white; font-weight: 700; font-size: 1.4em; }
 
-/* Clinic page */
-.clinic-hero { display: grid; overflow: hidden; border-radius: 28px; background: white; box-shadow: inset 0 0 0 1px var(--line), 0 30px 60px -44px #0b2a3d59; }
-@media (min-width: 1024px) { .clinic-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); } }
-.clinic-hero-body { position: relative; display: flex; flex-direction: column; gap: 22px; padding: 28px; isolation: isolate; }
-@media (min-width: 768px) { .clinic-hero-body { padding: 40px; } }
-.clinic-hero-body::before { content: ""; position: absolute; inset: 0; z-index: -1;
-  background: radial-gradient(70% 60% at 0% 0%, #55b6e31f, transparent 70%), radial-gradient(60% 50% at 100% 100%, #57bf8c1a, transparent 70%); }
-.clinic-hero-eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
-.clinic-hero-eyebrow > span + span::before { content: "·"; margin-right: 8px; color: var(--line); }
-.clinic-hero h1 { color: var(--ink); font-size: clamp(30px, 3.4vw, 46px); font-weight: 600; line-height: 1.06; letter-spacing: -.04em; }
-.clinic-hero-lead { display: -webkit-box; overflow: hidden; color: var(--muted); font-size: 16px; line-height: 1.65; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-.clinic-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
-.clinic-stats > div { padding: 14px 16px; border-radius: 18px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
-.clinic-stats strong { display: block; color: var(--ink); font-size: 22px; font-weight: 700; letter-spacing: -.03em; }
-.clinic-stats span { color: var(--muted); font-size: 12px; font-weight: 600; }
-.clinic-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; }
-
-.clinic-mosaic { display: grid; gap: 8px; min-height: 340px; padding: 8px; }
-.clinic-mosaic.has-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1.65fr 1fr; }
-.clinic-mosaic.has-3 > :first-child { grid-column: span 2; }
-.clinic-mosaic.has-2 { grid-template-rows: 1.4fr 1fr; }
-.clinic-mosaic > button { position: relative; min-height: 0; overflow: hidden; border-radius: 20px; cursor: zoom-in; }
-.clinic-mosaic > button .fit-image { position: absolute; inset: 0; transition: transform .6s ease; }
-.clinic-mosaic > button:hover .fit-image { transform: scale(1.03); }
-.clinic-mosaic-all { position: absolute; right: 14px; bottom: 14px; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px;
-  background: white; color: var(--ink); font-size: 13px; font-weight: 600; box-shadow: 0 10px 24px -12px #0b2a3d80; }
-.clinic-mosaic-empty { display: grid; place-items: center; min-height: 300px; margin: 8px; border-radius: 20px;
-  background: radial-gradient(60% 80% at 80% 10%, #55b6e366, transparent 70%), radial-gradient(60% 80% at 10% 100%, #57bf8c59, transparent 70%), linear-gradient(135deg, #0b2a3d, #0f4a63); }
-@media (max-width: 1023px) {
-  .clinic-mosaic, .clinic-mosaic.has-2, .clinic-mosaic.has-3 { min-height: 0; grid-template-rows: none; }
-  .clinic-mosaic > button { aspect-ratio: 3 / 2; }
-  .clinic-mosaic > button:first-child { aspect-ratio: 16 / 10; }
-}
-
-.clinic-section-title { color: var(--ink); font-size: clamp(22px, 2vw, 28px); font-weight: 600; letter-spacing: -.035em; }
-.clinic-panel { border-radius: 22px; background: white; box-shadow: inset 0 0 0 1px var(--line); }
-.clinic-label { color: var(--accent-deep); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.clinic-avatar { display: grid; flex-shrink: 0; place-items: center; overflow: hidden; background: var(--brand-gradient); color: white; font-weight: 700; }
-.clinic-avatar > img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
-.clinic-tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 12px; font-weight: 600; }
-.clinic-tag.is-accent { background: #57bf8c1f; box-shadow: none; color: var(--accent-strong); }
-
-.clinic-contact { overflow: hidden; border-radius: 24px; background: var(--ink); color: white; }
-.clinic-contact-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #ffffff1a; color: #ffffffd9; font-size: 14px; font-weight: 500; transition: color .2s ease; }
-.clinic-contact-row:first-child { border-top: 0; }
-a.clinic-contact-row:hover { color: white; }
-.clinic-contact-row > svg { flex-shrink: 0; color: var(--accent); }
-.clinic-contact-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
 /* Phones and tablets zoom the page in when a focused field's text is under 16px; keep every typed-in field at 16px there,
    whatever text size it inherits from its label (pinch-zoom stays available). */
 @media (pointer: coarse) {
@@ -903,18 +839,6 @@ a.clinic-contact-row:hover { color: white; }
   select,
   textarea { font-size: 16px !important; }
 }
-
-/* Branch page: open/closed badge, and the "how to get there" panel that takes the photos' place when there are none. */
-.clinic-status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: var(--sand); color: var(--muted); font-size: 13px; font-weight: 600; }
-.clinic-status::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: currentColor; }
-.clinic-status.is-open { background: #57bf8c24; color: var(--accent-strong); }
-.clinic-status.is-open::before { box-shadow: 0 0 0 4px #57bf8c33; }
-.clinic-hero-facts { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; gap: 24px; min-height: 300px; margin: 8px; padding: 32px; border-radius: 20px; color: white;
-  background: radial-gradient(60% 70% at 100% 0%, #55b6e340, transparent 70%), radial-gradient(60% 70% at 0% 100%, #57bf8c33, transparent 70%), linear-gradient(135deg, #0b2a3d, #0f4a63); }
-.clinic-hero-fact { display: flex; gap: 14px; max-width: 460px; font-size: 18px; font-weight: 500; line-height: 1.45; letter-spacing: -.015em; }
-.clinic-hero-fact > svg { flex-shrink: 0; margin-top: 2px; color: var(--accent); }
-.clinic-hero-fact p:first-child { margin-bottom: 4px; font-size: 12px; font-weight: 600; letter-spacing: .04em; }
-@media (max-width: 767px) { .clinic-hero-facts { min-height: 0; padding: 24px; } }
 
 /* SelectField options. Wider screens: a white card under the field. Phones: a sheet from the bottom over a dimmed page
    (solid dim, no blur). Rows are rounded; the picked one sits on paper with a green check. An open field is lifted

@@ -7,6 +7,9 @@ import {
   fetchCabinetBranches,
   fetchCabinetClinic,
 } from "@/shared/api/cabinet";
+import { CITY_LABELS } from "@/shared/api/client";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
+import { BackMark, PageHead, WsIcon, WsLoading, WsNote } from "@/widgets/workspace/Workspace";
 
 export const Route = createFileRoute("/cabinet/clinics/$id/branches/")({
   component: BranchesListPage,
@@ -31,83 +34,105 @@ function BranchesListPage() {
     if (auth.isError || auth.data === false) void navigate({ to: "/cabinet/login" });
   }, [auth.data, auth.isError, navigate]);
 
-  if (!auth.data || clinic.isLoading) return <p className="text-muted">Загрузка…</p>;
-  if (!clinic.data) return <p className="text-danger">Клиника не найдена</p>;
+  if (!auth.data || clinic.isLoading) return <WsLoading />;
+  if (!clinic.data) return <WsNote tone="danger" title="Клиника не найдена" />;
 
   const locked = clinic.data.status === "moderation";
+  const list = (branches.data || []).filter(Boolean);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <Link to="/cabinet/clinics/$id" params={{ id }} className="text-sm font-bold text-primary">
+    <div className="ws-stack">
+      <PageHead
+        back={
+          <Link to="/cabinet/clinics/$id" params={{ id }} className="ws-back">
+            <BackMark />
             {clinic.data.nameRu || clinic.data.nameEn}
           </Link>
-          <h1 className="mt-2 text-3xl font-extrabold">Филиалы</h1>
-          <p className="mt-1 text-sm text-muted">
-            Для модерации нужен хотя бы один филиал с адресом и телефоном.
-          </p>
+        }
+        eyebrow="Филиалы"
+        title="Филиалы клиники"
+        lead="Для модерации нужен хотя бы один филиал с адресом и телефоном. У каждого филиала своя страница в каталоге."
+        actions={
+          !locked ? (
+            <Link to="/cabinet/clinics/$id/branches/new" params={{ id }} className="pill-btn is-ink">
+              Добавить филиал
+              <span className="pill-btn-icon">
+                <WsIcon name="plus" size={18} />
+              </span>
+            </Link>
+          ) : undefined
+        }
+      />
+
+      {branches.isLoading ? <WsLoading label="Загружаем филиалы…" inline /> : null}
+      {branches.isError ? <WsNote tone="danger" title="Не удалось загрузить список филиалов" /> : null}
+
+      {list.length ? (
+        <div className="ws-rows">
+          {list.map((branch) => (
+            <article key={branch!.id} className="ws-row">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paper text-ink">
+                <WsIcon name="pin" size={20} />
+              </span>
+              <div className="ws-row-main">
+                <h2 className="ws-row-title">
+                  <Link
+                    to="/cabinet/clinics/$id/branches/$branchId"
+                    params={{ id, branchId: branch!.id }}
+                    search={{ section: undefined }}
+                    className="ws-row-link"
+                  >
+                    {branch!.nameRu || branch!.nameEn}
+                  </Link>
+                </h2>
+                <p className="ws-row-meta">
+                  <span>{CITY_LABELS[branch!.city] || branch!.city}</span>
+                  {branch!.phone ? <span>{branch!.phone}</span> : null}
+                  <span>Врачей: {branch!.doctorCount ?? 0}</span>
+                  <span>Услуг: {branch!.serviceCount ?? 0}</span>
+                </p>
+              </div>
+              <div className="ws-row-end">
+                {!locked ? (
+                  <button
+                    type="button"
+                    className="ws-pill is-icon is-danger"
+                    aria-label="Удалить филиал"
+                    title="Удалить филиал"
+                    onClick={async () => {
+                      if (!window.confirm(`Удалить филиал «${branch!.nameRu || branch!.nameEn}»?`)) return;
+                      await deleteCabinetBranch(id, branch!.id);
+                      await branches.refetch();
+                    }}
+                  >
+                    <WsIcon name="trash" size={17} />
+                  </button>
+                ) : null}
+                <span className="ws-row-arrow" aria-hidden="true">
+                  <ArrowIcon size={15} />
+                </span>
+              </div>
+            </article>
+          ))}
         </div>
-        {!locked ? (
-          <Link
-            to="/cabinet/clinics/$id/branches/new"
-            params={{ id }}
-            className="btn btn-primary text-sm"
-          >
-            + Добавить филиал
-          </Link>
-        ) : null}
-      </div>
+      ) : null}
 
-      {branches.isLoading ? <p className="text-muted">Загрузка…</p> : null}
-      {branches.isError ? <p className="text-danger">Не удалось загрузить список филиалов</p> : null}
-
-      <div className="grid gap-4">
-        {(branches.data || []).map((branch) => (
-          <article
-            key={branch!.id}
-            className="soft-card flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] bg-white p-5"
-          >
-            <div>
-              <h2 className="text-xl font-extrabold">{branch!.nameRu || branch!.nameEn}</h2>
-              <p className="mt-1 text-sm text-muted">
-                {branch!.city} · {branch!.phone}
-              </p>
-              <p className="mt-1 text-xs text-muted">
-                Врачей: {branch!.doctorCount ?? 0} · услуг: {branch!.serviceCount ?? 0}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                to="/cabinet/clinics/$id/branches/$branchId"
-                params={{ id, branchId: branch!.id }}
-                search={{ section: undefined }}
-                className="btn btn-primary px-4 py-2 text-sm"
-              >
-                {locked ? "Открыть" : "Редактировать"}
-              </Link>
-              {!locked ? (
-                <button
-                  type="button"
-                  className="btn btn-ghost px-4 py-2 text-sm"
-                  onClick={async () => {
-                    if (!window.confirm("Удалить филиал?")) return;
-                    await deleteCabinetBranch(id, branch!.id);
-                    await branches.refetch();
-                  }}
-                >
-                  Удалить
-                </button>
-              ) : null}
-            </div>
-          </article>
-        ))}
-      </div>
-
-      {!branches.isLoading && (branches.data || []).length === 0 ? (
-        <p className="rounded-[1.25rem] bg-warning-soft p-4 text-sm">
-          Филиалов пока нет. Добавьте первый — без него клинику не отправить на модерацию.
-        </p>
+      {!branches.isLoading && list.length === 0 ? (
+        <div className="ws-empty">
+          <span className="ws-empty-mark">
+            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+          </span>
+          <h2>Филиалов пока нет</h2>
+          <p>Добавьте первый филиал с адресом и телефоном — без него клинику не отправить на модерацию.</p>
+          {!locked ? (
+            <Link to="/cabinet/clinics/$id/branches/new" params={{ id }} className="pill-btn is-ink">
+              Добавить филиал
+              <span className="pill-btn-icon">
+                <WsIcon name="plus" size={18} />
+              </span>
+            </Link>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

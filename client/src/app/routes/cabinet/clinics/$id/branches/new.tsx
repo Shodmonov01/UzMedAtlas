@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { cabinetMe, createCabinetBranch, fetchCabinetClinic, uploadCabinetFile } from "@/shared/api/cabinet";
 import { fetchSpecialties } from "@/shared/api/client";
 import { BranchEditorForm } from "@/widgets/clinic-form/BranchEditorForm";
+import { BackMark, PageHead, WsLoading, WsNote } from "@/widgets/workspace/Workspace";
 
 export const Route = createFileRoute("/cabinet/clinics/$id/branches/new")({
   component: NewBranchPage,
@@ -28,24 +29,25 @@ function NewBranchPage() {
     if (auth.isError || auth.data === false) void navigate({ to: "/cabinet/login" });
   }, [auth.data, auth.isError, navigate]);
 
-  if (!auth.data || clinic.isLoading) return <p className="text-muted">Загрузка…</p>;
-  if (!clinic.data) return <p className="text-danger">Клиника не найдена</p>;
+  if (!auth.data || clinic.isLoading) return <WsLoading />;
+  if (!clinic.data) return <WsNote tone="danger" title="Клиника не найдена" />;
   if (clinic.data.status === "moderation") {
-    return <p className="text-muted">На модерации нельзя добавлять филиалы.</p>;
+    return <WsNote tone="info" title="Клиника на модерации">На модерации нельзя добавлять филиалы.</WsNote>;
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link
-          to="/cabinet/clinics/$id/branches"
-          params={{ id }}
-          className="text-sm font-bold text-primary"
-        >
-          Филиалы
-        </Link>
-        <h1 className="mt-2 text-3xl font-extrabold">Новый филиал</h1>
-      </div>
+    <div className="ws-stack">
+      <PageHead
+        back={
+          <Link to="/cabinet/clinics/$id/branches" params={{ id }} className="ws-back">
+            <BackMark />
+            Филиалы · {clinic.data.nameRu || clinic.data.nameEn}
+          </Link>
+        }
+        eyebrow="Новый филиал"
+        title="Добавить филиал"
+        lead="Адрес, телефон и направления подставлены из профиля клиники — поправьте их под этот филиал. Услуги, врачи и фото добавите после сохранения."
+      />
       {specialties.data ? (
         <BranchEditorForm
           specialties={specialties.data}

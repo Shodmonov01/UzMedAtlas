@@ -7,6 +7,8 @@ import {
   fetchCabinetLeads,
   updateCabinetLead,
 } from "@/shared/api/cabinet";
+import { CONTACT_LABELS, LEAD_STATUS_LABELS, LeadStatusBadge } from "@/shared/ui/StatusBadge";
+import { BackMark, PageHead, WsIcon, WsLoading } from "@/widgets/workspace/Workspace";
 
 export const Route = createFileRoute("/cabinet/clinics/$id/leads")({
   component: CabinetLeadsPage,
@@ -25,6 +27,7 @@ function CabinetLeadsPage() {
   const qc = useQueryClient();
   const [status, setStatus] = useState("");
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({});
+  const [savedNote, setSavedNote] = useState<string | null>(null);
 
   const auth = useQuery({ queryKey: ["cabinet-me"], queryFn: cabinetMe, retry: false });
   const clinic = useQuery({
@@ -41,7 +44,8 @@ function CabinetLeadsPage() {
   const patch = useMutation({
     mutationFn: (payload: { leadId: string; status?: string; notes?: string | null }) =>
       updateCabinetLead(id, payload.leadId, { status: payload.status, notes: payload.notes }),
-    onSuccess: () => {
+    onSuccess: (_data, payload) => {
+      if (payload.notes !== undefined) setSavedNote(payload.leadId);
       void qc.invalidateQueries({ queryKey: ["cabinet-leads", id] });
     },
   });
@@ -52,123 +56,159 @@ function CabinetLeadsPage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (auth.isLoading || !auth.data) {
-    return <p className="text-muted">Проверка сессии…</p>;
-  }
+  if (auth.isLoading || !auth.data) return <WsLoading label="Проверка сессии…" />;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link to="/cabinet/clinics/$id" params={{ id }} className="text-sm font-semibold text-muted">
-          {clinic.data?.nameRu || clinic.data?.nameEn || "Клиника"}
-        </Link>
-        <h1 className="mt-2 text-3xl font-extrabold">Заявки</h1>
-        <p className="mt-1 text-muted">Обращения пациентов с каталога и Health Checker</p>
+    <div className="ws-stack">
+      <PageHead
+        back={
+          <Link to="/cabinet/clinics/$id" params={{ id }} className="ws-back">
+            <BackMark />
+            {clinic.data?.nameRu || clinic.data?.nameEn || "Клиника"}
+          </Link>
+        }
+        eyebrow="Заявки"
+        title="Заявки пациентов"
+        lead="Обращения со страницы клиники в каталоге и из Health Checker. Это просьба перезвонить, а не запись к врачу — свяжитесь с пациентом удобным ему способом."
+      />
+
+      <div className="ws-toolbar">
+        <div className="ws-seg" role="tablist" aria-label="Статус заявки">
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value || "all"}
+              type="button"
+              role="tab"
+              aria-selected={status === opt.value}
+              className={status === opt.value ? "is-active" : undefined}
+              onClick={() => setStatus(opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {STATUS_OPTIONS.map((opt) => (
-          <button
-            key={opt.value || "all"}
-            type="button"
-            className={`rounded-full px-3 py-1.5 text-sm font-bold ${
-              status === opt.value ? "bg-primary text-white" : "bg-white text-muted ring-1 ring-line"
-            }`}
-            onClick={() => setStatus(opt.value)}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-
-      {leads.isLoading ? <p className="text-muted">Загрузка…</p> : null}
+      {leads.isLoading ? <WsLoading label="Загружаем заявки…" inline /> : null}
       {!leads.isLoading && leads.data?.length === 0 ? (
-        <p className="text-muted">Заявок пока нет</p>
+        <div className="ws-empty">
+          <span className="ws-empty-mark">
+            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+          </span>
+          <h2>{status ? "Здесь пусто" : "Заявок пока нет"}</h2>
+          <p>Когда пациент оставит заявку на странице клиники, она появится здесь. Подключите Telegram в «Моих клиниках», чтобы узнавать о заявках сразу.</p>
+        </div>
       ) : null}
 
-      <div className="space-y-4">
-        {leads.data?.map((lead) => (
-          <article key={lead.id} className="soft-card space-y-3 rounded-[1.5rem] bg-white p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-extrabold">{lead.fullName}</h2>
-                <p className="text-sm text-muted">
-                  {lead.country} · {lead.phone}
-                  {lead.email ? ` · ${lead.email}` : ""}
-                </p>
+      <div className="grid gap-4">
+        {leads.data?.map((lead) => {
+          const note = notesDraft[lead.id] ?? lead.notes ?? "";
+          const phoneHref = `tel:${lead.phone.replace(/[^\d+]/g, "")}`;
+          return (
+            <article key={lead.id} className="ws-card is-pad space-y-4">
+              <div className="ws-card-head">
+                <div className="flex min-w-0 items-start gap-4">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paper text-ink">
+                    <WsIcon name="user" size={20} />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="ws-card-title">{lead.fullName}</h2>
+                    <p className="ws-row-meta">
+                      <span>{lead.country}</span>
+                      <span>{new Date(lead.createdAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</span>
+                      <span>{lead.source === "checker" ? "Health Checker" : "Каталог"}</span>
+                    </p>
+                  </div>
+                </div>
+                <LeadStatusBadge status={lead.status} />
               </div>
-              <div className="flex flex-wrap gap-2 text-xs font-bold">
-                <span className="rounded-full bg-sand px-2 py-1">
-                  {lead.source === "checker" ? "Health Checker" : "Каталог"}
-                </span>
-                <span
-                  className={`rounded-full px-2 py-1 ${
-                    lead.status === "new"
-                      ? "bg-primary-soft text-primary"
-                      : lead.status === "contacted"
-                        ? "bg-mint text-primary"
-                        : "bg-sand text-muted"
-                  }`}
-                >
-                  {lead.status}
-                </span>
+
+              <dl className="ws-facts">
+                <div>
+                  <dt>Телефон</dt>
+                  <dd>
+                    <a href={phoneHref}>{lead.phone}</a>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Как связаться</dt>
+                  <dd>{CONTACT_LABELS[lead.contactMethod] || lead.contactMethod}</dd>
+                </div>
+                {lead.email ? (
+                  <div>
+                    <dt>Email</dt>
+                    <dd>
+                      <a href={`mailto:${lead.email}`}>{lead.email}</a>
+                    </dd>
+                  </div>
+                ) : null}
+                {lead.recommendedSpecialty ? (
+                  <div>
+                    <dt>Направление</dt>
+                    <dd>{lead.recommendedSpecialty.nameRu || lead.recommendedSpecialty.nameEn}</dd>
+                  </div>
+                ) : null}
+                {lead.age != null ? (
+                  <div>
+                    <dt>Возраст</dt>
+                    <dd>{lead.age}</dd>
+                  </div>
+                ) : null}
+                {lead.symptoms || lead.medicalNeed ? (
+                  <div className="is-wide">
+                    <dt>Запрос пациента</dt>
+                    <dd className="is-text">{lead.symptoms || lead.medicalNeed}</dd>
+                  </div>
+                ) : null}
+              </dl>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm font-semibold text-muted">Статус:</span>
+                <div className="ws-seg">
+                  {(["new", "contacted", "closed"] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className={lead.status === s ? "is-active" : undefined}
+                      disabled={patch.isPending || lead.status === s}
+                      onClick={() => patch.mutate({ leadId: lead.id, status: s })}
+                    >
+                      {LEAD_STATUS_LABELS[s]}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {lead.recommendedSpecialty ? (
-              <p className="text-sm">
-                Направление:{" "}
-                <strong>{lead.recommendedSpecialty.nameRu || lead.recommendedSpecialty.nameEn}</strong>
-              </p>
-            ) : null}
-            {(lead.symptoms || lead.medicalNeed) && (
-              <p className="rounded-xl bg-sand px-3 py-2 text-sm text-muted">
-                {lead.symptoms || lead.medicalNeed}
-              </p>
-            )}
-            <p className="text-xs text-muted">
-              {new Date(lead.createdAt).toLocaleString("ru-RU")} · {lead.contactMethod}
-              {lead.age != null ? ` · ${lead.age} лет` : ""}
-            </p>
-
-            <div className="flex flex-wrap gap-2">
-              {(["new", "contacted", "closed"] as const).map((s) => (
+              <label className="ws-field">
+                <span className="ws-field-label">Заметки для команды</span>
+                <textarea
+                  className="field"
+                  rows={2}
+                  value={note}
+                  placeholder="Например: перезвонили, ждёт выписку из МРТ"
+                  onChange={(e) => {
+                    setSavedNote(null);
+                    setNotesDraft((prev) => ({ ...prev, [lead.id]: e.target.value }));
+                  }}
+                />
+              </label>
+              <div className="flex flex-wrap items-center gap-3">
                 <button
-                  key={s}
                   type="button"
-                  className="btn btn-ghost px-3 py-1.5 text-xs"
-                  disabled={patch.isPending || lead.status === s}
-                  onClick={() => patch.mutate({ leadId: lead.id, status: s })}
+                  className="ws-pill is-ink"
+                  disabled={patch.isPending || note === (lead.notes ?? "")}
+                  onClick={() => patch.mutate({ leadId: lead.id, notes: note })}
                 >
-                  {s}
+                  Сохранить заметку
                 </button>
-              ))}
-            </div>
-
-            <label className="block text-sm font-bold">
-              Заметки
-              <textarea
-                className="field mt-1"
-                rows={2}
-                value={notesDraft[lead.id] ?? lead.notes ?? ""}
-                onChange={(e) => setNotesDraft((prev) => ({ ...prev, [lead.id]: e.target.value }))}
-              />
-            </label>
-            <button
-              type="button"
-              className="btn btn-primary px-4 py-2 text-sm"
-              disabled={patch.isPending}
-              onClick={() =>
-                patch.mutate({
-                  leadId: lead.id,
-                  notes: notesDraft[lead.id] ?? lead.notes ?? "",
-                })
-              }
-            >
-              Сохранить заметки
-            </button>
-          </article>
-        ))}
+                <a href={phoneHref} className="ws-pill">
+                  Позвонить
+                </a>
+                {savedNote === lead.id ? <span className="text-sm font-semibold text-accent-strong">Сохранено</span> : null}
+              </div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

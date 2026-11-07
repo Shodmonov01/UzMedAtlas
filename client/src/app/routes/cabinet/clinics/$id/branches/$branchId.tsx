@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   addBranchPhoto,
   cabinetMe,
@@ -13,8 +13,9 @@ import {
   updateCabinetBranch,
   uploadCabinetFile,
 } from "@/shared/api/cabinet";
-import { fetchSpecialties } from "@/shared/api/client";
+import { CITY_LABELS, fetchSpecialties } from "@/shared/api/client";
 import { yandexPointUrl } from "@/shared/lib/yandex-maps";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { BranchDoctorsPanel } from "@/widgets/clinic-form/BranchDoctorsPanel";
 import {
   BRANCH_CORE_SECTIONS,
@@ -24,6 +25,7 @@ import {
 import { BranchEquipmentPanel } from "@/widgets/clinic-form/BranchEquipmentPanel";
 import { BranchServicesPanel } from "@/widgets/clinic-form/BranchServicesPanel";
 import { Field } from "@/widgets/clinic-form/FormField";
+import { BackMark, PageHead, WsIcon, WsLoading, WsNote, WsToast } from "@/widgets/workspace/Workspace";
 
 export const Route = createFileRoute("/cabinet/clinics/$id/branches/$branchId")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -66,6 +68,7 @@ function EditBranchPage() {
       ? (search.section as BranchPageSectionId)
       : "basic",
   );
+  const clearMessage = useCallback(() => setMessage(null), []);
 
   const auth = useQuery({ queryKey: ["cabinet-me"], queryFn: cabinetMe, retry: false });
   const clinic = useQuery({
@@ -88,299 +91,351 @@ function EditBranchPage() {
     if (auth.isError || auth.data === false) void navigate({ to: "/cabinet/login" });
   }, [auth.data, auth.isError, navigate]);
 
-  function goNextPageSection() {
-    const i = BRANCH_PAGE_SECTIONS.findIndex((s) => s.id === section);
-    if (i >= 0 && i < BRANCH_PAGE_SECTIONS.length - 1) {
-      setSection(BRANCH_PAGE_SECTIONS[i + 1].id);
-      setMessage(null);
-    }
-  }
-
-  if (!auth.data || clinic.isLoading || branch.isLoading) {
-    return <p className="text-muted">Загрузка…</p>;
-  }
-  if (!clinic.data || !branch.data) return <p className="text-danger">Не найдено</p>;
+  if (!auth.data || clinic.isLoading || branch.isLoading) return <WsLoading />;
+  if (!clinic.data || !branch.data) return <WsNote tone="danger" title="Филиал не найден" />;
 
   const locked = clinic.data.status === "moderation";
   const isCore = CORE_IDS.has(section);
+  const stepIndex = Math.max(0, BRANCH_PAGE_SECTIONS.findIndex((s) => s.id === section));
+  const prevStep = BRANCH_PAGE_SECTIONS[stepIndex - 1];
+  const nextStep = BRANCH_PAGE_SECTIONS[stepIndex + 1];
+  const branchName = branch.data.nameRu || branch.data.nameEn;
+  const clinicName = clinic.data.nameRu || clinic.data.nameEn;
+
+  function pick(next: BranchPageSectionId) {
+    setSection(next);
+    setMessage(null);
+    const wz = document.querySelector(".wz");
+    if (wz && wz.getBoundingClientRect().top < 0) wz.scrollIntoView({ block: "start" });
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link
-          to="/cabinet/clinics/$id/branches"
-          params={{ id }}
-          className="text-sm font-bold text-primary"
-        >
-          Филиалы
-        </Link>
-        <h1 className="mt-2 text-3xl font-extrabold">
-          {branch.data.nameRu || branch.data.nameEn}
-        </h1>
-      </div>
+    <div className="ws-stack">
+      <PageHead
+        back={
+          <Link to="/cabinet/clinics/$id/branches" params={{ id }} className="ws-back">
+            <BackMark />
+            Филиалы · {clinicName}
+          </Link>
+        }
+        eyebrow="Филиал"
+        title={branchName}
+        meta={
+          <>
+            <span>
+              <WsIcon name="pin" size={15} />
+              {CITY_LABELS[branch.data.city] || branch.data.city}
+            </span>
+            {branch.data.phone ? <span>{branch.data.phone}</span> : null}
+          </>
+        }
+        actions={
+          clinic.data.status === "published" && branch.data.slug ? (
+            <Link
+              to="/clinics/$slug/branches/$branchSlug"
+              params={{ slug: clinic.data.slug, branchSlug: branch.data.slug }}
+              target="_blank"
+              className="ws-pill"
+            >
+              Страница на сайте
+              <WsIcon name="external" size={14} />
+            </Link>
+          ) : undefined
+        }
+      />
 
-      {message ? <p className="text-sm font-bold text-primary">{message}</p> : null}
-
-      <nav className="soft-card flex flex-wrap gap-1 rounded-[1.5rem] bg-white p-2">
-        {BRANCH_PAGE_SECTIONS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`rounded-xl px-3 py-2 text-sm font-bold ${
-              section === item.id ? "bg-lime text-primary-deep" : "text-muted hover:bg-mint"
-            }`}
-            onClick={() => {
-              setSection(item.id);
-              setMessage(null);
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-
-      {isCore && specialties.data ? (
-        <BranchEditorForm
-          key={branch.data.id}
-          specialties={specialties.data}
-          allowedSpecialtyIds={clinic.data.specialtyIds}
-          onUpload={uploadCabinetFile}
-          initial={branch.data}
-          locked={locked}
-          hideNav
-          activeSection={section as BranchCoreSectionId}
-          onActiveSectionChange={(id) => setSection(id)}
-          onContinuePastEnd={() => setSection("services")}
-          onSubmit={async (payload) => {
-            await updateCabinetBranch(id, branchId, payload);
-            await qc.invalidateQueries({ queryKey: ["cabinet-branch", id, branchId] });
-            await qc.invalidateQueries({ queryKey: ["cabinet-branches", id] });
-            await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
-            setMessage("Филиал сохранён");
-            await branch.refetch();
-          }}
-        />
+      {locked ? (
+        <WsNote tone="info" title="Клиника на модерации">
+          <p>Пока модератор проверяет профиль, филиалы редактировать нельзя.</p>
+        </WsNote>
       ) : null}
 
-      {section === "services" ? (
-        <div className="space-y-4">
-          <BranchServicesPanel
-            clinicId={id}
-            branchId={branchId}
-            services={branch.data.services || []}
-            specialties={(branch.data.specialties || []).map((s) => ({
-              id: s.id,
-              nameRu: s.nameRu,
-              nameEn: s.nameEn,
-            }))}
-            locked={locked}
-            onChanged={async () => {
-              await branch.refetch();
-              await qc.invalidateQueries({ queryKey: ["cabinet-branches", id] });
-              await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
-            }}
-          />
-          {!locked ? (
-            <button type="button" className="btn btn-ghost text-sm" onClick={goNextPageSection}>
-              Сохранить и продолжить
-            </button>
+      <WsToast message={message} onDone={clearMessage} />
+
+      <div className="wz">
+        <nav className="wz-nav" aria-label="Разделы филиала">
+          <div className="wz-progress">
+            <p>
+              Раздел <strong>{stepIndex + 1} из {BRANCH_PAGE_SECTIONS.length}</strong>
+            </p>
+            <div className="wz-progress-bar">
+              <span style={{ width: `${((stepIndex + 1) / BRANCH_PAGE_SECTIONS.length) * 100}%` }} />
+            </div>
+          </div>
+          <ol className="wz-steps">
+            {BRANCH_PAGE_SECTIONS.map((item, i) => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  className={`wz-step${section === item.id ? " is-active" : i < stepIndex ? " is-done" : ""}`}
+                  aria-current={section === item.id ? "step" : undefined}
+                  onClick={() => pick(item.id)}
+                >
+                  <span>{String(i + 1).padStart(2, "0")}</span>
+                  {item.label}
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
+        <div className="wz-body">
+          {isCore && specialties.data ? (
+            <BranchEditorForm
+              key={branch.data.id}
+              specialties={specialties.data}
+              allowedSpecialtyIds={clinic.data.specialtyIds}
+              onUpload={uploadCabinetFile}
+              initial={branch.data}
+              locked={locked}
+              hideNav
+              activeSection={section as BranchCoreSectionId}
+              onActiveSectionChange={(next) => pick(next)}
+              onContinuePastEnd={() => pick("services")}
+              onSubmit={async (payload) => {
+                await updateCabinetBranch(id, branchId, payload);
+                await qc.invalidateQueries({ queryKey: ["cabinet-branch", id, branchId] });
+                await qc.invalidateQueries({ queryKey: ["cabinet-branches", id] });
+                await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
+                setMessage("Филиал сохранён");
+                await branch.refetch();
+              }}
+            />
           ) : null}
-        </div>
-      ) : null}
 
-      {section === "doctors" ? (
-        <div className="space-y-4">
-          <BranchDoctorsPanel
-            clinicId={id}
-            branchId={branchId}
-            clinicDoctors={clinic.data.doctors || []}
-            branchDoctorIds={(branch.data.doctors || []).map((d) => d.id)}
-            specialtyIds={branch.data.specialtyIds || []}
-            specialtyOptions={clinic.data.specialties || []}
-            onUpload={uploadCabinetFile}
-            locked={locked}
-            onChanged={async () => {
-              await branch.refetch();
-              await clinic.refetch();
-              await qc.invalidateQueries({ queryKey: ["cabinet-branches", id] });
-            }}
-          />
-          {!locked ? (
-            <button type="button" className="btn btn-ghost text-sm" onClick={goNextPageSection}>
-              Сохранить и продолжить
-            </button>
+          {section === "services" ? (
+            <BranchServicesPanel
+              clinicId={id}
+              branchId={branchId}
+              services={branch.data.services || []}
+              specialties={(branch.data.specialties || []).map((s) => ({
+                id: s.id,
+                nameRu: s.nameRu,
+                nameEn: s.nameEn,
+              }))}
+              locked={locked}
+              onChanged={async () => {
+                await branch.refetch();
+                await qc.invalidateQueries({ queryKey: ["cabinet-branches", id] });
+                await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
+              }}
+            />
           ) : null}
-        </div>
-      ) : null}
 
-      {section === "photos" ? (
-        <div className="space-y-4">
-          <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-            <h2 className="text-xl font-extrabold">Фото филиала</h2>
-            <p className="text-sm text-muted">Первое фото — главное. Меняйте порядок или назначьте главную.</p>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {(branch.data.photos || []).map((photo, index) => (
-                <div key={photo.id} className="overflow-hidden rounded-xl border border-line">
-                  <div className="relative">
-                    <img src={photo.url} alt="" className="aspect-video w-full object-cover" />
-                    {index === 0 ? (
-                      <span className="absolute left-2 top-2 rounded-lg bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
-                        Главная
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2 p-2 text-xs">
-                    <p className="font-bold text-muted">{PHOTO_CATEGORY_LABELS[photo.category] || photo.category}</p>
-                    {!locked ? (
-                      <div className="flex flex-wrap gap-1">
-                        <button
-                          type="button"
-                          className="rounded-lg border border-line px-2 py-1 font-bold disabled:opacity-40"
-                          disabled={index === 0}
-                          onClick={async () => {
-                            const ids = (branch.data.photos || []).map((p) => p.id);
-                            const next = [...ids];
-                            [next[index - 1], next[index]] = [next[index], next[index - 1]];
-                            await reorderBranchPhotos(id, branchId, next);
-                            await branch.refetch();
-                          }}
-                        >
-                          ↑
-                        </button>
-                        <button
-                          type="button"
-                          className="rounded-lg border border-line px-2 py-1 font-bold disabled:opacity-40"
-                          disabled={index >= (branch.data.photos?.length || 0) - 1}
-                          onClick={async () => {
-                            const ids = (branch.data.photos || []).map((p) => p.id);
-                            const next = [...ids];
-                            [next[index], next[index + 1]] = [next[index + 1], next[index]];
-                            await reorderBranchPhotos(id, branchId, next);
-                            await branch.refetch();
-                          }}
-                        >
-                          ↓
-                        </button>
-                        {index !== 0 ? (
+          {section === "doctors" ? (
+            <BranchDoctorsPanel
+              clinicId={id}
+              branchId={branchId}
+              clinicDoctors={clinic.data.doctors || []}
+              branchDoctorIds={(branch.data.doctors || []).map((d) => d.id)}
+              specialtyIds={branch.data.specialtyIds || []}
+              specialtyOptions={clinic.data.specialties || []}
+              onUpload={uploadCabinetFile}
+              locked={locked}
+              onChanged={async () => {
+                await branch.refetch();
+                await clinic.refetch();
+                await qc.invalidateQueries({ queryKey: ["cabinet-branches", id] });
+              }}
+            />
+          ) : null}
+
+          {section === "photos" ? (
+            <div className="soft-card space-y-5">
+              <div>
+                <h2 className="ws-card-title">Фото филиала</h2>
+                <p className="ws-card-text">Первое фото — обложка страницы филиала. Меняйте порядок стрелками или сделайте нужное фото обложкой.</p>
+              </div>
+              {(branch.data.photos || []).length ? (
+                <div className="ws-photos">
+                  {(branch.data.photos || []).map((photo, index) => (
+                    <div key={photo.id} className="ws-photo">
+                      <div className="ws-photo-img">
+                        <img src={photo.url} alt="" loading="lazy" />
+                        {index === 0 ? <b>Обложка</b> : null}
+                      </div>
+                      <div className="ws-photo-meta">
+                        <span className="truncate">{PHOTO_CATEGORY_LABELS[photo.category] || photo.category}</span>
+                        <span className="text-xs font-semibold text-muted">#{index + 1}</span>
+                      </div>
+                      {!locked ? (
+                        <div className="ws-photo-tools">
                           <button
                             type="button"
-                            className="rounded-lg border border-line px-2 py-1 font-bold text-primary"
+                            className="ws-mini"
+                            disabled={index === 0}
+                            title="Переместить выше"
+                            aria-label="Переместить выше"
                             onClick={async () => {
-                              await setBranchMainPhoto(id, branchId, photo.id);
+                              const ids = (branch.data.photos || []).map((p) => p.id);
+                              const next = [...ids];
+                              [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                              await reorderBranchPhotos(id, branchId, next);
                               await branch.refetch();
                             }}
                           >
-                            Главная
+                            <WsIcon name="up" size={15} />
                           </button>
-                        ) : null}
-                        <label className="cursor-pointer rounded-lg border border-line px-2 py-1 font-bold text-primary">
-                          Заменить
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              const url = await uploadCabinetFile(file);
-                              await replaceBranchPhoto(id, branchId, photo.id, { url });
+                          <button
+                            type="button"
+                            className="ws-mini"
+                            disabled={index >= (branch.data.photos?.length || 0) - 1}
+                            title="Переместить ниже"
+                            aria-label="Переместить ниже"
+                            onClick={async () => {
+                              const ids = (branch.data.photos || []).map((p) => p.id);
+                              const next = [...ids];
+                              [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                              await reorderBranchPhotos(id, branchId, next);
                               await branch.refetch();
-                              setMessage("Фото заменено");
-                              e.target.value = "";
                             }}
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          className="rounded-lg border border-line px-2 py-1 font-bold text-danger"
-                          onClick={async () => {
-                            await deleteBranchPhoto(id, branchId, photo.id);
-                            await branch.refetch();
-                          }}
-                        >
-                          Удалить
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
+                          >
+                            <WsIcon name="down" size={15} />
+                          </button>
+                          {index !== 0 ? (
+                            <button
+                              type="button"
+                              className="ws-mini"
+                              title="Сделать обложкой"
+                              aria-label="Сделать обложкой"
+                              onClick={async () => {
+                                await setBranchMainPhoto(id, branchId, photo.id);
+                                await branch.refetch();
+                                setMessage("Обложка обновлена");
+                              }}
+                            >
+                              <WsIcon name="star" size={15} />
+                            </button>
+                          ) : null}
+                          <label className="ws-mini" title="Заменить файл" aria-label="Заменить файл">
+                            <WsIcon name="swap" size={15} />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const url = await uploadCabinetFile(file);
+                                await replaceBranchPhoto(id, branchId, photo.id, { url });
+                                await branch.refetch();
+                                setMessage("Фото заменено");
+                                e.target.value = "";
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            className="ws-mini is-danger ml-auto"
+                            title="Удалить фото"
+                            aria-label="Удалить фото"
+                            onClick={async () => {
+                              if (!window.confirm("Удалить это фото?")) return;
+                              await deleteBranchPhoto(id, branchId, photo.id);
+                              await branch.refetch();
+                            }}
+                          >
+                            <WsIcon name="trash" size={15} />
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            {!locked ? (
-              <form
-                className="space-y-3"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const fd = new FormData(e.currentTarget);
-                  const file = (e.currentTarget.elements.namedItem("file") as HTMLInputElement)
-                    ?.files?.[0];
-                  if (!file) return;
-                  const url = await uploadCabinetFile(file);
-                  await addBranchPhoto(id, branchId, {
-                    url,
-                    category: String(fd.get("category") || "facade"),
-                  });
-                  e.currentTarget.reset();
-                  await branch.refetch();
-                  setMessage("Фото добавлено");
-                }}
-              >
-                <div>
-                  <h3 className="font-extrabold">Добавить фото филиала</h3>
-                  <p className="mt-1 text-sm text-muted">Новое фото встанет в конец списка — сделать его главным можно кнопкой «Главная».</p>
-                </div>
-                <div className="grid gap-3 md:grid-cols-2">
-                  <Field label="Что на фото">
-                    <select name="category" className="field" defaultValue="facade">
-                      {Object.entries(PHOTO_CATEGORY_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Файл" hint="JPG, PNG или WEBP, лучше горизонтальное">
-                    <input name="file" type="file" accept="image/*" required className="field" />
-                  </Field>
-                </div>
-                <button className="btn btn-primary text-sm" type="submit">
-                  Загрузить фото
-                </button>
-              </form>
-            ) : null}
-
-            {branch.data.lat != null && branch.data.lng != null ? (
-              <p className="text-sm text-muted">
-                Карта:{" "}
-                <a
-                  className="font-bold text-primary"
-                  href={yandexPointUrl(branch.data.lat, branch.data.lng)}
-                  target="_blank"
-                  rel="noreferrer"
+              ) : (
+                <p className="rounded-2xl bg-paper px-4 py-3 text-sm text-muted">Фото пока нет. Добавьте фасад, вход и кабинеты — так пациенту проще найти филиал.</p>
+              )}
+              {!locked ? (
+                <form
+                  className="ws-group"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const form = e.currentTarget;
+                    const fd = new FormData(form);
+                    const file = (form.elements.namedItem("file") as HTMLInputElement)?.files?.[0];
+                    if (!file) return;
+                    const url = await uploadCabinetFile(file);
+                    await addBranchPhoto(id, branchId, {
+                      url,
+                      category: String(fd.get("category") || "facade"),
+                    });
+                    form.reset();
+                    await branch.refetch();
+                    setMessage("Фото добавлено");
+                  }}
                 >
-                  Яндекс.Карты ({branch.data.lat}, {branch.data.lng})
-                </a>
-              </p>
-            ) : null}
-          </div>
-          {!locked ? (
-            <button type="button" className="btn btn-ghost text-sm" onClick={goNextPageSection}>
-              Сохранить и продолжить
-            </button>
+                  <p className="ws-label">Добавить фото</p>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <Field label="Что на фото">
+                      <select name="category" className="field" defaultValue="facade">
+                        {Object.entries(PHOTO_CATEGORY_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Файл" hint="JPG, PNG или WEBP, лучше горизонтальное">
+                      <input name="file" type="file" accept="image/*" required className="field" />
+                    </Field>
+                  </div>
+                  <button className="btn btn-primary justify-self-start" type="submit">
+                    Загрузить фото
+                  </button>
+                </form>
+              ) : null}
+
+              {branch.data.lat != null && branch.data.lng != null ? (
+                <p className="text-sm text-muted">
+                  Точка на карте:{" "}
+                  <a className="font-bold text-primary" href={yandexPointUrl(branch.data.lat, branch.data.lng)} target="_blank" rel="noreferrer">
+                    Яндекс.Карты ({branch.data.lat}, {branch.data.lng})
+                  </a>
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {section === "equipment" ? (
+            <BranchEquipmentPanel
+              clinicId={id}
+              branchId={branchId}
+              equipment={branch.data.equipment || []}
+              locked={locked}
+              onChanged={async () => {
+                await branch.refetch();
+                await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
+              }}
+            />
+          ) : null}
+
+          {!isCore ? (
+            <div className="wz-pager">
+              {prevStep ? (
+                <button type="button" className="ws-pill" onClick={() => pick(prevStep.id)}>
+                  <span className="inline-flex -scale-x-100">
+                    <ArrowIcon size={15} />
+                  </span>
+                  {prevStep.label}
+                </button>
+              ) : (
+                <span />
+              )}
+              {nextStep ? (
+                <button type="button" className="ws-pill is-ink" onClick={() => pick(nextStep.id)}>
+                  Далее: {nextStep.label}
+                  <ArrowIcon size={15} />
+                </button>
+              ) : (
+                <Link to="/cabinet/clinics/$id/branches" params={{ id }} className="ws-pill is-ink">
+                  Готово — к списку филиалов
+                  <ArrowIcon size={15} />
+                </Link>
+              )}
+            </div>
           ) : null}
         </div>
-      ) : null}
-
-      {section === "equipment" ? (
-        <BranchEquipmentPanel
-          clinicId={id}
-          branchId={branchId}
-          equipment={branch.data.equipment || []}
-          locked={locked}
-          onChanged={async () => {
-            await branch.refetch();
-            await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
-          }}
-        />
-      ) : null}
+      </div>
     </div>
   );
 }
