@@ -1,17 +1,24 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { cabinetLogin, cabinetRegister } from "@/shared/api/cabinet";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
+import { AuthLayout, WsIcon } from "@/widgets/workspace/Workspace";
+import { Field } from "@/widgets/clinic-form/FormField";
 
 export const Route = createFileRoute("/cabinet/login")({
   component: CabinetLoginPage,
 });
 
+const DEMO = { email: "owner@uzmedatlas.local", password: "clinic123" };
+
 function CabinetLoginPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("owner@uzmedatlas.local");
-  const [password, setPassword] = useState("clinic123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,76 +32,93 @@ function CabinetLoginPage() {
       } else {
         await cabinetLogin(email, password);
       }
+      qc.clear();
       void navigate({ to: "/cabinet" });
     } catch {
-      setError(mode === "register" ? "Не удалось зарегистрироваться" : "Неверный email или пароль");
+      setError(mode === "register" ? "Не удалось зарегистрироваться. Возможно, этот email уже занят." : "Неверный email или пароль");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="mx-auto flex min-h-[50vh] max-w-md flex-col justify-center">
-      <h1 className="text-3xl font-extrabold">ЛК клиники</h1>
-      <p className="mt-2 text-muted">
-        {mode === "login" ? "Вход владельца клиники" : "Регистрация владельца"}
-      </p>
-      <form onSubmit={onSubmit} className="soft-card mt-6 space-y-4 rounded-[1.75rem] bg-white p-6">
+    <AuthLayout
+      kicker="Для клиник"
+      title={
+        <>
+          Кабинет клиники на <em>карте медтуризма</em>
+        </>
+      }
+      points={[
+        "Профиль клиники, филиалы, врачи и цены — в одном месте",
+        "Заявки пациентов из каталога и Health Checker",
+        "Проверка модератором перед публикацией в каталоге",
+      ]}
+    >
+      <h2>{mode === "login" ? "Вход в кабинет" : "Регистрация клиники"}</h2>
+      <p>{mode === "login" ? "Войдите, чтобы управлять профилем клиники и заявками." : "Создайте аккаунт владельца — затем добавите клинику по шагам."}</p>
+
+      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Вход или регистрация">
+        <button type="button" role="tab" aria-selected={mode === "login"} className={mode === "login" ? "is-active" : undefined} onClick={() => { setMode("login"); setError(null); }}>
+          Вход
+        </button>
+        <button type="button" role="tab" aria-selected={mode === "register"} className={mode === "register" ? "is-active" : undefined} onClick={() => { setMode("register"); setError(null); }}>
+          Регистрация
+        </button>
+      </div>
+
+      <form onSubmit={onSubmit} className="auth-form">
         {mode === "register" ? (
-          <label className="block text-sm font-bold">
-            Имя
-            <input
-              className="field mt-1"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              minLength={2}
-            />
-          </label>
+          <Field label="Ваше имя">
+            <input className="field" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} autoComplete="name" placeholder="Например, Дилноза Юсупова" />
+          </Field>
         ) : null}
-        <label className="block text-sm font-bold">
-          Email
-          <input
-            type="email"
-            className="field mt-1"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoFocus
-          />
-        </label>
-        <label className="block text-sm font-bold">
-          Пароль
+        <Field label="Email">
+          <input type="email" className="field" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus autoComplete="username" placeholder="clinic@example.uz" />
+        </Field>
+        <Field label="Пароль" hint={mode === "register" ? "Не меньше 8 символов" : undefined}>
           <input
             type="password"
-            className="field mt-1"
+            className="field"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={mode === "register" ? 8 : 1}
+            autoComplete={mode === "register" ? "new-password" : "current-password"}
           />
-        </label>
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
-        <button className="btn btn-primary w-full" type="submit" disabled={loading}>
-          {loading ? "…" : mode === "login" ? "Войти" : "Создать аккаунт"}
-        </button>
-        <button
-          type="button"
-          className="w-full text-sm font-bold text-primary"
-          onClick={() => {
-            setMode((m) => (m === "login" ? "register" : "login"));
-            setError(null);
-          }}
-        >
-          {mode === "login" ? "Нет аккаунта? Регистрация" : "Уже есть аккаунт? Войти"}
+        </Field>
+        {error ? (
+          <p className="auth-error" role="alert">
+            <WsIcon name="alert" />
+            {error}
+          </p>
+        ) : null}
+        <button className="pill-btn is-ink is-large" type="submit" disabled={loading}>
+          {loading ? "Подождите…" : mode === "login" ? "Войти" : "Создать аккаунт"}
+          <span className="pill-btn-icon">
+            <ArrowIcon />
+          </span>
         </button>
       </form>
-      <p className="mt-3 text-xs text-muted">
-        Демо: owner@uzmedatlas.local / clinic123
-      </p>
-      <Link to="/" className="mt-4 text-sm font-bold text-primary">
-        На главную
-      </Link>
-    </div>
+
+      {mode === "login" ? (
+        <div className="auth-demo">
+          <div>
+            <strong>Демо-доступ</strong>
+            {DEMO.email} / {DEMO.password}
+          </div>
+          <button
+            type="button"
+            className="ws-pill"
+            onClick={() => {
+              setEmail(DEMO.email);
+              setPassword(DEMO.password);
+            }}
+          >
+            Подставить
+          </button>
+        </div>
+      ) : null}
+    </AuthLayout>
   );
 }

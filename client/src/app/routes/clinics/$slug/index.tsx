@@ -1,18 +1,90 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRef } from "react";
 import { CITY_LABELS, fetchClinic } from "@/shared/api/client";
-import { formatServicePrice } from "@/shared/lib/format-price";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { PhotoCarousel, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { yandexRouteUrl } from "@/shared/lib/yandex-maps";
+import { countWord, pickName, useLang, type Text } from "@/shared/i18n/lang";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
-import { ContactCard, DoctorList, Icon, PhotoMosaic, ProfileSection, initials } from "@/widgets/clinic-profile/ClinicProfile";
+import {
+  ContactCard,
+  DoctorList,
+  Icon,
+  MobileDock,
+  PageSkeleton,
+  PageState,
+  PersonCard,
+  PhotoMosaic,
+  ProfileSection,
+  QuickContact,
+  SectionBar,
+  ServicesList,
+  telHref,
+  useHeroIntro,
+  type BarSection,
+} from "@/widgets/clinic-profile/ClinicProfile";
 
 export const Route = createFileRoute("/clinics/$slug/")({
   component: ClinicDetailPage,
 });
+
+/** Copy of the page in the three site languages. */
+const L = {
+  catalog: { ru: "Каталог клиник", uz: "Klinikalar katalogi", en: "Clinic catalog" },
+  back: { ru: "Назад в каталог", uz: "Katalogga qaytish", en: "Back to the catalog" },
+  loadError: { ru: "Не удалось загрузить страницу клиники", uz: "Klinika sahifasini yuklab boʻlmadi", en: "Could not load the clinic page" },
+  loadErrorText: { ru: "Проверьте соединение и обновите страницу.", uz: "Internetni tekshirib, sahifani yangilang.", en: "Check your connection and reload the page." },
+  notFound: { ru: "Клиника не найдена", uz: "Klinika topilmadi", en: "Clinic not found" },
+  notFoundText: { ru: "Возможно, страница переехала или клиника ещё не опубликована.", uz: "Ehtimol, sahifa koʻchgan yoki klinika hali eʼlon qilinmagan.", en: "The page may have moved, or the clinic is not published yet." },
+  reply: { ru: "ответ ~{n} ч", uz: "javob ~{n} soat", en: "reply ~{n} h" },
+  request: { ru: "Оставить заявку", uz: "Ariza qoldirish", en: "Send a request" },
+  about: { ru: "О клинике", uz: "Klinika haqida", en: "About" },
+  aboutKicker: { ru: "Знакомство", uz: "Tanishuv", en: "Introduction" },
+  history: { ru: "История", uz: "Tarix", en: "History" },
+  mission: { ru: "Миссия", uz: "Missiya", en: "Mission" },
+  directions: { ru: "Направления", uz: "Yoʻnalishlar", en: "Specialties" },
+  languages: { ru: "Языки общения", uz: "Muloqot tillari", en: "Languages" },
+  tourism: { ru: "Медтуризм", uz: "Tibbiy turizm", en: "Medical travel" },
+  advantages: { ru: "Преимущества", uz: "Afzalliklar", en: "Advantages" },
+  advantagesKicker: { ru: "Почему сюда", uz: "Nega aynan shu yerga", en: "Why here" },
+  more: { ru: "Подробнее о клинике", uz: "Klinika haqida batafsil", en: "More about the clinic" },
+  why: { ru: "Почему выбирают", uz: "Nega tanlashadi", en: "Why patients choose it" },
+  plans: { ru: "Планы развития", uz: "Rivojlanish rejalari", en: "Development plans" },
+  tourismText: { ru: "Медицинский туризм", uz: "Tibbiy turizm", en: "Medical travel" },
+  doctors: { ru: "Врачи", uz: "Shifokorlar", en: "Doctors" },
+  doctorsTitle: { ru: "Специалисты", uz: "Mutaxassislar", en: "Specialists" },
+  team: { ru: "Команда", uz: "Jamoa", en: "Team" },
+  leadership: { ru: "Руководство", uz: "Rahbariyat", en: "Leadership" },
+  founder: { ru: "Основатель", uz: "Asoschi", en: "Founder" },
+  chief: { ru: "Главный врач", uz: "Bosh shifokor", en: "Chief physician" },
+  services: { ru: "Услуги", uz: "Xizmatlar", en: "Services" },
+  servicesTitle: { ru: "Услуги и цены", uz: "Xizmatlar va narxlar", en: "Services and prices" },
+  prices: { ru: "Цены", uz: "Narxlar", en: "Prices" },
+  popular: { ru: "Популярные услуги", uz: "Ommabop xizmatlar", en: "Popular services" },
+  photos: { ru: "Фотографии", uz: "Rasmlar", en: "Photos" },
+  inside: { ru: "Внутри клиники", uz: "Klinika ichida", en: "Inside the clinic" },
+  equipment: { ru: "Оборудование", uz: "Uskunalar", en: "Equipment" },
+  equipmentKicker: { ru: "Оснащение", uz: "Jihozlar", en: "Facilities" },
+  tech: { ru: "Технологии и методики", uz: "Texnologiyalar va usullar", en: "Technologies and methods" },
+  certs: { ru: "Сертификаты и лицензии", uz: "Sertifikatlar va litsenziyalar", en: "Certificates and licences" },
+  trust: { ru: "Признание", uz: "Eʼtirof", en: "Recognition" },
+  achievements: { ru: "Достижения", uz: "Yutuqlar", en: "Achievements" },
+  openFile: { ru: "Открыть документ", uz: "Hujjatni ochish", en: "Open document" },
+  received: { ru: "получен", uz: "olingan", en: "issued" },
+  validUntil: { ru: "до", uz: "gacha", en: "valid until" },
+  location: { ru: "Как добраться", uz: "Qanday borish mumkin", en: "Getting there" },
+  map: { ru: "На карте", uz: "Xaritada", en: "On the map" },
+  route: { ru: "Построить маршрут", uz: "Yoʻnalish qurish", en: "Get directions" },
+  branches: { ru: "Филиалы", uz: "Filiallar", en: "Branches" },
+  branchesKicker: { ru: "Адреса", uz: "Manzillar", en: "Addresses" },
+  noBranches: { ru: "Филиалы пока не указаны.", uz: "Filiallar hali koʻrsatilmagan.", en: "No branches listed yet." },
+  coordinator: { ru: "Координатор", uz: "Koordinator", en: "Coordinator" },
+  call: { ru: "Позвонить", uz: "Qoʻngʻiroq", en: "Call" },
+} satisfies Record<string, Text>;
 
 function text(value?: string | null) {
   const v = value?.trim();
@@ -24,205 +96,238 @@ function lines(value?: string | null) {
   if (!raw) return [];
   return raw
     .split("\n")
-    .map((line) => line.replace(/^[•\-\*]\s*/, "").trim())
+    .map((line) => line.replace(/^[•\-*]\s*/, "").trim())
     .filter(Boolean);
 }
 
+type Branch = {
+  id: string;
+  slug: string;
+  nameRu?: string;
+  nameEn: string;
+  city: string;
+  addressRu?: string;
+  addressEn?: string;
+  coverUrl?: string | null;
+  phone?: string;
+  lat?: number | null;
+  lng?: number | null;
+};
+
 function ClinicDetailPage() {
   const { slug } = Route.useParams();
-  const symptoms =
-    typeof window !== "undefined" ? sessionStorage.getItem("uma_last_symptoms") || "" : "";
+  const { lang, t } = useLang();
+  const root = useRef<HTMLDivElement>(null);
+  const symptoms = typeof window !== "undefined" ? sessionStorage.getItem("uma_last_symptoms") || "" : "";
 
   const clinic = useQuery({
     queryKey: ["clinic", slug],
     queryFn: () => fetchClinic(slug),
   });
+  useHeroIntro(root, Boolean(clinic.data));
 
-  if (clinic.isLoading) return <p className="text-muted">Загрузка…</p>;
-  if (clinic.isError) return <p className="text-danger">Не удалось загрузить страницу клиники</p>;
-  if (!clinic.data) {
-    return (
-      <div>
-        <p className="text-danger">Клиника не найдена</p>
-        <Link to="/" className="mt-4 inline-block font-bold text-primary">
-          К каталогу
-        </Link>
-      </div>
-    );
-  }
+  const backToCatalog = (
+    <Link to="/" hash="catalog" className="pill-btn is-ink">
+      {t(L.catalog)}
+      <span className="pill-btn-icon">
+        <ArrowIcon />
+      </span>
+    </Link>
+  );
+  if (clinic.isLoading) return <PageSkeleton />;
+  if (clinic.isError) return <PageState title={t(L.loadError)} text={t(L.loadErrorText)} action={backToCatalog} />;
+  if (!clinic.data) return <PageState title={t(L.notFound)} text={t(L.notFoundText)} action={backToCatalog} />;
 
   const data = clinic.data;
-  const name: string = data.nameRu || data.nameEn;
-  const description = text(data.descriptionRu) || text(data.descriptionEn);
-  const gallery: GalleryPhoto[] = (data.photos || []).map(
-    (p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
-      id: p.id,
-      url: p.url,
-      alt: p.altRu || p.altEn || "",
-    }),
-  );
+  const pick = (ru?: string | null, en?: string | null) => text(pickName(lang, ru, en));
+  const pickLines = (ru?: string | null, en?: string | null) => {
+    const first = lines(lang === "en" ? en : ru);
+    return first.length ? first : lines(lang === "en" ? ru : en);
+  };
+  const name: string = pickName(lang, data.nameRu, data.nameEn);
+  const description = pick(data.descriptionRu, data.descriptionEn);
+  const gallery: GalleryPhoto[] = (data.photos || []).map((p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
+    id: p.id,
+    url: p.url,
+    alt: pickName(lang, p.altRu, p.altEn),
+  }));
   if (!gallery.length && data.branches?.[0]?.coverUrl) {
     gallery.push({ id: "branch-cover", url: data.branches[0].coverUrl, alt: name });
   }
-  const history = text(data.historyRu) || text(data.historyEn);
-  const mission = text(data.missionRu) || text(data.missionEn);
-  const advantagesRu = lines(data.advantagesRu);
-  const advantages = advantagesRu.length ? advantagesRu : lines(data.advantagesEn);
-  const why = text(data.whyChooseRu) || text(data.whyChooseEn);
-  const popularRu = lines(data.popularServicesRu);
-  const popular = popularRu.length ? popularRu : lines(data.popularServicesEn);
-  const tourism = text(data.medicalTourismRu) || text(data.medicalTourismEn);
+  const history = pick(data.historyRu, data.historyEn);
+  const mission = pick(data.missionRu, data.missionEn);
+  const advantages = pickLines(data.advantagesRu, data.advantagesEn);
+  const why = pick(data.whyChooseRu, data.whyChooseEn);
+  const plans = pick(data.developmentPlansRu, data.developmentPlansEn);
+  const popular = pickLines(data.popularServicesRu, data.popularServicesEn);
+  const tourism = pick(data.medicalTourismRu, data.medicalTourismEn);
   const cityLabel = CITY_LABELS[data.city] || data.city;
-  const mapBranch = (data.branches || []).find(
-    (b: { lat?: number | null; lng?: number | null }) =>
-      b.lat != null && b.lng != null && Number.isFinite(b.lat) && Number.isFinite(b.lng),
-  ) as
-    | {
-        lat: number;
-        lng: number;
-        addressRu?: string;
-        addressEn?: string;
-        nameRu?: string;
-        nameEn?: string;
-        slug?: string;
-      }
-    | undefined;
-  const mapLocation = mapBranch || (
-    data.lat != null && data.lng != null && Number.isFinite(data.lat) && Number.isFinite(data.lng)
-      ? { lat: data.lat, lng: data.lng, addressRu: data.addressRu, addressEn: data.addressEn }
-      : undefined
-  );
-
-  const cities: string = data.cities?.length
-    ? data.cities.map((c: string) => CITY_LABELS[c] || c).join(", ")
-    : cityLabel;
+  const branches: Branch[] = data.branches || [];
+  const mapBranch = branches.find((b) => b.lat != null && b.lng != null && Number.isFinite(b.lat) && Number.isFinite(b.lng)) as (Branch & { lat: number; lng: number }) | undefined;
+  const mapLocation = mapBranch
+    ? { lat: mapBranch.lat, lng: mapBranch.lng, address: pick(mapBranch.addressRu, mapBranch.addressEn) }
+    : data.lat != null && data.lng != null && Number.isFinite(data.lat) && Number.isFinite(data.lng)
+      ? { lat: data.lat as number, lng: data.lng as number, address: pick(data.addressRu, data.addressEn) }
+      : null;
+  const cities: string = data.cities?.length ? data.cities.map((c: string) => CITY_LABELS[c] || c).join(", ") : cityLabel;
   const doctors = data.doctors || [];
   const specialties: { slug: string; nameRu?: string; nameEn: string }[] = data.specialties || [];
-  const phoneHref = data.phone ? `tel:${String(data.phone).replace(/\s/g, "")}` : null;
-  const stats = [
-    doctors.length ? { value: doctors.length, label: "специалистов" } : null,
-    data.branches?.length ? { value: data.branches.length, label: data.branches.length === 1 ? "филиал" : "филиалов" } : null,
-    specialties.length ? { value: specialties.length, label: "направлений" } : null,
-    data.foundedYear ? { value: data.foundedYear, label: "год основания" } : null,
+  const services = data.services || [];
+  const leaders: { id?: string; name: string; roleRu?: string; roleEn?: string; bioRu?: string; bioEn?: string; photoUrl?: string | null }[] = Array.isArray(data.leaders) ? data.leaders : [];
+  const achievements: { id?: string; titleRu?: string; titleEn?: string; descriptionRu?: string; descriptionEn?: string; year?: number | null }[] = Array.isArray(data.achievements) ? data.achievements : [];
+  const technologies: { id?: string; nameRu?: string; nameEn?: string; descriptionRu?: string; descriptionEn?: string }[] = Array.isArray(data.technologies) ? data.technologies : [];
+  const equipment: { id: string; nameRu?: string; nameEn: string; manufacturer?: string; descriptionRu?: string; descriptionEn?: string; photoUrl?: string | null }[] = data.equipment || [];
+  const certificates: { id: string; nameRu?: string; nameEn: string; issuerRu?: string; issuerEn?: string; year?: number | null; receivedAt?: string | null; validUntil?: string | null; fileUrl?: string | null; imageUrl?: string | null }[] = data.certificates || [];
+
+  const facts = [
+    doctors.length ? { value: doctors.length, label: countWord(lang, doctors.length, { ru: ["специалист", "специалиста", "специалистов"], uz: "mutaxassis", en: ["specialist", "specialists"] }) } : null,
+    branches.length ? { value: branches.length, label: countWord(lang, branches.length, { ru: ["филиал", "филиала", "филиалов"], uz: "filial", en: ["branch", "branches"] }) } : null,
+    specialties.length ? { value: specialties.length, label: countWord(lang, specialties.length, { ru: ["направление", "направления", "направлений"], uz: "yoʻnalish", en: ["specialty", "specialties"] }) } : null,
+    data.foundedYear ? { value: data.foundedYear, label: t({ ru: "год основания", uz: "tashkil topgan yil", en: "founded" }) } : null,
   ].filter(Boolean) as { value: number; label: string }[];
 
+  const hasAbout = Boolean(description || history || mission || specialties.length);
+  const hasLeadership = Boolean(data.founderName || data.chiefDoctorName || leaders.length);
+  const sections: BarSection[] = [
+    hasAbout ? { id: "about", label: t(L.about) } : null,
+    doctors.length ? { id: "doctors", label: t(L.doctors), count: doctors.length } : null,
+    services.length ? { id: "services", label: t(L.services), count: services.length } : null,
+    equipment.length || technologies.length || certificates.length ? { id: "equipment", label: t(L.equipmentKicker) } : null,
+    mapLocation ? { id: "location", label: t(L.map) } : null,
+    { id: "branches", label: t(L.branches), count: branches.length || undefined },
+  ].filter(Boolean) as BarSection[];
+
   return (
-    <div className="space-y-12">
-      <nav className="flex items-center gap-2 text-sm font-semibold text-muted">
-        <Link to="/" className="hover:text-primary">
-          Каталог
-        </Link>
-        <span aria-hidden="true">/</span>
-        <span className="truncate text-ink">{name}</span>
-      </nav>
+    <div ref={root} className="cp">
+      <div className="wrap">
+        <nav className="cp-crumbs" aria-label="Breadcrumbs">
+          <Link to="/" hash="catalog" className="cp-back" aria-label={t(L.back)}>
+            <ArrowIcon size={15} />
+          </Link>
+          <Link to="/" hash="catalog">
+            {t(L.catalog)}
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span>{name}</span>
+        </nav>
 
-      <header className="clinic-hero">
-        <div className="clinic-hero-body">
-          <div className="flex items-center gap-4">
-            <ClinicLogo src={data.logoUrl} name={name} className="h-[72px] rounded-[20px] md:h-20" wide />
-            <div className="clinic-hero-eyebrow">
-              <span className="inline-flex items-center gap-1.5">
-                <Icon name="pin" size={15} />
-                {cities}
-              </span>
-              {data.responseHours ? <span>ответ ~{data.responseHours} ч</span> : null}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h1>{name}</h1>
-            {description ? <p className="clinic-hero-lead">{description}</p> : null}
-          </div>
-
-          {specialties.length ? (
-            <div className="flex flex-wrap gap-2">
-              {specialties.slice(0, 5).map((s) => (
-                <span key={s.slug} className="clinic-tag">
-                  {s.nameRu || s.nameEn}
+        <header className="cp-hero">
+          <div className="cp-hero-copy">
+            <div className="cp-hero-top">
+              <ClinicLogo src={data.logoUrl} name={name} className="h-16 rounded-[18px] md:h-[72px]" wide />
+              <div className="cp-chips">
+                <span className="cp-chip">
+                  <Icon name="pin" size={14} />
+                  {cities}
                 </span>
-              ))}
-              {specialties.length > 5 ? (
-                <a href="#about" className="clinic-tag is-accent">
-                  +{specialties.length - 5}
+                {data.responseHours ? (
+                  <span className="cp-chip">
+                    <Icon name="clock" size={14} />
+                    {t(L.reply).replace("{n}", String(data.responseHours))}
+                  </span>
+                ) : null}
+                {data.medicalTourism ? <span className="cp-chip is-open">{t(L.tourism)}</span> : null}
+              </div>
+            </div>
+
+            <h1 className="cp-title">{name}</h1>
+            {description ? <p className="cp-intro">{description}</p> : null}
+
+            {specialties.length ? (
+              <div className="cp-tags">
+                {specialties.slice(0, 4).map((s) => (
+                  <span key={s.slug}>{pickName(lang, s.nameRu, s.nameEn)}</span>
+                ))}
+                {specialties.length > 4 ? <a href="#about">+{specialties.length - 4}</a> : null}
+              </div>
+            ) : null}
+
+            <div className="cp-hero-actions">
+              <a href="#lead" className="pill-btn is-ink">
+                {t(L.request)}
+                <span className="pill-btn-icon">
+                  <ArrowIcon />
+                </span>
+              </a>
+              {data.phone ? (
+                <a href={telHref(String(data.phone))} className="pill-btn is-outline">
+                  <Icon name="phone" size={17} />
+                  {data.phone}
                 </a>
               ) : null}
             </div>
-          ) : null}
 
-          {stats.length ? (
-            <div className="clinic-stats">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <strong>{stat.value}</strong>
-                  <span>{stat.label}</span>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="clinic-hero-actions">
-            <a href="#lead" className="btn btn-primary">
-              Оставить заявку
-            </a>
-            {phoneHref ? (
-              <a href={phoneHref} className="btn btn-ghost">
-                <Icon name="phone" size={16} />
-                {data.phone}
-              </a>
+            {facts.length ? (
+              <dl className="cp-facts">
+                {facts.map((fact) => (
+                  <div key={fact.label}>
+                    <dt className="sr-only">{fact.label}</dt>
+                    <dd>
+                      <strong>{fact.value}</strong>
+                      <span>{fact.label}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             ) : null}
           </div>
-        </div>
 
-        {gallery.length ? (
-          <PhotoMosaic photos={gallery} />
-        ) : (
-          <div className="clinic-mosaic-empty" aria-hidden="true">
-            <img src="/brand/logo.svg" alt="" width={72} height={72} />
+          <div className="cp-hero-media">
+            {gallery.length ? (
+              <PhotoMosaic photos={gallery} />
+            ) : (
+              <div className="cp-hero-empty" aria-hidden="true">
+                <img src="/brand/logo.svg" alt="" width={88} height={88} />
+              </div>
+            )}
           </div>
-        )}
-      </header>
+        </header>
+      </div>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_440px]">
-        <div className="min-w-0 space-y-14">
-          {description || history || mission || specialties.length ? (
-            <ProfileSection id="about" title="О клинике">
-              {description ? (
-                <p className="max-w-3xl text-base leading-relaxed text-muted md:text-[17px]">{description}</p>
-              ) : null}
+      <SectionBar sections={sections} cta={t(L.request)} />
+
+      <div className="wrap cp-body">
+        <div className="cp-main">
+          {hasAbout ? (
+            <ProfileSection id="about" kicker={t(L.aboutKicker)} title={t(L.about)}>
+              {description ? <p className="cp-text is-lead">{description}</p> : null}
               {history || mission ? (
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="cp-grid">
                   {history ? (
-                    <div className="clinic-panel p-6">
-                      <p className="clinic-label">История</p>
-                      <p className="mt-3 text-sm leading-relaxed text-muted">{history}</p>
+                    <div className={`cp-card${mission ? "" : " is-wide"}`}>
+                      <p className="cp-label">{t(L.history)}</p>
+                      <p>{history}</p>
                     </div>
                   ) : null}
                   {mission ? (
-                    <div className="clinic-panel p-6">
-                      <p className="clinic-label">Миссия</p>
-                      <p className="mt-3 text-sm leading-relaxed text-muted">{mission}</p>
+                    <div className={`cp-card${history ? "" : " is-wide"}`}>
+                      <p className="cp-label">{t(L.mission)}</p>
+                      <p>{mission}</p>
                     </div>
                   ) : null}
                 </div>
               ) : null}
               {specialties.length ? (
-                <div className="clinic-panel p-6">
-                  <p className="clinic-label">Направления</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
+                <div className="cp-card">
+                  <p className="cp-label">{t(L.directions)}</p>
+                  <div className="cp-pills mt-4">
                     {specialties.map((s) => (
-                      <span key={s.slug} className="clinic-tag">
-                        {s.nameRu || s.nameEn}
+                      <span key={s.slug}>
+                        <i aria-hidden="true" />
+                        {pickName(lang, s.nameRu, s.nameEn)}
                       </span>
                     ))}
                   </div>
-                  {data.languages?.length || data.medicalTourism ? (
-                    <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-5">
-                      {data.languages?.length ? (
-                        <span className="clinic-tag is-accent uppercase tracking-wide">
-                          {data.languages.join(" · ")}
-                        </span>
-                      ) : null}
-                      {data.medicalTourism ? <span className="clinic-tag is-accent">Медтуризм</span> : null}
+                  {data.languages?.length ? (
+                    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-5">
+                      <span className="cp-label">{t(L.languages)}</span>
+                      <div className="cp-pills">
+                        {data.languages.map((code: string) => (
+                          <span key={code} className="is-accent uppercase">
+                            {code}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -230,18 +335,14 @@ function ClinicDetailPage() {
             </ProfileSection>
           ) : null}
 
-          {gallery.length > 3 ? (
-            <ProfileSection title="Фотографии" count={gallery.length}>
-              <PhotoCarousel photos={gallery} />
-            </ProfileSection>
-          ) : null}
-
           {advantages.length ? (
-            <ProfileSection title="Преимущества">
-              <ul className="grid gap-3 sm:grid-cols-2">
+            <ProfileSection kicker={t(L.advantagesKicker)} title={t(L.advantages)}>
+              <ul className="cp-checks">
                 {advantages.map((item) => (
-                  <li key={item} className="clinic-panel flex gap-3 px-5 py-4 text-sm leading-relaxed text-ink">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                  <li key={item}>
+                    <span>
+                      <Icon name="check" size={15} />
+                    </span>
                     {item}
                   </li>
                 ))}
@@ -249,154 +350,66 @@ function ClinicDetailPage() {
             </ProfileSection>
           ) : null}
 
-          {why ? (
-            <ProfileSection title="Почему выбирают">
-              <p className="max-w-3xl text-sm leading-relaxed text-muted md:text-base">{why}</p>
-            </ProfileSection>
-          ) : null}
-
-          {(text(data.developmentPlansRu) || text(data.developmentPlansEn)) && (
-            <ProfileSection title="Планы развития">
-              <p className="max-w-3xl text-sm leading-relaxed text-muted md:text-base">
-                {text(data.developmentPlansRu) || text(data.developmentPlansEn)}
-              </p>
-            </ProfileSection>
-          )}
-
-          {data.founderName ? (
-            <ProfileSection title="Основатель">
-              <div className="clinic-panel flex flex-wrap items-center gap-4 p-5">
-                <span className="clinic-avatar h-16 w-16 rounded-2xl text-lg">
-                  {data.founderPhotoUrl ? <img src={data.founderPhotoUrl} alt="" /> : initials(data.founderName)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-lg font-semibold text-ink">{data.founderName}</p>
-                  <p className="text-sm text-muted">{data.founderRoleRu || data.founderRoleEn}</p>
-                  {(data.founderBioRu || data.founderBioEn) && (
-                    <p className="mt-2 text-sm text-muted">{data.founderBioRu || data.founderBioEn}</p>
-                  )}
-                </div>
+          {why || tourism || plans ? (
+            <ProfileSection kicker={t(L.advantagesKicker)} title={t(L.more)}>
+              <div className="cp-grid">
+                {[
+                  why ? { label: t(L.why), body: why } : null,
+                  tourism ? { label: t(L.tourismText), body: tourism } : null,
+                  plans ? { label: t(L.plans), body: plans } : null,
+                ]
+                  .filter(Boolean)
+                  .map((item, i, list) => (
+                    <div key={item!.label} className={`cp-card${list.length % 2 === 1 && i === 0 ? " is-wide" : ""}`}>
+                      <p className="cp-label">{item!.label}</p>
+                      <p className="whitespace-pre-line">{item!.body}</p>
+                    </div>
+                  ))}
               </div>
             </ProfileSection>
           ) : null}
 
-          {Array.isArray(data.achievements) && data.achievements.length ? (
-            <ProfileSection title="Достижения">
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {data.achievements.map((a: { id?: string; titleRu?: string; titleEn?: string; descriptionRu?: string; descriptionEn?: string; year?: number | null }) => (
-                  <li key={a.id || a.titleRu} className="clinic-panel p-5">
-                    {a.year ? <p className="clinic-label">{a.year}</p> : null}
-                    <p className="mt-1 font-semibold text-ink">{a.titleRu || a.titleEn}</p>
-                    {(a.descriptionRu || a.descriptionEn) ? <p className="mt-1 text-sm text-muted">{a.descriptionRu || a.descriptionEn}</p> : null}
-                  </li>
+          {doctors.length ? (
+            <ProfileSection id="doctors" kicker={t(L.team)} title={t(L.doctorsTitle)} count={doctors.length}>
+              <DoctorList doctors={doctors} />
+            </ProfileSection>
+          ) : null}
+
+          {hasLeadership ? (
+            <ProfileSection kicker={t(L.team)} title={t(L.leadership)}>
+              <ul className="cp-people">
+                {data.founderName ? (
+                  <PersonCard
+                    wide
+                    name={data.founderName}
+                    role={pick(data.founderRoleRu, data.founderRoleEn) || t(L.founder)}
+                    bio={pick(data.founderBioRu, data.founderBioEn)}
+                    photoUrl={data.founderPhotoUrl}
+                  />
+                ) : null}
+                {data.chiefDoctorName ? (
+                  <PersonCard
+                    wide={!data.founderName}
+                    name={data.chiefDoctorName}
+                    role={pick(data.chiefDoctorRoleRu, data.chiefDoctorRoleEn) || t(L.chief)}
+                    bio={pick(data.chiefDoctorBioRu, data.chiefDoctorBioEn)}
+                    photoUrl={data.chiefDoctorPhotoUrl}
+                  />
+                ) : null}
+                {leaders.map((l) => (
+                  <PersonCard key={l.id || l.name} name={l.name} role={pick(l.roleRu, l.roleEn)} bio={pick(l.bioRu, l.bioEn)} photoUrl={l.photoUrl} />
                 ))}
               </ul>
             </ProfileSection>
           ) : null}
 
-          {Array.isArray(data.technologies) && data.technologies.length ? (
-            <ProfileSection title="Технологии и методики">
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {data.technologies.map(
-                  (t: { id?: string; nameRu?: string; nameEn?: string; descriptionRu?: string; descriptionEn?: string }) => (
-                    <li key={t.id || t.nameRu} className="clinic-panel p-5">
-                      <p className="font-semibold text-ink">{t.nameRu || t.nameEn}</p>
-                      {(t.descriptionRu || t.descriptionEn) && (
-                        <p className="mt-2 text-sm text-muted">{t.descriptionRu || t.descriptionEn}</p>
-                      )}
-                    </li>
-                  ),
-                )}
-              </ul>
-            </ProfileSection>
-          ) : null}
-
-          {data.chiefDoctorName || (Array.isArray(data.leaders) && data.leaders.length) ? (
-            <ProfileSection title="Руководство">
-              {data.chiefDoctorName ? (
-                <div className="clinic-panel flex flex-wrap items-center gap-4 p-5">
-                  <span className="clinic-avatar h-16 w-16 rounded-2xl text-lg">
-                    {data.chiefDoctorPhotoUrl ? <img src={data.chiefDoctorPhotoUrl} alt="" /> : initials(data.chiefDoctorName)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-lg font-semibold text-ink">{data.chiefDoctorName}</p>
-                    <p className="text-sm text-muted">{data.chiefDoctorRoleRu || data.chiefDoctorRoleEn}</p>
-                    {(data.chiefDoctorBioRu || data.chiefDoctorBioEn) && (
-                      <p className="mt-2 text-sm leading-relaxed text-muted">
-                        {data.chiefDoctorBioRu || data.chiefDoctorBioEn}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-              {Array.isArray(data.leaders) && data.leaders.length ? (
-                <ul className="grid gap-3 sm:grid-cols-2">
-                  {data.leaders.map(
-                    (l: {
-                      id?: string;
-                      name: string;
-                      roleRu?: string;
-                      roleEn?: string;
-                      bioRu?: string;
-                      bioEn?: string;
-                      photoUrl?: string | null;
-                    }) => (
-                      <li key={l.id || l.name} className="clinic-panel flex gap-4 p-5">
-                        <span className="clinic-avatar h-12 w-12 rounded-xl text-sm">
-                          {l.photoUrl ? <img src={l.photoUrl} alt="" /> : initials(l.name)}
-                        </span>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-ink">{l.name}</p>
-                          <p className="text-sm text-muted">{l.roleRu || l.roleEn}</p>
-                          {(l.bioRu || l.bioEn) && <p className="mt-1 text-sm text-muted">{l.bioRu || l.bioEn}</p>}
-                        </div>
-                      </li>
-                    ),
-                  )}
-                </ul>
-              ) : null}
-            </ProfileSection>
-          ) : null}
-
-          {doctors.length ? (
-            <ProfileSection id="doctors" title="Специалисты" count={doctors.length}>
-              <DoctorList doctors={doctors} />
-            </ProfileSection>
-          ) : null}
-
-          {data.services?.length ? (
-            <ProfileSection title="Услуги и цены">
-              <ul className="clinic-panel divide-y divide-line overflow-hidden">
-                {data.services.map(
-                  (s: {
-                    id: string;
-                    nameRu?: string;
-                    nameEn: string;
-                    descriptionRu?: string;
-                    descriptionEn?: string;
-                    priceUsd?: number | null;
-                    currency?: string;
-                    unit?: string;
-                  }) => {
-                    const price = formatServicePrice(s);
-                    return (
-                      <li key={s.id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-ink">{s.nameRu || s.nameEn}</p>
-                          {(s.descriptionRu || s.descriptionEn) && (
-                            <p className="mt-1 text-sm text-muted">{s.descriptionRu || s.descriptionEn}</p>
-                          )}
-                        </div>
-                        {price ? <p className="shrink-0 text-sm font-bold text-accent-strong">{price}</p> : null}
-                      </li>
-                    );
-                  },
-                )}
-              </ul>
+          {services.length ? (
+            <ProfileSection id="services" kicker={t(L.prices)} title={t(L.servicesTitle)} count={services.length}>
+              <ServicesList services={services} />
               {popular.length ? (
-                <div className="rounded-[22px] bg-mint px-6 py-5">
-                  <p className="clinic-label">Популярные услуги</p>
-                  <ul className="mt-3 space-y-1.5 text-sm text-ink">
+                <div className="cp-popular">
+                  <p className="cp-label">{t(L.popular)}</p>
+                  <ul>
                     {popular.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -404,178 +417,171 @@ function ClinicDetailPage() {
                 </div>
               ) : null}
             </ProfileSection>
-          ) : null}
-
-          {data.equipment?.length ? (
-            <ProfileSection title="Оборудование">
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {data.equipment.map(
-                  (e: {
-                    id: string;
-                    nameRu?: string;
-                    nameEn: string;
-                    manufacturer?: string;
-                    descriptionRu?: string;
-                    descriptionEn?: string;
-                    photoUrl?: string | null;
-                  }) => (
-                    <li key={e.id} className="clinic-panel flex gap-4 p-4">
-                      {e.photoUrl ? <FitImage src={e.photoUrl} className="h-20 w-20 shrink-0 rounded-xl" tolerance={0.2} /> : null}
-                      <div className="min-w-0">
-                        <p className="font-semibold text-ink">{e.nameRu || e.nameEn}</p>
-                        {e.manufacturer ? <p className="mt-1 clinic-label">{e.manufacturer}</p> : null}
-                        {(e.descriptionRu || e.descriptionEn) && (
-                          <p className="mt-2 text-sm text-muted">{e.descriptionRu || e.descriptionEn}</p>
-                        )}
-                      </div>
-                    </li>
-                  ),
-                )}
-              </ul>
+          ) : popular.length ? (
+            <ProfileSection kicker={t(L.prices)} title={t(L.popular)}>
+              <div className="cp-popular">
+                <ul className="!mt-0">
+                  {popular.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
             </ProfileSection>
           ) : null}
 
-          {data.certificates?.length ? (
-            <ProfileSection title="Сертификаты и лицензии">
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {data.certificates.map(
-                  (c: {
-                    id: string;
-                    nameRu?: string;
-                    nameEn: string;
-                    issuerRu?: string;
-                    issuerEn?: string;
-                    year?: number | null;
-                    receivedAt?: string | null;
-                    validUntil?: string | null;
-                    fileUrl?: string | null;
-                    imageUrl?: string | null;
-                  }) => (
-                    <li key={c.id} className="clinic-panel flex gap-4 p-4">
-                      {c.imageUrl ? <FitImage src={c.imageUrl} className="h-16 w-16 shrink-0 rounded-xl" tolerance={0.2} /> : null}
+          {gallery.length > 3 ? (
+            <ProfileSection kicker={t(L.inside)} title={t(L.photos)} count={gallery.length}>
+              <PhotoCarousel photos={gallery} />
+            </ProfileSection>
+          ) : null}
+
+          {equipment.length || technologies.length ? (
+            <ProfileSection id="equipment" kicker={t(L.equipmentKicker)} title={equipment.length ? t(L.equipment) : t(L.tech)}>
+              {equipment.length ? (
+                <ul className="cp-grid">
+                  {equipment.map((e) => (
+                    <li key={e.id} className="cp-card is-row">
+                      {e.photoUrl ? <FitImage src={e.photoUrl} className="cp-thumb" tolerance={0.2} /> : null}
                       <div className="min-w-0">
-                        <p className="font-semibold text-ink">{c.nameRu || c.nameEn}</p>
-                        <p className="mt-1 text-sm text-muted">
-                          {c.issuerRu || c.issuerEn}
-                          {c.receivedAt ? ` · получен ${c.receivedAt}` : c.year ? ` · ${c.year}` : ""}
-                          {c.validUntil ? ` · до ${c.validUntil}` : ""}
+                        {e.manufacturer ? <p className="cp-label">{e.manufacturer}</p> : null}
+                        <h3 className={e.manufacturer ? "mt-1.5" : undefined}>{pickName(lang, e.nameRu, e.nameEn)}</h3>
+                        {pick(e.descriptionRu, e.descriptionEn) ? <p className="mt-2">{pick(e.descriptionRu, e.descriptionEn)}</p> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {technologies.length ? (
+                <>
+                  {equipment.length ? <h3 className="mt-4 text-xl font-semibold tracking-tight text-ink">{t(L.tech)}</h3> : null}
+                  <ul className="cp-grid">
+                    {technologies.map((item) => (
+                      <li key={item.id || item.nameRu} className="cp-card">
+                        <h3>{pickName(lang, item.nameRu, item.nameEn)}</h3>
+                        {pick(item.descriptionRu, item.descriptionEn) ? <p>{pick(item.descriptionRu, item.descriptionEn)}</p> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </ProfileSection>
+          ) : null}
+
+          {certificates.length || achievements.length ? (
+            <ProfileSection id={equipment.length || technologies.length ? undefined : "equipment"} kicker={t(L.trust)} title={certificates.length ? t(L.certs) : t(L.achievements)}>
+              {certificates.length ? (
+                <ul className="cp-grid">
+                  {certificates.map((c) => (
+                    <li key={c.id} className="cp-card is-row">
+                      {c.imageUrl ? <FitImage src={c.imageUrl} className="cp-thumb" tolerance={0.2} /> : null}
+                      <div className="min-w-0">
+                        <h3>{pickName(lang, c.nameRu, c.nameEn)}</h3>
+                        <p className="mt-1.5">
+                          {pickName(lang, c.issuerRu, c.issuerEn)}
+                          {c.receivedAt ? ` · ${t(L.received)} ${c.receivedAt}` : c.year ? ` · ${c.year}` : ""}
+                          {c.validUntil ? ` · ${t(L.validUntil)} ${c.validUntil}` : ""}
                         </p>
                         {c.fileUrl ? (
-                          <a href={c.fileUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-bold text-primary">
-                            Открыть файл
+                          <a href={c.fileUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm">
+                            <Icon name="file" size={16} />
+                            {t(L.openFile)}
                           </a>
                         ) : null}
                       </div>
                     </li>
-                  ),
-                )}
-              </ul>
-            </ProfileSection>
-          ) : null}
-
-          {tourism ? (
-            <ProfileSection title="Медицинский туризм">
-              <p className="max-w-3xl text-sm leading-relaxed text-muted md:text-base">{tourism}</p>
+                  ))}
+                </ul>
+              ) : null}
+              {achievements.length ? (
+                <>
+                  {certificates.length ? <h3 className="mt-4 text-xl font-semibold tracking-tight text-ink">{t(L.achievements)}</h3> : null}
+                  <ul className="cp-grid">
+                    {achievements.map((a) => (
+                      <li key={a.id || a.titleRu} className="cp-card">
+                        {a.year ? <p className="cp-label">{a.year}</p> : null}
+                        <h3>{pickName(lang, a.titleRu, a.titleEn)}</h3>
+                        {pick(a.descriptionRu, a.descriptionEn) ? <p>{pick(a.descriptionRu, a.descriptionEn)}</p> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </ProfileSection>
           ) : null}
 
           {mapLocation ? (
-            <ProfileSection title="Расположение">
-              {(mapLocation.addressRu || mapLocation.addressEn) && (
-                <p className="flex items-start gap-2 text-sm text-muted">
-                  <span className="mt-0.5 text-primary"><Icon name="pin" size={16} /></span>
-                  {mapLocation.addressRu || mapLocation.addressEn}
-                </p>
-              )}
-              <div className="min-w-0 overflow-hidden rounded-[22px]">
+            <ProfileSection id="location" kicker={t(L.location)} title={t(L.map)}>
+              <div className="cp-map">
                 <BranchMap mode="view" lat={mapLocation.lat} lng={mapLocation.lng} className="w-full max-w-full" />
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <a
-                  className="btn btn-primary"
-                  href={yandexRouteUrl(mapLocation.lat, mapLocation.lng)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Построить маршрут
-                </a>
-                {mapBranch?.slug ? (
-                  <Link
-                    to="/clinics/$slug/branches/$branchSlug"
-                    params={{ slug, branchSlug: mapBranch.slug }}
-                    className="inline-flex items-center text-sm font-bold text-primary"
-                  >
-                    {mapBranch.nameRu || mapBranch.nameEn || "Филиал"}
-                  </Link>
-                ) : null}
+              <div className="cp-address">
+                <p>
+                  <Icon name="pin" size={20} />
+                  {mapLocation.address || cities}
+                </p>
+                <div className="cp-address-actions">
+                  <a className="pill-btn is-ink" href={yandexRouteUrl(mapLocation.lat, mapLocation.lng)} target="_blank" rel="noreferrer">
+                    {t(L.route)}
+                    <span className="pill-btn-icon">
+                      <Icon name="route" size={17} />
+                    </span>
+                  </a>
+                </div>
               </div>
             </ProfileSection>
           ) : null}
 
-          <ProfileSection id="branches" title="Филиалы" count={data.branches?.length}>
-            {(data.branches || []).length === 0 ? (
-              <p className="text-sm text-muted">Филиалы не указаны</p>
+          <ProfileSection id="branches" kicker={t(L.branchesKicker)} title={t(L.branches)} count={branches.length || undefined}>
+            {branches.length === 0 ? (
+              <p className="cp-text">{t(L.noBranches)}</p>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {data.branches.map(
-                  (b: {
-                    id: string;
-                    slug: string;
-                    nameRu?: string;
-                    nameEn: string;
-                    city: string;
-                    addressRu?: string;
-                    addressEn?: string;
-                    coverUrl?: string | null;
-                    phone?: string;
-                  }) => (
-                    <Link
-                      key={b.id}
-                      to="/clinics/$slug/branches/$branchSlug"
-                      params={{ slug, branchSlug: b.slug }}
-                      className="clinic-card"
-                    >
-                      <div className="clinic-card-cover">
+              <div className="clinic-tiles cp-branches">
+                {branches.map((b) => {
+                  const address = pick(b.addressRu, b.addressEn);
+                  return (
+                    <Link key={b.id} to="/clinics/$slug/branches/$branchSlug" params={{ slug, branchSlug: b.slug }} className="clinic-tile">
+                      <div className="clinic-tile-cover">
                         {b.coverUrl ? (
-                          <FitImage src={b.coverUrl} className="clinic-card-photo" />
+                          <FitImage src={b.coverUrl} className="clinic-tile-photo" />
                         ) : (
-                          <div className="clinic-card-placeholder">
-                            <img src="/brand/logo.svg" alt="" width={56} height={56} />
+                          <div className="clinic-tile-placeholder">
+                            <img src="/brand/logo.svg" alt="" width={64} height={64} />
                           </div>
                         )}
-                        <span className="clinic-card-city">{CITY_LABELS[b.city] || b.city}</span>
                       </div>
-                      <div className="clinic-card-body">
-                        <div className="clinic-card-head">
-                          <h3>{b.nameRu || b.nameEn}</h3>
-                        </div>
-                        {(b.addressRu || b.addressEn) && (
-                          <p className="clinic-card-address">
+                      <div className="clinic-tile-body">
+                        <h3>{pickName(lang, b.nameRu, b.nameEn)}</h3>
+                        <p className="clinic-tile-meta">
+                          <span className="clinic-tile-city">
                             <Icon name="pin" size={14} />
-                            {b.addressRu || b.addressEn}
-                          </p>
-                        )}
-                        <div className="clinic-card-foot">
-                          <span className="clinic-card-meta">{b.phone || ""}</span>
-                          <span className="clinic-card-more">
-                            Подробнее
-                            <span>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            </span>
+                            {CITY_LABELS[b.city] || b.city}
                           </span>
-                        </div>
+                        </p>
+                        {address ? <p className="clinic-tile-text">{address}</p> : null}
                       </div>
+                      <p className="clinic-tile-foot">
+                        {b.phone ? (
+                          <span className="clinic-tile-reply">
+                            <Icon name="phone" size={14} />
+                            {b.phone}
+                          </span>
+                        ) : (
+                          <span />
+                        )}
+                        <span className="clinic-tile-arrow" aria-hidden="true">
+                          <ArrowIcon size={15} />
+                        </span>
+                      </p>
                     </Link>
-                  ),
-                )}
+                  );
+                })}
               </div>
             )}
           </ProfileSection>
         </div>
 
-        <aside className="min-w-0 space-y-4">
+        <aside className="cp-aside">
+          <LeadForm clinicSlug={data.slug} clinicName={name} defaultSymptoms={symptoms} responseHours={data.responseHours} />
           <ContactCard
             logoUrl={data.logoUrl}
             name={name}
@@ -590,18 +596,18 @@ function ClinicDetailPage() {
             responseHours={data.responseHours}
           >
             {data.coordinatorName ? (
-              <div className="border-t border-white/10 px-6 py-5">
-                <p className="text-xs font-semibold uppercase tracking-[.12em] text-white/60">Координатор</p>
-                <p className="mt-1 font-semibold">{data.coordinatorName}</p>
-                <p className="text-sm text-white/70">{data.coordinatorRoleRu || data.coordinatorRoleEn}</p>
+              <div className="cp-contact-extra">
+                <small>{t(L.coordinator)}</small>
+                <p className="mt-1.5 font-semibold">{data.coordinatorName}</p>
+                {pick(data.coordinatorRoleRu, data.coordinatorRoleEn) ? <p className="text-sm text-white/70">{pick(data.coordinatorRoleRu, data.coordinatorRoleEn)}</p> : null}
               </div>
             ) : null}
           </ContactCard>
-          <div id="lead" className="scroll-mt-28">
-            <LeadForm clinicSlug={data.slug} clinicName={name} defaultSymptoms={symptoms} />
-          </div>
+          <QuickContact name={name} phone={data.phone} whatsapp={data.whatsapp} telegram={data.telegram} responseHours={data.responseHours} cta={t(L.request)} />
         </aside>
       </div>
+
+      <MobileDock cta={t(L.request)} phone={data.phone} />
     </div>
   );
 }

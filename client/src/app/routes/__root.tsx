@@ -4,6 +4,7 @@ import { Footer } from "@/widgets/footer/Footer";
 import { HealthCheckerProvider } from "@/widgets/health-checker/HealthCheckerContext";
 import { HealthCheckerWidget } from "@/widgets/health-checker/HealthCheckerWidget";
 import { LanguageProvider, useLang } from "@/shared/i18n/lang";
+import { WorkspaceShell } from "@/widgets/workspace/Workspace";
 
 // The AI helper bubble is switched off for now; set to true to bring it back.
 const SHOW_HEALTH_CHECKER = true;
@@ -46,45 +47,36 @@ function RootShell() {
   const { lang } = useLang();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isWorkspace = pathname.startsWith("/cabinet") || pathname.startsWith("/moderation");
+  const isSignIn = pathname === "/cabinet/login" || pathname === "/moderation/login";
   const isHome = pathname === "/";
+  // Clinic and branch pages lay out their own width (full-width bars, the site's gutters).
+  const isClinicPage = /^\/clinics\/[^/]+/.test(pathname);
+
+  // The cabinet and the moderation desk have their own frame (a sidebar instead of the site header and footer);
+  // their sign-in pages fill the screen on their own.
+  if (isWorkspace) {
+    return (
+      <HealthCheckerProvider>
+        {isSignIn ? (
+          <Outlet key={lang} />
+        ) : (
+          <WorkspaceShell kind={pathname.startsWith("/moderation") ? "moderation" : "cabinet"}>
+            <Outlet key={lang} />
+          </WorkspaceShell>
+        )}
+      </HealthCheckerProvider>
+    );
+  }
 
   return (
     <HealthCheckerProvider>
-      <div className={`portal flex min-h-screen flex-col ${isHome ? "reference-portal" : ""} ${isWorkspace ? "is-workspace" : ""}`}>
-        {!isWorkspace ? <Header /> : null}
-        <main className={isHome ? "w-full flex-1" : `mx-auto w-full flex-1 px-4 py-8 ${isWorkspace ? "max-w-7xl" : "max-w-[calc(var(--page-width)+2rem)] pb-28"}`}>
-          {isWorkspace ? (
-            <div className="mb-6 flex items-center justify-between gap-3">
-              <Link to="/" className="inline-flex items-center gap-2 font-extrabold text-ink">
-                <img src="/brand/logo.svg" alt="" className="h-8 w-8 object-contain" />
-                MEDGUIDE UZ
-              </Link>
-              <div className="flex items-center gap-3 text-sm font-bold text-muted">
-                {pathname.startsWith("/moderation") ? (
-                  <>
-                    <Link to="/moderation" className="hover:text-primary">
-                      Очередь
-                    </Link>
-                    <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className="hover:text-primary">
-                      Заявки
-                    </Link>
-                    <span>Модерация</span>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/cabinet" className="hover:text-primary">
-                      Мои клиники
-                    </Link>
-                    <span>ЛК клиники</span>
-                  </>
-                )}
-              </div>
-            </div>
-          ) : null}
+      <div className={`portal flex min-h-screen flex-col ${isHome ? "reference-portal" : ""}`}>
+        <Header />
+        <main className={isHome || isClinicPage ? "w-full flex-1" : "mx-auto w-full max-w-[calc(var(--page-width)+2rem)] flex-1 px-4 py-8 pb-28"}>
           <Outlet key={lang} />
         </main>
-        {!isWorkspace ? <Footer /> : null}
-        {!isWorkspace && SHOW_HEALTH_CHECKER ? <HealthCheckerWidget key={lang} showTip={!isHome} hideOverHero={isHome} /> : null}
+        <Footer />
+        {SHOW_HEALTH_CHECKER ? <HealthCheckerWidget key={lang} showTip={!isHome} hideOverHero={isHome} /> : null}
       </div>
     </HealthCheckerProvider>
   );

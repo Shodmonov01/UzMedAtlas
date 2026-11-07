@@ -1,7 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { adminLogin } from "@/shared/api/cabinet";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
+import { AuthLayout, WsIcon } from "@/widgets/workspace/Workspace";
+import { Field } from "@/widgets/clinic-form/FormField";
 
 export const Route = createFileRoute("/moderation/login")({
   component: ModerationLoginPage,
@@ -32,35 +35,61 @@ function ModerationLoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[50vh] max-w-md flex-col justify-center">
-      <h1 className="text-3xl font-extrabold">Модерация</h1>
-      <p className="mt-2 text-muted">Вход для проверки клиник</p>
-      <form onSubmit={onSubmit} className="soft-card mt-6 space-y-4 rounded-[1.75rem] bg-white p-6">
-        <div className="flex gap-2">
-          <button type="button" className={`btn ${mode === "administrator" ? "btn-primary" : "btn-ghost"} text-sm`} onClick={() => setMode("administrator")}>Администратор</button>
-          <button type="button" className={`btn ${mode === "staff" ? "btn-primary" : "btn-ghost"} text-sm`} onClick={() => setMode("staff")}>Модератор</button>
-        </div>
-        {mode === "staff" ? <label className="block text-sm font-bold">Email<input type="email" autoComplete="username" className="field mt-1" value={email} onChange={e => setEmail(e.target.value)} required /></label> : null}
-        <label className="block text-sm font-bold">
-          Пароль
+    <AuthLayout
+      kicker="Модерация"
+      title={
+        <>
+          Проверка клиник <em>перед публикацией</em>
+        </>
+      }
+      points={[
+        "Очередь клиник с чеклистом обязательных полей",
+        "Одобрение, возврат на доработку и публикация в каталоге",
+        "Заявки пациентов и уведомления в Telegram",
+      ]}
+    >
+      <h2>Вход для модераторов</h2>
+      <p>Администратор входит по паролю, модератор — по email и паролю.</p>
+
+      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Роль">
+        <button type="button" role="tab" aria-selected={mode === "administrator"} className={mode === "administrator" ? "is-active" : undefined} onClick={() => setMode("administrator")}>
+          Администратор
+        </button>
+        <button type="button" role="tab" aria-selected={mode === "staff"} className={mode === "staff" ? "is-active" : undefined} onClick={() => setMode("staff")}>
+          Модератор
+        </button>
+      </div>
+
+      <form onSubmit={onSubmit} className="auth-form">
+        {mode === "staff" ? (
+          <Field label="Email">
+            <input type="email" autoComplete="username" className="field" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="name@example.uz" />
+          </Field>
+        ) : null}
+        <Field label="Пароль">
           <input
             type="password"
-            className="field mt-1"
+            className="field"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
             autoFocus
           />
-        </label>
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
-        <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+        </Field>
+        {error ? (
+          <p className="auth-error" role="alert">
+            <WsIcon name="alert" />
+            {error}
+          </p>
+        ) : null}
+        <button className="pill-btn is-ink is-large" type="submit" disabled={loading}>
           {loading ? "Вход…" : "Войти"}
+          <span className="pill-btn-icon">
+            <ArrowIcon />
+          </span>
         </button>
       </form>
-      <Link to="/" className="mt-4 text-sm font-bold text-primary">
-        На главную
-      </Link>
-    </div>
+    </AuthLayout>
   );
 }

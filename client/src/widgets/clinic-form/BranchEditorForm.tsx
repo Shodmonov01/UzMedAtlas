@@ -1,3 +1,4 @@
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { useRef, useState } from "react";
 import type { BranchFormPayload, BranchSchedule, CabinetBranch } from "@/shared/api/cabinet";
 import type { Specialty } from "@/shared/api/client";
@@ -164,19 +165,19 @@ export function BranchEditorForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error ? <p className="rounded-2xl bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p> : null}
+      {error ? <p className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger" role="alert">{error}</p> : null}
 
       {!hideNav ? (
-        <nav className="soft-card flex flex-wrap gap-1 rounded-[1.5rem] bg-white p-2">
-          {BRANCH_CORE_SECTIONS.map((item) => (
+        <nav className="ws-seg" aria-label="Разделы филиала">
+          {BRANCH_CORE_SECTIONS.map((item, i) => (
             <button
               key={item.id}
               type="button"
-              className={`rounded-xl px-3 py-2 text-sm font-bold ${
-                section === item.id ? "bg-lime text-primary-deep" : "text-muted hover:bg-mint"
-              }`}
+              className={section === item.id ? "is-active" : undefined}
+              aria-current={section === item.id ? "step" : undefined}
               onClick={() => setSection(item.id)}
             >
+              <b>{i + 1}</b>
               {item.label}
             </button>
           ))}
@@ -539,7 +540,7 @@ export function BranchEditorForm({
         </fieldset>
 
         {!locked ? (
-          <div className="flex flex-wrap gap-2 border-t border-line pt-4">
+          <div className="wz-actions">
             <button className="btn btn-primary" type="submit" disabled={loading}>
               {loading ? "Сохранение…" : submitLabel}
             </button>
@@ -552,7 +553,9 @@ export function BranchEditorForm({
                   continueAfterSave.current = true;
                 }}
               >
-                Сохранить и продолжить
+                <span className="sm:hidden">Далее</span>
+                <span className="hidden sm:inline">Сохранить и продолжить</span>
+                <ArrowIcon size={15} />
               </button>
             ) : null}
           </div>

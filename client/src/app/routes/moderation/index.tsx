@@ -1,19 +1,30 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { adminLogout, adminMe, fetchModerationQueue } from "@/shared/api/cabinet";
+import { adminMe, fetchModerationQueue } from "@/shared/api/cabinet";
+import { CITY_LABELS } from "@/shared/api/client";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
+import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
-import { adminProfile } from "@/shared/api/telegram";
+import { PageHead, WsLoading, WsNote } from "@/widgets/workspace/Workspace";
 
 export const Route = createFileRoute("/moderation/")({
   component: ModerationQueuePage,
 });
 
+const FILTERS = [
+  ["moderation", "На модерации"],
+  ["needs_changes", "Нужны изменения"],
+  ["approved", "Одобрены"],
+  ["published", "Опубликованы"],
+  ["all", "Все"],
+] as const;
+
 function ModerationQueuePage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("moderation");
+  const [q, setQ] = useState("");
   const auth = useQuery({ queryKey: ["admin-me"], queryFn: adminMe, retry: false });
-  const profile = useQuery({ queryKey: ["admin-profile"], queryFn: adminProfile, enabled: auth.data === true });
   const queue = useQuery({
     queryKey: ["moderation-queue", status],
     queryFn: () => fetchModerationQueue(status),
@@ -26,87 +37,89 @@ function ModerationQueuePage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (auth.isLoading || !auth.data) {
-    return <p className="text-muted">Проверка сессии…</p>;
-  }
+  if (auth.isLoading || !auth.data) return <WsLoading label="Проверка сессии…" />;
+
+  const needle = q.trim().toLowerCase();
+  const list = (queue.data || []).filter(
+    (clinic) => !needle || `${clinic.nameRu} ${clinic.nameEn} ${clinic.city}`.toLowerCase().includes(needle),
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-primary">Модератор</p>
-          <h1 className="mt-1 text-3xl font-extrabold">Очередь клиник</h1>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/moderation/telegram" className="btn btn-ghost text-sm">Telegram</Link>
-          {profile.data?.role === "administrator" ? <Link to="/moderation/team" className="btn btn-ghost text-sm">Модераторы</Link> : null}
-          <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className="btn btn-ghost text-sm">
-            Заявки
-          </Link>
-          <button
-            type="button"
-            className="btn btn-ghost text-sm"
-            onClick={async () => {
-              await adminLogout();
-              void navigate({ to: "/moderation/login" });
-            }}
-          >
-            Выйти
-          </button>
-        </div>
-      </div>
+    <div className="ws-stack">
+      <PageHead
+        eyebrow="Модерация"
+        title="Очередь клиник"
+        lead="Проверьте профиль по чеклисту, затем одобрите и опубликуйте клинику или верните её на доработку с комментарием."
+      />
 
-      <div className="flex flex-wrap gap-2">
-        {[
-          ["moderation", "На модерации"],
-          ["needs_changes", "Нужны изменения"],
-          ["approved", "Одобрены"],
-          ["published", "Опубликованы"],
-          ["all", "Все"],
-        ].map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            className={`rounded-full px-3 py-1.5 text-sm font-bold ${
-              status === value ? "bg-primary text-white" : "bg-white text-muted ring-1 ring-line"
-            }`}
-            onClick={() => setStatus(value)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {queue.isLoading ? <p className="text-muted">Загрузка…</p> : null}
-
-      <div className="grid gap-4">
-        {queue.data?.map((clinic) => (
-          <article
-            key={clinic.id}
-            className="soft-card flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] bg-white p-5"
-          >
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-xl font-extrabold">{clinic.nameRu || clinic.nameEn}</h2>
-                <StatusBadge status={clinic.status} />
-              </div>
-              <p className="mt-1 text-sm text-muted">
-                {clinic.city} · обновлено {new Date(clinic.updatedAt).toLocaleString("ru-RU")}
-                {clinic.branchCount != null ? ` · филиалов: ${clinic.branchCount}` : ""}
-              </p>
-            </div>
-            <Link
-              to="/moderation/$id"
-              params={{ id: clinic.id }}
-              className="btn btn-primary px-4 py-2 text-sm"
+      <div className="ws-toolbar">
+        <div className="ws-seg" role="tablist" aria-label="Статус">
+          {FILTERS.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={status === value}
+              className={status === value ? "is-active" : undefined}
+              onClick={() => setStatus(value)}
             >
-              Проверить
-            </Link>
-          </article>
-        ))}
+              {label}
+              {status === value && queue.data ? <b>{queue.data.length}</b> : null}
+            </button>
+          ))}
+        </div>
+        <label className="ws-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Найти клинику или город" aria-label="Поиск клиники" />
+        </label>
       </div>
 
-      {queue.data?.length === 0 ? <p className="text-muted">Пусто</p> : null}
+      {queue.isLoading ? <WsLoading label="Загружаем очередь…" inline /> : null}
+      {queue.isError ? <WsNote tone="danger" title="Не удалось загрузить очередь" /> : null}
+
+      {list.length ? (
+        <div className="ws-rows">
+          {list.map((clinic) => {
+            const name = clinic.nameRu || clinic.nameEn;
+            return (
+              <article key={clinic.id} className="ws-row">
+                <ClinicLogo src={clinic.logoUrl} name={name} className="h-12 w-12 rounded-2xl" />
+                <div className="ws-row-main">
+                  <h2 className="ws-row-title">
+                    <Link to="/moderation/$id" params={{ id: clinic.id }} className="ws-row-link">
+                      {name}
+                    </Link>
+                    <StatusBadge status={clinic.status} />
+                  </h2>
+                  <p className="ws-row-meta">
+                    <span>{CITY_LABELS[clinic.city] || clinic.city}</span>
+                    {clinic.branchCount != null ? <span>Филиалов: {clinic.branchCount}</span> : null}
+                    <span>Обновлено {new Date(clinic.updatedAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</span>
+                  </p>
+                </div>
+                <div className="ws-row-end">
+                  <span className="hidden text-sm font-semibold text-ink sm:inline">{clinic.status === "moderation" ? "Проверить" : "Открыть"}</span>
+                  <span className="ws-row-arrow" aria-hidden="true">
+                    <ArrowIcon size={15} />
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {queue.data && list.length === 0 ? (
+        <div className="ws-empty">
+          <span className="ws-empty-mark">
+            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+          </span>
+          <h2>{needle ? "Ничего не нашлось" : "Очередь пуста"}</h2>
+          <p>{needle ? "Попробуйте другое название или город." : "Новых клиник на проверку нет. Когда владелец отправит профиль, он появится здесь."}</p>
+        </div>
+      ) : null}
     </div>
   );
 }

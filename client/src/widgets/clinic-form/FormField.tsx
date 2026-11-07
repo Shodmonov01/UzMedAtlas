@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
-/** A titled block of fields in an "add" form, two columns on wide screens. */
+/** A titled block of fields in an "add" form: a paper panel with a small green label, two columns on wide screens. */
 export function FormGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <fieldset className="rounded-2xl border border-line p-4">
-      <legend className="px-1 text-xs font-bold uppercase tracking-wide text-primary">{title}</legend>
+    <fieldset className="ws-group">
+      <legend>{title}</legend>
       <div className="grid gap-3 md:grid-cols-2">{children}</div>
     </fieldset>
   );
@@ -24,10 +24,10 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <label className={`block text-sm font-bold${wide ? " md:col-span-2" : ""}`}>
-      {label}
-      <div className="mt-1">{children}</div>
-      {hint ? <p className="mt-1 text-xs font-normal text-muted">{hint}</p> : null}
+    <label className={`ws-field${wide ? " md:col-span-2" : ""}`}>
+      <span className="ws-field-label">{label}</span>
+      {children}
+      {hint ? <span className="ws-field-hint">{hint}</span> : null}
     </label>
   );
 }

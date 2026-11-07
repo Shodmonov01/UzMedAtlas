@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Specialty } from "@/shared/api/client";
 import {
@@ -16,6 +16,7 @@ import {
   setClinicMainPhoto,
   updateCabinetClinic,
   uploadCabinetFile,
+  STATUS_LABELS,
   WIZARD_SECTIONS,
   type CabinetClinic,
   type AchievementItem,
@@ -30,6 +31,11 @@ import { BranchMap } from "@/shared/ui/BranchMap";
 import { AddressMapSearchButton } from "@/shared/ui/AddressMapSearchButton";
 import { BriefUpload } from "./BriefUpload";
 import { Field, FormGroup } from "./FormField";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
+import { WsIcon, WsToast } from "@/widgets/workspace/Workspace";
+
+/** Steps that end in their own save buttons; the others get a back / next pager. */
+const FORM_SECTIONS = new Set<string>(["basic", "about", "directions", "leadership", "contacts", "extra"]);
 
 const LANGS = ["ru", "en", "uz", "kz", "tr", "ar"];
 const PHOTO_CATS = [
@@ -70,29 +76,36 @@ function FormActions({
   locked,
   saving,
   onContinue,
+  savedAt,
+  children,
 }: {
   locked?: boolean;
   saving: boolean;
   onContinue?: () => void;
+  /** When the draft was last saved on its own while typing. */
+  savedAt?: Date | null;
+  /** Extra buttons after the save buttons (an upload, say). */
+  children?: React.ReactNode;
 }) {
   if (locked) return null;
   return (
-    <div className="flex flex-wrap gap-2">
-      <button className="btn btn-primary text-sm" type="submit" disabled={saving} name="intent" value="save">
+    <div className="wz-actions">
+      <button className="btn btn-primary" type="submit" disabled={saving} name="intent" value="save">
         {saving ? "Сохранение…" : "Сохранить"}
       </button>
       {onContinue ? (
-        <button
-          className="btn btn-ghost text-sm"
-          type="submit"
-          disabled={saving}
-          name="intent"
-          value="continue"
-          onClick={onContinue}
-        >
-          Сохранить и продолжить
+        <button className="btn btn-ghost" type="submit" disabled={saving} name="intent" value="continue" onClick={onContinue}>
+          <span className="sm:hidden">Далее</span>
+          <span className="hidden sm:inline">Сохранить и продолжить</span>
+          <ArrowIcon size={15} />
         </button>
       ) : null}
+      {children}
+      <span className="wz-actions-note">
+        {savedAt
+          ? `Черновик сохранён в ${savedAt.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}`
+          : "Черновик сохраняется сам при вводе"}
+      </span>
     </div>
   );
 }
@@ -104,6 +117,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<Date | null>(null);
   const [languages, setLanguages] = useState(clinic.languages?.length ? clinic.languages : ["ru", "en"]);
   const [specialtyIds, setSpecialtyIds] = useState(clinic.specialtyIds || []);
   const [addedSpecialties, setAddedSpecialties] = useState<Specialty[]>(
@@ -128,10 +142,16 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
     const i = ids.indexOf(section);
     if (i >= 0 && i < ids.length - 1) {
       setSection(ids[i + 1]);
-      setMessage(null);
       setError(null);
+      const wz = editorRoot.current?.querySelector(".wz");
+      if (wz && wz.getBoundingClientRect().top < 0) wz.scrollIntoView({ block: "start" });
     }
   }
+
+  const clearNotice = useCallback(() => {
+    setMessage(null);
+    setError(null);
+  }, []);
 
   async function save(payload: ClinicFormPayload) {
     if (locked) return;
@@ -141,7 +161,8 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
     quietSave.current = false;
     try {
       await updateCabinetClinic(clinic.id, payload);
-      setMessage(quiet ? "Черновик сохранён" : "Сохранено");
+      if (quiet) setDraftSavedAt(new Date());
+      else setMessage("Сохранено");
       await onSaved();
       if (continueAfterSave.current) {
         continueAfterSave.current = false;
@@ -210,9 +231,21 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
     await onSaved();
   }
 
+  const stepIndex = Math.max(0, WIZARD_SECTIONS.findIndex((s) => s.id === section));
+  const prevStep = WIZARD_SECTIONS[stepIndex - 1];
+  const nextStep = WIZARD_SECTIONS[stepIndex + 1];
+  const pickSection = (id: WizardSectionId) => {
+    setSection(id);
+    setMessage(null);
+    setError(null);
+    const wz = editorRoot.current?.querySelector(".wz");
+    if (wz && wz.getBoundingClientRect().top < 0) wz.scrollIntoView({ block: "start" });
+  };
+
   return (
-    <div ref={editorRoot} className="grid gap-6 lg:grid-cols-[220px_1fr]">
-      {!locked && <div className="lg:col-span-2"><BriefUpload onApply={async fields => {
+    <div ref={editorRoot} className="ws-stack">
+      <WsToast message={message} error={error} onDone={clearNotice} />
+      {!locked && <BriefUpload onApply={async fields => {
         if (draftTimer.current) window.clearTimeout(draftTimer.current);
         await updateCabinetClinic(clinic.id, fields);
         if (fields.addressRu) setClinicAddressRu(fields.addressRu);
@@ -221,29 +254,36 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
           const value = fields[element.name];
           if (value !== undefined) element.value = element.name === "city" ? displayCity(value) : value;
         });
-      }} /></div>}
-      <nav className="soft-card h-fit space-y-1 rounded-[1.5rem] bg-white p-3">
-        {WIZARD_SECTIONS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`w-full rounded-xl px-3 py-2 text-left text-sm font-bold ${
-              section === item.id ? "bg-lime text-primary-deep" : "text-muted hover:bg-mint"
-            }`}
-            onClick={() => {
-              setSection(item.id);
-              setMessage(null);
-              setError(null);
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
+        setMessage("Данные из брифа применены");
+      }} />}
+      <div className="wz">
+      <nav className="wz-nav" aria-label="Шаги профиля">
+        <div className="wz-progress">
+          <p>
+            Шаг <strong>{stepIndex + 1} из {WIZARD_SECTIONS.length}</strong>
+          </p>
+          <div className="wz-progress-bar">
+            <span style={{ width: `${((stepIndex + 1) / WIZARD_SECTIONS.length) * 100}%` }} />
+          </div>
+        </div>
+        <ol className="wz-steps">
+          {WIZARD_SECTIONS.map((item, i) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                className={`wz-step${section === item.id ? " is-active" : i < stepIndex ? " is-done" : ""}`}
+                aria-current={section === item.id ? "step" : undefined}
+                onClick={() => pickSection(item.id)}
+              >
+                <span>{String(i + 1).padStart(2, "0")}</span>
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ol>
       </nav>
 
-      <div className="space-y-4">
-        {message ? <p className="text-sm font-bold text-primary">{message}</p> : null}
-        {error ? <p className="text-sm font-bold text-danger">{error}</p> : null}
+      <div className="wz-body">
 
         {section === "basic" ? (
           <form
@@ -314,9 +354,8 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               </Field>
             </div>
             {!locked ? (
-              <div className="flex flex-wrap items-center gap-3">
-                <FormActions locked={locked} saving={saving} onContinue={markContinue} />
-                <label className="btn btn-ghost cursor-pointer text-sm">
+                <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt}>
+                <label className="btn btn-ghost cursor-pointer">
                   Загрузить лого
                   <input
                     type="file"
@@ -341,7 +380,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     }}
                   />
                 </label>
-              </div>
+                </FormActions>
             ) : null}
           </form>
         ) : null}
@@ -458,7 +497,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               ))}
               {!achievements.length ? <p className="text-sm text-muted">Достижения не добавлены</p> : null}
             </div>
-            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt} />
           </form>
         ) : null}
 
@@ -487,17 +526,12 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             </div>
             {!locked ? (
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="btn btn-primary text-sm"
-                  disabled={saving}
-                  onClick={() => save({ specialtyIds })}
-                >
+                <button type="button" className="btn btn-primary" disabled={saving} onClick={() => save({ specialtyIds })}>
                   Сохранить направления
                 </button>
                 <button
                   type="button"
-                  className="btn btn-ghost text-sm"
+                  className="btn btn-ghost"
                   disabled={saving}
                   onClick={() => {
                     markContinue();
@@ -505,7 +539,9 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   }}
                 >
                   Сохранить и продолжить
+                  <ArrowIcon size={15} />
                 </button>
+                <span className="self-center text-sm font-semibold text-muted">Выбрано: {specialtyIds.length}</span>
               </div>
             ) : null}
             {!locked ? (
@@ -751,7 +787,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 ))
               )}
             </div>
-            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt} />
           </form>
         ) : null}
 
@@ -936,11 +972,6 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   Добавить специалиста
                 </button>
               </form>
-            ) : null}
-            {!locked ? (
-              <button type="button" className="btn btn-ghost text-sm" onClick={goNext}>
-                Сохранить и продолжить
-              </button>
             ) : null}
           </div>
         ) : null}
@@ -1187,11 +1218,6 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 </form>
               </div>
             ) : null}
-            {!locked ? (
-              <button type="button" className="btn btn-ghost text-sm" onClick={goNext}>
-                Сохранить и продолжить
-              </button>
-            ) : null}
           </div>
         ) : null}
 
@@ -1322,7 +1348,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 ))}
               </div>
             </fieldset>
-            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt} />
           </form>
         ) : null}
 
@@ -1331,104 +1357,108 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             <div className="soft-card rounded-[1.5rem] bg-white p-6">
               <h2 className="text-xl font-extrabold">Фотографии</h2>
               <p className="mt-1 text-sm text-muted">
-                Первое фото — обложка публичной страницы. Меняйте порядок стрелками или назначьте
-                главную.
+                Первое фото — обложка публичной страницы. Меняйте порядок стрелками или сделайте
+                нужное фото обложкой.
               </p>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {(clinic.photos || []).length ? (
+              <div className="ws-photos mt-5">
                 {(clinic.photos || []).map((photo, index) => (
-                  <div key={photo.id} className="overflow-hidden rounded-xl border border-line">
-                    <div className="relative">
-                      <img src={photo.url} alt="" className="aspect-video w-full object-cover" />
-                      {index === 0 ? (
-                        <span className="absolute left-2 top-2 rounded-lg bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                          Главная
-                        </span>
-                      ) : null}
+                  <div key={photo.id} className="ws-photo">
+                    <div className="ws-photo-img">
+                      <img src={photo.url} alt={photo.altRu || ""} loading="lazy" />
+                      {index === 0 ? <b>Обложка</b> : null}
                     </div>
-                    <div className="space-y-2 p-2 text-xs">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-muted">{photoCategoryLabel(photo.category)}</span>
-                        {!locked ? (
+                    <div className="ws-photo-meta">
+                      <span className="truncate">{photoCategoryLabel(photo.category)}</span>
+                      <span className="text-xs font-semibold text-muted">#{index + 1}</span>
+                    </div>
+                    {!locked ? (
+                      <div className="ws-photo-tools">
+                        <button
+                          type="button"
+                          className="ws-mini"
+                          disabled={index === 0}
+                          title="Переместить выше"
+                          aria-label="Переместить выше"
+                          onClick={async () => {
+                            const ids = (clinic.photos || []).map((p) => p.id);
+                            const next = [...ids];
+                            [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                            await reorderClinicPhotos(clinic.id, next);
+                            await refresh();
+                          }}
+                        >
+                          <WsIcon name="up" size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          className="ws-mini"
+                          disabled={index >= (clinic.photos?.length || 0) - 1}
+                          title="Переместить ниже"
+                          aria-label="Переместить ниже"
+                          onClick={async () => {
+                            const ids = (clinic.photos || []).map((p) => p.id);
+                            const next = [...ids];
+                            [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                            await reorderClinicPhotos(clinic.id, next);
+                            await refresh();
+                          }}
+                        >
+                          <WsIcon name="down" size={15} />
+                        </button>
+                        {index !== 0 ? (
                           <button
                             type="button"
-                            className="font-bold text-danger"
+                            className="ws-mini"
+                            title="Сделать обложкой"
+                            aria-label="Сделать обложкой"
                             onClick={async () => {
-                              await deleteClinicPhoto(clinic.id, photo.id);
+                              await setClinicMainPhoto(clinic.id, photo.id);
                               await refresh();
+                              setMessage("Обложка обновлена");
                             }}
                           >
-                            Удалить
+                            <WsIcon name="star" size={15} />
                           </button>
                         ) : null}
+                        <label className="ws-mini" title="Заменить файл" aria-label="Заменить файл">
+                          <WsIcon name="swap" size={15} />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              const url = await onUpload(file);
+                              await replaceClinicPhoto(clinic.id, photo.id, { url });
+                              await refresh();
+                              setMessage("Фото заменено");
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          className="ws-mini is-danger ml-auto"
+                          title="Удалить фото"
+                          aria-label="Удалить фото"
+                          onClick={async () => {
+                            if (!window.confirm("Удалить это фото?")) return;
+                            await deleteClinicPhoto(clinic.id, photo.id);
+                            await refresh();
+                          }}
+                        >
+                          <WsIcon name="trash" size={15} />
+                        </button>
                       </div>
-                      {!locked ? (
-                        <div className="flex flex-wrap gap-1">
-                          <button
-                            type="button"
-                            className="rounded-lg border border-line px-2 py-1 font-bold disabled:opacity-40"
-                            disabled={index === 0}
-                            title="Выше"
-                            onClick={async () => {
-                              const ids = (clinic.photos || []).map((p) => p.id);
-                              const next = [...ids];
-                              [next[index - 1], next[index]] = [next[index], next[index - 1]];
-                              await reorderClinicPhotos(clinic.id, next);
-                              await refresh();
-                            }}
-                          >
-                            ↑
-                          </button>
-                          <button
-                            type="button"
-                            className="rounded-lg border border-line px-2 py-1 font-bold disabled:opacity-40"
-                            disabled={index >= (clinic.photos?.length || 0) - 1}
-                            title="Ниже"
-                            onClick={async () => {
-                              const ids = (clinic.photos || []).map((p) => p.id);
-                              const next = [...ids];
-                              [next[index], next[index + 1]] = [next[index + 1], next[index]];
-                              await reorderClinicPhotos(clinic.id, next);
-                              await refresh();
-                            }}
-                          >
-                            ↓
-                          </button>
-                          {index !== 0 ? (
-                            <button
-                              type="button"
-                              className="rounded-lg border border-line px-2 py-1 font-bold text-primary"
-                              onClick={async () => {
-                                await setClinicMainPhoto(clinic.id, photo.id);
-                                await refresh();
-                                setMessage("Главное фото обновлено");
-                              }}
-                            >
-                              Главная
-                            </button>
-                          ) : null}
-                          <label className="cursor-pointer rounded-lg border border-line px-2 py-1 font-bold text-primary">
-                            Заменить
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                const url = await onUpload(file);
-                                await replaceClinicPhoto(clinic.id, photo.id, { url });
-                                await refresh();
-                                setMessage("Фото заменено");
-                                e.target.value = "";
-                              }}
-                            />
-                          </label>
-                        </div>
-                      ) : null}
-                    </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
+              ) : (
+                <p className="mt-4 rounded-2xl bg-paper px-4 py-3 text-sm text-muted">Фото пока нет. Добавьте фасад, холл и кабинеты — с фото клинику выбирают чаще.</p>
+              )}
             </div>
             {!locked ? (
               <form
@@ -1453,7 +1483,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 <div>
                   <h3 className="font-extrabold">Добавить фото</h3>
                   <p className="mt-1 text-sm text-muted">
-                    Выберите, что на снимке, добавьте подпись и файл. Новое фото встанет в конец списка — сделать его главным можно кнопкой «Главная».
+                    Выберите, что на снимке, добавьте подпись и файл. Новое фото встанет в конец списка — сделать его обложкой можно кнопкой со звездой.
                   </p>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
@@ -1477,11 +1507,6 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   Загрузить фото
                 </button>
               </form>
-            ) : null}
-            {!locked ? (
-              <button type="button" className="btn btn-ghost text-sm" onClick={goNext}>
-                Сохранить и продолжить
-              </button>
             ) : null}
           </div>
         ) : null}
@@ -1540,7 +1565,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             <Field label="Медтуризм — описание (EN)">
               <textarea name="medicalTourismEn" rows={2} className="field" defaultValue={clinic.medicalTourismEn || ""} disabled={locked} />
             </Field>
-            <FormActions locked={locked} saving={saving} onContinue={markContinue} />
+            <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt} />
           </form>
         ) : null}
 
@@ -1603,9 +1628,27 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 Комментарий модератора: {clinic.moderatorNote}
               </p>
             ) : null}
-            <p className="text-sm font-semibold text-muted">Текущий статус: {clinic.status}</p>
+            <p className="text-sm font-semibold text-muted">Текущий статус: {STATUS_LABELS[clinic.status] || clinic.status}</p>
           </div>
         ) : null}
+
+        {!FORM_SECTIONS.has(section) ? (
+          <div className="wz-pager">
+            {prevStep ? (
+              <button type="button" className="ws-pill" onClick={() => pickSection(prevStep.id)}>
+                <span className="inline-flex -scale-x-100"><ArrowIcon size={15} /></span>
+                {prevStep.label}
+              </button>
+            ) : <span />}
+            {nextStep ? (
+              <button type="button" className="ws-pill is-ink" onClick={() => pickSection(nextStep.id)}>
+                Далее: {nextStep.label}
+                <ArrowIcon size={15} />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
       </div>
     </div>
   );

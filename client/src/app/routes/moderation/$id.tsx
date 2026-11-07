@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   adminMe,
   approveClinic,
@@ -9,9 +9,12 @@ import {
   rejectClinic,
   unpublishClinic,
 } from "@/shared/api/cabinet";
+import { CITY_LABELS } from "@/shared/api/client";
+import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { TelegramPanel } from "@/widgets/telegram/TelegramPanel";
 import { ClinicPreview } from "@/widgets/clinic-form/ClinicPreview";
+import { BackMark, PageHead, WsIcon, WsLoading, WsNote, WsToast } from "@/widgets/workspace/Workspace";
 import axios from "axios";
 
 export const Route = createFileRoute("/moderation/$id")({
@@ -26,27 +29,18 @@ const ACTION_LABELS: Record<string, string> = {
   unpublish: "Снято с публикации",
 };
 
-function CheckList({
-  title,
-  items,
-}: {
-  title: string;
-  items: { key: string; label: string; ok: boolean }[];
-}) {
+function CheckList({ title, items }: { title: string; items: { key: string; label: string; ok: boolean }[] }) {
+  if (!items.length) return null;
   return (
     <div>
-      <h3 className="text-sm font-extrabold">{title}</h3>
-      <ul className="mt-2 space-y-1.5">
+      <p className="ws-label">{title}</p>
+      <ul className="ws-checks">
         {items.map((item) => (
-          <li key={item.key} className="flex items-center gap-2 text-sm">
-            <span
-              className={`grid h-5 w-5 place-items-center rounded-full text-xs font-extrabold text-white ${
-                item.ok ? "bg-success" : "bg-danger"
-              }`}
-            >
-              {item.ok ? "✓" : "!"}
+          <li key={item.key} className={item.ok ? undefined : "is-missing"}>
+            <span>
+              <WsIcon name={item.ok ? "check" : "close"} size={13} />
             </span>
-            <span className={item.ok ? "text-ink" : "font-semibold text-danger"}>{item.label}</span>
+            {item.label}
           </li>
         ))}
       </ul>
@@ -61,6 +55,10 @@ function ModerationDetailPage() {
   const [note, setNote] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const clearNotice = useCallback(() => {
+    setMessage(null);
+    setError(null);
+  }, []);
 
   const auth = useQuery({ queryKey: ["admin-me"], queryFn: adminMe, retry: false });
   const clinic = useQuery({
@@ -75,12 +73,13 @@ function ModerationDetailPage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (!auth.data || clinic.isLoading) return <p className="text-muted">Загрузка…</p>;
-  if (!clinic.data) return <p className="text-danger">Не найдено</p>;
+  if (!auth.data || clinic.isLoading) return <WsLoading />;
+  if (!clinic.data) return <WsNote tone="danger" title="Клиника не найдена" />;
 
   const c = clinic.data;
   const checklist = c.checklist;
   const canApprove = c.status === "moderation" && (checklist?.ready ?? true);
+  const missing = checklist ? checklist.required.filter((item) => !item.ok).length : 0;
 
   async function refresh() {
     await qc.invalidateQueries({ queryKey: ["moderation-clinic", id] });
@@ -89,124 +88,172 @@ function ModerationDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <TelegramPanel clinicId={id} />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <Link to="/moderation" className="text-sm font-bold text-primary">
-            Очередь
+    <div className="ws-stack">
+      <WsToast message={message} error={error} onDone={clearNotice} />
+      <PageHead
+        back={
+          <Link to="/moderation" className="ws-back">
+            <BackMark />
+            Очередь клиник
           </Link>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-extrabold">{c.nameRu || c.nameEn}</h1>
+        }
+        eyebrow="Проверка клиники"
+        title={c.nameRu || c.nameEn}
+        meta={
+          <>
             <StatusBadge status={c.status} />
-          </div>
-          <p className="mt-2 text-sm text-muted">
-            Филиалов: {c.branchCount ?? c.branches?.length ?? 0} · Врачей:{" "}
-            {c.doctorCount ?? c.doctors?.length ?? 0}
-          </p>
-        </div>
-      </div>
-
-      {message ? <p className="text-sm font-bold text-primary">{message}</p> : null}
-      {error ? <p className="text-sm font-bold text-danger">{error}</p> : null}
+            <span>{CITY_LABELS[c.city] || c.city}</span>
+            <span>Филиалов: {c.branchCount ?? c.branches?.length ?? 0}</span>
+            <span>Врачей: {c.doctorCount ?? c.doctors?.length ?? 0}</span>
+          </>
+        }
+        actions={
+          c.status === "published" ? (
+            <Link to="/clinics/$slug" params={{ slug: c.slug }} target="_blank" className="ws-pill">
+              Открыть в каталоге
+              <WsIcon name="external" size={14} />
+            </Link>
+          ) : undefined
+        }
+      />
 
       {c.moderatorNote ? (
-        <div className="rounded-[1.25rem] bg-danger-soft p-4 text-sm text-danger">
-          <p className="font-bold">Текущий комментарий модератора</p>
-          <p className="mt-1">{c.moderatorNote}</p>
-        </div>
+        <WsNote tone="danger" title="Текущий комментарий модератора">
+          <p>{c.moderatorNote}</p>
+        </WsNote>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <aside className="space-y-4">
-          {checklist ? (
-            <div className="soft-card space-y-5 rounded-[1.5rem] bg-white p-5">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-muted">Чеклист</p>
-                <p className="mt-1 text-lg font-extrabold">
-                  {checklist.ready ? "Готово к одобрению" : "Есть замечания"}
-                </p>
-              </div>
-              <CheckList title="Обязательно" items={checklist.required} />
-              <CheckList title="Рекомендуется" items={checklist.recommended} />
-            </div>
-          ) : null}
+      <div className="ws-split">
+        <div className="grid min-w-0 gap-6">
+          <ClinicPreview clinic={c} />
 
-          {c.status === "moderation" ? (
-            <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-5">
-              <button
-                type="button"
-                className="btn btn-primary w-full text-sm"
-                disabled={!canApprove}
-                onClick={async () => {
-                  setError(null);
-                  try {
-                    await approveClinic(id);
-                    await refresh();
-                    setMessage("Клиника одобрена");
-                  } catch (err) {
-                    if (axios.isAxiosError(err) && err.response?.data?.error === "checklist_failed") {
-                      setError("Нельзя одобрить: не заполнены обязательные поля");
+          <section className="ws-card is-pad space-y-4">
+            <h2 className="ws-card-title">Филиалы</h2>
+            {(c.branches || []).length === 0 ? (
+              <WsNote tone="danger">Филиалы отсутствуют — без филиала клинику нельзя одобрить.</WsNote>
+            ) : (
+              <ul className="ws-items">
+                {(c.branches || []).map((b) => (
+                  <li key={b.id} className="ws-item">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-ink">
+                      <WsIcon name="pin" size={18} />
+                    </span>
+                    <div className="ws-item-body">
+                      <strong>{b.nameRu || b.nameEn}</strong>
+                      <p>
+                        {CITY_LABELS[b.city] || b.city}
+                        {b.phone ? ` · ${b.phone}` : ""}
+                      </p>
+                      {b.addressRu || b.addressEn ? <p>{b.addressRu || b.addressEn}</p> : null}
+                      <p>
+                        Направлений: {b.specialtyCount ?? b.specialties?.length ?? 0} · врачей: {b.doctorCount ?? 0} · фото: {b.photoCount ?? 0}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        <aside>
+          <section className="ws-card is-pad space-y-5">
+            <div>
+              <p className="ws-label">Решение</p>
+              <h2 className="ws-card-title mt-2">
+                {c.status === "moderation"
+                  ? checklist?.ready ?? true
+                    ? "Готово к одобрению"
+                    : `Не хватает обязательных пунктов: ${missing}`
+                  : c.status === "approved"
+                    ? "Одобрена — можно публиковать"
+                    : c.status === "published"
+                      ? "Опубликована в каталоге"
+                      : c.status === "needs_changes"
+                        ? "Ждём правок от клиники"
+                        : "Черновик клиники"}
+              </h2>
+            </div>
+
+            {c.status === "moderation" ? (
+              <>
+                <button
+                  type="button"
+                  className="pill-btn is-ink w-full"
+                  disabled={!canApprove}
+                  onClick={async () => {
+                    setError(null);
+                    try {
+                      await approveClinic(id);
                       await refresh();
-                    } else {
-                      setError("Не удалось одобрить");
+                      setMessage("Клиника одобрена");
+                    } catch (err) {
+                      if (axios.isAxiosError(err) && err.response?.data?.error === "checklist_failed") {
+                        setError("Нельзя одобрить: не заполнены обязательные поля");
+                        await refresh();
+                      } else {
+                        setError("Не удалось одобрить");
+                      }
                     }
-                  }
-                }}
-              >
-                Одобрить
-              </button>
-              {!canApprove ? (
-                <p className="text-xs text-danger">Исправьте обязательные пункты чеклиста.</p>
-              ) : null}
-              <label className="block text-sm font-bold">
-                Вернуть на доработку
-                <textarea
-                  className="field mt-1 min-h-24"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Например: добавьте фото фасада и актуальный телефон филиала"
-                />
-              </label>
+                  }}
+                >
+                  Одобрить
+                  <span className="pill-btn-icon">
+                    <WsIcon name="check" size={18} />
+                  </span>
+                </button>
+                {!canApprove ? <p className="text-sm font-semibold text-danger">Сначала клиника должна заполнить обязательные пункты чеклиста.</p> : null}
+                <div className="ws-group">
+                  <label className="ws-field">
+                    <span className="ws-field-label">Вернуть на доработку</span>
+                    <textarea
+                      className="field min-h-24"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Например: добавьте фото фасада и актуальный телефон филиала"
+                    />
+                    <span className="ws-field-hint">Клиника увидит этот комментарий в кабинете.</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="ws-pill w-full"
+                    disabled={note.trim().length < 5}
+                    onClick={async () => {
+                      await rejectClinic(id, note.trim());
+                      await refresh();
+                      setMessage("Возвращено на доработку");
+                      setNote("");
+                    }}
+                  >
+                    Нужны изменения
+                  </button>
+                </div>
+              </>
+            ) : null}
+
+            {c.status === "approved" ? (
               <button
                 type="button"
-                className="btn btn-ghost w-full text-sm"
-                disabled={note.trim().length < 5}
+                className="pill-btn is-ink w-full"
                 onClick={async () => {
-                  await rejectClinic(id, note.trim());
+                  await publishClinic(id);
                   await refresh();
-                  setMessage("Возвращено на доработку");
-                  setNote("");
+                  setMessage("Опубликовано в каталоге");
                 }}
               >
-                Нужны изменения
+                Опубликовать
+                <span className="pill-btn-icon">
+                  <ArrowIcon />
+                </span>
               </button>
-            </div>
-          ) : null}
+            ) : null}
 
-          {c.status === "approved" ? (
-            <button
-              type="button"
-              className="btn btn-primary w-full text-sm"
-              onClick={async () => {
-                await publishClinic(id);
-                await refresh();
-                setMessage("Опубликовано в каталоге");
-              }}
-            >
-              Опубликовать
-            </button>
-          ) : null}
-
-          {c.status === "published" ? (
-            <div className="flex flex-col gap-2">
-              <Link to="/clinics/$slug" params={{ slug: c.slug }} className="btn btn-ghost text-sm">
-                Открыть в каталоге
-              </Link>
+            {c.status === "published" ? (
               <button
                 type="button"
-                className="btn btn-ghost text-sm"
+                className="ws-pill is-danger w-full"
                 onClick={async () => {
+                  if (!window.confirm("Снять клинику с публикации? Она пропадёт из каталога.")) return;
                   await unpublishClinic(id);
                   await refresh();
                   setMessage("Снято с публикации");
@@ -214,56 +261,36 @@ function ModerationDetailPage() {
               >
                 Снять с публикации
               </button>
-            </div>
+            ) : null}
+          </section>
+
+          {checklist ? (
+            <section className="ws-card is-pad space-y-5">
+              <h2 className="ws-card-title">Чеклист</h2>
+              <CheckList title="Обязательно" items={checklist.required} />
+              <CheckList title="Рекомендуется" items={checklist.recommended} />
+            </section>
           ) : null}
 
-          <div className="soft-card rounded-[1.5rem] bg-white p-5">
-            <h3 className="text-sm font-extrabold">История решений</h3>
+          <section className="ws-card is-pad">
+            <h2 className="ws-card-title">История решений</h2>
             {(c.moderationLogs || []).length === 0 ? (
-              <p className="mt-2 text-sm text-muted">Пока пусто</p>
+              <p className="ws-card-text">Пока пусто</p>
             ) : (
-              <ul className="mt-3 space-y-3">
+              <ul className="ws-timeline">
                 {(c.moderationLogs || []).map((log) => (
-                  <li key={log.id} className="border-b border-line pb-3 text-sm last:border-0 last:pb-0">
-                    <p className="font-bold">{ACTION_LABELS[log.action] || log.action}</p>
-                    <p className="text-xs text-muted">
-                      {new Date(log.createdAt).toLocaleString("ru-RU")}
-                    </p>
-                    {log.note ? <p className="mt-1 text-muted">{log.note}</p> : null}
+                  <li key={log.id}>
+                    <strong>{ACTION_LABELS[log.action] || log.action}</strong>
+                    <small>{new Date(log.createdAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</small>
+                    {log.note ? <p>{log.note}</p> : null}
                   </li>
                 ))}
               </ul>
             )}
-          </div>
-        </aside>
-
-        <div className="space-y-6">
-          <ClinicPreview clinic={c} />
-
-          <section className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-            <h2 className="text-xl font-extrabold">Филиалы</h2>
-            {(c.branches || []).length === 0 ? (
-              <p className="text-sm text-danger">Филиалы отсутствуют</p>
-            ) : (
-              <div className="space-y-4">
-                {(c.branches || []).map((b) => (
-                  <article key={b.id} className="rounded-2xl border border-line p-4">
-                    <h3 className="font-extrabold">{b.nameRu || b.nameEn}</h3>
-                    <p className="mt-1 text-sm text-muted">
-                      {b.city} · {b.phone}
-                    </p>
-                    <p className="mt-1 text-sm">{b.addressRu || b.addressEn}</p>
-                    <p className="mt-2 text-xs text-muted">
-                      Направлений: {b.specialtyCount ?? b.specialties?.length ?? 0}
-                      {" · "}врачей: {b.doctorCount ?? 0}
-                      {" · "}фото: {b.photoCount ?? 0}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            )}
           </section>
-        </div>
+
+          <TelegramPanel clinicId={id} />
+        </aside>
       </div>
     </div>
   );

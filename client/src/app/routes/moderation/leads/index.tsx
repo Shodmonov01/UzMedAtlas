@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { adminLogout, adminMe, fetchAdminLeads } from "@/shared/api/cabinet";
+import { adminMe, fetchAdminLeads } from "@/shared/api/cabinet";
+import { LeadStatusBadge } from "@/shared/ui/StatusBadge";
+import { PageHead, WsLoading, WsNote } from "@/widgets/workspace/Workspace";
 
 export const Route = createFileRoute("/moderation/leads/")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -11,6 +13,13 @@ export const Route = createFileRoute("/moderation/leads/")({
   }),
   component: AdminLeadsPage,
 });
+
+const STATUSES = [
+  { value: undefined, label: "Все" },
+  { value: "new", label: "Новые" },
+  { value: "contacted", label: "На связи" },
+  { value: "closed", label: "Закрыты" },
+];
 
 function AdminLeadsPage() {
   const navigate = useNavigate();
@@ -29,109 +38,116 @@ function AdminLeadsPage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (auth.isLoading || !auth.data) {
-    return <p className="text-muted">Проверка сессии…</p>;
-  }
+  if (auth.isLoading || !auth.data) return <WsLoading label="Проверка сессии…" />;
+
+  const go = (next: Partial<typeof search>) => void navigate({ to: "/moderation/leads", search: { ...search, ...next } });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <Link to="/moderation" className="text-sm font-semibold text-muted">
-            Очередь модерации
-          </Link>
-          <h1 className="mt-2 text-3xl font-extrabold">Заявки пациентов</h1>
+    <div className="ws-stack">
+      <PageHead
+        eyebrow="Модерация"
+        title="Заявки пациентов"
+        lead="Все обращения со страниц клиник и из Health Checker. Клиника видит свои заявки в кабинете; здесь — общий список."
+      />
+
+      <div className="ws-toolbar">
+        <div className="flex flex-wrap gap-2">
+          <div className="ws-seg" role="tablist" aria-label="Статус">
+            {STATUSES.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                role="tab"
+                aria-selected={search.status === item.value}
+                className={search.status === item.value ? "is-active" : undefined}
+                onClick={() => go({ status: item.value })}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <div className="ws-seg" role="tablist" aria-label="Источник">
+            {[
+              { value: undefined, label: "Все источники" },
+              { value: "catalog", label: "Каталог" },
+              { value: "checker", label: "Health Checker" },
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                role="tab"
+                aria-selected={search.source === item.value}
+                className={search.source === item.value ? "is-active" : undefined}
+                onClick={() => go({ source: item.value })}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <button
-          type="button"
-          className="btn btn-ghost text-sm"
-          onClick={async () => {
-            await adminLogout();
-            void navigate({ to: "/moderation/login" });
+        <form
+          className="ws-search"
+          role="search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            go({ q: q.trim() || undefined });
           }}
         >
-          Выйти
-        </button>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Имя, телефон или клиника" aria-label="Поиск заявок" />
+          <button type="submit" className="ws-pill is-ink">
+            Найти
+          </button>
+        </form>
       </div>
 
-      <form
-        className="flex flex-wrap gap-3 rounded-[1.5rem] border border-line bg-white p-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          void navigate({
-            to: "/moderation/leads",
-            search: {
-              q: String(fd.get("q") || "") || undefined,
-              status: String(fd.get("status") || "") || undefined,
-              source: String(fd.get("source") || "") || undefined,
-            },
-          });
-        }}
-      >
-        <input
-          name="q"
-          className="field w-full max-w-xs"
-          placeholder="Поиск…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        <select name="status" className="field w-auto" defaultValue={search.status || ""}>
-          <option value="">Все статусы</option>
-          <option value="new">new</option>
-          <option value="contacted">contacted</option>
-          <option value="closed">closed</option>
-        </select>
-        <select name="source" className="field w-auto" defaultValue={search.source || ""}>
-          <option value="">Все источники</option>
-          <option value="checker">Health Checker</option>
-          <option value="catalog">Каталог</option>
-        </select>
-        <button className="btn btn-primary text-sm" type="submit">
-          Фильтр
-        </button>
-      </form>
-
-      {leads.isLoading ? <p className="text-muted">Загрузка…</p> : null}
+      {leads.isLoading ? <WsLoading label="Загружаем заявки…" inline /> : null}
+      {leads.isError ? <WsNote tone="danger" title="Не удалось загрузить заявки" /> : null}
       {!leads.isLoading && leads.data?.length === 0 ? (
-        <p className="text-muted">Заявок нет</p>
+        <div className="ws-empty">
+          <span className="ws-empty-mark">
+            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+          </span>
+          <h2>Заявок нет</h2>
+          <p>По этим фильтрам ничего не нашлось. Сбросьте фильтры или измените запрос.</p>
+        </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-[1.5rem] border border-line bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-sand">
-            <tr>
-              <th className="px-4 py-3">Пациент</th>
-              <th className="px-4 py-3">Клиника</th>
-              <th className="px-4 py-3">Источник</th>
-              <th className="px-4 py-3">Статус</th>
-              <th className="px-4 py-3">Дата</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads.data?.map((lead) => (
-              <tr key={lead.id} className="border-t border-line">
-                <td className="px-4 py-3">
-                  <Link
-                    to="/moderation/leads/$id"
-                    params={{ id: lead.id }}
-                    className="font-semibold text-primary"
-                  >
-                    {lead.fullName}
-                  </Link>
-                  <div className="text-muted">{lead.phone}</div>
-                </td>
-                <td className="px-4 py-3">{lead.clinic?.nameRu || lead.clinic?.nameEn}</td>
-                <td className="px-4 py-3">
-                  {lead.source === "checker" ? "Health Checker" : "Каталог"}
-                </td>
-                <td className="px-4 py-3">{lead.status}</td>
-                <td className="px-4 py-3">{new Date(lead.createdAt).toLocaleString("ru-RU")}</td>
+      {leads.data?.length ? (
+        <div className="ws-table-wrap">
+          <table className="ws-table">
+            <thead>
+              <tr>
+                <th>Пациент</th>
+                <th>Клиника</th>
+                <th>Источник</th>
+                <th>Статус</th>
+                <th>Дата</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {leads.data.map((lead) => (
+                <tr key={lead.id}>
+                  <td>
+                    <Link to="/moderation/leads/$id" params={{ id: lead.id }}>
+                      {lead.fullName}
+                    </Link>
+                    <small>{lead.phone}</small>
+                  </td>
+                  <td>{lead.clinic?.nameRu || lead.clinic?.nameEn || "—"}</td>
+                  <td>{lead.source === "checker" ? "Health Checker" : "Каталог"}</td>
+                  <td>
+                    <LeadStatusBadge status={lead.status} />
+                  </td>
+                  <td className="whitespace-nowrap text-muted">{new Date(lead.createdAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </div>
   );
 }

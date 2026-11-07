@@ -55,7 +55,7 @@ const FLAGS: { value: Lang; name: string; flag: ReactNode }[] = [
   },
 ];
 
-/** The site language as a dropdown: the current language's round flag with a chevron opens a small white list of
+/** The site language as a dropdown: the current language's round flag (no arrow) opens a small white list of
  *  the three languages (flag and name). It closes on a pick, on Escape, on a click anywhere else and when the page
  *  scrolls. */
 export function LanguageSwitch({ className = "" }: { className?: string }) {
@@ -104,9 +104,6 @@ export function LanguageSwitch({ className = "" }: { className?: string }) {
             {current.flag}
           </svg>
         </span>
-        <svg className="lang-switch-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
-          <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
       </button>
       <ul id={listId} className="lang-switch-menu" hidden={!open}>
         {FLAGS.map((item) => (

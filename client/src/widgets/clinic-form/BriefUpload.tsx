@@ -18,9 +18,14 @@ export function BriefUpload({ onApply, disabled }: { onApply: (fields: Record<st
     brief_too_long: "Бриф слишком длинный: максимум 80 000 символов.",
     rate_limit: "Лимит разборов исчерпан. Попробуйте позже.",
   };
-  return <section className="soft-card space-y-4 rounded-2xl bg-white p-5">
-    <div><h2 className="text-lg font-extrabold">Заполнить из брифа</h2>
-      <p className="mt-1 text-sm text-muted">Загрузите PDF, DOCX или TXT до 5 МБ. Текст будет передан Groq для разбора. Проверьте найденные данные перед применением.</p></div>
+  return <section className="ws-card is-pad space-y-4">
+    <div className="flex items-start gap-4">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-white" style={{ background: "var(--brand-gradient)" }} aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </span>
+      <div className="min-w-0"><h2 className="ws-card-title">Заполнить из брифа</h2>
+      <p className="ws-card-text">Есть бриф или презентация клиники? Загрузите PDF, DOCX или TXT до 5 МБ — поля заполнятся сами. Текст разбирает Groq; проверьте данные перед применением.</p></div>
+    </div>
     <input type="file" accept=".pdf,.docx,.txt,.md,.csv,.json" disabled={disabled || busy} aria-label="Загрузить бриф клиники" onChange={async event => {
       const file = event.target.files?.[0]; event.target.value = "";
       if (!file) return;
@@ -30,13 +35,13 @@ export function BriefUpload({ onApply, disabled }: { onApply: (fields: Record<st
       catch (err) { const code = (err as { response?: { data?: { error?: string } } }).response?.data?.error || ""; setError(messages[code] || "Не удалось разобрать бриф. Попробуйте ещё раз."); }
       finally { setBusy(false); }
     }} />
-    {busy && <p role="status">Обработка…</p>}
-    {error && <p role="alert" className="text-danger">{error}</p>}
-    {result && <div className="space-y-3">
+    {busy && <p role="status" className="text-sm font-semibold text-muted">Разбираем бриф…</p>}
+    {error && <p role="alert" className="text-sm font-semibold text-danger">{error}</p>}
+    {result && <div className="ws-group">
       <p className="text-sm text-muted">Применение заменит соответствующие поля формы. Остальные данные сохранятся.</p>
-      {Object.entries(result.fields).map(([key, value]) => <label key={key} className="block text-sm font-semibold">{fieldLabel(key)}<textarea className="field mt-1" rows={2} value={value} onChange={e => setResult({ ...result, fields: { ...result.fields, [key]: e.target.value } })} /></label>)}
-      {result.notes.length > 0 && <div><h3 className="font-bold">Дополнительные сведения для ручного заполнения</h3><ul className="list-disc pl-5">{result.notes.map((note, i) => <li key={i}>{note}</li>)}</ul></div>}
-      <button type="button" className="btn btn-primary" disabled={busy || disabled || !Object.keys(result.fields).length} onClick={async () => {
+      {Object.entries(result.fields).map(([key, value]) => <label key={key} className="ws-field"><span className="ws-field-label">{fieldLabel(key)}</span><textarea className="field" rows={2} value={value} onChange={e => setResult({ ...result, fields: { ...result.fields, [key]: e.target.value } })} /></label>)}
+      {result.notes.length > 0 && <div><h3 className="text-sm font-bold text-ink">Дополнительные сведения для ручного заполнения</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted">{result.notes.map((note, i) => <li key={i}>{note}</li>)}</ul></div>}
+      <button type="button" className="btn btn-primary justify-self-start" disabled={busy || disabled || !Object.keys(result.fields).length} onClick={async () => {
         setBusy(true); setError("");
         try { await onApply(result.fields); setResult(null); }
         catch { setError("Не удалось применить данные. Проверьте поля и повторите."); }

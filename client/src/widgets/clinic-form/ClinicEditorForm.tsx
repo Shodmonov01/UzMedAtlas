@@ -77,14 +77,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section data-clinic-step={step} hidden={!active} className="soft-card space-y-5 rounded-[1.75rem] bg-white p-5 md:p-7">
-      <header className="flex items-start gap-3 border-b border-line pb-4">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-primary-soft text-sm font-extrabold text-primary">
+    <section data-clinic-step={step} hidden={!active} className="soft-card space-y-5 p-5 md:p-7">
+      <header className="flex items-start gap-4 border-b border-line pb-5">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-ink text-sm font-bold text-white">
           {step}
         </span>
         <div className="min-w-0">
-          <h2 className="text-lg font-extrabold tracking-tight text-ink">{title}</h2>
-          {description ? <p className="mt-1 text-sm text-muted">{description}</p> : null}
+          <h2 className="ws-card-title">{title}</h2>
+          {description ? <p className="ws-card-text">{description}</p> : null}
         </div>
       </header>
       {children}
@@ -108,10 +108,11 @@ function ChipToggle({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`rounded-full px-3.5 py-2 text-sm font-bold transition ${
+      aria-pressed={active}
+      className={`h-10 rounded-full px-4 text-sm font-semibold transition-colors ${
         active
-          ? "bg-primary text-white shadow-sm"
-          : "border border-line bg-sand text-ink hover:border-primary/40 hover:bg-mint"
+          ? "bg-ink text-white"
+          : "bg-paper text-ink shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--ink)]"
       } disabled:cursor-not-allowed disabled:opacity-60`}
     >
       {children}
@@ -216,7 +217,7 @@ export function ClinicEditorForm({
         <p className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">{error}</p>
       ) : null}
 
-      <nav aria-label="Этапы заполнения клиники" className="soft-card grid gap-2 rounded-[1.5rem] bg-white p-2 sm:grid-cols-2 lg:grid-cols-5">
+      <nav aria-label="Этапы заполнения клиники" className="soft-card grid gap-1 p-2 sm:grid-cols-2 lg:grid-cols-5">
         {[
           { n: 1, title: "Основное", note: "Название и город" },
           { n: 2, title: "Адрес", note: "Адрес и карта" },
@@ -229,10 +230,10 @@ export function ClinicEditorForm({
             type="button"
             aria-current={activeStep === item.n ? "step" : undefined}
             onClick={() => setActiveStep(item.n)}
-            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-left ${activeStep === item.n ? "bg-mint text-primary-deep" : "text-muted hover:bg-sand"}`}
+            className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors ${activeStep === item.n ? "bg-ink text-white" : "text-muted hover:bg-paper hover:text-ink"}`}
           >
-            <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-extrabold ${activeStep === item.n ? "bg-primary text-white" : "bg-sand text-muted"}`}>{item.n}</span>
-            <span><span className="block text-sm font-extrabold">{item.title}</span><span className="block text-xs">{item.note}</span></span>
+            <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-[10px] text-xs font-bold ${activeStep === item.n ? "bg-[#1d4a63] text-white" : activeStep > item.n ? "bg-[#e4f5ec] text-accent-strong" : "bg-paper text-muted"}`}>{activeStep > item.n ? "✓" : item.n}</span>
+            <span><span className="block text-sm font-bold">{item.title}</span><span className={`block text-xs ${activeStep === item.n ? "text-white/70" : ""}`}>{item.note}</span></span>
           </button>
         ))}
       </nav>
@@ -508,9 +509,9 @@ export function ClinicEditorForm({
       </Section>
 
       {!locked ? (
-        <div className="soft-card flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-line bg-white px-5 py-4">
+        <div className="soft-card sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div>
-            <p className="text-sm font-extrabold text-ink">Шаг {activeStep} из 5</p>
+            <p className="text-sm font-bold text-ink">Шаг {activeStep} из 5</p>
             <p className="text-xs text-muted">Черновик можно дополнить после создания</p>
           </div>
           <div className="flex gap-2">
