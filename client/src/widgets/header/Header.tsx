@@ -1,15 +1,16 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import { AirplaneTilt, Buildings, CaretRight, Stethoscope, UsersThree, type Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { ScrollTrigger, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { LanguageSwitch } from "@/shared/ui/LanguageSwitch";
 import { useLang, type Text } from "@/shared/i18n/lang";
 
 // Sections of the home page, in page order, linked from the nav.
-const SECTIONS: { id: string; label: Text }[] = [
-  { id: "medtourism", label: { ru: "Медтуризм", uz: "Tibbiy turizm", en: "Medical travel" } },
-  { id: "catalog", label: { ru: "Каталог клиник", uz: "Klinikalar", en: "Clinics" } },
-  { id: "team", label: { ru: "Команда", uz: "Jamoa", en: "Team" } },
+const SECTIONS: { id: string; label: Text; icon: PhosphorIcon }[] = [
+  { id: "medtourism", label: { ru: "Медтуризм", uz: "Tibbiy turizm", en: "Medical travel" }, icon: AirplaneTilt },
+  { id: "catalog", label: { ru: "Каталог клиник", uz: "Klinikalar", en: "Clinics" }, icon: Buildings },
+  { id: "team", label: { ru: "Команда", uz: "Jamoa", en: "Team" }, icon: UsersThree },
 ];
 const PICKER: Text = { ru: "Подбор направления", uz: "Yoʻnalish tanlash", en: "Find a specialty" };
 const FOR_CLINICS: Text = { ru: "Для клиник", uz: "Klinikalar uchun", en: "For clinics" };
@@ -175,28 +176,40 @@ export function Header() {
         </div>
       </div>
       <div className="site-menu-backdrop" hidden={!menuOpen} onClick={() => setMenuOpen(false)} />
+      {/* Phones and tablets: a sheet under the bar with the sections as one grouped list (an icon tile, the name, a
+          chevron), then the clinics entrance. The language stays in the bar beside the menu button. */}
       <nav id="site-menu" className="site-menu" aria-label={t({ ru: "Разделы", uz: "Boʻlimlar", en: "Sections" })} hidden={!menuOpen}>
-        {SECTIONS.map((section, i) => (
-          <Link
-            key={section.id}
-            to="/"
-            hash={section.id}
-            className={active === section.id ? "is-active" : undefined}
-            style={{ animationDelay: `${0.04 * i}s` }}
-            onClick={(event) => {
-              setMenuOpen(false);
-              goToSection(event, section.id);
-            }}
-          >
-            {t(section.label)}
-            <ArrowIcon />
+        <div className="site-menu-list">
+          {SECTIONS.map((section, i) => {
+            const Glyph = section.icon;
+            return (
+              <Link
+                key={section.id}
+                to="/"
+                hash={section.id}
+                className={active === section.id ? "is-active" : undefined}
+                style={{ animationDelay: `${0.04 * i}s` }}
+                onClick={(event) => {
+                  setMenuOpen(false);
+                  goToSection(event, section.id);
+                }}
+              >
+                <i aria-hidden="true">
+                  <Glyph size={22} weight="duotone" />
+                </i>
+                <span>{t(section.label)}</span>
+                <CaretRight className="site-menu-chevron" size={18} weight="bold" aria-hidden="true" />
+              </Link>
+            );
+          })}
+          <Link to="/checker" activeProps={{ className: "is-active" }} style={{ animationDelay: `${0.04 * SECTIONS.length}s` }} onClick={() => setMenuOpen(false)}>
+            <i aria-hidden="true">
+              <Stethoscope size={22} weight="duotone" />
+            </i>
+            <span>{t(PICKER)}</span>
+            <CaretRight className="site-menu-chevron" size={18} weight="bold" aria-hidden="true" />
           </Link>
-        ))}
-        <Link to="/checker" activeProps={{ className: "is-active" }} style={{ animationDelay: `${0.04 * SECTIONS.length}s` }} onClick={() => setMenuOpen(false)}>
-          {t(PICKER)}
-          <ArrowIcon />
-        </Link>
-        <LanguageSwitch className="site-menu-lang" />
+        </div>
         <Link to="/cabinet/login" className="site-menu-action" onClick={() => setMenuOpen(false)}>
           {t(FOR_CLINICS)}
           <span>

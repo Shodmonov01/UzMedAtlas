@@ -1,6 +1,48 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import {
+  AirplaneTilt,
+  BookOpenText,
+  Briefcase,
+  Buildings,
+  CalendarBlank,
+  CaretRight,
+  Check,
+  Clock,
+  Cpu,
+  Envelope,
+  FileText,
+  Globe,
+  Heart,
+  Images,
+  Info,
+  InstagramLogo,
+  LinkSimple,
+  MagnifyingGlass,
+  MapPin,
+  Medal,
+  Path,
+  Phone,
+  SealCheck,
+  ShieldCheck,
+  Sparkle,
+  SquaresFour,
+  Star,
+  Stethoscope,
+  Tag,
+  Target,
+  TelegramLogo,
+  Translate,
+  TrendUp,
+  UserCircle,
+  UsersThree,
+  WhatsappLogo,
+  YoutubeLogo,
+  type Icon as PhosphorIcon,
+  type IconWeight,
+} from "@phosphor-icons/react";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
+import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
@@ -37,37 +79,100 @@ export function telHref(phone: string) {
   return `tel:${phone.replace(/[^\d+]/g, "")}`;
 }
 
+/** "JCI; университетская клиника\n• робот-центр." → ["JCI", "Университетская клиника", "Робот-центр"] */
+export function splitPoints(value?: string | null) {
+  return (value || "")
+    .split(/[;\n]/)
+    .map((item) => item.replace(/^[•\-*–]\s*/, "").replace(/\.$/, "").trim())
+    .filter(Boolean)
+    .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
+}
+
+/** Languages in their own names, so a reader finds theirs at a glance. */
+const LANGUAGE_NAMES: Record<string, string> = {
+  ru: "Русский",
+  uz: "Oʻzbekcha",
+  en: "English",
+  tr: "Türkçe",
+  kz: "Қазақша",
+  kk: "Қазақша",
+  ky: "Кыргызча",
+  kg: "Кыргызча",
+  tg: "Тоҷикӣ",
+  tj: "Тоҷикӣ",
+  tk: "Türkmençe",
+  ko: "한국어",
+  kr: "한국어",
+  zh: "中文",
+  cn: "中文",
+  hi: "हिन्दी",
+  ar: "العربية",
+  fa: "فارسی",
+  de: "Deutsch",
+  fr: "Français",
+  es: "Español",
+  it: "Italiano",
+  he: "עברית",
+  az: "Azərbaycan",
+};
+
+export function languageName(code: string) {
+  return LANGUAGE_NAMES[code.toLowerCase()] || code.toUpperCase();
+}
+
+/** Smooth, rounded icons in the iOS manner (Phosphor): plain strokes next to text, two-tone inside the tiles. */
 const ICONS = {
-  phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2",
-  mail: "M4 6h16v12H4zM4 7l8 6 8-6",
-  globe: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3",
-  send: "M21 4 3 11l6 2.5M21 4l-4 16-8-6.5M21 4 9 13.5V19l3-3",
-  camera: "M4 8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M17 7h.01",
-  chat: "M4 20l1.4-4.2A8 8 0 1 1 8.4 18.7z",
-  play: "M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM10 9l5 3-5 3z",
-  link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
-  clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M12 7v5l3 2",
-  pin: "M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21ZM12 7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5",
-  photos: "M4 6h16v12H4zM4 15l4-4 4 4 3-3 5 5",
-  route: "M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4M6 15V9a4 4 0 0 1 4-4h4M18 9v6a4 4 0 0 1-4 4h-4",
-  check: "M5 12.5l4.5 4.5L19 7.5",
-  search: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4",
-  file: "M7 3h7l5 5v13H7zM14 3v5h5",
-} as const;
+  phone: Phone,
+  mail: Envelope,
+  globe: Globe,
+  send: TelegramLogo,
+  camera: InstagramLogo,
+  chat: WhatsappLogo,
+  play: YoutubeLogo,
+  link: LinkSimple,
+  clock: Clock,
+  pin: MapPin,
+  photos: Images,
+  route: Path,
+  check: Check,
+  search: MagnifyingGlass,
+  file: FileText,
+  calendar: CalendarBlank,
+  users: UsersThree,
+  stethoscope: Stethoscope,
+  building: Buildings,
+  grid: SquaresFour,
+  target: Target,
+  book: BookOpenText,
+  star: Star,
+  plane: AirplaneTilt,
+  trend: TrendUp,
+  shield: ShieldCheck,
+  award: Medal,
+  seal: SealCheck,
+  cpu: Cpu,
+  sparkle: Sparkle,
+  heart: Heart,
+  briefcase: Briefcase,
+  tag: Tag,
+  info: Info,
+  chevron: CaretRight,
+  user: UserCircle,
+  translate: Translate,
+} satisfies Record<string, PhosphorIcon>;
 
 export type IconName = keyof typeof ICONS;
 
-export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d={ICONS[name]} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+/** Small icons get the bold weight so they stay crisp; tiles pass "duotone". */
+export function Icon({ name, size = 18, weight }: { name: IconName; size?: number; weight?: IconWeight }) {
+  const Glyph = ICONS[name];
+  return <Glyph size={size} weight={weight || (size <= 16 ? "bold" : "regular")} aria-hidden="true" />;
 }
 
-/** A section of the page: a small blue label over a large heading (with an optional count), then its content. */
+/** A section of the page: an icon tile beside a small blue label over a large heading (with an optional count). */
 export function ProfileSection({
   id,
+  icon,
   kicker,
   title,
   count,
@@ -75,6 +180,7 @@ export function ProfileSection({
   children,
 }: {
   id?: string;
+  icon?: IconName;
   kicker?: string;
   title: string;
   count?: number;
@@ -84,12 +190,19 @@ export function ProfileSection({
   return (
     <section id={id} className="cp-section">
       <div className="cp-section-head">
-        <div>
-          {kicker ? <p className="cp-kicker">{kicker}</p> : null}
-          <h2 className="cp-h2">
-            {title}
-            {count ? <span>{count}</span> : null}
-          </h2>
+        <div className="cp-section-title">
+          {icon ? (
+            <span className="cp-section-icon">
+              <Icon name={icon} size={24} weight="duotone" />
+            </span>
+          ) : null}
+          <div className="min-w-0">
+            {kicker ? <p className="cp-kicker">{kicker}</p> : null}
+            <h2 className="cp-h2">
+              {title}
+              {count ? <span>{count}</span> : null}
+            </h2>
+          </div>
         </div>
         {aside}
       </div>
@@ -98,28 +211,204 @@ export function ProfileSection({
   );
 }
 
-/** Up to three photos beside the hero text; the last one opens the full set. */
-export function PhotoMosaic({ photos }: { photos: GalleryPhoto[] }) {
+/** A white card with an icon tile and a small label over its text. */
+export function InfoCard({ icon, label, wide, children }: { icon: IconName; label: string; wide?: boolean; children: ReactNode }) {
+  return (
+    <div className={`cp-card cp-info${wide ? " is-wide" : ""}`}>
+      <div className="cp-info-head">
+        <span className="cp-tile">
+          <Icon name={icon} size={22} weight="duotone" />
+        </span>
+        <p className="cp-label">{label}</p>
+      </div>
+      <div className="cp-info-body">{children}</div>
+    </div>
+  );
+}
+
+/** Long text folded to a few lines with a "Read more" toggle. */
+export function ReadMore({ text, className = "", limit = 420 }: { text: string; className?: string; limit?: number }) {
+  const { t } = useLang();
+  const [open, setOpen] = useState(false);
+  const long = text.length > limit;
+  return (
+    <div className="cp-readmore">
+      <p className={`${className}${long && !open ? " is-clamped" : ""}`}>{text}</p>
+      {long ? (
+        <button type="button" className="cp-link-btn" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+          {open ? t({ ru: "Свернуть", uz: "Yigʻish", en: "Show less" }) : t({ ru: "Читать полностью", uz: "Toʻliq oʻqish", en: "Read more" })}
+          <span className={open ? "is-up" : undefined}>
+            <Icon name="chevron" size={15} />
+          </span>
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** The photos across the top of the page: one large picture and up to four smaller ones on wide screens,
+ *  a swipeable strip with a counter on phones. Any picture opens the full set. */
+export function HeroGallery({ photos, fallback }: { photos: GalleryPhoto[]; fallback?: ReactNode }) {
   const { t } = useLang();
   const [index, setIndex] = useState<number | null>(null);
-  const shown = photos.slice(0, 3);
+  const [current, setCurrent] = useState(0);
+  const strip = useRef<HTMLDivElement>(null);
+  const shown = photos.slice(0, 5);
+
+  useEffect(() => {
+    const el = strip.current;
+    if (!el) return;
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        setCurrent(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));
+      });
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [photos.length]);
+
+  if (!photos.length) return <div className="cp-gallery is-empty">{fallback}</div>;
+
+  const allLabel = `${t({ ru: "Все фото", uz: "Barcha rasmlar", en: "All photos" })} · ${photos.length}`;
   return (
     <>
-      <div className={`clinic-mosaic has-${shown.length}`}>
+      <div className={`cp-gallery has-${shown.length}`}>
         {shown.map((photo, i) => (
-          <button key={photo.id} type="button" aria-label={`${t({ ru: "Открыть фото", uz: "Rasmni ochish", en: "Open photo" })} ${i + 1}`} onClick={() => setIndex(i)}>
-            <FitImage src={photo.url} alt={photo.alt} tolerance={0.2} loading={i === 0 ? "eager" : "lazy"} />
-            {i === shown.length - 1 && photos.length > 1 ? (
-              <span className="clinic-mosaic-all">
-                <Icon name="photos" size={16} />
-                {t({ ru: "Все фото", uz: "Barcha rasmlar", en: "All photos" })} · {photos.length}
-              </span>
-            ) : null}
+          <button
+            key={photo.id}
+            type="button"
+            className="cp-gallery-cell"
+            aria-label={`${t({ ru: "Открыть фото", uz: "Rasmni ochish", en: "Open photo" })} ${i + 1}`}
+            onClick={() => setIndex(i)}
+          >
+            <FitImage src={photo.url} alt={photo.alt} tolerance={0.25} loading={i === 0 ? "eager" : "lazy"} />
           </button>
         ))}
+        {photos.length > 1 ? (
+          <button type="button" className="cp-gallery-all" onClick={() => setIndex(0)}>
+            <Icon name="grid" size={16} />
+            {allLabel}
+          </button>
+        ) : null}
+      </div>
+
+      <div className="cp-strip">
+        <div ref={strip} className="cp-strip-track">
+          {photos.map((photo, i) => (
+            <button key={photo.id} type="button" className="cp-strip-cell" aria-label={`${t({ ru: "Открыть фото", uz: "Rasmni ochish", en: "Open photo" })} ${i + 1}`} onClick={() => setIndex(i)}>
+              <FitImage src={photo.url} alt={photo.alt} tolerance={0.25} loading={i === 0 ? "eager" : "lazy"} />
+            </button>
+          ))}
+        </div>
+        {photos.length > 1 ? (
+          <>
+            <span className="cp-strip-count" aria-hidden="true">
+              <Icon name="photos" size={14} />
+              {Math.min(current + 1, photos.length)} / {photos.length}
+            </span>
+            <span className="cp-strip-dots" aria-hidden="true">
+              {photos.slice(0, 8).map((photo, i) => (
+                <i key={photo.id} className={i === Math.min(current, 7) ? "is-on" : undefined} />
+              ))}
+            </span>
+          </>
+        ) : null}
       </div>
       <PhotoLightbox photos={photos} index={index} onIndexChange={setIndex} />
     </>
+  );
+}
+
+/** The photo section: a bento grid (one large picture, five smaller; on phones one large and four), the last tile
+ *  saying how many more there are. Any tile, or "View all" in the heading, opens the full set. */
+export function PhotoSection({ photos, kicker, title }: { photos: GalleryPhoto[]; kicker: string; title: string }) {
+  const { t } = useLang();
+  const [index, setIndex] = useState<number | null>(null);
+  const shown = photos.slice(0, 6);
+  const open = t({ ru: "Открыть фото", uz: "Rasmni ochish", en: "Open photo" });
+  return (
+    <ProfileSection
+      icon="photos"
+      kicker={kicker}
+      title={title}
+      count={photos.length}
+      aside={
+        <button type="button" className="cp-head-btn" onClick={() => setIndex(0)}>
+          <Icon name="grid" size={16} />
+          {t({ ru: "Смотреть все", uz: "Barchasini koʻrish", en: "View all" })}
+        </button>
+      }
+    >
+      <div className="cp-photos">
+        {shown.map((photo, i) => {
+          // Phones show five tiles, wide screens six: each count gets its own "+N" on its last tile.
+          const moreWide = i === 5 && photos.length > 6 ? photos.length - 6 : 0;
+          const moreNarrow = i === 4 && photos.length > 5 ? photos.length - 5 : 0;
+          return (
+            <button key={photo.id} type="button" className="cp-photo" aria-label={`${open} ${i + 1}`} onClick={() => setIndex(i)}>
+              <FitImage src={photo.url} alt={photo.alt} tolerance={0.3} />
+              {moreWide ? <span className="cp-photo-more is-wide">+{moreWide}</span> : null}
+              {moreNarrow ? <span className="cp-photo-more is-narrow">+{moreNarrow}</span> : null}
+            </button>
+          );
+        })}
+      </div>
+      <PhotoLightbox photos={photos} index={index} onIndexChange={setIndex} />
+    </ProfileSection>
+  );
+}
+
+/** Kept for older imports: the gallery without a fallback. */
+export const PhotoMosaic = HeroGallery;
+
+export type HeroStat = { icon: IconName; value: string | number; label: string; href?: string };
+
+/** The key figures beside the name: an icon tile, a large number and its label. */
+export function HeroStats({ stats }: { stats: HeroStat[] }) {
+  if (!stats.length) return null;
+  return (
+    <dl className={`cp-stats has-${Math.min(stats.length, 4)}`}>
+      {stats.map((stat) => {
+        const body = (
+          <>
+            <span className="cp-tile">
+              <Icon name={stat.icon} size={22} weight="duotone" />
+            </span>
+            <span className="cp-stat-text">
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </span>
+          </>
+        );
+        return (
+          <div key={stat.label} className="cp-stat">
+            <dt className="sr-only">{stat.label}</dt>
+            <dd>{stat.href ? <a href={stat.href}>{body}</a> : <span>{body}</span>}</dd>
+          </div>
+        );
+      })}
+    </dl>
+  );
+}
+
+/** Small facts in one line under the name: an icon, then the words. */
+export function MetaLine({ items }: { items: { icon: IconName; text: ReactNode; tone?: "open" | "closed" }[] }) {
+  if (!items.length) return null;
+  return (
+    <ul className="cp-meta">
+      {items.map((item, i) => (
+        <li key={i} className={item.tone ? `is-${item.tone}` : undefined}>
+          <Icon name={item.icon} size={16} />
+          <span>{item.text}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -144,9 +433,9 @@ export type ProfileDoctor = {
 };
 
 const CATEGORY_LABELS: Record<string, Text> = {
-  highest: { ru: "высшая категория", uz: "oliy toifa", en: "top category" },
-  first: { ru: "первая категория", uz: "birinchi toifa", en: "first category" },
-  second: { ru: "вторая категория", uz: "ikkinchi toifa", en: "second category" },
+  highest: { ru: "Высшая категория", uz: "Oliy toifa", en: "Top category" },
+  first: { ru: "Первая категория", uz: "Birinchi toifa", en: "First category" },
+  second: { ru: "Вторая категория", uz: "Ikkinchi toifa", en: "Second category" },
 };
 
 const DOCTORS_PREVIEW = 6;
@@ -164,14 +453,14 @@ function doctorDetails(d: ProfileDoctor, lang: Lang): { label: string; value: st
   return details.filter((item): item is { label: string; value: string } => Boolean(item.value?.trim()));
 }
 
-/** Doctors as portrait cards, six at first; the long credentials fold away under "More". */
+/** Doctors as portrait cards (photo on top, experience on the photo), six at first; the credentials fold away. */
 export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
   const { lang, t } = useLang();
   const [all, setAll] = useState(false);
   const shown = all ? doctors : doctors.slice(0, DOCTORS_PREVIEW);
   return (
     <>
-      <ul className="cp-people">
+      <ul className="cp-doctors">
         {shown.map((d) => {
           const name = pickName(lang, d.nameRu, d.nameEn);
           const role = pickName(lang, d.roleRu, d.roleEn);
@@ -179,18 +468,28 @@ export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
           const details = doctorDetails(d, lang);
           const years = d.experienceYears != null && d.experienceYears !== "" ? d.experienceYears : null;
           return (
-            <li key={d.id} className="cp-person">
-              <span className="cp-avatar">{d.photoUrl ? <img src={d.photoUrl} alt="" loading="lazy" /> : initials(name)}</span>
-              <div className="cp-person-body">
-                <h3>{name}</h3>
-                {role ? <p className="cp-person-role">{role}</p> : null}
-                {years || d.category ? (
-                  <div className="cp-person-tags">
-                    {years ? <span className="is-accent">{t({ ru: `опыт ${years} лет`, uz: `${years} yil tajriba`, en: `${years} years of practice` })}</span> : null}
-                    {d.category ? <span>{CATEGORY_LABELS[d.category] ? t(CATEGORY_LABELS[d.category]) : d.category}</span> : null}
-                  </div>
+            <li key={d.id} className="cp-doctor">
+              <div className={`cp-doctor-photo${d.photoUrl ? "" : " is-empty"}`}>
+                {d.photoUrl ? <img src={d.photoUrl} alt="" loading="lazy" /> : <span className="cp-doctor-initials">{initials(name)}</span>}
+                {years ? (
+                  <span className="cp-doctor-badge">
+                    <Icon name="briefcase" size={14} />
+                    {t({ ru: `${years} лет опыта`, uz: `${years} yil tajriba`, en: `${years} yrs experience` })}
+                  </span>
                 ) : null}
-                {bio ? <p className="cp-person-bio">{bio}</p> : null}
+              </div>
+              <div className="cp-doctor-body">
+                <h3>{name}</h3>
+                <p className="cp-doctor-role">
+                  <Icon name="stethoscope" size={15} />
+                  <span>{role || " "}</span>
+                </p>
+                {/* Every card keeps the same rows (empty ones held open), so the cards line up at one height. */}
+                <p className={`cp-doctor-cat${d.category ? "" : " is-blank"}`} aria-hidden={d.category ? undefined : true}>
+                  <Icon name="award" size={15} />
+                  {d.category ? (CATEGORY_LABELS[d.category] ? t(CATEGORY_LABELS[d.category]) : d.category) : " "}
+                </p>
+                <p className="cp-doctor-bio">{bio || " "}</p>
                 {details.length ? (
                   <details className="cp-more">
                     <summary>{t({ ru: "Подробнее о враче", uz: "Shifokor haqida batafsil", en: "More about the doctor" })}</summary>
@@ -220,14 +519,14 @@ export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
   );
 }
 
-/** A person card for the founder or the leadership. */
+/** A person card for the founder or the leadership: the portrait beside the name, role and story. */
 export function PersonCard({ name, role, bio, photoUrl, wide }: { name: string; role?: string | null; bio?: string | null; photoUrl?: string | null; wide?: boolean }) {
   return (
     <li className={`cp-person${wide ? " is-wide" : ""}`}>
       <span className="cp-avatar">{photoUrl ? <img src={photoUrl} alt="" loading="lazy" /> : initials(name)}</span>
       <div className="cp-person-body">
+        {role ? <p className="cp-label">{role}</p> : null}
         <h3>{name}</h3>
-        {role ? <p className="cp-person-role">{role}</p> : null}
         {bio ? <p className="cp-person-bio">{bio}</p> : null}
       </div>
     </li>
@@ -287,7 +586,10 @@ export function ServicesList({ services }: { services: Service[] }) {
           const description = pickName(lang, s.descriptionRu, s.descriptionEn);
           return (
             <li key={s.id} className="cp-service">
-              <div>
+              <span className="cp-service-icon" aria-hidden="true">
+                <Icon name="stethoscope" size={20} weight="duotone" />
+              </span>
+              <div className="cp-service-text">
                 <h3>{pickName(lang, s.nameRu, s.nameEn)}</h3>
                 {description ? <p>{description}</p> : null}
               </div>
@@ -305,6 +607,224 @@ export function ServicesList({ services }: { services: Service[] }) {
         </button>
       ) : null}
     </>
+  );
+}
+
+export type EquipmentItem = { id: string; nameRu?: string; nameEn: string; manufacturer?: string; descriptionRu?: string; descriptionEn?: string; photoUrl?: string | null };
+
+/** Equipment as picture cards: the photo on top (or an icon panel), the maker, the name and a few words. */
+export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
+  const { lang } = useLang();
+  // Without any pictures the cards stay compact: an icon tile beside the words.
+  const compact = !items.some((e) => e.photoUrl);
+  if (compact) {
+    return (
+      <FeatureGrid
+        icon="cpu"
+        items={items.map((e) => ({
+          key: e.id,
+          label: e.manufacturer || null,
+          title: pickName(lang, e.nameRu, e.nameEn),
+          text: pickName(lang, e.descriptionRu, e.descriptionEn).trim() || null,
+        }))}
+      />
+    );
+  }
+  return (
+    <ul className="cp-media-grid">
+      {items.map((e) => {
+        const description = pickName(lang, e.descriptionRu, e.descriptionEn).trim();
+        return (
+          <li key={e.id} className="cp-media">
+            <div className="cp-media-photo">
+              {e.photoUrl ? (
+                <FitImage src={e.photoUrl} className="absolute inset-0" tolerance={0.25} />
+              ) : (
+                <span className="cp-media-empty">
+                  <Icon name="cpu" size={40} weight="duotone" />
+                </span>
+              )}
+            </div>
+            <div className="cp-media-body">
+              {e.manufacturer ? <p className="cp-label">{e.manufacturer}</p> : null}
+              <h3>{pickName(lang, e.nameRu, e.nameEn)}</h3>
+              {description ? <p className="cp-media-text">{description}</p> : null}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Technologies and methods: compact cards with a sparkle tile. */
+export function FeatureGrid({ items, icon = "sparkle" }: { items: { key: string; label?: string | null; title: string; text?: string | null }[]; icon?: IconName }) {
+  return (
+    <ul className="cp-features">
+      {items.map((item) => (
+        <li key={item.key} className="cp-feature">
+          <span className="cp-tile">
+            <Icon name={icon} size={22} weight="duotone" />
+          </span>
+          <div className="min-w-0">
+            {item.label ? <p className="cp-label">{item.label}</p> : null}
+            <h3>{item.title}</h3>
+            {item.text ? <p>{item.text}</p> : null}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Points with a gradient check disc, two to a row. */
+export function CheckList({ items, plain }: { items: string[]; plain?: boolean }) {
+  return (
+    <ul className={`cp-checks${plain ? " is-plain" : ""}`}>
+      {items.map((item) => (
+        <li key={item}>
+          <span>
+            <Icon name="check" size={14} />
+          </span>
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export type Certificate = {
+  id: string;
+  nameRu?: string;
+  nameEn: string;
+  issuerRu?: string;
+  issuerEn?: string;
+  year?: number | null;
+  receivedAt?: string | null;
+  validUntil?: string | null;
+  fileUrl?: string | null;
+  imageUrl?: string | null;
+};
+
+/** Certificates and licences: the scan (or an award tile), the name, who issued it and the dates. */
+export function CertificateList({ items }: { items: Certificate[] }) {
+  const { lang, t } = useLang();
+  return (
+    <ul className="cp-certs">
+      {items.map((c) => {
+        const issuer = pickName(lang, c.issuerRu, c.issuerEn).trim();
+        const issued = c.receivedAt || (c.year ? String(c.year) : null);
+        return (
+          <li key={c.id} className="cp-cert">
+            <div className={`cp-cert-thumb${c.imageUrl ? "" : " is-icon"}`}>{c.imageUrl ? <FitImage src={c.imageUrl} className="absolute inset-0" tolerance={0.4} /> : <Icon name="seal" size={26} weight="duotone" />}</div>
+            <div className="cp-cert-body">
+              <h3>{pickName(lang, c.nameRu, c.nameEn)}</h3>
+              {issuer ? <p>{issuer}</p> : null}
+              {issued || c.validUntil ? (
+                <div className="cp-cert-dates">
+                  {issued ? (
+                    <span>
+                      <Icon name="calendar" size={13} />
+                      {t({ ru: "Получен", uz: "Olingan", en: "Issued" })} {issued}
+                    </span>
+                  ) : null}
+                  {c.validUntil ? (
+                    <span>
+                      <Icon name="shield" size={13} />
+                      {t({ ru: "До", uz: "Amal qiladi", en: "Valid until" })} {c.validUntil}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
+              {c.fileUrl ? (
+                <a href={c.fileUrl} target="_blank" rel="noreferrer" className="cp-cert-link">
+                  <Icon name="file" size={15} />
+                  {t({ ru: "Открыть документ", uz: "Hujjatni ochish", en: "Open document" })}
+                </a>
+              ) : null}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Achievements as a timeline: the year on the left, a dot on the line, the story beside it. */
+export function Timeline({ items }: { items: { key: string; year?: number | null; title: string; text?: string | null }[] }) {
+  return (
+    <ol className="cp-timeline">
+      {items.map((item) => (
+        <li key={item.key}>
+          <span className="cp-timeline-year">{item.year || "—"}</span>
+          <span className="cp-timeline-dot" aria-hidden="true">
+            <Icon name="star" size={13} weight="fill" />
+          </span>
+          <div className="cp-timeline-body">
+            <h3>{item.title}</h3>
+            {item.text ? <p>{item.text}</p> : null}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** The map in a rounded frame with the address card laid over its corner (under it on phones). */
+export function LocationBlock({
+  lat,
+  lng,
+  address,
+  routeUrl,
+  mapsUrl,
+  extra,
+}: {
+  lat?: number | null;
+  lng?: number | null;
+  address: string;
+  routeUrl?: string | null;
+  mapsUrl?: string | null;
+  extra?: ReactNode;
+}) {
+  const { t } = useLang();
+  const hasMap = lat != null && lng != null;
+  return (
+    <div className={`cp-location${hasMap ? "" : " is-plain"}`}>
+      {hasMap ? (
+        <div className="cp-map">
+          <BranchMap mode="view" lat={lat} lng={lng} height={440} className="w-full max-w-full" />
+        </div>
+      ) : null}
+      <div className="cp-address">
+        <div className="cp-address-line">
+          <span className="cp-tile">
+            <Icon name="pin" size={22} weight="duotone" />
+          </span>
+          <div className="min-w-0">
+            <p className="cp-label">{t({ ru: "Адрес", uz: "Manzil", en: "Address" })}</p>
+            <p className="cp-address-text">{address}</p>
+          </div>
+        </div>
+        {extra}
+        {routeUrl || mapsUrl ? (
+          <div className="cp-address-actions">
+            {routeUrl ? (
+              <a className="pill-btn is-ink" href={routeUrl} target="_blank" rel="noreferrer">
+                {t({ ru: "Построить маршрут", uz: "Yoʻnalish qurish", en: "Get directions" })}
+                <span className="pill-btn-icon">
+                  <Icon name="route" size={17} />
+                </span>
+              </a>
+            ) : null}
+            {mapsUrl ? (
+              <a className="pill-btn is-outline" href={mapsUrl} target="_blank" rel="noreferrer">
+                {t({ ru: "Яндекс Карты", uz: "Yandex Xaritalar", en: "Yandex Maps" })}
+              </a>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -326,7 +846,33 @@ export type ContactCardProps = {
   children?: ReactNode;
 };
 
-/** The ink contacts card: every way to reach the clinic, each one a row with an icon disc. */
+function ContactRow({ href, icon, label, value, main, external }: { href?: string; icon: IconName; label: string; value: string; main?: boolean; external?: boolean }) {
+  const inner = (
+    <>
+      <i>
+        <Icon name={icon} size={21} weight="duotone" />
+      </i>
+      <span className="cp-contact-text">
+        <small>{label}</small>
+        <span>{value}</span>
+      </span>
+      {href ? (
+        <b aria-hidden="true">
+          <Icon name="chevron" size={16} />
+        </b>
+      ) : null}
+    </>
+  );
+  const className = `cp-contact-row${main ? " is-main" : ""}`;
+  if (!href) return <p className={className}>{inner}</p>;
+  return (
+    <a href={href} className={className} {...(external ? { target: "_blank", rel: "noreferrer" } : {})}>
+      {inner}
+    </a>
+  );
+}
+
+/** The ink contacts card: every way to reach the clinic, each one a row with an icon tile, what it is and the value. */
 export function ContactCard({
   logoUrl,
   name,
@@ -358,76 +904,31 @@ export function ContactCard({
       </div>
       <div className="cp-contact-rows">
         {phones.map((phone, index) => (
-          <a key={phone} href={telHref(phone)} className={`cp-contact-row${index === 0 ? " is-main" : ""}`}>
-            <i>
-              <Icon name="phone" />
-            </i>
-            <span>{phone}</span>
-          </a>
+          <ContactRow key={phone} href={telHref(phone)} icon="phone" label={t({ ru: "Телефон", uz: "Telefon", en: "Phone" })} value={phone} main={index === 0} />
         ))}
-        {email ? (
-          <a href={`mailto:${email}`} className="cp-contact-row">
-            <i>
-              <Icon name="mail" />
-            </i>
-            <span>{email}</span>
-          </a>
-        ) : null}
+        {whatsapp ? <ContactRow href={socialHref("whatsapp", whatsapp)} external icon="chat" label="WhatsApp" value={socialLabel(whatsapp)} /> : null}
+        {telegram ? <ContactRow href={socialHref("telegram", telegram)} external icon="send" label="Telegram" value={socialLabel(telegram)} /> : null}
+        {email ? <ContactRow href={`mailto:${email}`} icon="mail" label="Email" value={email} /> : null}
         {website ? (
-          <a href={/^https?:\/\//i.test(website) ? website : `https://${website}`} target="_blank" rel="noreferrer" className="cp-contact-row">
-            <i>
-              <Icon name="globe" />
-            </i>
-            <span>{website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
-          </a>
+          <ContactRow
+            href={/^https?:\/\//i.test(website) ? website : `https://${website}`}
+            external
+            icon="globe"
+            label={t({ ru: "Сайт", uz: "Sayt", en: "Website" })}
+            value={website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+          />
         ) : null}
-        {whatsapp ? (
-          <a href={socialHref("whatsapp", whatsapp)} target="_blank" rel="noreferrer" className="cp-contact-row">
-            <i>
-              <Icon name="chat" />
-            </i>
-            <span>WhatsApp · {socialLabel(whatsapp)}</span>
-          </a>
-        ) : null}
-        {telegram ? (
-          <a href={socialHref("telegram", telegram)} target="_blank" rel="noreferrer" className="cp-contact-row">
-            <i>
-              <Icon name="send" />
-            </i>
-            <span>Telegram · {socialLabel(telegram)}</span>
-          </a>
-        ) : null}
-        {instagram ? (
-          <a href={socialHref("instagram", instagram)} target="_blank" rel="noreferrer" className="cp-contact-row">
-            <i>
-              <Icon name="camera" />
-            </i>
-            <span>Instagram · {socialLabel(instagram).replace(/^@?/, "@")}</span>
-          </a>
-        ) : null}
-        {youtube ? (
-          <a href={youtube} target="_blank" rel="noreferrer" className="cp-contact-row">
-            <i>
-              <Icon name="play" />
-            </i>
-            <span>YouTube</span>
-          </a>
-        ) : null}
+        {instagram ? <ContactRow href={socialHref("instagram", instagram)} external icon="camera" label="Instagram" value={socialLabel(instagram).replace(/^@?/, "@")} /> : null}
+        {youtube ? <ContactRow href={youtube} external icon="play" label="YouTube" value={socialLabel(youtube)} /> : null}
         {extra.map((social) => (
-          <a key={social.url} href={social.url} target="_blank" rel="noreferrer" className="cp-contact-row">
-            <i>
-              <Icon name="link" />
-            </i>
-            <span>{social.label}</span>
-          </a>
+          <ContactRow key={social.url} href={social.url} external icon="link" label={social.label} value={socialLabel(social.url)} />
         ))}
         {responseHours ? (
-          <p className="cp-contact-row">
-            <i>
-              <Icon name="clock" />
-            </i>
-            <span>{t({ ru: `Отвечают примерно за ${responseHours} ч`, uz: `Taxminan ${responseHours} soatda javob berishadi`, en: `Usually reply within ${responseHours} h` })}</span>
-          </p>
+          <ContactRow
+            icon="clock"
+            label={t({ ru: "Скорость ответа", uz: "Javob tezligi", en: "Response time" })}
+            value={t({ ru: `Отвечают примерно за ${responseHours} ч`, uz: `Taxminan ${responseHours} soatda`, en: `Within about ${responseHours} h` })}
+          />
         ) : null}
       </div>
       {children}
@@ -571,7 +1072,7 @@ export function SectionBar({ sections, cta }: { sections: BarSection[]; cta: str
 }
 
 /** Phones and tablets: the request button (and a call button) docked along the bottom edge. It steps aside while the
- *  form itself is on screen, and the Health Checker bubble moves up above it. */
+ *  form itself is on screen. */
 export function MobileDock({ cta, phone }: { cta: string; phone?: string | null }) {
   const { t } = useLang();
   const [hidden, setHidden] = useState(false);
@@ -605,16 +1106,18 @@ export function MobileDock({ cta, phone }: { cta: string; phone?: string | null 
   );
 }
 
-/** The hero comes in once, when the page has its data: the copy rises line by line, the photos settle into place.
- *  With reduced motion it is simply there. */
+/** The hero comes in once, when the page has its data: the photos settle into place, then the name and the facts
+ *  rise line by line. With reduced motion it is simply there. */
 export function useHeroIntro(scope: RefObject<HTMLElement | null>, ready: boolean) {
   useGSAP(
     () => {
       if (!ready) return;
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        gsap.from(".cp-hero-copy > *", { y: 26, autoAlpha: 0, duration: 1, ease: "expo.out", stagger: 0.07, clearProps: "all" });
-        gsap.from(".cp-hero-media", { scale: 0.96, autoAlpha: 0, duration: 1.2, ease: "expo.out", clearProps: "all" });
+        const tl = gsap.timeline({ defaults: { ease: "expo.out", clearProps: "all" } });
+        tl.from(".cp-gallery-cell, .cp-strip, .cp-gallery.is-empty", { y: 24, autoAlpha: 0, duration: 1.1, stagger: 0.06 })
+          .from(".cp-id > *", { y: 22, autoAlpha: 0, duration: 0.9, stagger: 0.06 }, 0.15)
+          .from(".cp-stat", { y: 18, autoAlpha: 0, duration: 0.8, stagger: 0.06 }, 0.3);
       });
     },
     { scope, dependencies: [ready] },
@@ -625,6 +1128,9 @@ export function useHeroIntro(scope: RefObject<HTMLElement | null>, ready: boolea
 export function PageState({ title, text, action }: { title: string; text?: string; action?: ReactNode }) {
   return (
     <div className="wrap cp-state">
+      <span className="cp-tile is-large">
+        <Icon name="info" size={30} weight="duotone" />
+      </span>
       <h1>{title}</h1>
       {text ? <p>{text}</p> : null}
       {action}
@@ -637,8 +1143,16 @@ export function PageSkeleton() {
     <div className="wrap" aria-busy="true">
       <div className="cp-crumbs">&nbsp;</div>
       <div className="cp-skeleton">
-        <div />
-        <div />
+        <div className="cp-skeleton-gallery">
+          <div />
+          <div />
+          <div />
+        </div>
+        <div className="cp-skeleton-lines">
+          <div />
+          <div />
+          <div />
+        </div>
       </div>
     </div>
   );

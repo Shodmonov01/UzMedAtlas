@@ -3,30 +3,41 @@ import { useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
 import { CITY_LABELS, fetchClinicBranch } from "@/shared/api/client";
 import { isOpenNow, type DayHours } from "@/shared/lib/schedule";
-import { BranchMap } from "@/shared/ui/BranchMap";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
-import { FitImage } from "@/shared/ui/FitImage";
 import { LogoTiles } from "@/shared/ui/LogoTiles";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { PhotoCarousel, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
+import { type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
 import { countWord, pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
 import {
+  CheckList,
   ContactCard,
   DoctorList,
+  EquipmentGrid,
+  HeroGallery,
+  HeroStats,
   Icon,
+  InfoCard,
+  LocationBlock,
+  MetaLine,
   MobileDock,
   PageSkeleton,
   PageState,
-  PhotoMosaic,
+  PhotoSection,
   ProfileSection,
   QuickContact,
+  ReadMore,
   SectionBar,
   ServicesList,
+  socialHref,
+  splitPoints,
   telHref,
   useHeroIntro,
   type BarSection,
+  type EquipmentItem,
+  type HeroStat,
+  type IconName,
   type ProfileDoctor,
 } from "@/widgets/clinic-profile/ClinicProfile";
 
@@ -46,7 +57,6 @@ const DAYS: { key: string; label: Text }[] = [
 
 const L = {
   catalog: { ru: "Каталог клиник", uz: "Klinikalar katalogi", en: "Clinic catalog" },
-  back: { ru: "Назад к клинике", uz: "Klinikaga qaytish", en: "Back to the clinic" },
   clinic: { ru: "Клиника", uz: "Klinika", en: "Clinic" },
   loadError: { ru: "Не удалось загрузить страницу филиала", uz: "Filial sahifasini yuklab boʻlmadi", en: "Could not load the branch page" },
   loadErrorText: { ru: "Проверьте соединение и обновите страницу.", uz: "Internetni tekshirib, sahifani yangilang.", en: "Check your connection and reload the page." },
@@ -104,15 +114,6 @@ function dayHours(day: DayHours | null, lang: Lang) {
   return `${day.open} – ${day.close}`;
 }
 
-/** "JCI; университетская клиника; робот-центр." → ["JCI", "Университетская клиника", "Робот-центр"] */
-function points(value?: string | null) {
-  return (value || "")
-    .split(/[;\n]/)
-    .map((item) => item.replace(/^[•\-*]\s*/, "").replace(/\.$/, "").trim())
-    .filter(Boolean)
-    .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
-}
-
 function BranchDetailPage() {
   const { slug, branchSlug } = Route.useParams();
   const { lang, t } = useLang();
@@ -161,20 +162,27 @@ function BranchDetailPage() {
   if (data.coverUrl && !gallery.some((p) => p.url === data.coverUrl)) {
     gallery.unshift({ id: "cover", url: data.coverUrl, alt: name });
   }
-  const advantages = points(pick(data.advantagesRu, data.advantagesEn));
-  const features = points(pick(data.featuresRu, data.featuresEn));
+  const advantages = splitPoints(pick(data.advantagesRu, data.advantagesEn));
+  const features = splitPoints(pick(data.featuresRu, data.featuresEn));
   const tourism = data.medicalTourism ? pick(data.medicalTourismInfoRu, data.medicalTourismInfoEn) : null;
   const specialties: { slug: string; nameRu?: string; nameEn: string }[] = data.specialties || [];
   const doctors: ProfileDoctor[] = data.doctors || [];
   const services = data.services || [];
-  const equipment: { id: string; nameRu?: string; nameEn: string; manufacturer?: string; descriptionRu?: string; descriptionEn?: string; photoUrl?: string | null }[] = data.equipment || [];
+  const equipment: EquipmentItem[] = data.equipment || [];
   const hoursLabel = allDay ? t(L.allDay) : hasSchedule ? `${t(L.today)}: ${dayHours(schedule[today] ?? null, lang)}` : null;
-  const facts = [
-    doctors.length ? { value: String(doctors.length), label: countWord(lang, doctors.length, { ru: [...L.specialists.ru], uz: L.specialists.uz, en: [...L.specialists.en] }) } : null,
-    specialties.length ? { value: String(specialties.length), label: countWord(lang, specialties.length, { ru: ["направление", "направления", "направлений"], uz: "yoʻnalish", en: ["specialty", "specialties"] }) } : null,
-    services.length ? { value: String(services.length), label: countWord(lang, services.length, { ru: ["услуга", "услуги", "услуг"], uz: "xizmat", en: ["service", "services"] }) } : null,
-    allDay ? { value: "24/7", label: t({ ru: "без выходных", uz: "dam olishsiz", en: "every day" }) } : null,
-  ].filter(Boolean) as { value: string; label: string }[];
+  const stats = [
+    doctors.length ? { icon: "users", value: doctors.length, label: countWord(lang, doctors.length, { ru: [...L.specialists.ru], uz: L.specialists.uz, en: [...L.specialists.en] }), href: "#doctors" } : null,
+    specialties.length ? { icon: "grid", value: specialties.length, label: countWord(lang, specialties.length, { ru: ["направление", "направления", "направлений"], uz: "yoʻnalish", en: ["specialty", "specialties"] }), href: "#specialties" } : null,
+    services.length ? { icon: "tag", value: services.length, label: countWord(lang, services.length, { ru: ["услуга", "услуги", "услуг"], uz: "xizmat", en: ["service", "services"] }), href: "#services" } : null,
+    allDay ? { icon: "clock", value: "24/7", label: t({ ru: "без выходных", uz: "dam olishsiz", en: "every day" }) } : null,
+    equipment.length ? { icon: "cpu", value: equipment.length, label: t({ ru: "единиц оборудования", uz: "uskuna", en: "equipment items" }), href: "#equipment" } : null,
+  ].filter(Boolean).slice(0, 4) as HeroStat[];
+
+  const meta = [
+    { icon: "pin" as IconName, text: address || CITY_LABELS[data.city] || data.city },
+    hoursLabel ? { icon: "clock" as IconName, text: hoursLabel } : null,
+    hasSchedule && !allDay ? { icon: "info" as IconName, text: openNow ? t(L.openNow) : t(L.closedNow), tone: openNow ? ("open" as const) : ("closed" as const) } : null,
+  ].filter(Boolean) as { icon: IconName; text: string; tone?: "open" | "closed" }[];
 
   const sections: BarSection[] = [
     advantages.length || features.length || tourism ? { id: "features", label: t(L.features) } : null,
@@ -189,88 +197,25 @@ function BranchDetailPage() {
     <div ref={root} className="cp">
       <div className="wrap">
         <nav className="cp-crumbs" aria-label="Breadcrumbs">
-          <Link to="/clinics/$slug" params={{ slug }} className="cp-back" aria-label={t(L.back)}>
-            <ArrowIcon size={15} />
-          </Link>
-          <Link to="/" hash="catalog" className="hidden sm:inline">
+          <Link to="/" hash="catalog" className="cp-crumbs-wide">
             {t(L.catalog)}
           </Link>
-          <span aria-hidden="true" className="hidden sm:inline">
-            /
+          <span aria-hidden="true" className="cp-crumbs-wide">
+            <Icon name="chevron" size={14} />
           </span>
           <Link to="/clinics/$slug" params={{ slug }} className="min-w-0 truncate">
             {clinicName}
           </Link>
-          <span aria-hidden="true">/</span>
+          <span aria-hidden="true">
+            <Icon name="chevron" size={14} />
+          </span>
           <span>{name}</span>
         </nav>
 
         <header className="cp-hero">
-          <div className="cp-hero-copy">
-            <div className="cp-hero-top">
-              <ClinicLogo src={data.clinic?.logoUrl} name={clinicName} className="h-16 rounded-[18px] md:h-[72px]" wide />
-              <div className="cp-chips">
-                <span className="cp-chip">
-                  <Icon name="pin" size={14} />
-                  {CITY_LABELS[data.city] || data.city}
-                </span>
-                <span className="cp-chip">{t(L.branchOf)}</span>
-                {hasSchedule ? <span className={`cp-chip ${openNow ? "is-open" : "is-closed"}`}>{openNow ? t(L.openNow) : t(L.closedNow)}</span> : null}
-              </div>
-            </div>
-
-            <h1 className="cp-title">{name}</h1>
-            {hoursLabel ? (
-              <p className="-mt-2 flex items-center gap-2 text-[15px] font-semibold text-muted">
-                <Icon name="clock" size={16} />
-                {hoursLabel}
-              </p>
-            ) : null}
-            {description ? <p className="cp-intro">{description}</p> : null}
-
-            {specialties.length ? (
-              <div className="cp-tags">
-                {specialties.slice(0, 4).map((s) => (
-                  <span key={s.slug}>{pickName(lang, s.nameRu, s.nameEn)}</span>
-                ))}
-                {specialties.length > 4 ? <a href="#specialties">+{specialties.length - 4}</a> : null}
-              </div>
-            ) : null}
-
-            <div className="cp-hero-actions">
-              <a href="#lead" className="pill-btn is-ink">
-                {t(L.request)}
-                <span className="pill-btn-icon">
-                  <ArrowIcon />
-                </span>
-              </a>
-              {phones[0] ? (
-                <a href={telHref(phones[0])} className="pill-btn is-outline">
-                  <Icon name="phone" size={17} />
-                  {phones[0]}
-                </a>
-              ) : null}
-            </div>
-
-            {facts.length ? (
-              <dl className="cp-facts">
-                {facts.map((fact) => (
-                  <div key={fact.label}>
-                    <dt className="sr-only">{fact.label}</dt>
-                    <dd>
-                      <strong>{fact.value}</strong>
-                      <span>{fact.label}</span>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            ) : null}
-          </div>
-
-          <div className="cp-hero-media">
-            {gallery.length ? (
-              <PhotoMosaic photos={gallery} />
-            ) : (
+          <HeroGallery
+            photos={gallery}
+            fallback={
               <div className="cp-hero-facts">
                 <LogoTiles corner="br" seed={17} />
                 <p>{t(L.howTo)}</p>
@@ -314,7 +259,52 @@ function BranchDetailPage() {
                   </a>
                 ) : null}
               </div>
-            )}
+            }
+          />
+
+          <div className="cp-hero-body">
+            <div className="cp-id">
+              <div className="cp-id-top">
+                <ClinicLogo src={data.clinic?.logoUrl} name={clinicName} className="h-16 rounded-[18px] md:h-[76px]" wide />
+                <Link to="/clinics/$slug" params={{ slug }} className="cp-badge is-link">
+                  <Icon name="building" size={15} />
+                  {t(L.branchOf)} · {clinicName}
+                </Link>
+              </div>
+
+              <h1 className="cp-title">{name}</h1>
+
+              <MetaLine items={meta} />
+
+              {description ? <p className="cp-intro">{description}</p> : null}
+
+              <div className="cp-hero-actions">
+                <a href="#lead" className="pill-btn is-ink">
+                  {t(L.request)}
+                  <span className="pill-btn-icon">
+                    <ArrowIcon />
+                  </span>
+                </a>
+                {phones[0] ? (
+                  <a href={telHref(phones[0])} className="pill-btn is-outline">
+                    <Icon name="phone" size={17} />
+                    {phones[0]}
+                  </a>
+                ) : null}
+                {data.whatsapp ? (
+                  <a href={socialHref("whatsapp", data.whatsapp)} target="_blank" rel="noreferrer" className="cp-round-btn" aria-label="WhatsApp">
+                    <Icon name="chat" size={19} />
+                  </a>
+                ) : null}
+                {data.telegram ? (
+                  <a href={socialHref("telegram", data.telegram)} target="_blank" rel="noreferrer" className="cp-round-btn" aria-label="Telegram">
+                    <Icon name="send" size={19} />
+                  </a>
+                ) : null}
+              </div>
+            </div>
+
+            <HeroStats stats={stats} />
           </div>
         </header>
       </div>
@@ -324,126 +314,81 @@ function BranchDetailPage() {
       <div className="wrap cp-body">
         <div className="cp-main">
           {advantages.length || features.length || tourism ? (
-            <ProfileSection id="features" kicker={t(L.features)} title={t(L.featuresTitle)}>
+            <ProfileSection id="features" icon="shield" kicker={t(L.features)} title={t(L.featuresTitle)}>
               {advantages.length || features.length ? (
                 <div className="cp-grid">
                   {advantages.length ? (
-                    <div className={`cp-card${features.length ? "" : " is-wide"}`}>
-                      <p className="cp-label">{t(L.advantages)}</p>
-                      <ul className="cp-checks is-plain mt-4">
-                        {advantages.map((item) => (
-                          <li key={item}>
-                            <span>
-                              <Icon name="check" size={14} />
-                            </span>
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <InfoCard icon="star" label={t(L.advantages)} wide={!features.length}>
+                      <CheckList items={advantages} plain />
+                    </InfoCard>
                   ) : null}
                   {features.length ? (
-                    <div className={`cp-card${advantages.length ? "" : " is-wide"}`}>
-                      <p className="cp-label">{t(L.inside)}</p>
-                      <ul className="cp-checks is-plain mt-4">
-                        {features.map((item) => (
-                          <li key={item}>
-                            <span>
-                              <Icon name="check" size={14} />
-                            </span>
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <InfoCard icon="building" label={t(L.inside)} wide={!advantages.length}>
+                      <CheckList items={features} plain />
+                    </InfoCard>
                   ) : null}
                 </div>
               ) : null}
               {tourism ? (
-                <div className="cp-popular">
-                  <p className="cp-label">{t(L.tourism)}</p>
-                  <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-ink">{tourism}</p>
-                </div>
+                <InfoCard icon="plane" label={t(L.tourism)}>
+                  <ReadMore text={tourism} limit={360} />
+                </InfoCard>
               ) : null}
             </ProfileSection>
           ) : null}
 
           {specialties.length ? (
-            <ProfileSection id="specialties" kicker={t(L.directions)} title={t(L.directions)} count={specialties.length}>
-              <div className="cp-pills">
-                {specialties.map((s) => (
-                  <span key={s.slug}>
-                    <i aria-hidden="true" />
-                    {pickName(lang, s.nameRu, s.nameEn)}
-                  </span>
-                ))}
+            <ProfileSection id="specialties" icon="grid" kicker={t(L.directions)} title={t(L.directions)} count={specialties.length}>
+              <div className="cp-card">
+                <ul className="cp-spec-list">
+                  {specialties.map((s) => (
+                    <li key={s.slug}>
+                      <Icon name="check" size={15} />
+                      {pickName(lang, s.nameRu, s.nameEn)}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </ProfileSection>
           ) : null}
 
           {doctors.length ? (
-            <ProfileSection id="doctors" kicker={t(L.team)} title={t(L.doctorsTitle)} count={doctors.length}>
+            <ProfileSection id="doctors" icon="stethoscope" kicker={t(L.team)} title={t(L.doctorsTitle)} count={doctors.length}>
               <DoctorList doctors={doctors} />
             </ProfileSection>
           ) : null}
 
           {services.length ? (
-            <ProfileSection id="services" kicker={t(L.prices)} title={t(L.servicesTitle)} count={services.length}>
+            <ProfileSection id="services" icon="tag" kicker={t(L.prices)} title={t(L.servicesTitle)} count={services.length}>
               <ServicesList services={services} />
             </ProfileSection>
           ) : null}
 
           {equipment.length ? (
-            <ProfileSection id="equipment" kicker={t(L.equipmentKicker)} title={t(L.equipment)}>
-              <ul className="cp-grid">
-                {equipment.map((e) => (
-                  <li key={e.id} className="cp-card is-row">
-                    {e.photoUrl ? <FitImage src={e.photoUrl} className="cp-thumb" tolerance={0.2} /> : null}
-                    <div className="min-w-0">
-                      {e.manufacturer ? <p className="cp-label">{e.manufacturer}</p> : null}
-                      <h3 className={e.manufacturer ? "mt-1.5" : undefined}>{pickName(lang, e.nameRu, e.nameEn)}</h3>
-                      {pick(e.descriptionRu, e.descriptionEn) ? <p className="mt-2">{pick(e.descriptionRu, e.descriptionEn)}</p> : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+            <ProfileSection id="equipment" icon="cpu" kicker={t(L.equipmentKicker)} title={t(L.equipment)} count={equipment.length}>
+              <EquipmentGrid items={equipment} />
             </ProfileSection>
           ) : null}
 
-          {gallery.length > 3 ? (
-            <ProfileSection kicker={t(L.insideKicker)} title={t(L.photos)} count={gallery.length}>
-              <PhotoCarousel photos={gallery} />
-            </ProfileSection>
-          ) : null}
+          {gallery.length > 5 ? <PhotoSection photos={gallery} kicker={t(L.insideKicker)} title={t(L.photos)} /> : null}
 
           {address || hasCoords ? (
-            <ProfileSection id="location" kicker={t(L.howTo)} title={t(L.map)}>
-              {hasCoords ? (
-                <div className="cp-map">
-                  <BranchMap mode="view" lat={lat} lng={lng} className="w-full max-w-full" />
-                </div>
-              ) : null}
-              <div className="cp-address">
-                <p>
-                  <Icon name="pin" size={20} />
-                  {address || t(L.addressAsk)}
-                </p>
-                <div className="cp-address-actions">
-                  {hasCoords ? (
-                    <a className="pill-btn is-ink" href={yandexRouteUrl(lat, lng)} target="_blank" rel="noreferrer">
-                      {t(L.route)}
-                      <span className="pill-btn-icon">
-                        <Icon name="route" size={17} />
-                      </span>
-                    </a>
-                  ) : null}
-                  {mapsUrl ? (
-                    <a className="pill-btn is-outline" href={mapsUrl} target="_blank" rel="noreferrer">
-                      {t(L.yandex)}
-                    </a>
-                  ) : null}
-                </div>
-              </div>
+            <ProfileSection id="location" icon="pin" kicker={t(L.howTo)} title={t(L.map)}>
+              <LocationBlock
+                lat={hasCoords ? lat : null}
+                lng={hasCoords ? lng : null}
+                address={address || t(L.addressAsk)}
+                routeUrl={hasCoords ? yandexRouteUrl(lat, lng) : null}
+                mapsUrl={mapsUrl}
+                extra={
+                  hoursLabel ? (
+                    <p className={`cp-address-hours${hasSchedule && !allDay ? (openNow ? " is-open" : " is-closed") : ""}`}>
+                      <Icon name="clock" size={16} />
+                      {hoursLabel}
+                    </p>
+                  ) : null
+                }
+              />
             </ProfileSection>
           ) : null}
         </div>

@@ -10,8 +10,6 @@ export const Route = createFileRoute("/cabinet/login")({
   component: CabinetLoginPage,
 });
 
-const DEMO = { email: "owner@uzmedatlas.local", password: "clinic123" };
-
 function CabinetLoginPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -100,25 +98,6 @@ function CabinetLoginPage() {
           </span>
         </button>
       </form>
-
-      {mode === "login" ? (
-        <div className="auth-demo">
-          <div>
-            <strong>Демо-доступ</strong>
-            {DEMO.email} / {DEMO.password}
-          </div>
-          <button
-            type="button"
-            className="ws-pill"
-            onClick={() => {
-              setEmail(DEMO.email);
-              setPassword(DEMO.password);
-            }}
-          >
-            Подставить
-          </button>
-        </div>
-      ) : null}
     </AuthLayout>
   );
 }
