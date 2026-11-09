@@ -49,7 +49,15 @@ export function glideTo(target: string | HTMLElement | number, offset = 0) {
   if (el === null) return false;
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const inputs = ["wheel", "touchstart", "keydown"] as const;
-  const release = () => inputs.forEach((name) => window.removeEventListener(name, stop));
+  // The site's CSS smooth scroll (inner pages) would ease every step of the tween again and stall it short of the
+  // target, so it is switched off for the glide and put back after.
+  const html = document.documentElement;
+  const behavior = html.style.scrollBehavior;
+  html.style.scrollBehavior = "auto";
+  const release = () => {
+    inputs.forEach((name) => window.removeEventListener(name, stop));
+    html.style.scrollBehavior = behavior;
+  };
   const tween = gsap.to(window, {
     scrollTo: { y: el, offsetY: offset, autoKill: false },
     duration: still ? 0 : 1.3,

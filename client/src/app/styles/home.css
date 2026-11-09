@@ -49,6 +49,8 @@
    The current section sits on a soft pill that glides between the links (Header moves it with GSAP); hovering a link
    only darkens its text. */
 .site-header { position: sticky; top: 0; z-index: 30; }
+/* While the phone menu is open it sits above everything, the docked request bar included. */
+.site-header.is-open { z-index: 70; }
 .reference-portal .site-header { position: fixed; left: 0; right: 0; }
 .site-header-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 72px; padding: 0 max(var(--gutter), calc((100% - var(--page-width)) / 2));
   background: white; box-shadow: 0 1px 0 var(--line); transition: background-color .45s ease, box-shadow .45s ease; }
@@ -73,21 +75,32 @@
 .site-header-action-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--brand-gradient); color: white; transition: transform .5s var(--ease-out); }
 .site-header-action:hover .site-header-action-icon { transform: rotate(-45deg); }
 
-.site-menu-button { display: none; place-items: center; width: 44px; height: 44px; margin-right: -6px; padding: 0; color: var(--ink); cursor: pointer; transition: color .45s ease; }
-.site-menu-button > span { grid-area: 1 / 1; width: 22px; height: 2px; border-radius: 2px; background: currentColor; transition: transform .4s var(--ease-out); }
-.site-menu-button > span:first-child { transform: translateY(-4px); }
-.site-menu-button > span:last-child { transform: translateY(4px); }
+/* The menu button: a round button the size of the language flag, two lines that fold into a cross. */
+.site-menu-button { display: none; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 999px; background: white; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); cursor: pointer; transition: background-color .3s ease, color .3s ease, box-shadow .3s ease; }
+.site-menu-button:hover { background: var(--paper); }
+.site-menu-button:focus-visible { outline: 2px solid var(--brand-sky); outline-offset: 2px; }
+.site-menu-button > span { grid-area: 1 / 1; width: 18px; height: 2px; border-radius: 2px; background: currentColor; transition: transform .45s var(--ease-out), width .45s var(--ease-out); }
+.site-menu-button > span:first-child { transform: translateY(-3.5px); }
+.site-menu-button > span:last-child { width: 12px; transform: translate(-3px, 3.5px); }
+.site-header.is-open .site-menu-button { background: var(--ink); box-shadow: none; color: white; }
 .site-header.is-open .site-menu-button > span:first-child { transform: rotate(45deg); }
-.site-header.is-open .site-menu-button > span:last-child { transform: rotate(-45deg); }
+.site-header.is-open .site-menu-button > span:last-child { width: 18px; transform: rotate(-45deg); }
 
 /* Phone and tablet menu: a white sheet attached under the bar over a dimmed page; the links rise in one after another. */
-.site-menu { position: relative; z-index: 1; display: grid; padding: 4px max(var(--gutter), calc((100% - var(--page-width)) / 2)) 24px; background: white; box-shadow: 0 1px 0 var(--line), 0 30px 50px -30px #0b2a3d80; animation: site-menu-in .4s var(--ease-out); }
+.site-menu { position: relative; z-index: 1; display: grid; gap: 12px; padding: 12px max(var(--gutter), calc((100% - var(--page-width)) / 2)) 20px; background: var(--paper); box-shadow: 0 1px 0 var(--line), 0 30px 50px -30px #0b2a3d80; animation: site-menu-in .4s var(--ease-out); }
 .site-menu[hidden], .site-menu-backdrop[hidden] { display: none; }
-.site-menu a { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 20px; font-weight: 600; letter-spacing: -.03em; animation: site-menu-item-in .6s var(--ease-out) backwards; }
-.site-menu a > svg { color: var(--muted); transition: transform .3s ease, color .3s ease; }
-.site-menu a:hover > svg, .site-menu a.is-active > svg { color: var(--accent-deep); transform: translateX(3px); }
-.site-menu a.is-active { color: var(--accent-deep); }
-.site-menu .site-menu-action { height: 54px; margin-top: 18px; padding: 0 5px 0 22px; border: 0; border-radius: 999px; background: var(--ink); color: white; font-size: 16px; }
+/* One grouped white list, the rows split by hairlines that start after the icon. */
+.site-menu-list { display: grid; overflow: hidden; border-radius: 22px; background: white; box-shadow: 0 0 0 1px #0b2a3d0f, 0 20px 40px -32px #0b2a3d59; }
+.site-menu-list a { position: relative; display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 8px 14px 8px 10px; color: var(--ink); font-size: 17px; font-weight: 600; letter-spacing: -.02em; animation: site-menu-item-in .6s var(--ease-out) backwards; transition: background-color .2s ease; }
+.site-menu-list a + a::before { content: ""; position: absolute; top: 0; right: 0; left: 64px; height: 1px; background: var(--line); }
+.site-menu-list a:active { background: var(--paper); }
+.site-menu-list a > i { display: grid; flex-shrink: 0; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--paper); color: var(--ink); font-style: normal; transition: background-color .25s ease, color .25s ease; }
+.site-menu-list a > span { flex: 1; min-width: 0; }
+.site-menu-chevron { flex-shrink: 0; color: #9db4bf; transition: transform .3s ease, color .3s ease; }
+.site-menu-list a:hover .site-menu-chevron { color: var(--ink); transform: translateX(2px); }
+.site-menu-list a.is-active > i { background: var(--ink); color: white; }
+.site-menu-list a.is-active .site-menu-chevron { color: var(--ink); }
+.site-menu .site-menu-action { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 6px 0 22px; border-radius: 999px; background: var(--ink); color: white; font-size: 16px; font-weight: 600; animation: site-menu-item-in .6s var(--ease-out) .2s backwards; }
 .site-menu .site-menu-action > span { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; background: var(--brand-gradient); }
 .site-menu .site-menu-action > span > svg { color: white; }
 .site-menu-backdrop { position: fixed; inset: 0; z-index: -1; background: #0b1a2b66; animation: site-backdrop-in .3s ease-out; }
@@ -152,16 +165,8 @@
 .lang-switch-check { margin-left: auto; color: var(--accent-deep); opacity: 0; }
 .lang-switch-menu button.is-active .lang-switch-check { opacity: 1; }
 @keyframes lang-menu-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-/* In the phone menu (a white sheet) the trigger is drawn on paper and the list opens to the right edge of it. */
-.site-menu-lang { justify-self: start; margin-top: 20px; }
-.site-menu-lang .lang-switch-trigger { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
-.site-menu-lang .lang-switch-menu { right: auto; left: 0; }
-@media (max-width: 639px) {
-  .site-header-lang { display: none; }
-}
-@media (min-width: 640px) {
-  .site-menu-lang { display: none; }
-}
+/* The flag stays in the bar on every width, beside the menu button and matching it. */
+.site-header-end .lang-switch-menu { right: 0; }
 /* While the phone menu is open the bar stays ink above the white sheet. */
 .site-header.is-open .site-header-bar::after { opacity: 0; }
 
@@ -177,6 +182,7 @@
 .reference-portal .site-header.is-over-film:not(.is-open) .site-header-bar::after { opacity: 0; }
 .reference-portal .site-header.is-over-film .site-nav { background: transparent; box-shadow: none; }
 .reference-portal .site-header.is-over-film:not(.is-open) .lang-switch-trigger { background: white; color: var(--ink); box-shadow: none; }
+.reference-portal .site-header.is-over-film:not(.is-open) .site-menu-button { background: white; color: var(--ink); box-shadow: none; }
 .reference-portal .site-header.is-over-film:not(.is-open) .site-header-action { background: white; color: var(--ink); }
 .reference-portal .site-header.is-over-film:not(.is-open) .site-header-action:hover { background: var(--primary-soft); }
 

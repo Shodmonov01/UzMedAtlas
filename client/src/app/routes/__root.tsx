@@ -76,7 +76,8 @@ function RootShell() {
           <Outlet key={lang} />
         </main>
         <Footer />
-        {SHOW_HEALTH_CHECKER ? <HealthCheckerWidget key={lang} showTip={!isHome} hideOverHero={isHome} /> : null}
+        {/* No checker bubble on clinic and branch pages: it covered the content and the request dock. */}
+        {SHOW_HEALTH_CHECKER && !isClinicPage ? <HealthCheckerWidget key={lang} showTip={!isHome} hideOverHero={isHome} /> : null}
       </div>
     </HealthCheckerProvider>
   );
