@@ -5,10 +5,8 @@ import { glideTo } from "@/shared/lib/gsap";
 import { ClinicCatalog, type CatalogSearch } from "@/widgets/clinic-catalog/ClinicCatalog";
 import { HomeHero } from "@/widgets/home/HomeHero";
 import { Manifesto } from "@/widgets/home/Manifesto";
-import { CareJourney } from "@/widgets/home/CareJourney";
-import { TourismFilm } from "@/widgets/home/TourismFilm";
+import { Gallery } from "@/widgets/home/Gallery";
 import { Directions } from "@/widgets/home/Directions";
-import { FinalCta } from "@/widgets/home/FinalCta";
 import { Team } from "@/widgets/team/Team";
 import { Contacts } from "@/widgets/home/Contacts";
 
@@ -17,8 +15,7 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-/** The home page tells the medical-tourism story top to bottom: the film, why Uzbekistan, how a trip for treatment
- *  goes, treatment and rest, the directions, the clinic catalog, the team, an invitation to start and the contacts. */
+/** The home page tells the medical-tourism story top to bottom: the film, why Uzbekistan, the country in photos, the directions, the clinic catalog, the team and the contacts. */
 function HomePage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -46,12 +43,10 @@ function HomePage() {
     <div className="home">
       <HomeHero />
       <Manifesto />
-      <CareJourney />
-      <TourismFilm />
+      <Gallery />
       <Directions onPick={(specialty) => patchSearch({ specialty })} />
       <ClinicCatalog search={search} onPatchSearch={patchSearch} onClearSearch={() => void navigate({ search: {}, resetScroll: false })} />
       <Team />
-      <FinalCta />
       <Contacts />
     </div>
   );

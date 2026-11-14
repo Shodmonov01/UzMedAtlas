@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
-import { AirplaneTilt, Buildings, CaretRight, Stethoscope, UsersThree, type Icon as PhosphorIcon } from "@phosphor-icons/react";
+import { AirplaneTilt, Buildings, CaretRight, UsersThree, type Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { ScrollTrigger, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 
@@ -10,8 +10,7 @@ const SECTIONS: { id: string; label: string; icon: PhosphorIcon }[] = [
   { id: "catalog", label: "Clinics", icon: Buildings },
   { id: "team", label: "Team", icon: UsersThree },
 ];
-const PICKER: string = "Find a specialty";
-const FOR_CLINICS: string = "For clinics";
+const FIND_CLINIC: string = "Find a clinic";
 const BRAND: { title: string; sub: string } = {
   title: "Association",
   sub: "of Medical Organizations",
@@ -147,13 +146,11 @@ export function Header() {
               {section.label}
             </Link>
           ))}
-          <Link to="/checker" activeProps={{ className: "is-active" }}>
-            {PICKER}
-          </Link>
         </nav>
         <div className="site-header-end">
-          <Link to="/cabinet/login" className="site-header-action">
-            {FOR_CLINICS}
+          {/* The main action opens the clinic catalog; the sign-in for clinics lives in the footer. */}
+          <Link to="/" hash="catalog" className="site-header-action" onClick={(event) => goToSection(event, "catalog")}>
+            {FIND_CLINIC}
             <span className="site-header-action-icon">
               <ArrowIcon />
             </span>
@@ -173,7 +170,7 @@ export function Header() {
       </div>
       <div className="site-menu-backdrop" hidden={!menuOpen} onClick={() => setMenuOpen(false)} />
       {/* Phones and tablets: a sheet under the bar with the sections as one grouped list (an icon tile, the name, a
-          chevron), then the clinics entrance. */}
+          chevron), then the button to the clinic catalog. */}
       <nav id="site-menu" className="site-menu" aria-label="Sections" hidden={!menuOpen}>
         <div className="site-menu-list">
           {SECTIONS.map((section, i) => {
@@ -198,16 +195,17 @@ export function Header() {
               </Link>
             );
           })}
-          <Link to="/checker" activeProps={{ className: "is-active" }} style={{ animationDelay: `${0.04 * SECTIONS.length}s` }} onClick={() => setMenuOpen(false)}>
-            <i aria-hidden="true">
-              <Stethoscope size={22} weight="duotone" />
-            </i>
-            <span>{PICKER}</span>
-            <CaretRight className="site-menu-chevron" size={18} weight="bold" aria-hidden="true" />
-          </Link>
         </div>
-        <Link to="/cabinet/login" className="site-menu-action" onClick={() => setMenuOpen(false)}>
-          {FOR_CLINICS}
+        <Link
+          to="/"
+          hash="catalog"
+          className="site-menu-action"
+          onClick={(event) => {
+            setMenuOpen(false);
+            goToSection(event, "catalog");
+          }}
+        >
+          {FIND_CLINIC}
           <span>
             <ArrowIcon />
           </span>

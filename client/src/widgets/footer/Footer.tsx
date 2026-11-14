@@ -67,7 +67,7 @@ export function Footer() {
           <div className="site-footer-cta">
             <p className="site-footer-cta-title">Do you represent a clinic?</p>
             <p>List your clinic in the catalog and receive requests from patients.</p>
-            <Link to="/cabinet/login" className="pill-btn is-ink">
+            <Link to="/cabinet/login" className="pill-btn is-brand">
               Add your clinic
               <span className="pill-btn-icon">
                 <ArrowIcon />

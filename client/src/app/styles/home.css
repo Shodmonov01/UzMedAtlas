@@ -35,7 +35,13 @@
 .pill-btn.is-ink:hover { background: #134058; }
 .pill-btn.is-light { background: white; color: var(--ink); }
 .pill-btn.is-light:hover { background: var(--primary-soft); }
+.pill-btn.is-brand { background: var(--brand-gradient); color: white; box-shadow: 0 14px 30px -16px #0187c5cc; }
+/* No hover or press effect on the brand button: it stays as it is. */
+.pill-btn.is-brand:hover .pill-btn-icon { transform: none; }
+.pill-btn.is-brand:active { scale: 1; }
+.pill-btn.is-brand .pill-btn-icon { background: white; color: var(--ink); }
 .pill-btn.is-outline-light { color: white; box-shadow: inset 0 0 0 1.5px #ffffffb3; }
+.pill-btn.is-outline-light:has(svg:first-child) { gap: 10px; padding-left: 20px; }
 .pill-btn.is-outline-light:hover { background: white; color: var(--ink); box-shadow: none; }
 .pill-btn.is-outline { color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
 .pill-btn.is-outline:hover { background: white; }
@@ -69,11 +75,9 @@
 .site-nav a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .site-header-end { display: flex; align-items: center; gap: 8px; }
-.site-header-action { display: inline-flex; flex-shrink: 0; align-items: center; gap: 12px; height: 48px; padding: 0 4px 0 20px; border-radius: 999px; background: var(--ink); color: white; font-size: 14px; font-weight: 600; white-space: nowrap;
+.site-header-action { display: inline-flex; flex-shrink: 0; align-items: center; gap: 12px; height: 46px; padding: 0 4px 0 20px; border-radius: 999px; background: var(--brand-gradient); color: white; box-shadow: 0 10px 24px -14px #0187c5b3; font-size: 14px; font-weight: 600; white-space: nowrap;
   transition: background-color .3s ease, color .3s ease; }
-.site-header-action:hover { background: #134058; }
-.site-header-action-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--brand-gradient); color: white; transition: transform .5s var(--ease-out); }
-.site-header-action:hover .site-header-action-icon { transform: rotate(-45deg); }
+.site-header-action-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 999px; background: white; color: var(--ink); }
 
 /* The menu button: a round 44px button, two lines that fold into a cross. */
 .site-menu-button { display: none; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 999px; background: white; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); cursor: pointer; transition: background-color .3s ease, color .3s ease, box-shadow .3s ease; }
@@ -132,9 +136,10 @@
 }
 
 /* The solid bar (scrolled past the hero, and on every other page) is white with a plain light hairline along its
-   lower edge; everything on it is solid colour, nothing see-through. A section link under the pointer sits on a
-   soft paper pill; the current section is the ink pill that Header glides between links. */
-.site-nav { gap: 2px; padding: 4px; border-radius: 999px; }
+   lower edge; everything on it is solid colour, nothing see-through. The section links sit in a light grey capsule,
+   like an iPhone segmented control: the current section is a white pill with a soft shadow that Header glides
+   between links; hovering a link only darkens its text. */
+.site-nav { gap: 2px; padding: 4px; border-radius: 999px; background: var(--paper); box-shadow: inset 0 0 0 1px #0b2a3d0d; }
 .site-nav a { height: 38px; font-weight: 600; transition: color .3s ease, background-color .3s ease; }
 .site-nav-indicator { top: 4px; height: calc(100% - 8px); }
 .site-header-bar { position: relative; background: white; box-shadow: none; }
@@ -142,10 +147,10 @@
 .site-header.is-scrolled .site-header-bar { box-shadow: 0 18px 40px -30px #0b2a3d59; }
 .site-brand, .site-menu-button { color: var(--ink); }
 .site-brand-text > span { color: var(--muted); }
-.site-nav a { color: #4f6878; }
-.site-nav a:hover { background: var(--paper); color: var(--ink); }
-.site-nav a.is-active, .site-nav a.is-active:hover { background: transparent; color: white; }
-.site-nav-indicator { background: var(--ink); box-shadow: 0 8px 18px -10px #0b2a3d99; }
+.site-nav a { color: var(--muted); }
+.site-nav a:hover { background: transparent; color: var(--ink); }
+.site-nav a.is-active, .site-nav a.is-active:hover { background: transparent; color: var(--ink); }
+.site-nav-indicator { background: white; box-shadow: 0 0 0 1px #0b2a3d0f, 0 2px 4px #0b2a3d14, 0 8px 16px -8px #0b2a3d40; }
 
 /* While the phone menu is open the bar stays ink above the white sheet. */
 .site-header.is-open .site-header-bar::after { opacity: 0; }
@@ -162,69 +167,79 @@
 .reference-portal .site-header.is-over-film:not(.is-open) .site-header-bar::after { opacity: 0; }
 .reference-portal .site-header.is-over-film .site-nav { background: transparent; box-shadow: none; }
 .reference-portal .site-header.is-over-film:not(.is-open) .site-menu-button { background: white; color: var(--ink); box-shadow: none; }
-.reference-portal .site-header.is-over-film:not(.is-open) .site-header-action { background: white; color: var(--ink); }
-.reference-portal .site-header.is-over-film:not(.is-open) .site-header-action:hover { background: var(--primary-soft); }
+
 
 /* ---------- Hero ---------- */
-/* Khiva at sunset fills the screen with UZBEKISTAN across the sky behind the minarets; the copy is centred at the bottom.
-   Stacking, back to front: the sky, the word, the city cut out of the same photo, the shade, the copy.
-   Both photo layers are the photo's own box (1600 x 922) scaled to cover the hero, so the cut-out always lands exactly
-   on the sky; --scene-x / --scene-y choose which part stays in view when the screen's shape crops it.
-   The word takes whatever height the copy leaves under the header and is sized to fit it (and the width). */
-.home-hero { --scene-ar: 1.7354; --scene-x: .5; --scene-y: .3; --header-h: 72px;
-  --scene-w: max(100cqw, 100cqh * var(--scene-ar)); --scene-h: max(100cqw / var(--scene-ar), 100cqh);
-  position: relative; height: 100svh; min-height: 560px; overflow: hidden; container-type: size; background: var(--ink); }
-.home-hero-layer { position: absolute; z-index: 0; top: calc((100cqh - var(--scene-h)) * var(--scene-y)); left: calc((100cqw - var(--scene-w)) * var(--scene-x));
-  width: var(--scene-w); max-width: none; height: var(--scene-h); transform-origin: 50% 45%; visibility: hidden; user-select: none; pointer-events: none; }
-.home-hero-layer.is-city { z-index: 2; }
-.home-hero-shade { position: absolute; z-index: 3; inset: 0; pointer-events: none;
-  background: linear-gradient(to top, #0b2a3df2 0%, #0b2a3dc2 22%, #0b2a3d5c 44%, transparent 62%), linear-gradient(to bottom, #0b2a3d61, transparent 20%); }
-.home-hero-stage { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
-  padding: calc(var(--header-h) + 2cqh) var(--gutter) clamp(32px, 6.5cqh, 80px); }
-.home-hero-word { position: relative; z-index: 1; display: grid; place-items: center; flex: 1 1 0; min-height: 0; width: 100%; container-type: size; visibility: hidden; pointer-events: none; }
-.home-hero-word-inner { display: flex; padding-right: .045em; color: white; font-size: min(100cqw / 5.72, 80cqh); font-weight: 600; line-height: .74; letter-spacing: -.045em; white-space: nowrap; }
-.home-hero-letter { display: block; }
-.home-hero-copy { position: relative; z-index: 4; display: flex; flex-direction: column; align-items: center; width: min(760px, 100%); color: white; text-align: center; }
-.home-hero-eyebrow { display: flex; align-items: center; gap: 14px; color: #ffffffcc; font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
-.home-hero-eyebrow::before,
-.home-hero-eyebrow::after { content: ""; width: 28px; height: 1px; background: #ffffff66; }
-.home-hero-title { margin-top: 18px; color: white; font-size: clamp(36px, min(4.6cqw, 7.4cqh), 72px); font-weight: 600; line-height: 1.02; letter-spacing: -.05em; text-wrap: balance; }
-.home-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 34px; }
-/* On an upright screen the photo is cropped hard at the sides; keep the tall minaret in view. */
+/* Wide screens: the operating-room shot fills the screen from the very top, held at its top edge so the whole head
+   (loupe frame included) stays in the picture; the surgeon is on the right and the copy on the open blue to the left,
+   over a soft ink shade from that side.
+   Upright screens: the cover portrait starts under the header (so the cap is never under it), fills the upper part on
+   the photo's own blue and fades into ink, with the copy below the face. */
+.home-hero { --header-h: 72px; position: relative; height: 100svh; min-height: 600px; overflow: hidden; container-type: size;
+  background: linear-gradient(90deg, #00326c 0%, #01468d 42%, #025db1 70%, #3f7bbd 100%); }
+.home-hero picture { display: contents; }
+.home-hero-photo { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; object-position: 64% 0%;
+  visibility: hidden; user-select: none; pointer-events: none; }
+.home-hero-shade { position: absolute; z-index: 1; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, #0b2a3de6 0%, #0b2a3db3 22%, #0b2a3d4d 40%, transparent 56%), linear-gradient(to bottom, #0b2a3d59, transparent 12%), linear-gradient(to top, #0b2a3d80, transparent 26%); }
+/* The copy sits in the open blue at the upper left, clear of the raised hand below it. */
+.home-hero-stage { position: absolute; z-index: 2; inset: 0; display: flex; align-items: flex-start;
+  padding: calc(var(--header-h) + clamp(40px, 13cqh, 150px)) max(var(--gutter), calc((100% - var(--page-width)) / 2)) 48px; }
+.home-hero-copy { display: flex; flex-direction: column; align-items: flex-start; width: min(540px, 38%); color: white; }
+.home-hero-title { margin-top: 22px; color: white; font-size: clamp(44px, min(5.2cqw, 9cqh), 88px); font-weight: 500; line-height: .98; letter-spacing: -.055em; text-wrap: balance; }
+.home-hero-title > div { padding-bottom: .1em; margin-bottom: -.1em; }
+.home-hero-title em { color: var(--accent); font-style: normal; }
+.home-hero-lead { max-width: 30ch; margin-top: 22px; color: #ffffffd9; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.55; }
+.home-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
+/* Three short promises on one solid white bar, centred along the bottom; thin rules between them. */
+.home-hero-points { position: absolute; bottom: clamp(24px, 4.5cqh, 44px); left: 50%; translate: -50% 0;
+  display: flex; align-items: center; padding: 8px; border-radius: 999px; background: white; box-shadow: 0 24px 48px -24px #0b2a3d99; }
+.home-hero-points li { display: flex; align-items: center; gap: 10px; padding: 0 22px 0 8px; color: var(--ink); font-size: 14px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; }
+.home-hero-points li + li { padding-left: 22px; box-shadow: inset 1px 0 0 var(--line); }
+.home-hero-points li:last-child { padding-right: 16px; }
+.home-hero-points i { display: grid; flex-shrink: 0; place-items: center; width: 34px; height: 34px; border-radius: 999px; background: var(--paper); color: var(--accent-deep); }
+@media (orientation: portrait), (max-height: 640px) {
+  .home-hero-points { display: none; }
+}
+
 @media (orientation: portrait) {
-  .home-hero { --scene-x: .86; }
+  .home-hero { background: linear-gradient(to bottom, #1e6fa9 0%, #1e6fa9 40%, var(--ink) 75%); }
+  .home-hero-photo { inset: auto; top: var(--header-h); left: 0; height: calc(74% - var(--header-h)); object-position: 70% 0%;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 3%); mask-image: linear-gradient(to bottom, transparent, #000 3%); }
+  .home-hero-shade { background: linear-gradient(to bottom, transparent 40%, #0b2a3dcc 60%, var(--ink) 74%); }
+  .home-hero-stage { align-items: flex-end; padding-bottom: clamp(28px, 5cqh, 56px); }
+  .home-hero-copy { width: min(560px, 100%); }
 }
 @media (max-width: 767px) {
   .home-hero { --header-h: 62px; }
-  .home-hero-eyebrow { gap: 10px; font-size: 11px; letter-spacing: .08em; white-space: nowrap; }
-  .home-hero-eyebrow::before,
-  .home-hero-eyebrow::after { width: 18px; }
-  .home-hero-title { margin-top: 14px; font-size: clamp(34px, 9.6vw, 46px); }
-  /* On a phone both buttons are one size: full width (up to 320px), the same height, the label centred and the arrow
+  .home-hero-title { margin-top: 16px; font-size: clamp(38px, 11vw, 52px); }
+  .home-hero-lead { margin-top: 14px; font-size: 15px; }
+  /* On a phone both buttons are one size: full width (up to 340px), the same height, the label centred and the arrow
      disc pinned to the right edge of the first. */
-  .home-hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); width: min(100%, 320px); margin-top: 24px; }
+  .home-hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); width: min(100%, 340px); margin-top: 24px; }
   .home-hero-actions .pill-btn { position: relative; justify-content: center; width: 100%; height: 52px; padding: 0 24px; font-size: 14px; }
   .home-hero-actions .pill-btn-icon { position: absolute; top: 50%; right: 6px; width: 40px; height: 40px; translate: 0 -50%; }
 }
 
 /* ---------- Manifesto: why Uzbekistan ---------- */
-.manifesto { padding: clamp(104px, 13vw, 200px) 0 clamp(88px, 10vw, 160px); }
+/* On deep navy, carrying the hero's blue down the page: white type, the key phrases in the bright logo green. */
+.manifesto { padding: clamp(104px, 13vw, 200px) 0 clamp(88px, 10vw, 160px); background: radial-gradient(120% 90% at 85% 0%, #0a4d8c 0%, transparent 60%), linear-gradient(180deg, #0b2a3d 0%, #082035 100%); color: white; }
 /* Editorial head: a small label on the left sits on the first line of the statement; the key phrases are in brand green. */
 .manifesto-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); gap: clamp(24px, 4vw, 64px); align-items: first baseline; }
 .manifesto-kicker { display: flex; align-items: center; gap: 10px; color: var(--accent-deep); font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
 .manifesto-kicker-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--brand-gradient); }
-.manifesto-text { max-width: 20em; color: var(--ink); font-size: clamp(28px, 3.6vw, 56px); font-weight: 500; line-height: 1.16; letter-spacing: -.045em; text-wrap: pretty; }
-.manifesto-text em { color: var(--accent-deep); font-style: normal; }
+.manifesto-text { max-width: 20em; color: white; font-size: clamp(28px, 3.6vw, 56px); font-weight: 500; line-height: 1.16; letter-spacing: -.045em; text-wrap: pretty; }
+.manifesto-text em { color: var(--accent); font-style: normal; }
 .manifesto-keep { white-space: nowrap; }
 @media (max-width: 1023px) {
   .manifesto-head { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 }
 .manifesto-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 3vw, 48px); margin-top: clamp(72px, 9vw, 136px); }
 .manifesto-stat { position: relative; padding-top: 28px; }
-.manifesto-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--ink); opacity: .18; }
-.manifesto-figure { display: flex; align-items: baseline; gap: 8px; color: var(--ink); font-size: clamp(64px, 7.4vw, 120px); font-weight: 600; line-height: .9; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
-.manifesto-figure small { color: var(--accent-deep); font-size: .3em; font-weight: 600; letter-spacing: -.02em; }
-.manifesto-label { max-width: 26ch; margin-top: 18px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+.manifesto-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: white; opacity: .22; }
+.manifesto-figure { display: flex; align-items: baseline; gap: 8px; color: white; font-size: clamp(64px, 7.4vw, 120px); font-weight: 600; line-height: .9; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
+.manifesto-figure small { color: var(--accent); font-size: .3em; font-weight: 600; letter-spacing: -.02em; }
+.manifesto-label { max-width: 26ch; margin-top: 18px; color: #ffffffb3; font-size: 15px; line-height: 1.5; }
 @media (max-width: 767px) {
   .manifesto-stats { grid-template-columns: minmax(0, 1fr); gap: 40px; }
 }

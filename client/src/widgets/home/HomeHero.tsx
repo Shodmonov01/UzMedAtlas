@@ -1,16 +1,21 @@
 import { useRef, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
+import { ChatCircleDots, SealCheck, Stethoscope, Tag } from "@phosphor-icons/react";
 import { EASE_OUT, MOTION_OK, ScrollTrigger, SplitText, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 
-const WORD = "UZBEKISTAN";
+const POINTS = [
+  { icon: SealCheck, text: "Vetted private clinics" },
+  { icon: Tag, text: "Clear prices before you travel" },
+  { icon: ChatCircleDots, text: "A reply within 24 hours" },
+];
 
-/** The home page opens on Khiva at sunset over the whole screen, with UZBEKISTAN written across the sky behind the
- *  minarets: the photo is two layers (the sky, and the city cut out of it) with the word between them, and the copy
- *  centred at the bottom. On arrival the photo settles in and the letters rise one by one from behind the city; the
- *  word then stays still (the pointer does not move it) and only sinks back behind the roofs as the page scrolls.
- *  The photo and the word stay hidden until both layers are decoded, so the word never shows without the city in
- *  front of it. With reduced motion everything is simply in place. */
+/** The home page opens on a surgeon in the operating room over the whole screen: the surgeon on the
+ *  right, the copy on the open blue to the left. Upright screens get the MEDGUIDE UZ cover portrait instead, with the
+ *  copy below the face. Both photos come in several widths, picked by the size they are shown at, so they stay sharp;
+ *  on arrival the photo settles in,
+ *  then the label, the headline (line by line), the line and the buttons rise in. The photo stays hidden until it is
+ *  decoded, so it never paints half loaded. With reduced motion everything is simply in place. */
 export function HomeHero() {
   const root = useRef<HTMLElement>(null);
 
@@ -18,12 +23,10 @@ export function HomeHero() {
     () => {
       const hero = root.current;
       if (hero === null) return;
-      const layers = Array.from(hero.querySelectorAll<HTMLImageElement>(".home-hero-layer"));
-      const scene = [...layers, hero.querySelector(".home-hero-word")];
-      const ready = Promise.all(layers.map((img) => img.decode().catch(() => undefined)));
-      // The whole intro starts at one quiet moment: both photo layers decoded, the webfont in, and the page's first
-      // heavy render over (an idle callback, then a frame). Started earlier, its first frames would land on that work
-      // and stutter. Until then the copy and the scene simply wait hidden.
+      const photo = hero.querySelector<HTMLImageElement>(".home-hero-photo");
+      const ready = photo ? photo.decode().catch(() => undefined) : Promise.resolve();
+      // The intro starts at one quiet moment: the photo decoded, the webfont in, and the page's first heavy render
+      // over (an idle callback, then a frame). Started earlier, its first frames would stutter.
       const settled = Promise.all([ready, document.fonts.ready]).then(
         () =>
           new Promise<void>((resolve) => {
@@ -36,56 +39,39 @@ export function HomeHero() {
 
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        const copy = gsap
+        const intro = gsap
           .timeline({ paused: true, defaults: { ease: EASE_OUT } })
-          .from(".home-hero-eyebrow", { y: 16, autoAlpha: 0, duration: 1 }, 0.15)
-          .from(".home-hero-actions > *", { y: 24, autoAlpha: 0, duration: 1.1, stagger: 0.08 }, 0.6);
-
-        // The photo fades in and settles while the letters come up from below the skyline, hidden by the city until
-        // they clear the roofs. The two photo layers and the letters move on the GPU (force3D) for the whole intro,
-        // and give the GPU back when it ends.
-        const moving = [...layers, ...hero.querySelectorAll<HTMLElement>(".home-hero-letter")];
-        const reveal = gsap
-          .timeline({
-            paused: true,
-            defaults: { ease: EASE_OUT, force3D: true },
-            onStart: () => gsap.set(moving, { willChange: "transform" }),
-            onComplete: () => gsap.set(moving, { willChange: "auto" }),
-          })
-          .to(scene, { autoAlpha: 1, duration: 0.9, ease: "power1.out" }, 0)
-          .from(layers, { scale: 1.08, duration: 2.4 }, 0)
-          .from(".home-hero-letter", { y: () => hero.offsetHeight * 0.6, duration: 2, stagger: 0.05 }, 0.15);
+          .to(photo, { autoAlpha: 1, duration: 1, ease: "power1.out" }, 0)
+          .from(photo, { scale: 1.08, duration: 2.4, force3D: true, clearProps: "transform" }, 0)
+          .from(".home-hero-eyebrow", { y: 16, autoAlpha: 0, duration: 1 }, 0.35)
+          .from([".home-hero-lead", ".home-hero-actions > *", ".home-hero-points"], { y: 24, autoAlpha: 0, duration: 1.1, stagger: 0.08 }, 0.8);
 
         void settled.then(() => {
           if (!alive) return;
-          reveal.play();
-          copy.play();
-          // The headline rises line by line. It is split only now, with the webfont in: split earlier, the font's
-          // arrival would split it again and restart the rise halfway. It stays hidden until then, and is split again
-          // only if the width changes its line breaks.
+          intro.play();
+          // The headline is split only now, with the webfont in, so it never splits twice; it stays hidden until then.
           SplitText.create(".home-hero-title", {
             type: "lines",
             mask: "lines",
             autoSplit: true,
             onSplit: (self) => {
               self.elements.forEach((el) => el.classList.remove("is-split-pending"));
-              return gsap.from(self.lines, { yPercent: 110, duration: 1.4, stagger: 0.12, ease: EASE_OUT, delay: 0.3 });
+              return gsap.from(self.lines, { yPercent: 110, duration: 1.4, stagger: 0.12, ease: EASE_OUT, delay: 0.45 });
             },
           });
         });
 
-        // Scrolling away, the word sinks back behind the city before it can reach the header (the photo itself keeps
-        // its size and place).
-        gsap.to(".home-hero-word", {
-          y: () => hero.offsetHeight * 0.5,
+        // Scrolling away, the photo drifts a little slower than the page.
+        gsap.to(photo, {
+          yPercent: 8,
           ease: "none",
-          scrollTrigger: { trigger: hero, start: "top top", end: "60% top", scrub: 0.4, invalidateOnRefresh: true },
+          scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: 0.4 },
         });
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
         void ready.then(() => {
-          if (alive) gsap.set(scene, { autoAlpha: 1 });
+          if (alive) gsap.set(photo, { autoAlpha: 1 });
         });
       });
 
@@ -106,38 +92,68 @@ export function HomeHero() {
 
   return (
     <section ref={root} className="home-hero" aria-labelledby="home-hero-title">
-      <img className="home-hero-layer is-sky" src="/images/hero/khiva-sky.webp" alt="" width={1600} height={922} fetchPriority="high" draggable={false} />
-      <img className="home-hero-layer is-city" src="/images/hero/khiva-city.webp" alt="" width={1600} height={922} fetchPriority="high" draggable={false} />
+      <picture>
+        {/* Upright screens: the cover portrait, taller and sharper for that shape (shown in the top 74% of the
+            hero, so about 0.88 x 74% of the screen height wide). */}
+        <source
+          media="(orientation: portrait)"
+          srcSet="/images/hero/hero-mobile-1100.webp 1100w, /images/hero/hero-mobile.webp 1762w"
+          sizes="66svh"
+        />
+        {/* Wide screens: the operating-room shot. It covers the screen, so on screens narrower than 16:9 it is as
+            wide as the screen is tall times 1.777. */}
+        <img
+          className="home-hero-photo"
+          src="/images/hero/hero-desktop.webp"
+          srcSet="/images/hero/hero-desktop-1000.webp 1000w, /images/hero/hero-desktop.webp 1672w, /images/hero/hero-desktop-2400.webp 2400w"
+          sizes="(max-aspect-ratio: 1672/941) 178svh, 100vw"
+          alt="A surgeon in a cap, mask and magnifying loupes looks at a tiny implant in his gloved hand"
+          width={1672}
+          height={941}
+          fetchPriority="high"
+          draggable={false}
+        />
+      </picture>
       <span className="home-hero-shade" />
 
       <div className="home-hero-stage">
-        <div className="home-hero-word" aria-hidden="true">
-          <span className="home-hero-word-inner">
-            {WORD.split("").map((letter, index) => (
-              <span key={index} className="home-hero-letter">
-                {letter}
-              </span>
-            ))}
-          </span>
-        </div>
-
         <div className="home-hero-copy">
-          <p className="home-hero-eyebrow">Medical tourism in Uzbekistan</p>
+          <p className="home-hero-eyebrow">
+            <img src="/brand/logo.svg" alt="" width={24} height={24} />
+            MEDGUIDE UZ
+          </p>
           <h1 id="home-hero-title" className="home-hero-title is-split-pending">
-            Medicine you can trust
+            Medicine you can <em>trust</em>
           </h1>
+          <p className="home-hero-lead">
+            One catalog of vetted private clinics across Uzbekistan. Compare doctors, prices and equipment, then send a
+            request in a few clicks.
+          </p>
           <div className="home-hero-actions">
-            <a href="#catalog" className="pill-btn is-light" onClick={toCatalog}>
+            <a href="#catalog" className="pill-btn is-brand" onClick={toCatalog}>
               Find a clinic
               <span className="pill-btn-icon">
                 <ArrowIcon />
               </span>
             </a>
             <Link to="/checker" className="pill-btn is-outline-light">
+              <Stethoscope size={18} weight="bold" aria-hidden="true" />
               Find a specialty
             </Link>
           </div>
         </div>
+
+        {/* Three short promises on a white bar along the bottom of the hero. */}
+        <ul className="home-hero-points">
+          {POINTS.map(({ icon: Icon, text }) => (
+            <li key={text}>
+              <i aria-hidden="true">
+                <Icon size={16} weight="bold" />
+              </i>
+              {text}
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

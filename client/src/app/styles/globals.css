@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./home.css";
+@import "./discover.css";
 @import "./workspace.css";
 @import "./clinic-page.css";
 

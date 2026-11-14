@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
 
-type Member = { role: string; name: string; org?: string };
+type Member = { role: string; name: string; org?: string; url?: string };
 
 const TEAM: Member[] = [
   { role: "Chair of the Association", name: "Salokhiddin Mukhitdinov" },
@@ -9,7 +9,7 @@ const TEAM: Member[] = [
   { role: "Medical marketer", name: "Shakhnoza Yakubova", org: "Maestro Marketing Agency" },
   { role: "Designer", name: "Daria Novikova" },
   { role: "Editor", name: "Aziza Rasulova" },
-  { role: "Developer of the digital edition", name: "B. B. Rakhmonberdiev", org: "RZB TECH agency" },
+  { role: "Developer of the digital edition", name: "B. B. Rakhmonberdiev", org: "RZB TECH agency", url: "https://rzbtech.uz/ru" },
 ];
 
 const CLINICS_COUNT = 26;
@@ -66,7 +66,13 @@ export function Team() {
               <span className="team-row-rule" aria-hidden="true" />
               <span className="team-row-role">{member.role}</span>
               <strong className="team-row-name">{member.name}</strong>
-              {member.org ? <span className="team-row-org">{member.org}</span> : null}
+              {member.org && member.url ? (
+                <a className="team-row-org" href={member.url} target="_blank" rel="noopener noreferrer">
+                  {member.org}
+                </a>
+              ) : member.org ? (
+                <span className="team-row-org">{member.org}</span>
+              ) : null}
             </li>
           ))}
         </ul>
