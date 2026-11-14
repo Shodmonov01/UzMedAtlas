@@ -49,7 +49,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-primary/20 bg-mint px-4 py-3 text-sm font-semibold text-primary">
-        Предпросмотр публичной страницы — так клиника увидят посетители после публикации
+        Preview of the public page: this is how visitors will see the clinic once it is published
       </div>
 
       <div className="space-y-8">
@@ -77,8 +77,8 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                 <div className="min-w-0 flex-1 text-white">
                   <p className="text-sm font-semibold text-white/75">
                     {cityLabel}
-                    {clinic.foundedYear ? ` · с ${clinic.foundedYear}` : ""}
-                    {clinic.responseHours ? ` · ответ ~${clinic.responseHours}ч` : ""}
+                    {clinic.foundedYear ? ` · since ${clinic.foundedYear}` : ""}
+                    {clinic.responseHours ? ` · replies in ~${clinic.responseHours}h` : ""}
                   </p>
                   <h2 className="mt-1 text-2xl font-extrabold tracking-tight md:text-3xl">
                     {clinic.nameRu || clinic.nameEn}
@@ -108,7 +108,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
               {clinic.languages?.length ? (
                 <span className="uppercase tracking-wide">{clinic.languages.join(" · ")}</span>
               ) : null}
-              {clinic.medicalTourism ? <span>Медтуризм</span> : null}
+              {clinic.medicalTourism ? <span>Medical travel</span> : null}
               {clinic.phone ? <span className="text-primary">{clinic.phone}</span> : null}
             </div>
           </div>
@@ -117,7 +117,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div className="min-w-0 space-y-10">
             {clinic.photos?.length ? (
-              <Section title="Фотографии">
+              <Section title="Photos">
                 <PhotoCarousel
                   photos={clinic.photos.map((p) => ({
                     id: p.id,
@@ -129,17 +129,17 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {(history || mission) && (
-              <Section title="О клинике">
+              <Section title="About the clinic">
                 <div className="grid gap-4 md:grid-cols-2">
                   {history ? (
                     <div className="rounded-2xl border border-line bg-white p-4">
-                      <p className="text-xs font-bold uppercase tracking-wide text-primary">История</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-primary">History</p>
                       <p className="mt-2 text-sm leading-relaxed text-muted">{history}</p>
                     </div>
                   ) : null}
                   {mission ? (
                     <div className="rounded-2xl border border-line bg-white p-4">
-                      <p className="text-xs font-bold uppercase tracking-wide text-primary">Миссия</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-primary">Mission</p>
                       <p className="mt-2 text-sm leading-relaxed text-muted">{mission}</p>
                     </div>
                   ) : null}
@@ -148,7 +148,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             )}
 
             {advantages.length ? (
-              <Section title="Преимущества">
+              <Section title="Advantages">
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {advantages.map((item) => (
                     <li
@@ -163,13 +163,13 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {why ? (
-              <Section title="Почему выбирают">
+              <Section title="Why patients choose it">
                 <p className="text-sm leading-relaxed text-muted">{why}</p>
               </Section>
             ) : null}
 
             {(text(clinic.developmentPlansRu) || text(clinic.developmentPlansEn)) && (
-              <Section title="Планы развития">
+              <Section title="Development plans">
                 <p className="text-sm leading-relaxed text-muted">
                   {text(clinic.developmentPlansRu) || text(clinic.developmentPlansEn)}
                 </p>
@@ -177,7 +177,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             )}
 
             {clinic.founderName ? (
-              <Section title="Основатель">
+              <Section title="Founder">
                 <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-4">
                   {clinic.founderPhotoUrl ? (
                     <img
@@ -206,7 +206,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.achievements?.length ? (
-              <Section title="Достижения">
+              <Section title="Achievements">
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.achievements.map((a) => (
                     <li
@@ -227,7 +227,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.technologies?.length ? (
-              <Section title="Технологии и методики">
+              <Section title="Technologies and methods">
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.technologies.map((t) => (
                     <li
@@ -247,7 +247,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.chiefDoctorName || clinic.leaders?.length ? (
-              <Section title="Руководство">
+              <Section title="Leadership">
                 {clinic.chiefDoctorName ? (
                   <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-4">
                     {clinic.chiefDoctorPhotoUrl ? (
@@ -302,7 +302,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.doctors?.length ? (
-              <Section title="Специалисты">
+              <Section title="Doctors">
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.doctors.map((d) => (
                     <li key={d.id} className="rounded-2xl border border-line bg-white p-4">
@@ -323,12 +323,12 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                           <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
                           {d.category ? (
                             <p className="mt-1 text-xs font-semibold text-primary">
-                              категория: {d.category}
+                              category: {d.category}
                             </p>
                           ) : null}
                           {d.experienceYears != null ? (
                             <p className="mt-1 text-xs font-semibold text-primary">
-                              опыт {d.experienceYears} лет
+                              {d.experienceYears} years of experience
                             </p>
                           ) : null}
                         </div>
@@ -348,7 +348,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {popular.length ? (
-              <Section title="Популярные услуги">
+              <Section title="Popular services">
                 <div className="rounded-2xl bg-mint px-4 py-3">
                   <ul className="space-y-1 text-sm text-ink">
                     {popular.map((item) => (
@@ -360,7 +360,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.equipment?.length ? (
-              <Section title="Оборудование">
+              <Section title="Equipment">
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.equipment.map((e) => (
                     <li key={e.id} className="rounded-2xl border border-line bg-white p-4">
@@ -387,7 +387,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.certificates?.length ? (
-              <Section title="Сертификаты и лицензии">
+              <Section title="Certificates and licences">
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.certificates.map((c) => (
                     <li key={c.id} className="rounded-2xl border border-line bg-white p-4">
@@ -399,8 +399,8 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                           <p className="font-bold text-ink">{c.nameRu || c.nameEn}</p>
                           <p className="mt-1 text-sm text-muted">
                             {c.issuerRu || c.issuerEn}
-                            {c.receivedAt ? ` · получен ${c.receivedAt}` : c.year ? ` · ${c.year}` : ""}
-                            {c.validUntil ? ` · до ${c.validUntil}` : ""}
+                            {c.receivedAt ? ` · issued ${c.receivedAt}` : c.year ? ` · ${c.year}` : ""}
+                            {c.validUntil ? ` · valid until ${c.validUntil}` : ""}
                           </p>
                           {c.fileUrl ? (
                             <a
@@ -409,7 +409,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                               rel="noreferrer"
                               className="mt-2 inline-block text-sm font-bold text-primary"
                             >
-                              Открыть файл
+                              Open file
                             </a>
                           ) : null}
                         </div>
@@ -421,13 +421,13 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {tourism ? (
-              <Section title="Медицинский туризм">
+              <Section title="Medical tourism">
                 <p className="text-sm leading-relaxed text-muted">{tourism}</p>
               </Section>
             ) : null}
 
             {mapBranch && mapBranch.lat != null && mapBranch.lng != null ? (
-              <Section title="Расположение">
+              <Section title="Location">
                 {(mapBranch.addressRu || mapBranch.addressEn) && (
                   <p className="text-sm text-muted">{mapBranch.addressRu || mapBranch.addressEn}</p>
                 )}
@@ -442,10 +442,10 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
               </Section>
             ) : null}
 
-            <Section title="Филиалы">
+            <Section title="Branches">
               {(clinic.branches || []).length === 0 ? (
                 <p className="rounded-xl bg-warning-soft px-3 py-2 text-sm">
-                  Филиалы не добавлены — без них модерация недоступна.
+                  No branches added. Review is not available without them.
                 </p>
               ) : (
                 <div className="grid gap-3 md:grid-cols-2">
@@ -483,7 +483,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
 
           <aside className="space-y-4 lg:self-start">
             <div className="rounded-3xl border border-line bg-primary-soft p-5 text-ink">
-              <p className="text-sm text-muted">Контакты</p>
+              <p className="text-sm text-muted">Contacts</p>
               <p className="mt-3 text-lg font-bold">{clinic.phone}</p>
               {clinic.email ? <p className="mt-2 text-sm text-primary">{clinic.email}</p> : null}
               {clinic.website ? (
@@ -503,17 +503,17 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
               </div>
               {clinic.coordinatorName ? (
                 <div className="mt-5 border-t border-line pt-4">
-                  <p className="text-xs uppercase tracking-wide text-muted">Координатор</p>
+                  <p className="text-xs uppercase tracking-wide text-muted">Coordinator</p>
                   <p className="mt-1 font-bold">{clinic.coordinatorName}</p>
                   <p className="text-sm text-muted">
                     {clinic.coordinatorRoleRu || clinic.coordinatorRoleEn}
                   </p>
                 </div>
               ) : null}
-              <p className="mt-4 text-sm text-muted">Ответ около {clinic.responseHours} ч</p>
+              <p className="mt-4 text-sm text-muted">Replies in about {clinic.responseHours} h</p>
             </div>
             <div className="rounded-2xl border border-dashed border-line bg-sand/50 px-4 py-5 text-center text-sm text-muted">
-              Форма заявки появится на публичной странице
+              The request form will appear on the public page
             </div>
           </aside>
         </div>

@@ -72,7 +72,7 @@ export async function queueClinicNotification(tx: Prisma.TransactionClient, opti
     const dedupeKey = `event:${options.eventKey}:${connection.chatId}`;
     await tx.telegramDelivery.upsert({ where: { dedupeKey }, update: {}, create: {
       dedupeKey, connectionId: connection.id, chatId: connection.chatId,
-      text: `${options.title}\nКлиника: ${(options.clinic.nameRu || options.clinic.nameEn).slice(0, 200)}\nПодробности доступны в кабинете.`,
+      text: `${options.title}\nClinic: ${(options.clinic.nameRu || options.clinic.nameEn).slice(0, 200)}\nDetails are in the cabinet.`,
       url: site + route,
     } });
   }
@@ -126,7 +126,7 @@ export async function drainTelegramQueue(shouldStop: () => boolean = () => false
       try {
         const result = await callTelegram<{ message_id: number }>("sendMessage", {
           chat_id: row.chatId, text: row.text, link_preview_options: { is_disabled: true },
-          ...(row.url ? { reply_markup: { inline_keyboard: [[{ text: "Открыть в кабинете", url: row.url }]] } } : {}),
+          ...(row.url ? { reply_markup: { inline_keyboard: [[{ text: "Open in the cabinet", url: row.url }]] } } : {}),
         });
         await prisma.telegramDelivery.update({ where: { id: row.id }, data: {
           status: "sent", sentAt: new Date(), leaseUntil: null, lastError: null, telegramMessageId: String(result.message_id),

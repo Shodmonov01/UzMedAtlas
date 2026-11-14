@@ -29,7 +29,7 @@ function NewClinicPage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (!auth.data) return <WsLoading label="Проверка сессии…" />;
+  if (!auth.data) return <WsLoading label="Checking your session…" />;
 
   return (
     <div className="ws-stack mx-auto w-full max-w-4xl">
@@ -37,16 +37,16 @@ function NewClinicPage() {
         back={
           <Link to="/cabinet" className="ws-back">
             <BackMark />
-            Мои клиники
+            My clinics
           </Link>
         }
-        eyebrow="Новая клиника"
-        title="Создание клиники"
-        lead="Пять коротких шагов: название, адрес, контакты, описание и направления. После создания откроется редактор — там добавите филиалы, фото и врачей."
+        eyebrow="New clinic"
+        title="Create a clinic"
+        lead="Five short steps: name, address, contacts, description and specialties. After that the editor opens, where you add branches, photos and doctors."
       />
 
-      {specialties.isLoading ? <WsLoading label="Загрузка направлений…" inline /> : null}
-      {specialties.isError ? <WsNote tone="danger" title="Не удалось загрузить направления" /> : null}
+      {specialties.isLoading ? <WsLoading label="Loading specialties…" inline /> : null}
+      {specialties.isError ? <WsNote tone="danger" title="Could not load the specialties" /> : null}
       <BriefUpload onApply={fields => {
         const form = editor.current?.querySelector("form");
         const current = form ? Object.fromEntries(Array.from(new FormData(form).entries()).filter((entry): entry is [string, string] => typeof entry[1] === "string")) : {};

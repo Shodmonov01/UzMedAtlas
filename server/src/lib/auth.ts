@@ -80,7 +80,7 @@ export async function getAdminPrincipal(request: FastifyRequest): Promise<AdminP
   // Keep the existing administrator login while adding individual staff sessions.
   if (token.split(".").length === 2) {
     return readSignedCookie(request, ADMIN_COOKIE)
-      ? { id: "administrator", name: "Администратор", role: "administrator" }
+      ? { id: "administrator", name: "Administrator", role: "administrator" }
       : null;
   }
   const [exp, id, version, sig] = token.split(".");

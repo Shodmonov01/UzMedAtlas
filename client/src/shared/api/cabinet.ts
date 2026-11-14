@@ -865,26 +865,26 @@ export async function updateAdminLead(id: string, payload: { status?: string; no
 }
 
 export const STATUS_LABELS: Record<ClinicStatus, string> = {
-  draft: "Черновик",
-  moderation: "На модерации",
-  needs_changes: "Нужны изменения",
-  approved: "Одобрена",
-  published: "Опубликована",
+  draft: "Draft",
+  moderation: "In review",
+  needs_changes: "Needs changes",
+  approved: "Approved",
+  published: "Published",
 };
 
 export const WIZARD_SECTIONS = [
-  { id: "basic", label: "Основное" },
-  { id: "about", label: "О клинике" },
-  { id: "directions", label: "Направления" },
-  { id: "leadership", label: "Руководство" },
-  { id: "doctors", label: "Специалисты" },
-  { id: "equipment", label: "Оснащение" },
-  { id: "contacts", label: "Контакты" },
-  { id: "photos", label: "Фото" },
-  { id: "extra", label: "Дополнительно" },
-  { id: "branches", label: "Филиалы" },
-  { id: "preview", label: "Предпросмотр" },
-  { id: "moderation", label: "Модерация" },
+  { id: "basic", label: "Basics" },
+  { id: "about", label: "About" },
+  { id: "directions", label: "Specialties" },
+  { id: "leadership", label: "Leadership" },
+  { id: "doctors", label: "Doctors" },
+  { id: "equipment", label: "Equipment" },
+  { id: "contacts", label: "Contacts" },
+  { id: "photos", label: "Photos" },
+  { id: "extra", label: "Extra" },
+  { id: "branches", label: "Branches" },
+  { id: "preview", label: "Preview" },
+  { id: "moderation", label: "Review" },
 ] as const;
 
 export type WizardSectionId = (typeof WIZARD_SECTIONS)[number]["id"];

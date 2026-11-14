@@ -39,25 +39,25 @@ const FORM_SECTIONS = new Set<string>(["basic", "about", "directions", "leadersh
 
 const LANGS = ["ru", "en", "uz", "kz", "tr", "ar"];
 const PHOTO_CATS = [
-  { value: "facade", label: "Фасад" },
-  { value: "reception", label: "Ресепшен" },
-  { value: "hall", label: "Холл" },
-  { value: "waiting", label: "Зона ожидания" },
-  { value: "rooms", label: "Кабинеты" },
-  { value: "or", label: "Операционная" },
-  { value: "equipment", label: "Оборудование" },
-  { value: "staff", label: "Команда врачей" },
-  { value: "leadership", label: "Руководство" },
-  { value: "patients", label: "Пациенты / процесс" },
-  { value: "team", label: "Коллектив" },
-  { value: "other", label: "Другое" },
+  { value: "facade", label: "Facade" },
+  { value: "reception", label: "Reception" },
+  { value: "hall", label: "Lobby" },
+  { value: "waiting", label: "Waiting area" },
+  { value: "rooms", label: "Rooms" },
+  { value: "or", label: "Operating room" },
+  { value: "equipment", label: "Equipment" },
+  { value: "staff", label: "Medical team" },
+  { value: "leadership", label: "Leadership" },
+  { value: "patients", label: "Patients / process" },
+  { value: "team", label: "Staff" },
+  { value: "other", label: "Other" },
 ];
 const DOCTOR_CATEGORIES = [
-  { value: "", label: "Без категории" },
-  { value: "highest", label: "Высшая" },
-  { value: "first", label: "Первая" },
-  { value: "second", label: "Вторая" },
-  { value: "other", label: "Другая" },
+  { value: "", label: "No category" },
+  { value: "highest", label: "Highest" },
+  { value: "first", label: "First" },
+  { value: "second", label: "Second" },
+  { value: "other", label: "Other" },
 ];
 
 type Props = {
@@ -91,20 +91,20 @@ function FormActions({
   return (
     <div className="wz-actions">
       <button className="btn btn-primary" type="submit" disabled={saving} name="intent" value="save">
-        {saving ? "Сохранение…" : "Сохранить"}
+        {saving ? "Saving…" : "Save"}
       </button>
       {onContinue ? (
         <button className="btn btn-ghost" type="submit" disabled={saving} name="intent" value="continue" onClick={onContinue}>
-          <span className="sm:hidden">Далее</span>
-          <span className="hidden sm:inline">Сохранить и продолжить</span>
+          <span className="sm:hidden">Next</span>
+          <span className="hidden sm:inline">Save and continue</span>
           <ArrowIcon size={15} />
         </button>
       ) : null}
       {children}
       <span className="wz-actions-note">
         {savedAt
-          ? `Черновик сохранён в ${savedAt.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}`
-          : "Черновик сохраняется сам при вводе"}
+          ? `Draft saved at ${savedAt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`
+          : "The draft saves itself as you type"}
       </span>
     </div>
   );
@@ -162,7 +162,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
     try {
       await updateCabinetClinic(clinic.id, payload);
       if (quiet) setDraftSavedAt(new Date());
-      else setMessage("Сохранено");
+      else setMessage("Saved");
       await onSaved();
       if (continueAfterSave.current) {
         continueAfterSave.current = false;
@@ -170,7 +170,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
       }
     } catch {
       setMessage(null);
-      setError("Не удалось сохранить");
+      setError("Could not save");
       continueAfterSave.current = false;
     } finally {
       setSaving(false);
@@ -254,13 +254,13 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
           const value = fields[element.name];
           if (value !== undefined) element.value = element.name === "city" ? displayCity(value) : value;
         });
-        setMessage("Данные из брифа применены");
+        setMessage("Brief data applied");
       }} />}
       <div className="wz">
-      <nav className="wz-nav" aria-label="Шаги профиля">
+      <nav className="wz-nav" aria-label="Profile steps">
         <div className="wz-progress">
           <p>
-            Шаг <strong>{stepIndex + 1} из {WIZARD_SECTIONS.length}</strong>
+            Step <strong>{stepIndex + 1} of {WIZARD_SECTIONS.length}</strong>
           </p>
           <div className="wz-progress-bar">
             <span style={{ width: `${((stepIndex + 1) / WIZARD_SECTIONS.length) * 100}%` }} />
@@ -311,18 +311,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               });
             }}
           >
-            <h2 className="text-xl font-extrabold">Основная информация</h2>
+            <h2 className="text-xl font-extrabold">Basic information</h2>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Название (RU)">
+              <Field label="Name (RU)">
                 <input name="nameRu" required className="field" defaultValue={clinic.nameRu} disabled={locked} />
               </Field>
-              <Field label="Название (EN)">
+              <Field label="Name (EN)">
                 <input name="nameEn" required className="field" defaultValue={clinic.nameEn} disabled={locked} />
               </Field>
-              <Field label="Короткое название">
+              <Field label="Short name">
                 <input name="shortName" className="field" defaultValue={clinic.shortName || ""} disabled={locked} />
               </Field>
-              <Field label="Год основания">
+              <Field label="Year founded">
                 <input
                   name="foundedYear"
                   type="number"
@@ -333,14 +333,14 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   disabled={locked}
                 />
               </Field>
-              <Field label="Адрес страницы" hint="uzmedguide.uz/clinics/… — латиница, цифры и дефис">
+              <Field label="Page address" hint="uzmedguide.uz/clinics/… (Latin letters, digits and hyphens)">
                 <input name="slug" className="field" defaultValue={clinic.slug} disabled={locked} />
               </Field>
-              <Field label="Город">
+              <Field label="City">
                 <input name="city" list="clinic-city-options" required className="field" defaultValue={displayCity(clinic.city)} disabled={locked} />
                 <datalist id="clinic-city-options">{CITY_OPTIONS.map((city) => <option key={city.value} value={city.label} />)}</datalist>
               </Field>
-              <Field label="Цвет обложки">
+              <Field label="Cover colour">
                 <input
                   name="coverColor"
                   type="color"
@@ -349,14 +349,14 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   disabled={locked}
                 />
               </Field>
-              <Field label="Логотип (ссылка)" hint="Или загрузите файл кнопкой «Загрузить лого» ниже — до 2 МБ">
+              <Field label="Logo (link)" hint="Or upload a file with “Upload logo” below, up to 2 MB">
                 <input name="logoUrl" className="field" defaultValue={clinic.logoUrl || ""} disabled={locked} />
               </Field>
             </div>
             {!locked ? (
                 <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt}>
                 <label className="btn btn-ghost cursor-pointer">
-                  Загрузить лого
+                  Upload logo
                   <input
                     type="file"
                     accept="image/*"
@@ -365,7 +365,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                       const file = e.target.files?.[0];
                       if (!file) return;
                       if (file.size > 2 * 1024 * 1024) {
-                        setError("Логотип: максимум 2 МБ");
+                        setError("Logo: 2 MB at most");
                         e.target.value = "";
                         return;
                       }
@@ -373,7 +373,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         const url = await uploadCabinetFile(file, "logo");
                         await save({ logoUrl: url });
                       } catch {
-                        setError("Ошибка загрузки");
+                        setError("Upload failed");
                       } finally {
                         e.target.value = "";
                       }
@@ -411,49 +411,49 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               });
             }}
           >
-            <h2 className="text-xl font-extrabold">О клинике</h2>
-            <Field label="Описание (RU)">
+            <h2 className="text-xl font-extrabold">About the clinic</h2>
+            <Field label="Description (RU)">
               <textarea name="descriptionRu" required rows={4} className="field" defaultValue={clinic.descriptionRu} disabled={locked} />
             </Field>
-            <Field label="Описание (EN)">
+            <Field label="Description (EN)">
               <textarea name="descriptionEn" required rows={4} className="field" defaultValue={clinic.descriptionEn} disabled={locked} />
             </Field>
-            <Field label="История (RU)">
+            <Field label="History (RU)">
               <textarea name="historyRu" rows={3} className="field" defaultValue={clinic.historyRu || ""} disabled={locked} />
             </Field>
-            <Field label="История (EN)">
+            <Field label="History (EN)">
               <textarea name="historyEn" rows={3} className="field" defaultValue={clinic.historyEn || ""} disabled={locked} />
             </Field>
-            <Field label="Миссия (RU)">
+            <Field label="Mission (RU)">
               <textarea name="missionRu" rows={2} className="field" defaultValue={clinic.missionRu || ""} disabled={locked} />
             </Field>
-            <Field label="Миссия (EN)">
+            <Field label="Mission (EN)">
               <textarea name="missionEn" rows={2} className="field" defaultValue={clinic.missionEn || ""} disabled={locked} />
             </Field>
-            <Field label="Преимущества (RU, с новой строки)">
+            <Field label="Advantages (RU, one per line)">
               <textarea name="advantagesRu" rows={3} className="field" defaultValue={clinic.advantagesRu || ""} disabled={locked} />
             </Field>
-            <Field label="Преимущества (EN)">
+            <Field label="Advantages (EN)">
               <textarea name="advantagesEn" rows={3} className="field" defaultValue={clinic.advantagesEn || ""} disabled={locked} />
             </Field>
-            <h3 className="pt-2 text-lg font-extrabold">Основатель</h3>
+            <h3 className="pt-2 text-lg font-extrabold">Founder</h3>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="ФИО">
+              <Field label="Full name">
                 <input name="founderName" className="field" defaultValue={clinic.founderName || ""} disabled={locked} />
               </Field>
-              <Field label="Должность (RU)">
+              <Field label="Position (RU)">
                 <input name="founderRoleRu" className="field" defaultValue={clinic.founderRoleRu || ""} disabled={locked} />
               </Field>
-              <Field label="Должность (EN)">
+              <Field label="Position (EN)">
                 <input name="founderRoleEn" className="field" defaultValue={clinic.founderRoleEn || ""} disabled={locked} />
               </Field>
-              <Field label="Фото основателя (ссылка)" hint="Или загрузите файл кнопкой ниже">
+              <Field label="Founder photo (link)" hint="Or upload a file with the button below">
                 <input name="founderPhotoUrl" className="field" defaultValue={clinic.founderPhotoUrl || ""} disabled={locked} />
               </Field>
             </div>
             {!locked ? (
               <label className="btn btn-ghost inline-flex cursor-pointer text-sm">
-                Загрузить фото основателя
+                Upload founder photo
                 <input
                   type="file"
                   accept="image/*"
@@ -469,33 +469,33 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                       if (input) input.value = url;
                       await save({ founderPhotoUrl: url });
                     } catch {
-                      setError("Ошибка загрузки");
+                      setError("Upload failed");
                     }
                     e.target.value = "";
                   }}
                 />
               </label>
             ) : null}
-            <Field label="Биография основателя (RU)">
+            <Field label="Founder biography (RU)">
               <textarea name="founderBioRu" rows={2} className="field" defaultValue={clinic.founderBioRu || ""} disabled={locked} />
             </Field>
-            <Field label="Биография основателя (EN)">
+            <Field label="Founder biography (EN)">
               <textarea name="founderBioEn" rows={2} className="field" defaultValue={clinic.founderBioEn || ""} disabled={locked} />
             </Field>
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="font-bold">Достижения и преимущества</h3>
-                {!locked ? <button type="button" className="btn btn-ghost text-sm" onClick={() => setAchievements((items) => [...items, { titleRu: "", descriptionRu: "", year: null }])}>Добавить достижение</button> : null}
+                <h3 className="font-bold">Achievements and advantages</h3>
+                {!locked ? <button type="button" className="btn btn-ghost text-sm" onClick={() => setAchievements((items) => [...items, { titleRu: "", descriptionRu: "", year: null }])}>Add achievement</button> : null}
               </div>
               {achievements.map((item, index) => (
                 <div key={item.id || index} className="grid gap-3 rounded-xl border border-line p-3 md:grid-cols-2">
-                  <input className="field" value={item.titleRu} disabled={locked} placeholder="Название" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, titleRu: event.target.value } : current))} />
-                  <input className="field" type="number" min={1800} max={2100} value={item.year ?? ""} disabled={locked} placeholder="Год (необязательно)" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, year: event.target.value ? Number(event.target.value) : null } : current))} />
-                  <textarea className="field md:col-span-2" rows={2} value={item.descriptionRu || ""} disabled={locked} placeholder="Описание" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, descriptionRu: event.target.value } : current))} />
-                  {!locked ? <button type="button" className="justify-self-start text-sm font-bold text-danger" onClick={() => setAchievements((items) => items.filter((_, i) => i !== index))}>Удалить</button> : null}
+                  <input className="field" value={item.titleRu} disabled={locked} placeholder="Name" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, titleRu: event.target.value } : current))} />
+                  <input className="field" type="number" min={1800} max={2100} value={item.year ?? ""} disabled={locked} placeholder="Year (optional)" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, year: event.target.value ? Number(event.target.value) : null } : current))} />
+                  <textarea className="field md:col-span-2" rows={2} value={item.descriptionRu || ""} disabled={locked} placeholder="Description" onChange={(event) => setAchievements((items) => items.map((current, i) => i === index ? { ...current, descriptionRu: event.target.value } : current))} />
+                  {!locked ? <button type="button" className="justify-self-start text-sm font-bold text-danger" onClick={() => setAchievements((items) => items.filter((_, i) => i !== index))}>Remove</button> : null}
                 </div>
               ))}
-              {!achievements.length ? <p className="text-sm text-muted">Достижения не добавлены</p> : null}
+              {!achievements.length ? <p className="text-sm text-muted">No achievements added</p> : null}
             </div>
             <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt} />
           </form>
@@ -503,7 +503,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
 
         {section === "directions" ? (
           <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-            <h2 className="text-xl font-extrabold">Направления</h2>
+            <h2 className="text-xl font-extrabold">Specialties</h2>
             <div className="grid gap-2 md:grid-cols-2">
               {[...specialties, ...addedSpecialties.filter((added) => !specialties.some((item) => item.id === added.id))].map((item) => {
                 const id = item.id || item.slug;
@@ -519,7 +519,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         );
                       }}
                     />
-                    {item.nameRu || item.nameEn}
+                    {item.nameEn || item.nameRu}
                   </label>
                 );
               })}
@@ -527,7 +527,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             {!locked ? (
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="btn btn-primary" disabled={saving} onClick={() => save({ specialtyIds })}>
-                  Сохранить направления
+                  Save specialties
                 </button>
                 <button
                   type="button"
@@ -538,10 +538,10 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     void save({ specialtyIds });
                   }}
                 >
-                  Сохранить и продолжить
+                  Save and continue
                   <ArrowIcon size={15} />
                 </button>
-                <span className="self-center text-sm font-semibold text-muted">Выбрано: {specialtyIds.length}</span>
+                <span className="self-center text-sm font-semibold text-muted">Chosen: {specialtyIds.length}</span>
               </div>
             ) : null}
             {!locked ? (
@@ -566,22 +566,22 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     setSpecialtyIds((prev) => (prev.includes(specialty.id) ? prev : [...prev, specialty.id]));
                     form.reset();
                     await refresh();
-                    setMessage("Направление добавлено в клинику");
+                    setMessage("Specialty added to the clinic");
                   } catch {
-                    setError("Не удалось добавить направление. Проверьте название и попробуйте ещё раз.");
+                    setError("Could not add the specialty. Check the name and try again.");
                   } finally {
                     setAddingSpecialty(false);
                   }
                 }}
               >
                 <div>
-                  <p className="text-sm font-bold">Добавить своё направление</p>
-                  <p className="mt-1 text-xs text-muted">Оно сразу появится в списке вашей клиники.</p>
+                  <p className="text-sm font-bold">Add your own specialty</p>
+                  <p className="mt-1 text-xs text-muted">It appears in your clinic list right away.</p>
                 </div>
-                <input name="nameRu" required minLength={2} maxLength={120} className="field" placeholder="Название на русском" />
-                <input name="nameEn" minLength={2} maxLength={120} className="field" placeholder="Название на английском (необязательно)" />
+                <input name="nameRu" required minLength={2} maxLength={120} className="field" placeholder="Name in Russian" />
+                <input name="nameEn" minLength={2} maxLength={120} className="field" placeholder="Name in English (optional)" />
                 <button className="btn btn-ghost text-sm" type="submit" disabled={addingSpecialty}>
-                  {addingSpecialty ? "Добавляем…" : "Добавить направление"}
+                  {addingSpecialty ? "Adding…" : "Add specialty"}
                 </button>
               </form>
             ) : null}
@@ -614,33 +614,33 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               });
             }}
           >
-            <h2 className="text-xl font-extrabold">Руководство</h2>
+            <h2 className="text-xl font-extrabold">Leadership</h2>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Главный врач">
+              <Field label="Chief physician">
                 <input name="chiefDoctorName" className="field" defaultValue={clinic.chiefDoctorName || ""} disabled={locked} />
               </Field>
-              <Field label="Должность (RU)">
+              <Field label="Position (RU)">
                 <input name="chiefDoctorRoleRu" className="field" defaultValue={clinic.chiefDoctorRoleRu || ""} disabled={locked} />
               </Field>
-              <Field label="Должность (EN)">
+              <Field label="Position (EN)">
                 <input name="chiefDoctorRoleEn" className="field" defaultValue={clinic.chiefDoctorRoleEn || ""} disabled={locked} />
               </Field>
-              <Field label="Фото главврача (ссылка)" hint="Или загрузите файл кнопкой ниже">
+              <Field label="Chief physician photo (link)" hint="Or upload a file with the button below">
                 <input name="chiefDoctorPhotoUrl" className="field" defaultValue={clinic.chiefDoctorPhotoUrl || ""} disabled={locked} />
               </Field>
-              <Field label="Координатор">
+              <Field label="Coordinator">
                 <input name="coordinatorName" className="field" defaultValue={clinic.coordinatorName || ""} disabled={locked} />
               </Field>
-              <Field label="Роль координатора (RU)">
+              <Field label="Coordinator role (RU)">
                 <input name="coordinatorRoleRu" className="field" defaultValue={clinic.coordinatorRoleRu || ""} disabled={locked} />
               </Field>
-              <Field label="Роль координатора (EN)">
+              <Field label="Coordinator role (EN)">
                 <input name="coordinatorRoleEn" className="field" defaultValue={clinic.coordinatorRoleEn || ""} disabled={locked} />
               </Field>
             </div>
             {!locked ? (
               <label className="btn btn-ghost w-fit cursor-pointer text-sm">
-                Загрузить фото главврача
+                Upload chief physician photo
                 <input type="file" accept="image/*" className="hidden" onChange={async (event) => {
                   const input = event.currentTarget;
                   const file = input.files?.[0];
@@ -651,22 +651,22 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     if (photoField) photoField.value = url;
                     await save({ chiefDoctorPhotoUrl: url });
                   } catch {
-                    setError("Ошибка загрузки фото главврача");
+                    setError("Could not upload the chief physician photo");
                   } finally {
                     input.value = "";
                   }
                 }} />
               </label>
             ) : null}
-            <Field label="О главном враче (RU)">
+            <Field label="About the chief physician (RU)">
               <textarea name="chiefDoctorBioRu" rows={2} className="field" defaultValue={clinic.chiefDoctorBioRu || ""} disabled={locked} />
             </Field>
-            <Field label="О главном враче (EN)">
+            <Field label="About the chief physician (EN)">
               <textarea name="chiefDoctorBioEn" rows={2} className="field" defaultValue={clinic.chiefDoctorBioEn || ""} disabled={locked} />
             </Field>
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-lg font-extrabold">Доп. руководители</h3>
+                <h3 className="text-lg font-extrabold">Other leaders</h3>
                 {!locked ? (
                   <button
                     type="button"
@@ -678,19 +678,19 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                       ])
                     }
                   >
-                    + Добавить руководителя
+                    + Add a leader
                   </button>
                 ) : null}
               </div>
               {leaders.length === 0 ? (
-                <p className="text-sm text-muted">Руководители не добавлены</p>
+                <p className="text-sm text-muted">No leaders added</p>
               ) : (
                 leaders.map((leader, index) => (
                   <div key={leader.id || `leader-${index}`} className="grid gap-3 rounded-2xl border border-line p-4 md:grid-cols-2">
-                    <Field label="ФИО">
+                    <Field label="Full name">
                       <input
                         className="field"
-                        placeholder="Например, Дилноза Юсупова"
+                        placeholder="e.g. Dilnoza Yusupova"
                         value={leader.name}
                         disabled={locked}
                         onChange={(e) =>
@@ -700,10 +700,10 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         }
                       />
                     </Field>
-                    <Field label="Должность (RU)">
+                    <Field label="Position (RU)">
                       <input
                         className="field"
-                        placeholder="Например, медицинский директор"
+                        placeholder="e.g. медицинский директор"
                         value={leader.roleRu || ""}
                         disabled={locked}
                         onChange={(e) =>
@@ -713,7 +713,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         }
                       />
                     </Field>
-                    <Field label="Должность (EN)">
+                    <Field label="Position (EN)">
                       <input
                         className="field"
                         placeholder="For example, medical director"
@@ -726,10 +726,10 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         }
                       />
                     </Field>
-                    <Field label="Фото (ссылка)">
+                    <Field label="Photo (link)">
                       <input
                         className="field"
-                        placeholder="https://… или кнопка «Загрузить фото»"
+                        placeholder="https://… or the “Upload photo” button"
                         value={leader.photoUrl || ""}
                         disabled={locked}
                         onChange={(e) =>
@@ -741,11 +741,11 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         }
                       />
                     </Field>
-                    <Field label="Кратко о руководителе" wide>
+                    <Field label="About the leader" wide>
                       <textarea
                         className="field"
                         rows={2}
-                        placeholder="Опыт, образование, чем руководит"
+                        placeholder="Experience, education, what they lead"
                         value={leader.bioRu || ""}
                         disabled={locked}
                         onChange={(e) =>
@@ -758,7 +758,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     {!locked ? (
                       <div className="flex flex-wrap gap-2 md:col-span-2">
                         <label className="btn btn-ghost cursor-pointer text-sm">
-                          Загрузить фото
+                          Upload photo
                           <input
                             type="file"
                             accept="image/*"
@@ -779,7 +779,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                           className="text-sm font-bold text-danger"
                           onClick={() => setLeaders((prev) => prev.filter((_, i) => i !== index))}
                         >
-                          Удалить
+                          Delete
                         </button>
                       </div>
                     ) : null}
@@ -794,7 +794,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
         {section === "doctors" ? (
           <div className="space-y-4">
             <div className="soft-card rounded-[1.5rem] bg-white p-6">
-              <h2 className="text-xl font-extrabold">Специалисты</h2>
+              <h2 className="text-xl font-extrabold">Doctors</h2>
               <ul className="mt-4 space-y-3">
                 {(clinic.doctors || []).map((d) => {
                   const branchNames = (clinic.branches || [])
@@ -815,13 +815,13 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                           <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
                           {d.category ? (
                             <p className="mt-1 text-xs font-semibold text-primary">
-                              Категория: {DOCTOR_CATEGORIES.find((c) => c.value === d.category)?.label || d.category}
+                              Category: {DOCTOR_CATEGORIES.find((c) => c.value === d.category)?.label || d.category}
                             </p>
                           ) : null}
                           {branchNames.length ? (
-                            <p className="mt-1 text-xs text-muted">Филиалы: {branchNames.join(", ")}</p>
+                            <p className="mt-1 text-xs text-muted">Branches: {branchNames.join(", ")}</p>
                           ) : (
-                            <p className="mt-1 text-xs text-muted">Филиалы не назначены</p>
+                            <p className="mt-1 text-xs text-muted">No branches assigned</p>
                           )}
                         </div>
                       </div>
@@ -834,7 +834,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                             await refresh();
                           }}
                         >
-                          Удалить
+                          Delete
                         </button>
                       ) : null}
                     </li>
@@ -878,30 +878,30 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   });
                   form.reset();
                   await refresh();
-                  setMessage("Специалист добавлен");
+                  setMessage("Doctor added");
                 }}
               >
                 <div>
-                  <h3 className="font-extrabold">Добавить специалиста</h3>
-                  <p className="mt-1 text-sm text-muted">Поля со звёздочкой обязательны, остальное можно дополнить позже.</p>
+                  <h3 className="font-extrabold">Add a doctor</h3>
+                  <p className="mt-1 text-sm text-muted">Fields with an asterisk are required; the rest can be added later.</p>
                 </div>
-                <FormGroup title="Кто это">
-                  <Field label="Имя и фамилия (RU) *">
-                    <input name="nameRu" required placeholder="Например, Алишер Рахимов" className="field" />
+                <FormGroup title="Who">
+                  <Field label="Full name (RU) *">
+                    <input name="nameRu" required placeholder="e.g. Алишер Рахимов" className="field" />
                   </Field>
-                  <Field label="Имя и фамилия (EN) *">
+                  <Field label="Full name (EN) *">
                     <input name="nameEn" required placeholder="For example, Alisher Rakhimov" className="field" />
                   </Field>
-                  <Field label="Должность (RU)">
-                    <input name="roleRu" placeholder="Например, кардиолог" className="field" />
+                  <Field label="Position (RU)">
+                    <input name="roleRu" placeholder="e.g. кардиолог" className="field" />
                   </Field>
-                  <Field label="Должность (EN)">
+                  <Field label="Position (EN)">
                     <input name="roleEn" placeholder="For example, cardiologist" className="field" />
                   </Field>
-                  <Field label="Стаж, лет">
+                  <Field label="Experience, years">
                     <input name="experienceYears" type="number" min={0} placeholder="10" className="field" />
                   </Field>
-                  <Field label="Врачебная категория">
+                  <Field label="Medical category">
                     <select name="category" className="field" defaultValue="">
                       {DOCTOR_CATEGORIES.map((c) => (
                         <option key={c.value || "none"} value={c.value}>
@@ -910,52 +910,52 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                       ))}
                     </select>
                   </Field>
-                  <Field label="Специальность" hint="Из направлений клиники">
+                  <Field label="Specialty" hint="From the clinic specialties">
                     <select name="doctorSpecialtyId" className="field" defaultValue={specialtyIds[0] || ""}>
-                      <option value="">Не выбрана</option>
+                      <option value="">Not chosen</option>
                       {specialties.filter((item) => specialtyIds.includes(item.id)).map((item) => (
-                        <option key={item.id} value={item.id}>{item.nameRu || item.nameEn}</option>
+                        <option key={item.id} value={item.id}>{item.nameEn || item.nameRu}</option>
                       ))}
                     </select>
                   </Field>
                 </FormGroup>
-                <FormGroup title="Фото">
-                  <Field label="Загрузить файл" hint="Портрет, лучше квадратный">
+                <FormGroup title="Photo">
+                  <Field label="Upload a file" hint="A portrait, square works best">
                     <input name="photoFile" type="file" accept="image/*" className="field" />
                   </Field>
-                  <Field label="Или ссылка на фото">
+                  <Field label="Or a photo link">
                     <input name="photoUrl" className="field" placeholder="https://…" />
                   </Field>
                 </FormGroup>
-                <FormGroup title="О специалисте">
-                  <Field label="Кратко о враче" wide>
-                    <textarea name="bioRu" rows={2} className="field" placeholder="Чем занимается, с какими случаями работает" />
+                <FormGroup title="About the doctor">
+                  <Field label="Short bio" wide>
+                    <textarea name="bioRu" rows={2} className="field" placeholder="What they do and which cases they handle" />
                   </Field>
-                  <Field label="Сертификаты и квалификация (RU)">
+                  <Field label="Certificates and qualifications (RU)">
                     <textarea name="certsRu" rows={2} className="field" />
                   </Field>
                   <Field label="Certificates (EN)">
                     <textarea name="certsEn" rows={2} className="field" />
                   </Field>
-                  <Field label="Повышение квалификации">
+                  <Field label="Further training">
                     <textarea name="continuingEducationRu" rows={2} className="field" />
                   </Field>
-                  <Field label="Международный опыт">
+                  <Field label="International experience">
                     <textarea name="internationalExperienceRu" rows={2} className="field" />
                   </Field>
-                  <Field label="Научная деятельность">
+                  <Field label="Research">
                     <textarea name="researchActivityRu" rows={2} className="field" />
                   </Field>
-                  <Field label="Награды">
+                  <Field label="Awards">
                     <textarea name="awardsRu" rows={2} className="field" />
                   </Field>
-                  <Field label="Достижения" wide>
+                  <Field label="Achievements" wide>
                     <textarea name="achievementsRu" rows={2} className="field" />
                   </Field>
                 </FormGroup>
                 {(clinic.branches || []).length ? (
                   <fieldset>
-                    <legend className="text-sm font-bold">В каких филиалах принимает</legend>
+                    <legend className="text-sm font-bold">Branches where they see patients</legend>
                     <div className="mt-2 grid gap-2 md:grid-cols-2">
                       {(clinic.branches || []).map((b) => (
                         <label key={b.id} className="flex items-center gap-2 text-sm font-semibold">
@@ -966,10 +966,10 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                     </div>
                   </fieldset>
                 ) : (
-                  <p className="text-sm text-muted">Сначала добавьте филиал — потом можно привязать специалиста.</p>
+                  <p className="text-sm text-muted">Add a branch first, then you can assign the doctor to it.</p>
                 )}
                 <button className="btn btn-primary text-sm" type="submit">
-                  Добавить специалиста
+                  Add doctor
                 </button>
               </form>
             ) : null}
@@ -979,9 +979,9 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
         {section === "equipment" ? (
           <div className="space-y-4">
             <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-              <h2 className="text-xl font-extrabold">Оснащение и сертификаты</h2>
+              <h2 className="text-xl font-extrabold">Equipment and certificates</h2>
               <div>
-                <h3 className="font-bold">Оборудование</h3>
+                <h3 className="font-bold">Equipment</h3>
                 <ul className="mt-2 space-y-2">
                   {(clinic.equipment || []).map((item) => (
                     <li key={item.id} className="flex justify-between gap-3 text-sm">
@@ -1001,18 +1001,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                             await refresh();
                           }}
                         >
-                          Удалить
+                          Delete
                         </button>
                       ) : null}
                     </li>
                   ))}
                   {!clinic.equipment?.length ? (
-                    <li className="text-sm text-muted">Оборудование не добавлено</li>
+                    <li className="text-sm text-muted">No equipment added</li>
                   ) : null}
                 </ul>
               </div>
               <div>
-                <h3 className="font-bold">Технологии и методики</h3>
+                <h3 className="font-bold">Technologies and methods</h3>
                 <ul className="mt-2 space-y-2">
                   {(clinic.technologies || []).map((item) => (
                     <li key={item.id || item.nameRu} className="flex justify-between gap-3 text-sm">
@@ -1028,18 +1028,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                             await save({ technologies: next });
                           }}
                         >
-                          Удалить
+                          Delete
                         </button>
                       ) : null}
                     </li>
                   ))}
                   {!clinic.technologies?.length ? (
-                    <li className="text-sm text-muted">Технологии не добавлены</li>
+                    <li className="text-sm text-muted">No technologies added</li>
                   ) : null}
                 </ul>
               </div>
               <div>
-                <h3 className="font-bold">Сертификаты</h3>
+                <h3 className="font-bold">Certificates</h3>
                 <ul className="mt-2 space-y-2">
                   {(clinic.certificates || []).map((item) => (
                     <li key={item.id} className="flex justify-between gap-3 text-sm">
@@ -1049,12 +1049,12 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         ) : null}
                         {item.nameRu || item.nameEn}
                         {item.year ? ` (${item.year})` : ""}
-                        {item.validUntil ? ` · до ${item.validUntil}` : ""}
+                        {item.validUntil ? ` · valid until ${item.validUntil}` : ""}
                         {item.fileUrl ? (
                           <>
                             {" "}
                             <a href={item.fileUrl} className="font-bold text-primary" target="_blank" rel="noreferrer">
-                              файл
+                              file
                             </a>
                           </>
                         ) : null}
@@ -1068,7 +1068,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                             await refresh();
                           }}
                         >
-                          Удалить
+                          Delete
                         </button>
                       ) : null}
                     </li>
@@ -1099,29 +1099,29 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   }}
                 >
                   <div>
-                    <h3 className="font-extrabold">Добавить оборудование</h3>
-                    <p className="mt-1 text-xs text-muted">Аппараты для диагностики и лечения: МРТ, КТ, УЗИ и т. п.</p>
+                    <h3 className="font-extrabold">Add equipment</h3>
+                    <p className="mt-1 text-xs text-muted">Machines for diagnosis and treatment: MRI, CT, ultrasound and so on.</p>
                   </div>
-                  <Field label="Название (RU) *">
-                    <input name="nameRu" required className="field" placeholder="Например, МРТ 3 Тесла" />
+                  <Field label="Name (RU) *">
+                    <input name="nameRu" required className="field" placeholder="e.g. МРТ 3 Тесла" />
                   </Field>
-                  <Field label="Название (EN) *">
+                  <Field label="Name (EN) *">
                     <input name="nameEn" required className="field" placeholder="For example, 3T MRI" />
                   </Field>
-                  <Field label="Производитель">
+                  <Field label="Manufacturer">
                     <input name="manufacturer" className="field" placeholder="Siemens, GE, Philips…" />
                   </Field>
-                  <Field label="Описание">
-                    <input name="descriptionRu" className="field" placeholder="Для чего используется" />
+                  <Field label="Description">
+                    <input name="descriptionRu" className="field" placeholder="What it is used for" />
                   </Field>
-                  <Field label="Фото аппарата">
+                  <Field label="Equipment photo">
                     <input name="photoFile" type="file" accept="image/*" className="field" />
                   </Field>
-                  <Field label="Или ссылка на фото">
+                  <Field label="Or a photo link">
                     <input name="photoUrl" className="field" placeholder="https://…" />
                   </Field>
                   <button className="btn btn-primary text-sm" type="submit">
-                    Добавить оборудование
+                    Add equipment
                   </button>
                 </form>
                 <form
@@ -1145,20 +1145,20 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   }}
                 >
                   <div>
-                    <h3 className="font-extrabold">Добавить технологию</h3>
-                    <p className="mt-1 text-xs text-muted">Методики и подходы к лечению, которыми гордится клиника.</p>
+                    <h3 className="font-extrabold">Add a technology</h3>
+                    <p className="mt-1 text-xs text-muted">Treatment methods and approaches the clinic is proud of.</p>
                   </div>
-                  <Field label="Название (RU) *">
-                    <input name="nameRu" required className="field" placeholder="Например, лапароскопия" />
+                  <Field label="Name (RU) *">
+                    <input name="nameRu" required className="field" placeholder="e.g. лапароскопия" />
                   </Field>
-                  <Field label="Название (EN)" hint="Если пусто — возьмём русское">
+                  <Field label="Name (EN)" hint="If empty, the Russian name is used">
                     <input name="nameEn" className="field" placeholder="For example, laparoscopy" />
                   </Field>
-                  <Field label="Описание">
-                    <input name="descriptionRu" className="field" placeholder="Коротко, в чём польза для пациента" />
+                  <Field label="Description">
+                    <input name="descriptionRu" className="field" placeholder="In short, how it helps the patient" />
                   </Field>
                   <button className="btn btn-primary text-sm" type="submit">
-                    Добавить технологию
+                    Add technology
                   </button>
                 </form>
                 <form
@@ -1188,32 +1188,32 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   }}
                 >
                   <div>
-                    <h3 className="font-extrabold">Добавить сертификат</h3>
-                    <p className="mt-1 text-xs text-muted">Лицензии, аккредитации и знаки качества.</p>
+                    <h3 className="font-extrabold">Add a certificate</h3>
+                    <p className="mt-1 text-xs text-muted">Licences, accreditations and quality marks.</p>
                   </div>
-                  <Field label="Название (RU) *">
-                    <input name="nameRu" required className="field" placeholder="Например, аккредитация JCI" />
+                  <Field label="Name (RU) *">
+                    <input name="nameRu" required className="field" placeholder="e.g. аккредитация JCI" />
                   </Field>
-                  <Field label="Название (EN) *">
+                  <Field label="Name (EN) *">
                     <input name="nameEn" required className="field" placeholder="For example, JCI accreditation" />
                   </Field>
-                  <Field label="Кем выдан">
-                    <input name="issuerRu" className="field" placeholder="Организация" />
+                  <Field label="Issued by">
+                    <input name="issuerRu" className="field" placeholder="Organisation" />
                   </Field>
-                  <Field label="Дата получения">
+                  <Field label="Date issued">
                     <input name="receivedAt" type="date" className="field" />
                   </Field>
-                  <Field label="Действует до">
+                  <Field label="Valid until">
                     <input name="validUntil" type="date" className="field" />
                   </Field>
-                  <Field label="Логотип или знак" hint="Картинка, которую покажем рядом с названием">
+                  <Field label="Logo or mark" hint="An image shown next to the name">
                     <input name="logo" type="file" accept="image/*" className="field" />
                   </Field>
-                  <Field label="Скан документа" hint="PDF или фото — пациент сможет открыть">
+                  <Field label="Document scan" hint="PDF or photo that patients can open">
                     <input name="file" type="file" accept="image/*,application/pdf" className="field" />
                   </Field>
                   <button className="btn btn-primary text-sm" type="submit">
-                    Добавить сертификат
+                    Add certificate
                   </button>
                 </form>
               </div>
@@ -1246,9 +1246,9 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               });
             }}
           >
-            <h2 className="text-xl font-extrabold">Контакты</h2>
+            <h2 className="text-xl font-extrabold">Contacts</h2>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Адрес (RU)">
+              <Field label="Address (RU)">
                 <div className="space-y-1.5">
                   <input
                     name="addressRu"
@@ -1265,12 +1265,12 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   />
                 </div>
               </Field>
-              <Field label="Адрес (EN)">
+              <Field label="Address (EN)">
                 <input name="addressEn" required className="field" defaultValue={clinic.addressEn} disabled={locked} />
               </Field>
               <div className="space-y-2 md:col-span-2">
-                <p className="text-sm font-bold">Точка клиники на карте <span className="font-medium text-muted">(необязательно)</span></p>
-                <p className="text-sm text-muted">Нажмите на карту или перетащите метку. Изменения сохраняются кнопкой «Сохранить».</p>
+                <p className="text-sm font-bold">Clinic location on the map <span className="font-medium text-muted">(optional)</span></p>
+                <p className="text-sm text-muted">Click the map or drag the pin. Changes are saved with the “Save” button.</p>
                 <BranchMap
                   mode={locked ? "view" : "pick"}
                   lat={clinicCoords.lat}
@@ -1279,17 +1279,17 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 />
                 <p className="text-xs text-muted">
                   {clinicCoords.lat != null && clinicCoords.lng != null
-                    ? `Выбрано: ${clinicCoords.lat.toFixed(6)}, ${clinicCoords.lng.toFixed(6)}`
-                    : "Точка пока не выбрана"}
+                    ? `Chosen: ${clinicCoords.lat.toFixed(6)}, ${clinicCoords.lng.toFixed(6)}`
+                    : "No location chosen yet"}
                 </p>
               </div>
-              <Field label="Телефон">
+              <Field label="Phone">
                 <input name="phone" required className="field" defaultValue={clinic.phone} disabled={locked} />
               </Field>
               <Field label="Email">
                 <input name="email" type="email" required className="field" defaultValue={clinic.email} disabled={locked} />
               </Field>
-              <Field label="Сайт">
+              <Field label="Website">
                 <input name="website" className="field" defaultValue={clinic.website || ""} disabled={locked} />
               </Field>
               <Field label="WhatsApp">
@@ -1306,18 +1306,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               </Field>
               <div className="space-y-2 md:col-span-2">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-bold">Другие социальные сети</span>
-                  {!locked ? <button type="button" className="btn btn-ghost text-sm" onClick={() => setSocials((items) => [...items, { label: "", url: "" }])}>Добавить</button> : null}
+                  <span className="text-sm font-bold">Other social networks</span>
+                  {!locked ? <button type="button" className="btn btn-ghost text-sm" onClick={() => setSocials((items) => [...items, { label: "", url: "" }])}>Add</button> : null}
                 </div>
                 {socials.map((item, index) => (
                   <div key={index} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto]">
-                    <input className="field" value={item.label} disabled={locked} aria-label="Название социальной сети" placeholder="Название" onChange={(event) => setSocials((items) => items.map((current, i) => i === index ? { ...current, label: event.target.value } : current))} />
-                    <input className="field" value={item.url} disabled={locked} aria-label="Ссылка на социальную сеть" placeholder="Ссылка" onChange={(event) => setSocials((items) => items.map((current, i) => i === index ? { ...current, url: event.target.value } : current))} />
-                    {!locked ? <button type="button" className="text-sm font-bold text-danger" aria-label="Удалить социальную сеть" onClick={() => setSocials((items) => items.filter((_, i) => i !== index))}>Удалить</button> : null}
+                    <input className="field" value={item.label} disabled={locked} aria-label="Social network name" placeholder="Name" onChange={(event) => setSocials((items) => items.map((current, i) => i === index ? { ...current, label: event.target.value } : current))} />
+                    <input className="field" value={item.url} disabled={locked} aria-label="Social network link" placeholder="Link" onChange={(event) => setSocials((items) => items.map((current, i) => i === index ? { ...current, url: event.target.value } : current))} />
+                    {!locked ? <button type="button" className="text-sm font-bold text-danger" aria-label="Remove social network" onClick={() => setSocials((items) => items.filter((_, i) => i !== index))}>Remove</button> : null}
                   </div>
                 ))}
               </div>
-              <Field label="Время ответа (ч)">
+              <Field label="Reply time (h)">
                 <input
                   name="responseHours"
                   type="number"
@@ -1330,7 +1330,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               </Field>
             </div>
             <fieldset disabled={locked}>
-              <legend className="text-sm font-bold">Языки</legend>
+              <legend className="text-sm font-bold">Languages</legend>
               <div className="mt-2 flex flex-wrap gap-3">
                 {LANGS.map((code) => (
                   <label key={code} className="flex items-center gap-2 text-sm font-semibold">
@@ -1355,10 +1355,10 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
         {section === "photos" ? (
           <div className="space-y-4">
             <div className="soft-card rounded-[1.5rem] bg-white p-6">
-              <h2 className="text-xl font-extrabold">Фотографии</h2>
+              <h2 className="text-xl font-extrabold">Photos</h2>
               <p className="mt-1 text-sm text-muted">
-                Первое фото — обложка публичной страницы. Меняйте порядок стрелками или сделайте
-                нужное фото обложкой.
+                The first photo is the cover of the public page. Reorder with the arrows or make
+                any photo the cover.
               </p>
               {(clinic.photos || []).length ? (
               <div className="ws-photos mt-5">
@@ -1366,7 +1366,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   <div key={photo.id} className="ws-photo">
                     <div className="ws-photo-img">
                       <img src={photo.url} alt={photo.altRu || ""} loading="lazy" />
-                      {index === 0 ? <b>Обложка</b> : null}
+                      {index === 0 ? <b>Cover</b> : null}
                     </div>
                     <div className="ws-photo-meta">
                       <span className="truncate">{photoCategoryLabel(photo.category)}</span>
@@ -1378,8 +1378,8 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                           type="button"
                           className="ws-mini"
                           disabled={index === 0}
-                          title="Переместить выше"
-                          aria-label="Переместить выше"
+                          title="Move up"
+                          aria-label="Move up"
                           onClick={async () => {
                             const ids = (clinic.photos || []).map((p) => p.id);
                             const next = [...ids];
@@ -1394,8 +1394,8 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                           type="button"
                           className="ws-mini"
                           disabled={index >= (clinic.photos?.length || 0) - 1}
-                          title="Переместить ниже"
-                          aria-label="Переместить ниже"
+                          title="Move down"
+                          aria-label="Move down"
                           onClick={async () => {
                             const ids = (clinic.photos || []).map((p) => p.id);
                             const next = [...ids];
@@ -1410,18 +1410,18 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                           <button
                             type="button"
                             className="ws-mini"
-                            title="Сделать обложкой"
-                            aria-label="Сделать обложкой"
+                            title="Make cover"
+                            aria-label="Make cover"
                             onClick={async () => {
                               await setClinicMainPhoto(clinic.id, photo.id);
                               await refresh();
-                              setMessage("Обложка обновлена");
+                              setMessage("Cover updated");
                             }}
                           >
                             <WsIcon name="star" size={15} />
                           </button>
                         ) : null}
-                        <label className="ws-mini" title="Заменить файл" aria-label="Заменить файл">
+                        <label className="ws-mini" title="Replace file" aria-label="Replace file">
                           <WsIcon name="swap" size={15} />
                           <input
                             type="file"
@@ -1433,7 +1433,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                               const url = await onUpload(file);
                               await replaceClinicPhoto(clinic.id, photo.id, { url });
                               await refresh();
-                              setMessage("Фото заменено");
+                              setMessage("Photo replaced");
                               e.target.value = "";
                             }}
                           />
@@ -1441,10 +1441,10 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                         <button
                           type="button"
                           className="ws-mini is-danger ml-auto"
-                          title="Удалить фото"
-                          aria-label="Удалить фото"
+                          title="Delete photo"
+                          aria-label="Delete photo"
                           onClick={async () => {
-                            if (!window.confirm("Удалить это фото?")) return;
+                            if (!window.confirm("Delete this photo?")) return;
                             await deleteClinicPhoto(clinic.id, photo.id);
                             await refresh();
                           }}
@@ -1457,7 +1457,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 ))}
               </div>
               ) : (
-                <p className="mt-4 rounded-2xl bg-paper px-4 py-3 text-sm text-muted">Фото пока нет. Добавьте фасад, холл и кабинеты — с фото клинику выбирают чаще.</p>
+                <p className="mt-4 rounded-2xl bg-paper px-4 py-3 text-sm text-muted">No photos yet. Add the facade, the lobby and the rooms: clinics with photos are chosen more often.</p>
               )}
             </div>
             {!locked ? (
@@ -1477,17 +1477,17 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                   });
                   e.currentTarget.reset();
                   await refresh();
-                  setMessage("Фото добавлено");
+                  setMessage("Photo added");
                 }}
               >
                 <div>
-                  <h3 className="font-extrabold">Добавить фото</h3>
+                  <h3 className="font-extrabold">Add a photo</h3>
                   <p className="mt-1 text-sm text-muted">
-                    Выберите, что на снимке, добавьте подпись и файл. Новое фото встанет в конец списка — сделать его обложкой можно кнопкой со звездой.
+                    Choose what the photo shows, add a caption and the file. A new photo goes to the end of the list; the star button makes it the cover.
                   </p>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
-                  <Field label="Что на фото">
+                  <Field label="What is in the photo">
                     <select name="category" className="field" defaultValue="other">
                       {PHOTO_CATS.map((c) => (
                         <option key={c.value} value={c.value}>
@@ -1496,15 +1496,15 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                       ))}
                     </select>
                   </Field>
-                  <Field label="Подпись" hint="Необязательно">
-                    <input name="altRu" className="field" placeholder="Например, вход в клинику" />
+                  <Field label="Caption" hint="Optional">
+                    <input name="altRu" className="field" placeholder="e.g. вход в клинику" />
                   </Field>
                 </div>
-                <Field label="Файл" hint="JPG, PNG или WEBP. Лучше горизонтальное фото от 1200 px по ширине.">
+                <Field label="File" hint="JPG, PNG or WEBP. A landscape photo at least 1200 px wide works best.">
                   <input name="file" type="file" accept="image/*" required className="field" />
                 </Field>
                 <button className="btn btn-primary text-sm" type="submit">
-                  Загрузить фото
+                  Upload photo
                 </button>
               </form>
             ) : null}
@@ -1531,23 +1531,23 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               });
             }}
           >
-            <h2 className="text-xl font-extrabold">Дополнительно</h2>
-            <Field label="Почему выбирают (RU)">
+            <h2 className="text-xl font-extrabold">Extra</h2>
+            <Field label="Why patients choose it (RU)">
               <textarea name="whyChooseRu" rows={3} className="field" defaultValue={clinic.whyChooseRu || ""} disabled={locked} />
             </Field>
-            <Field label="Почему выбирают (EN)">
+            <Field label="Why patients choose it (EN)">
               <textarea name="whyChooseEn" rows={3} className="field" defaultValue={clinic.whyChooseEn || ""} disabled={locked} />
             </Field>
-            <Field label="Популярные услуги (RU)">
+            <Field label="Popular services (RU)">
               <textarea name="popularServicesRu" rows={2} className="field" defaultValue={clinic.popularServicesRu || ""} disabled={locked} />
             </Field>
-            <Field label="Популярные услуги (EN)">
+            <Field label="Popular services (EN)">
               <textarea name="popularServicesEn" rows={2} className="field" defaultValue={clinic.popularServicesEn || ""} disabled={locked} />
             </Field>
-            <Field label="Планы развития (RU)">
+            <Field label="Development plans (RU)">
               <textarea name="developmentPlansRu" rows={2} className="field" defaultValue={clinic.developmentPlansRu || ""} disabled={locked} />
             </Field>
-            <Field label="Планы развития (EN)">
+            <Field label="Development plans (EN)">
               <textarea name="developmentPlansEn" rows={2} className="field" defaultValue={clinic.developmentPlansEn || ""} disabled={locked} />
             </Field>
             <label className="flex items-center gap-2 text-sm font-bold">
@@ -1557,12 +1557,12 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                 defaultChecked={clinic.medicalTourism}
                 disabled={locked}
               />
-              Медицинский туризм
+              Medical tourism
             </label>
-            <Field label="Медтуризм — описание (RU)">
+            <Field label="Medical tourism description (RU)">
               <textarea name="medicalTourismRu" rows={2} className="field" defaultValue={clinic.medicalTourismRu || ""} disabled={locked} />
             </Field>
-            <Field label="Медтуризм — описание (EN)">
+            <Field label="Medical tourism description (EN)">
               <textarea name="medicalTourismEn" rows={2} className="field" defaultValue={clinic.medicalTourismEn || ""} disabled={locked} />
             </Field>
             <FormActions locked={locked} saving={saving} onContinue={markContinue} savedAt={draftSavedAt} />
@@ -1573,12 +1573,12 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
 
         {section === "branches" ? (
           <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-            <h2 className="text-xl font-extrabold">Филиалы</h2>
+            <h2 className="text-xl font-extrabold">Branches</h2>
             <p className="text-sm text-muted">
-              Для модерации нужен хотя бы один филиал с адресом и телефоном.
+              Review needs at least one branch with an address and a phone.
             </p>
             {(clinic.branches || []).length === 0 ? (
-              <p className="rounded-xl bg-warning-soft px-3 py-2 text-sm">Филиалы ещё не добавлены.</p>
+              <p className="rounded-xl bg-warning-soft px-3 py-2 text-sm">No branches added yet.</p>
             ) : (
               <ul className="space-y-2">
                 {clinic.branches!.map((b) => (
@@ -1598,7 +1598,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
                       href={`/cabinet/clinics/${clinic.id}/branches/${b.id}`}
                       className="font-bold text-primary"
                     >
-                      Редактировать
+                      Edit
                     </a>
                   </li>
                 ))}
@@ -1608,27 +1608,27 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
               href={`/cabinet/clinics/${clinic.id}/branches`}
               className="btn btn-primary inline-flex text-sm"
             >
-              Управление филиалами
+              Manage branches
             </a>
           </div>
         ) : null}
 
         {section === "moderation" ? (
           <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-            <h2 className="text-xl font-extrabold">Перед модерацией</h2>
+            <h2 className="text-xl font-extrabold">Before review</h2>
             <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
-              <li>Проверьте название, логотип и описание</li>
-              <li>Выберите направления</li>
-              <li>Добавьте хотя бы один филиал с адресом и телефоном</li>
-              <li>Откройте «Предпросмотр» и сверьте с публичной страницей</li>
-              <li>Кнопка «Отправить на модерацию» — в шапке страницы клиники</li>
+              <li>Check the name, logo and description</li>
+              <li>Choose the specialties</li>
+              <li>Add at least one branch with an address and a phone</li>
+              <li>Open “Preview” and compare it with the public page</li>
+              <li>The “Send for review” button is at the top of the clinic page</li>
             </ul>
             {clinic.moderatorNote ? (
               <p className="rounded-xl bg-danger-soft px-3 py-2 text-sm text-danger">
-                Комментарий модератора: {clinic.moderatorNote}
+                Moderator comment: {clinic.moderatorNote}
               </p>
             ) : null}
-            <p className="text-sm font-semibold text-muted">Текущий статус: {STATUS_LABELS[clinic.status] || clinic.status}</p>
+            <p className="text-sm font-semibold text-muted">Current status: {STATUS_LABELS[clinic.status] || clinic.status}</p>
           </div>
         ) : null}
 
@@ -1642,7 +1642,7 @@ export function ClinicWizard({ clinic, specialties, locked, onSaved, initialSect
             ) : <span />}
             {nextStep ? (
               <button type="button" className="ws-pill is-ink" onClick={() => pickSection(nextStep.id)}>
-                Далее: {nextStep.label}
+                Next: {nextStep.label}
                 <ArrowIcon size={15} />
               </button>
             ) : null}

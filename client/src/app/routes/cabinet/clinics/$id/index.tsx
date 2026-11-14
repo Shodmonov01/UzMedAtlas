@@ -46,7 +46,7 @@ function EditClinicPage() {
   }, [auth.data, auth.isError, navigate]);
 
   if (!auth.data || clinic.isLoading) return <WsLoading />;
-  if (!clinic.data) return <WsNote tone="danger" title="Клиника не найдена" />;
+  if (!clinic.data) return <WsNote tone="danger" title="Clinic not found" />;
 
   const locked = clinic.data.status === "moderation";
   const canSubmit = clinic.data.status === "draft" || clinic.data.status === "needs_changes";
@@ -68,16 +68,16 @@ function EditClinicPage() {
     setMessage(null);
     setIssues([]);
     try {
-      if (!window.confirm("После отправки данные будут переданы на проверку модератору. Продолжить?")) return;
+      if (!window.confirm("Once sent, the profile goes to a moderator for review. Continue?")) return;
       await submitCabinetClinic(id);
       await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
       await qc.invalidateQueries({ queryKey: ["cabinet-clinics"] });
-      setMessage("Клиника отправлена на модерацию. Мы сообщим о решении.");
+      setMessage("The clinic was sent for review. We will let you know the decision.");
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.issues) {
         setIssues(err.response.data.issues as { field: string; message: string }[]);
       } else {
-        setMessage("Не удалось отправить. Попробуйте ещё раз.");
+        setMessage("Could not send. Please try again.");
       }
     }
   }
@@ -88,16 +88,16 @@ function EditClinicPage() {
         back={
           <Link to="/cabinet" className="ws-back">
             <BackMark />
-            Мои клиники
+            My clinics
           </Link>
         }
-        eyebrow="Профиль клиники"
+        eyebrow="Clinic profile"
         title={name}
         meta={
           <>
             <StatusBadge status={clinic.data.status} />
-            <span>Филиалов: {clinic.data.branchCount ?? 0}</span>
-            <span>Врачей: {clinic.data.doctorCount ?? 0}</span>
+            <span>Branches: {clinic.data.branchCount ?? 0}</span>
+            <span>Doctors: {clinic.data.doctorCount ?? 0}</span>
           </>
         }
         actions={
@@ -106,10 +106,10 @@ function EditClinicPage() {
               <button
                 type="button"
                 className="ws-pill is-danger is-icon"
-                aria-label="Удалить клинику"
-                title="Удалить клинику"
+                aria-label="Delete clinic"
+                title="Delete clinic"
                 onClick={async () => {
-                  if (!window.confirm(`Удалить клинику «${name}»? Это действие нельзя отменить.`)) return;
+                  if (!window.confirm(`Delete the clinic “${name}”? This cannot be undone.`)) return;
                   await deleteCabinetClinic(id);
                   void navigate({ to: "/cabinet" });
                 }}
@@ -119,13 +119,13 @@ function EditClinicPage() {
             ) : null}
             {clinic.data.status === "published" ? (
               <Link to="/clinics/$slug" params={{ slug: clinic.data.slug }} target="_blank" className="ws-pill">
-                Страница на сайте
+                Public page
                 <WsIcon name="external" size={14} />
               </Link>
             ) : null}
             {canSubmit ? (
               <button type="button" className="pill-btn is-ink" onClick={() => void submit()}>
-                Отправить на модерацию
+                Send for review
                 <span className="pill-btn-icon">
                   <ArrowIcon />
                 </span>
@@ -136,14 +136,14 @@ function EditClinicPage() {
       />
 
       {clinic.data.moderatorNote ? (
-        <WsNote tone="danger" title="Комментарий модератора">
+        <WsNote tone="danger" title="Moderator comment">
           <p>{clinic.data.moderatorNote}</p>
         </WsNote>
       ) : null}
 
       {message ? <WsNote tone="success">{message}</WsNote> : null}
       {issues.length ? (
-        <WsNote tone="warning" title="Чтобы отправить на модерацию, заполните:">
+        <WsNote tone="warning" title="To send for review, fill in:">
           <ul>
             {issues.map((item) => (
               <li key={item.field + item.message}>
@@ -173,8 +173,8 @@ function EditClinicPage() {
       ) : null}
 
       {locked ? (
-        <WsNote tone="info" title="Клиника на модерации">
-          <p>Пока модератор проверяет профиль, редактирование недоступно. Решение придёт в кабинет и в Telegram.</p>
+        <WsNote tone="info" title="The clinic is in review">
+          <p>Editing is locked while a moderator reviews the profile. The decision will arrive in the cabinet and on Telegram.</p>
         </WsNote>
       ) : null}
 

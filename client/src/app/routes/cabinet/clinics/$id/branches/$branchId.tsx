@@ -36,10 +36,10 @@ export const Route = createFileRoute("/cabinet/clinics/$id/branches/$branchId")(
 
 const BRANCH_PAGE_SECTIONS = [
   ...BRANCH_CORE_SECTIONS,
-  { id: "services", label: "Услуги" },
-  { id: "doctors", label: "Специалисты" },
-  { id: "photos", label: "Фото" },
-  { id: "equipment", label: "Оборудование" },
+  { id: "services", label: "Services" },
+  { id: "doctors", label: "Doctors" },
+  { id: "photos", label: "Photos" },
+  { id: "equipment", label: "Equipment" },
 ] as const;
 
 type BranchPageSectionId = (typeof BRANCH_PAGE_SECTIONS)[number]["id"];
@@ -47,14 +47,14 @@ type BranchPageSectionId = (typeof BRANCH_PAGE_SECTIONS)[number]["id"];
 const CORE_IDS = new Set<string>(BRANCH_CORE_SECTIONS.map((s) => s.id));
 
 const PHOTO_CATEGORY_LABELS: Record<string, string> = {
-  facade: "Фасад",
-  reception: "Ресепшен",
-  hall: "Холл",
-  rooms: "Кабинеты",
-  or: "Операционная",
-  equipment: "Оборудование",
-  staff: "Сотрудники",
-  other: "Другое",
+  facade: "Facade",
+  reception: "Reception",
+  hall: "Lobby",
+  rooms: "Rooms",
+  or: "Operating room",
+  equipment: "Equipment",
+  staff: "Staff",
+  other: "Other",
 };
 
 function EditBranchPage() {
@@ -92,7 +92,7 @@ function EditBranchPage() {
   }, [auth.data, auth.isError, navigate]);
 
   if (!auth.data || clinic.isLoading || branch.isLoading) return <WsLoading />;
-  if (!clinic.data || !branch.data) return <WsNote tone="danger" title="Филиал не найден" />;
+  if (!clinic.data || !branch.data) return <WsNote tone="danger" title="Branch not found" />;
 
   const locked = clinic.data.status === "moderation";
   const isCore = CORE_IDS.has(section);
@@ -115,10 +115,10 @@ function EditBranchPage() {
         back={
           <Link to="/cabinet/clinics/$id/branches" params={{ id }} className="ws-back">
             <BackMark />
-            Филиалы · {clinicName}
+            Branches · {clinicName}
           </Link>
         }
-        eyebrow="Филиал"
+        eyebrow="Branch"
         title={branchName}
         meta={
           <>
@@ -137,7 +137,7 @@ function EditBranchPage() {
               target="_blank"
               className="ws-pill"
             >
-              Страница на сайте
+              Public page
               <WsIcon name="external" size={14} />
             </Link>
           ) : undefined
@@ -145,18 +145,18 @@ function EditBranchPage() {
       />
 
       {locked ? (
-        <WsNote tone="info" title="Клиника на модерации">
-          <p>Пока модератор проверяет профиль, филиалы редактировать нельзя.</p>
+        <WsNote tone="info" title="The clinic is in review">
+          <p>Branches cannot be edited while a moderator reviews the profile.</p>
         </WsNote>
       ) : null}
 
       <WsToast message={message} onDone={clearMessage} />
 
       <div className="wz">
-        <nav className="wz-nav" aria-label="Разделы филиала">
+        <nav className="wz-nav" aria-label="Branch sections">
           <div className="wz-progress">
             <p>
-              Раздел <strong>{stepIndex + 1} из {BRANCH_PAGE_SECTIONS.length}</strong>
+              Section <strong>{stepIndex + 1} of {BRANCH_PAGE_SECTIONS.length}</strong>
             </p>
             <div className="wz-progress-bar">
               <span style={{ width: `${((stepIndex + 1) / BRANCH_PAGE_SECTIONS.length) * 100}%` }} />
@@ -197,7 +197,7 @@ function EditBranchPage() {
                 await qc.invalidateQueries({ queryKey: ["cabinet-branch", id, branchId] });
                 await qc.invalidateQueries({ queryKey: ["cabinet-branches", id] });
                 await qc.invalidateQueries({ queryKey: ["cabinet-clinic", id] });
-                setMessage("Филиал сохранён");
+                setMessage("Branch saved");
                 await branch.refetch();
               }}
             />
@@ -243,8 +243,8 @@ function EditBranchPage() {
           {section === "photos" ? (
             <div className="soft-card space-y-5">
               <div>
-                <h2 className="ws-card-title">Фото филиала</h2>
-                <p className="ws-card-text">Первое фото — обложка страницы филиала. Меняйте порядок стрелками или сделайте нужное фото обложкой.</p>
+                <h2 className="ws-card-title">Branch photos</h2>
+                <p className="ws-card-text">The first photo is the cover of the branch page. Reorder with the arrows or make any photo the cover.</p>
               </div>
               {(branch.data.photos || []).length ? (
                 <div className="ws-photos">
@@ -252,7 +252,7 @@ function EditBranchPage() {
                     <div key={photo.id} className="ws-photo">
                       <div className="ws-photo-img">
                         <img src={photo.url} alt="" loading="lazy" />
-                        {index === 0 ? <b>Обложка</b> : null}
+                        {index === 0 ? <b>Cover</b> : null}
                       </div>
                       <div className="ws-photo-meta">
                         <span className="truncate">{PHOTO_CATEGORY_LABELS[photo.category] || photo.category}</span>
@@ -264,8 +264,8 @@ function EditBranchPage() {
                             type="button"
                             className="ws-mini"
                             disabled={index === 0}
-                            title="Переместить выше"
-                            aria-label="Переместить выше"
+                            title="Move up"
+                            aria-label="Move up"
                             onClick={async () => {
                               const ids = (branch.data.photos || []).map((p) => p.id);
                               const next = [...ids];
@@ -280,8 +280,8 @@ function EditBranchPage() {
                             type="button"
                             className="ws-mini"
                             disabled={index >= (branch.data.photos?.length || 0) - 1}
-                            title="Переместить ниже"
-                            aria-label="Переместить ниже"
+                            title="Move down"
+                            aria-label="Move down"
                             onClick={async () => {
                               const ids = (branch.data.photos || []).map((p) => p.id);
                               const next = [...ids];
@@ -296,18 +296,18 @@ function EditBranchPage() {
                             <button
                               type="button"
                               className="ws-mini"
-                              title="Сделать обложкой"
-                              aria-label="Сделать обложкой"
+                              title="Make cover"
+                              aria-label="Make cover"
                               onClick={async () => {
                                 await setBranchMainPhoto(id, branchId, photo.id);
                                 await branch.refetch();
-                                setMessage("Обложка обновлена");
+                                setMessage("Cover updated");
                               }}
                             >
                               <WsIcon name="star" size={15} />
                             </button>
                           ) : null}
-                          <label className="ws-mini" title="Заменить файл" aria-label="Заменить файл">
+                          <label className="ws-mini" title="Replace file" aria-label="Replace file">
                             <WsIcon name="swap" size={15} />
                             <input
                               type="file"
@@ -319,7 +319,7 @@ function EditBranchPage() {
                                 const url = await uploadCabinetFile(file);
                                 await replaceBranchPhoto(id, branchId, photo.id, { url });
                                 await branch.refetch();
-                                setMessage("Фото заменено");
+                                setMessage("Photo replaced");
                                 e.target.value = "";
                               }}
                             />
@@ -327,10 +327,10 @@ function EditBranchPage() {
                           <button
                             type="button"
                             className="ws-mini is-danger ml-auto"
-                            title="Удалить фото"
-                            aria-label="Удалить фото"
+                            title="Delete photo"
+                            aria-label="Delete photo"
                             onClick={async () => {
-                              if (!window.confirm("Удалить это фото?")) return;
+                              if (!window.confirm("Delete this photo?")) return;
                               await deleteBranchPhoto(id, branchId, photo.id);
                               await branch.refetch();
                             }}
@@ -343,7 +343,7 @@ function EditBranchPage() {
                   ))}
                 </div>
               ) : (
-                <p className="rounded-2xl bg-paper px-4 py-3 text-sm text-muted">Фото пока нет. Добавьте фасад, вход и кабинеты — так пациенту проще найти филиал.</p>
+                <p className="rounded-2xl bg-paper px-4 py-3 text-sm text-muted">No photos yet. Add the facade, the entrance and the rooms so patients can find the branch easily.</p>
               )}
               {!locked ? (
                 <form
@@ -361,12 +361,12 @@ function EditBranchPage() {
                     });
                     form.reset();
                     await branch.refetch();
-                    setMessage("Фото добавлено");
+                    setMessage("Photo added");
                   }}
                 >
-                  <p className="ws-label">Добавить фото</p>
+                  <p className="ws-label">Add a photo</p>
                   <div className="grid gap-3 md:grid-cols-2">
-                    <Field label="Что на фото">
+                    <Field label="What is in the photo">
                       <select name="category" className="field" defaultValue="facade">
                         {Object.entries(PHOTO_CATEGORY_LABELS).map(([value, label]) => (
                           <option key={value} value={value}>
@@ -375,21 +375,21 @@ function EditBranchPage() {
                         ))}
                       </select>
                     </Field>
-                    <Field label="Файл" hint="JPG, PNG или WEBP, лучше горизонтальное">
+                    <Field label="File" hint="JPG, PNG or WEBP, landscape works best">
                       <input name="file" type="file" accept="image/*" required className="field" />
                     </Field>
                   </div>
                   <button className="btn btn-primary justify-self-start" type="submit">
-                    Загрузить фото
+                    Upload photo
                   </button>
                 </form>
               ) : null}
 
               {branch.data.lat != null && branch.data.lng != null ? (
                 <p className="text-sm text-muted">
-                  Точка на карте:{" "}
+                  Map location:{" "}
                   <a className="font-bold text-primary" href={yandexPointUrl(branch.data.lat, branch.data.lng)} target="_blank" rel="noreferrer">
-                    Яндекс.Карты ({branch.data.lat}, {branch.data.lng})
+                    Yandex Maps ({branch.data.lat}, {branch.data.lng})
                   </a>
                 </p>
               ) : null}
@@ -423,12 +423,12 @@ function EditBranchPage() {
               )}
               {nextStep ? (
                 <button type="button" className="ws-pill is-ink" onClick={() => pick(nextStep.id)}>
-                  Далее: {nextStep.label}
+                  Next: {nextStep.label}
                   <ArrowIcon size={15} />
                 </button>
               ) : (
                 <Link to="/cabinet/clinics/$id/branches" params={{ id }} className="ws-pill is-ink">
-                  Готово — к списку филиалов
+                  Done, back to branches
                   <ArrowIcon size={15} />
                 </Link>
               )}

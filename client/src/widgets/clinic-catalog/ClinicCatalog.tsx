@@ -59,12 +59,12 @@ const inLang = (lang: Lang, options: { value: string; label: Text }[]) => option
 
 const LANG_OPTIONS = [
   { value: "", label: "Любой язык" },
-  { value: "ru", label: "Русский" },
+  { value: "ru", label: "Russian" },
   { value: "en", label: "English" },
-  { value: "uz", label: "Oʻzbek" },
-  { value: "tr", label: "Türkçe" },
-  { value: "ar", label: "العربية" },
-  { value: "kz", label: "Қазақша" },
+  { value: "uz", label: "Uzbek" },
+  { value: "tr", label: "Turkish" },
+  { value: "ar", label: "Arabic" },
+  { value: "kz", label: "Kazakh" },
 ];
 
 /** How many clinics one page of results shows. */

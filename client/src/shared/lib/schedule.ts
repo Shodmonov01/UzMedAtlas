@@ -1,4 +1,4 @@
-/** Branch / clinic opening hours helpers (§21 / §34) */
+/** Branch / clinic opening hours helpers */
 
 export type DayHours = {
   open: string;
@@ -24,8 +24,8 @@ function toMinutes(hhmm: string): number | null {
 }
 
 export function formatDayHours(day: DayHours): string {
-  if (!day) return "выходной";
-  if (day.roundTheClock) return "круглосуточно";
+  if (!day) return "day off";
+  if (day.roundTheClock) return "24 hours";
   if (day.breakStart && day.breakEnd) {
     return `${day.open}–${day.breakStart} / ${day.breakEnd}–${day.close}`;
   }

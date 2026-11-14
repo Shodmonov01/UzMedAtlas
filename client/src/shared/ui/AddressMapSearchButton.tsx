@@ -15,7 +15,7 @@ export function AddressMapSearchButton({ address, onFound, disabled }: Props) {
   async function search() {
     if (!address.trim()) {
       setFailed(true);
-      setMessage("Сначала введите адрес.");
+      setMessage("Enter the address first.");
       return;
     }
     setLoading(true);
@@ -24,10 +24,10 @@ export function AddressMapSearchButton({ address, onFound, disabled }: Props) {
     try {
       const point = await geocodeYandexAddress(address.trim());
       onFound(point);
-      setMessage(`Найден адрес: ${point.addressRu}`);
+      setMessage(`Address found: ${point.addressRu}`);
     } catch {
       setFailed(true);
-      setMessage("Не удалось выполнить поиск. Уточните адрес или попробуйте позже.");
+      setMessage("The search failed. Make the address more precise or try again later.");
     } finally {
       setLoading(false);
     }
@@ -41,7 +41,7 @@ export function AddressMapSearchButton({ address, onFound, disabled }: Props) {
         onClick={() => void search()}
         disabled={disabled || loading}
       >
-        {loading ? "Ищем адрес…" : "Найти на карте"}
+        {loading ? "Searching…" : "Find on the map"}
       </button>
       {message ? (
         <p className={`mt-1 max-w-xs text-xs ${failed ? "text-danger" : "text-primary"}`} role="status">

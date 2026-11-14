@@ -5,12 +5,12 @@ import { useLang, type Text } from "@/shared/i18n/lang";
 type Member = { role: Text; name: string; org?: string };
 
 const TEAM: Member[] = [
-  { role: { ru: "Председатель Ассоциации", uz: "Assotsiatsiya raisi", en: "Chair of the Association" }, name: "Салохиддин Мухитдинов" },
-  { role: { ru: "Помощник председателя", uz: "Rais yordamchisi", en: "Assistant to the Chair" }, name: "Феруза Ризаева" },
-  { role: { ru: "Медицинский маркетолог", uz: "Tibbiy marketolog", en: "Medical marketer" }, name: "Шахноза Якубова", org: "Maestro Marketing Agency" },
-  { role: { ru: "Дизайнер", uz: "Dizayner", en: "Designer" }, name: "Дарья Новикова" },
-  { role: { ru: "Редактор", uz: "Muharrir", en: "Editor" }, name: "Азиза Расулова" },
-  { role: { ru: "Разработчик электронной версии", uz: "Elektron versiya ishlab chiquvchisi", en: "Developer of the digital edition" }, name: "Рахмонбердиев Б.Б.", org: "RZB TECH agency" },
+  { role: { ru: "Председатель Ассоциации", uz: "Assotsiatsiya raisi", en: "Chair of the Association" }, name: "Salokhiddin Mukhitdinov" },
+  { role: { ru: "Помощник председателя", uz: "Rais yordamchisi", en: "Assistant to the Chair" }, name: "Feruza Rizaeva" },
+  { role: { ru: "Медицинский маркетолог", uz: "Tibbiy marketolog", en: "Medical marketer" }, name: "Shakhnoza Yakubova", org: "Maestro Marketing Agency" },
+  { role: { ru: "Дизайнер", uz: "Dizayner", en: "Designer" }, name: "Daria Novikova" },
+  { role: { ru: "Редактор", uz: "Muharrir", en: "Editor" }, name: "Aziza Rasulova" },
+  { role: { ru: "Разработчик электронной версии", uz: "Elektron versiya ishlab chiquvchisi", en: "Developer of the digital edition" }, name: "B. B. Rakhmonberdiev", org: "RZB TECH agency" },
 ];
 
 const CLINICS_COUNT = 26;

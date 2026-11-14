@@ -41,8 +41,8 @@ export function BranchDoctorsPanel({
 
   return (
     <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-      <h2 className="text-xl font-extrabold">Специалисты филиала</h2>
-      <p className="text-sm text-muted">Отметьте существующих специалистов или создайте нового.</p>
+      <h2 className="text-xl font-extrabold">Branch doctors</h2>
+      <p className="text-sm text-muted">Tick existing doctors or add a new one.</p>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
       {message ? <p className="text-sm font-bold text-primary">{message}</p> : null}
 
@@ -71,7 +71,7 @@ export function BranchDoctorsPanel({
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted">В клинике пока нет специалистов.</p>
+        <p className="text-sm text-muted">The clinic has no doctors yet.</p>
       )}
 
       {!locked && dirty ? (
@@ -84,16 +84,16 @@ export function BranchDoctorsPanel({
             setError(null);
             try {
               await setBranchDoctors(clinicId, branchId, selected);
-              setMessage("Привязка специалистов сохранена");
+              setMessage("Doctors saved for this branch");
               await onChanged();
             } catch {
-              setError("Не удалось сохранить привязку");
+              setError("Could not save the doctors");
             } finally {
               setSaving(false);
             }
           }}
         >
-          {saving ? "Сохранение…" : "Сохранить привязку"}
+          {saving ? "Saving…" : "Save doctors"}
         </button>
       ) : null}
 
@@ -129,75 +129,75 @@ export function BranchDoctorsPanel({
                 branchIds: [branchId],
               });
               form.reset();
-              setMessage("Специалист создан и привязан к филиалу");
+              setMessage("Doctor added to this branch");
               await onChanged();
             } catch {
-              setError("Не удалось создать специалиста");
+              setError("Could not add the doctor");
             }
           }}
         >
           <div>
-            <h3 className="font-extrabold">Новый специалист</h3>
-            <p className="mt-1 text-sm text-muted">Его не было в списке выше? Создайте — он сразу появится в этом филиале. Поля со звёздочкой обязательны.</p>
+            <h3 className="font-extrabold">New doctor</h3>
+            <p className="mt-1 text-sm text-muted">Not in the list above? Add them and they appear in this branch right away. Fields with an asterisk are required.</p>
           </div>
-          <FormGroup title="Кто это">
-            <Field label="Имя и фамилия (RU) *">
-              <input name="nameRu" required className="field" placeholder="Например, Алишер Рахимов" />
+          <FormGroup title="Who">
+            <Field label="Full name (RU) *">
+              <input name="nameRu" required className="field" placeholder="e.g. Алишер Рахимов" />
             </Field>
-            <Field label="Имя и фамилия (EN) *">
+            <Field label="Full name (EN) *">
               <input name="nameEn" required className="field" placeholder="For example, Alisher Rakhimov" />
             </Field>
-            <Field label="Должность (RU)">
-              <input name="roleRu" className="field" placeholder="Например, кардиолог" />
+            <Field label="Position (RU)">
+              <input name="roleRu" className="field" placeholder="e.g. кардиолог" />
             </Field>
-            <Field label="Должность (EN)">
+            <Field label="Position (EN)">
               <input name="roleEn" className="field" placeholder="For example, cardiologist" />
             </Field>
-            <Field label="Стаж, лет">
+            <Field label="Experience, years">
               <input name="experienceYears" type="number" min={0} className="field" placeholder="10" />
             </Field>
-            <Field label="Врачебная категория">
-              <select name="category" className="field" defaultValue=""><option value="">Без категории</option><option value="highest">Высшая</option><option value="first">Первая</option><option value="second">Вторая</option><option value="other">Другая</option></select>
+            <Field label="Medical category">
+              <select name="category" className="field" defaultValue=""><option value="">No category</option><option value="highest">Highest</option><option value="first">First</option><option value="second">Second</option><option value="other">Other</option></select>
             </Field>
-            <Field label="Специальность" hint="Из направлений клиники">
-              <select name="specialtyId" className="field" defaultValue={specialtyIds[0] || ""}><option value="">Не выбрана</option>{specialtyOptions.filter((specialty) => specialtyIds.includes(specialty.id)).map((specialty) => <option key={specialty.id} value={specialty.id}>{specialty.nameRu || specialty.nameEn}</option>)}</select>
+            <Field label="Specialty" hint="From the clinic specialties">
+              <select name="specialtyId" className="field" defaultValue={specialtyIds[0] || ""}><option value="">Not chosen</option>{specialtyOptions.filter((specialty) => specialtyIds.includes(specialty.id)).map((specialty) => <option key={specialty.id} value={specialty.id}>{specialty.nameEn || specialty.nameRu}</option>)}</select>
             </Field>
           </FormGroup>
-          <FormGroup title="Фото">
+          <FormGroup title="Photo">
             {onUpload ? (
-              <Field label="Загрузить файл" hint="Портрет, лучше квадратный">
+              <Field label="Upload a file" hint="A portrait, square works best">
                 <input name="photoFile" type="file" accept="image/*" className="field" />
               </Field>
             ) : null}
-            <Field label={onUpload ? "Или ссылка на фото" : "Ссылка на фото"}>
+            <Field label={onUpload ? "Or a photo link" : "Photo link"}>
               <input name="photoUrl" className="field" placeholder="https://…" />
             </Field>
           </FormGroup>
-          <FormGroup title="О специалисте">
-            <Field label="Кратко о враче" wide>
-              <textarea name="bioRu" rows={2} className="field" placeholder="Чем занимается, с какими случаями работает" />
+          <FormGroup title="About the doctor">
+            <Field label="Short bio" wide>
+              <textarea name="bioRu" rows={2} className="field" placeholder="What they do and which cases they handle" />
             </Field>
-            <Field label="Сертификаты">
+            <Field label="Certificates">
               <textarea name="certsRu" rows={2} className="field" />
             </Field>
-            <Field label="Повышение квалификации">
+            <Field label="Further training">
               <textarea name="continuingEducationRu" rows={2} className="field" />
             </Field>
-            <Field label="Международный опыт">
+            <Field label="International experience">
               <textarea name="internationalExperienceRu" rows={2} className="field" />
             </Field>
-            <Field label="Научная деятельность">
+            <Field label="Research">
               <textarea name="researchActivityRu" rows={2} className="field" />
             </Field>
-            <Field label="Награды">
+            <Field label="Awards">
               <textarea name="awardsRu" rows={2} className="field" />
             </Field>
-            <Field label="Достижения">
+            <Field label="Achievements">
               <textarea name="achievementsRu" rows={2} className="field" />
             </Field>
           </FormGroup>
           <button type="submit" className="btn btn-primary text-sm">
-            Создать специалиста
+            Add doctor
           </button>
         </form>
       ) : null}

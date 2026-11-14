@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { AirplaneTilt, Buildings, CaretRight, Stethoscope, UsersThree, type Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { ScrollTrigger, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { LanguageSwitch } from "@/shared/ui/LanguageSwitch";
 import { useLang, type Text } from "@/shared/i18n/lang";
 
 // Sections of the home page, in page order, linked from the nav.
@@ -155,7 +154,6 @@ export function Header() {
           </Link>
         </nav>
         <div className="site-header-end">
-          <LanguageSwitch className="site-header-lang" />
           <Link to="/cabinet/login" className="site-header-action">
             {t(FOR_CLINICS)}
             <span className="site-header-action-icon">
@@ -177,7 +175,7 @@ export function Header() {
       </div>
       <div className="site-menu-backdrop" hidden={!menuOpen} onClick={() => setMenuOpen(false)} />
       {/* Phones and tablets: a sheet under the bar with the sections as one grouped list (an icon tile, the name, a
-          chevron), then the clinics entrance. The language stays in the bar beside the menu button. */}
+          chevron), then the clinics entrance. */}
       <nav id="site-menu" className="site-menu" aria-label={t({ ru: "Разделы", uz: "Boʻlimlar", en: "Sections" })} hidden={!menuOpen}>
         <div className="site-menu-list">
           {SECTIONS.map((section, i) => {

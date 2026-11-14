@@ -35,20 +35,20 @@ export async function processTelegramUpdate(raw: unknown) {
       const command = /^\/(start|help|status|stop)(?:@[A-Za-z0-9_]+)?(?:\s+(\S+))?\s*$/.exec(message.text);
       if (!command) return;
       if (!checkRateLimit(`telegram:${userId}`, 20, 60000).ok) return;
-      let text = "AMO — уведомления UzMedAtlas. Для подключения откройте персональное приглашение от администратора или модератора.\n/status — мои подключения\n/stop — отключить все уведомления";
+      let text = "AMO: UzMedAtlas notifications. To connect, open the personal invitation from an administrator or moderator.\n/status: my connections\n/stop: turn off all notifications";
       if (command[1] === "stop") {
         const connections = await tx.telegramConnection.findMany({ where: { userId, active: true } });
         for (const connection of connections) await revokeTelegramTarget(tx, connection.subject);
-        text = "Уведомления отключены. Для повторного подключения получите новое приглашение.";
+        text = "Notifications are off. Get a new invitation to connect again.";
       } else if (command[1] === "status") {
         const connections = await tx.telegramConnection.findMany({ where: { userId, active: true }, include: { clinic: true, staff: true } });
         const labels: string[] = [];
         for (const connection of connections) {
           if (await connectionAllowed(connection, tx)) labels.push(connection.kind === "clinic"
-            ? `Клиника: ${connection.clinic?.nameRu || connection.clinic?.nameEn}`
-            : connection.kind === "administrator" || connection.staff?.role === "administrator" ? "Администратор" : "Модератор");
+            ? `Clinic: ${connection.clinic?.nameRu || connection.clinic?.nameEn}`
+            : connection.kind === "administrator" || connection.staff?.role === "administrator" ? "Administrator" : "Moderator");
         }
-        text = labels.length ? `Ваши подключения:\n${labels.join("\n")}\n/stop — отключить уведомления` : "Активных подключений нет. Получите персональное приглашение.";
+        text = labels.length ? `Your connections:\n${labels.join("\n")}\n/stop: turn off notifications` : "No active connections. Get a personal invitation.";
       } else if (command[1] === "start" && command[2]) {
         const code = command[2];
         const invite = /^[A-Za-z0-9_-]{43}$/.test(code)
@@ -58,7 +58,7 @@ export async function processTelegramUpdate(raw: unknown) {
             || invite.kind === "staff" && invite.staff?.active
             || invite.kind === "clinic" && invite.ownerId && invite.clinic?.ownerId === invite.ownerId);
         if (!valid || !invite) {
-          text = "Приглашение недействительно, уже использовано или истекло. Получите новую ссылку у администратора или модератора.";
+          text = "The invitation is invalid, used or expired. Get a new link from an administrator or moderator.";
         } else {
           const claimed = await tx.telegramInvite.updateMany({
             where: { id: invite.id, usedAt: null, revokedAt: null, expiresAt: { gt: new Date() } }, data: { usedAt: new Date() },
@@ -73,9 +73,9 @@ export async function processTelegramUpdate(raw: unknown) {
           };
           await tx.telegramConnection.upsert({ where: { subject: invite.subject }, update: data, create: { subject: invite.subject, ...data } });
           text = invite.kind === "clinic"
-            ? `Подключена клиника «${invite.clinic?.nameRu || invite.clinic?.nameEn}». Вы будете получать уведомления о её заявках и модерации.`
-            : "Подключены уведомления для команды UzMedAtlas: новые заявки и клиники на модерации.";
-          text += "\n/status — мои подключения\n/stop — отключить уведомления";
+            ? `Connected clinic “${invite.clinic?.nameEn || invite.clinic?.nameRu}”. You will get notifications about its requests and review.`
+            : "Notifications for the UzMedAtlas team are on: new requests and clinics in review.";
+          text += "\n/status: my connections\n/stop: turn off notifications";
         }
       }
       await tx.telegramDelivery.create({ data: { dedupeKey: `reply:${update.update_id}`, chatId, text } });

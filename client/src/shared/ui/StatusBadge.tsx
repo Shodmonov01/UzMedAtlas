@@ -7,9 +7,9 @@ export function StatusBadge({ status }: { status: ClinicStatus }) {
 }
 
 export const LEAD_STATUS_LABELS: Record<string, string> = {
-  new: "Новая",
-  contacted: "На связи",
-  closed: "Закрыта",
+  new: "New",
+  contacted: "In contact",
+  closed: "Closed",
 };
 
 /** A patient request's status in the same look. */
@@ -20,6 +20,6 @@ export function LeadStatusBadge({ status }: { status: string }) {
 export const CONTACT_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
   telegram: "Telegram",
-  phone: "Звонок",
+  phone: "Phone call",
   email: "Email",
 };

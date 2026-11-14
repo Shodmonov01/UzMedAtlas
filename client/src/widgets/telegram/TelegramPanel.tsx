@@ -17,12 +17,12 @@ export function InvitationLink({ invite }: { invite: Invite }) {
   return (
     <div className="ws-group">
       <p className="text-sm leading-relaxed text-ink">
-        Одноразовое приглашение действует до <strong>{new Date(invite.expiresAt).toLocaleString("ru-RU")}</strong>. Откройте ссылку и нажмите «Запустить» в Telegram.
+        This one-time invitation is valid until <strong>{new Date(invite.expiresAt).toLocaleString("en-GB")}</strong>. Open the link and press “Start” in Telegram.
       </p>
-      <input aria-label="Ссылка приглашения" className="field" readOnly value={invite.url} onFocus={(e) => e.target.select()} />
+      <input aria-label="Invitation link" className="field" readOnly value={invite.url} onFocus={(e) => e.target.select()} />
       <div className="flex flex-wrap gap-2">
         <a href={invite.url} target="_blank" rel="noreferrer" className="ws-pill is-ink">
-          Открыть бота
+          Open the bot
           <WsIcon name="external" size={14} />
         </a>
         <button
@@ -37,7 +37,7 @@ export function InvitationLink({ invite }: { invite: Invite }) {
             }
           }}
         >
-          {copied ? "Ссылка скопирована" : "Скопировать приглашение"}
+          {copied ? "Link copied" : "Copy invitation"}
         </button>
       </div>
     </div>
@@ -62,7 +62,7 @@ export function TelegramPanel({ clinicId }: { clinicId?: string }) {
       }
       await qc.invalidateQueries({ queryKey: ["telegram", base] });
     } catch {
-      setError("Не удалось выполнить действие. Обновите страницу и попробуйте снова.");
+      setError("The action failed. Refresh the page and try again.");
     } finally {
       setBusy(false);
     }
@@ -73,19 +73,19 @@ export function TelegramPanel({ clinicId }: { clinicId?: string }) {
       <div className="flex items-start gap-4">
         <TelegramMark />
         <div className="min-w-0 flex-1">
-          <h2 className="ws-card-title">{clinicId ? "Бот для владельца клиники" : "Мои уведомления в Telegram"}</h2>
+          <h2 className="ws-card-title">{clinicId ? "Bot for the clinic owner" : "My Telegram notifications"}</h2>
           <p className="ws-card-text">
             {clinicId
-              ? "Создайте приглашение и передайте его владельцу. Он получит уведомления только по этой клинике."
-              : "Получайте сообщения о новых заявках и клиниках на модерации. Подробности открываются в кабинете."}
+              ? "Create an invitation and give it to the owner. They will get notifications for this clinic only."
+              : "Get messages about new requests and clinics in review. Details open in the cabinet."}
           </p>
         </div>
         {status.data ? (
-          <span className={`ws-status ${connection?.active ? "is-published" : "is-draft"}`}>{connection?.active ? "Подключён" : "Не подключён"}</span>
+          <span className={`ws-status ${connection?.active ? "is-published" : "is-draft"}`}>{connection?.active ? "Connected" : "Not connected"}</span>
         ) : null}
       </div>
-      {status.isLoading ? <p className="text-sm text-muted">Проверяем подключение…</p> : null}
-      {status.isError ? <p className="text-sm text-danger">Не удалось проверить подключение. У клиники должен быть назначен владелец.</p> : null}
+      {status.isLoading ? <p className="text-sm text-muted">Checking the connection…</p> : null}
+      {status.isError ? <p className="text-sm text-danger">Could not check the connection. The clinic must have an owner assigned.</p> : null}
       {status.data ? (
         <>
           {connection?.active ? (
@@ -97,16 +97,16 @@ export function TelegramPanel({ clinicId }: { clinicId?: string }) {
           {status.data.configured ? (
             <div className="flex flex-wrap gap-2">
               <button type="button" disabled={busy} onClick={() => void act("invite")} className="ws-pill is-ink">
-                {connection?.active ? "Новое приглашение" : clinicId ? "Пригласить владельца" : "Подключить бота"}
+                {connection?.active ? "New invitation" : clinicId ? "Invite the owner" : "Connect the bot"}
               </button>
               {connection?.active || invite ? (
                 <button type="button" disabled={busy} onClick={() => void act("disconnect")} className="ws-pill is-danger">
-                  Отозвать подключение и приглашения
+                  Revoke the connection and invitations
                 </button>
               ) : null}
             </div>
           ) : (
-            <p className="text-sm text-danger">Бот пока не настроен. Обратитесь к администратору.</p>
+            <p className="text-sm text-danger">The bot is not set up yet. Contact the administrator.</p>
           )}
         </>
       ) : null}
@@ -129,21 +129,21 @@ export function OwnerTelegramPanel() {
       <div className="flex items-start gap-4">
         <TelegramMark />
         <div className="min-w-0">
-          <h2 className="ws-card-title">Уведомления в Telegram</h2>
+          <h2 className="ws-card-title">Telegram notifications</h2>
           <p className="ws-card-text">
-            Чтобы получать новые заявки в Telegram, попросите у модератора персональное приглашение. Каждая клиника подключается отдельно.
+            To get new requests on Telegram, ask a moderator for a personal invitation. Each clinic is connected separately.
           </p>
         </div>
       </div>
-      {status.isLoading ? <p className="text-sm text-muted">Загрузка…</p> : null}
-      {status.isError ? <p className="text-sm text-danger">Не удалось загрузить подключения</p> : null}
+      {status.isLoading ? <p className="text-sm text-muted">Loading…</p> : null}
+      {status.isError ? <p className="text-sm text-danger">Could not load the connections</p> : null}
       {status.data?.length ? (
         <ul className="ws-items">
           {status.data.map((item) => (
             <li key={item.clinicId} className="ws-item items-center">
               <div className="ws-item-body">
                 <strong>{item.name}</strong>
-                <p>{item.connection ? `Подключён: ${item.connection.displayName}` : "Telegram не подключён"}</p>
+                <p>{item.connection ? `Connected: ${item.connection.displayName}` : "Telegram not connected"}</p>
               </div>
               {item.connection ? (
                 <button
@@ -154,14 +154,14 @@ export function OwnerTelegramPanel() {
                       await telegramDisconnect(`/api/cabinet/telegram/${item.clinicId}`);
                       await qc.invalidateQueries({ queryKey: ["owner-telegram"] });
                     } catch {
-                      setError("Не удалось отключить уведомления");
+                      setError("Could not turn off notifications");
                     }
                   }}
                 >
-                  Отключить
+                  Disconnect
                 </button>
               ) : (
-                <span className="ws-status is-draft">Не подключён</span>
+                <span className="ws-status is-draft">Not connected</span>
               )}
             </li>
           ))}

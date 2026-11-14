@@ -23,16 +23,16 @@ function TeamPage() {
     if (profile.isError) void navigate({ to: "/moderation/login" });
   }, [profile.isError, navigate]);
 
-  if (!profile.data) return <WsLoading label="Проверка сессии…" />;
+  if (!profile.data) return <WsLoading label="Checking your session…" />;
   if (profile.data.role !== "administrator") {
     return (
       <div className="ws-stack">
-        <WsNote tone="warning" title="Только для администратора">
-          <p>Управлять сотрудниками может только администратор.</p>
+        <WsNote tone="warning" title="Administrator only">
+          <p>Only the administrator can manage staff.</p>
         </WsNote>
         <Link to="/moderation" className="ws-back">
           <BackMark />
-          Вернуться к очереди
+          Back to the queue
         </Link>
       </div>
     );
@@ -45,7 +45,7 @@ function TeamPage() {
       await fn();
       await qc.invalidateQueries({ queryKey: ["staff"] });
     } catch {
-      setError("Не удалось выполнить действие. Проверьте данные: email должен быть уникальным.");
+      setError("The action failed. Check the details: the email must be unique.");
     } finally {
       setBusy(false);
     }
@@ -54,22 +54,22 @@ function TeamPage() {
   return (
     <div className="ws-stack">
       <PageHead
-        eyebrow="Администратор"
-        title="Команда модераторов"
-        lead="Создайте аккаунт сотруднику и передайте ему данные для входа и персональную ссылку в Telegram-бот. Письма не отправляются."
+        eyebrow="Administrator"
+        title="Moderator team"
+        lead="Create an account for a team member and give them the sign-in details and a personal Telegram bot link. No emails are sent."
       />
 
       <div className="ws-split">
         <div className="grid min-w-0 gap-4">
-          {staff.isLoading ? <WsLoading label="Загружаем команду…" inline /> : null}
-          {staff.isError ? <WsNote tone="danger" title="Не удалось загрузить команду" /> : null}
+          {staff.isLoading ? <WsLoading label="Loading the team…" inline /> : null}
+          {staff.isError ? <WsNote tone="danger" title="Could not load the team" /> : null}
           {staff.data?.length === 0 ? (
             <div className="ws-empty">
               <span className="ws-empty-mark">
                 <img src="/brand/logo.svg" alt="" width={40} height={40} />
               </span>
-              <h2>Пока только вы</h2>
-              <p>Добавьте первого модератора справа.</p>
+              <h2>Only you so far</h2>
+              <p>Add the first moderator on the right.</p>
             </div>
           ) : null}
           {staff.data?.map((item) => {
@@ -85,20 +85,20 @@ function TeamPage() {
                       <h2 className="ws-card-title">{item.name}</h2>
                       <p className="ws-row-meta">
                         <span>{item.email}</span>
-                        <span>Telegram: {connected ? "подключён" : "не подключён"}</span>
+                        <span>Telegram: {connected ? "connected" : "not connected"}</span>
                       </p>
                     </div>
                   </div>
-                  <span className={`ws-status ${item.active ? "is-published" : "is-draft"}`}>{item.active ? "Активен" : "Отключён"}</span>
+                  <span className={`ws-status ${item.active ? "is-published" : "is-draft"}`}>{item.active ? "Active" : "Disabled"}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {item.active ? (
                     <button disabled={busy} type="button" className="ws-pill is-ink" onClick={() => void action(async () => setResult({ email: item.email, invite: await inviteStaff(item.id) }))}>
-                      Пригласить в бот
+                      Invite to the bot
                     </button>
                   ) : null}
                   <button disabled={busy} type="button" className="ws-pill" onClick={() => void action(async () => setResult({ email: item.email, password: await resetStaffPassword(item.id) }))}>
-                    Новый пароль
+                    New password
                   </button>
                   <button
                     disabled={busy}
@@ -111,7 +111,7 @@ function TeamPage() {
                       })
                     }
                   >
-                    {item.active ? "Отключить аккаунт и уведомления" : "Включить аккаунт"}
+                    {item.active ? "Disable account and notifications" : "Enable account"}
                   </button>
                 </div>
               </article>
@@ -132,15 +132,15 @@ function TeamPage() {
               });
             }}
           >
-            <h2 className="ws-card-title">Добавить модератора</h2>
-            <Field label="Имя">
+            <h2 className="ws-card-title">Add a moderator</h2>
+            <Field label="Name">
               <input className="field" value={name} onChange={(e) => setName(e.target.value)} minLength={2} maxLength={100} required />
             </Field>
-            <Field label="Email для входа">
+            <Field label="Sign-in email">
               <input type="email" className="field" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={120} required />
             </Field>
             <button disabled={busy} className="btn btn-primary w-full" type="submit">
-              Создать аккаунт и приглашение
+              Create account and invitation
             </button>
           </form>
 
@@ -152,18 +152,18 @@ function TeamPage() {
 
           {result ? (
             <section className="ws-card is-pad space-y-4">
-              <h2 className="ws-card-title">Доступ для {result.email}</h2>
+              <h2 className="ws-card-title">Access for {result.email}</h2>
               {result.password ? (
                 <>
                   <WsNote tone="warning">
-                    <p>Сохраните пароль и передайте сотруднику. Он показывается только сейчас.</p>
+                    <p>Save the password and pass it on. It is shown only now.</p>
                   </WsNote>
-                  <input aria-label="Пароль сотрудника" readOnly className="field font-mono" value={result.password} onFocus={(e) => e.target.select()} />
+                  <input aria-label="Team member password" readOnly className="field font-mono" value={result.password} onFocus={(e) => e.target.select()} />
                 </>
               ) : null}
               {result.invite ? <InvitationLink invite={result.invite} /> : null}
               <button type="button" className="ws-pill" onClick={() => setResult(null)}>
-                Скрыть данные
+                Hide details
               </button>
             </section>
           ) : null}

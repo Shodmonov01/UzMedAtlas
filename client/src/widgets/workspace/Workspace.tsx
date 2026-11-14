@@ -84,7 +84,7 @@ export function PageHead({
   );
 }
 
-export function WsLoading({ label = "Загрузка…", inline = false }: { label?: string; inline?: boolean }) {
+export function WsLoading({ label = "Loading…", inline = false }: { label?: string; inline?: boolean }) {
   return (
     <p className={`ws-loading${inline ? " is-inline" : ""}`} role="status">
       <i aria-hidden="true" />
@@ -150,7 +150,7 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const roleLabel = kind === "cabinet" ? "Кабинет клиники" : "Модерация";
+  const roleLabel = kind === "cabinet" ? "Clinic cabinet" : "Moderation";
 
   return (
     <div className={`ws${open ? " is-open" : ""}`}>
@@ -158,21 +158,21 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
         <Link to={kind === "cabinet" ? "/cabinet" : "/moderation"} className="ws-brand">
           <img src="/brand/logo.svg" alt="" width={36} height={36} />
           <span>
-            <strong>Ассоциация</strong>
+            <strong>Association</strong>
             <span>{roleLabel}</span>
           </span>
         </Link>
-        <button type="button" className="ws-menu-button" aria-label={open ? "Закрыть меню" : "Открыть меню"} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <button type="button" className="ws-menu-button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
           <WsIcon name={open ? "close" : "menu"} size={22} />
         </button>
       </div>
       <div className="ws-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />
-      <aside className="ws-side" aria-label="Меню кабинета">
+      <aside className="ws-side" aria-label="Cabinet menu">
         <Link to="/" className="ws-brand">
           <img src="/brand/logo.svg" alt="" width={40} height={40} />
           <span>
-            <strong>Ассоциация</strong>
-            <span>медицинских организаций</span>
+            <strong>Association</strong>
+            <span>of Medical Organizations</span>
           </span>
         </Link>
         <p className="ws-role">
@@ -198,20 +198,20 @@ function CabinetNav({ pathname }: { pathname: string }) {
     enabled: Boolean(clinicId),
     retry: false,
   });
-  const name = clinic.data ? clinic.data.nameRu || clinic.data.nameEn : "Клиника";
+  const name = clinic.data ? clinic.data.nameRu || clinic.data.nameEn : "Clinic";
   const base = clinicId ? `/cabinet/clinics/${clinicId}` : "";
 
   return (
     <>
-      <nav className="ws-nav" aria-label="Кабинет">
-        <p className="ws-nav-title">Кабинет</p>
+      <nav className="ws-nav" aria-label="Cabinet">
+        <p className="ws-nav-title">Cabinet</p>
         <Link to="/cabinet" className={pathname === "/cabinet" || pathname === "/cabinet/" ? "is-active" : undefined}>
           <WsIcon name="clinics" />
-          Мои клиники
+          My clinics
         </Link>
         <Link to="/cabinet/clinics/new" className={pathname === "/cabinet/clinics/new" ? "is-active" : undefined}>
           <WsIcon name="plus" />
-          Добавить клинику
+          Add a clinic
         </Link>
       </nav>
       {clinicId ? (
@@ -219,26 +219,26 @@ function CabinetNav({ pathname }: { pathname: string }) {
           <div className="ws-nav-clinic">
             <ClinicLogo src={clinic.data?.logoUrl} name={name} className="h-10 w-10 rounded-xl" />
             <div className="min-w-0">
-              <p className="ws-label">Клиника</p>
+              <p className="ws-label">Clinic</p>
               <strong>{name}</strong>
             </div>
           </div>
           <Link to="/cabinet/clinics/$id" params={{ id: clinicId }} className={pathname === base || pathname === `${base}/` ? "is-active" : undefined}>
             <WsIcon name="edit" />
-            Профиль клиники
+            Clinic profile
           </Link>
           <Link to="/cabinet/clinics/$id/branches" params={{ id: clinicId }} className={pathname.startsWith(`${base}/branches`) ? "is-active" : undefined}>
             <WsIcon name="pin" />
-            Филиалы
+            Branches
           </Link>
           <Link to="/cabinet/clinics/$id/leads" params={{ id: clinicId }} className={pathname.startsWith(`${base}/leads`) ? "is-active" : undefined}>
             <WsIcon name="inbox" />
-            Заявки пациентов
+            Patient requests
           </Link>
           {clinic.data?.status === "published" ? (
             <Link to="/clinics/$slug" params={{ slug: clinic.data.slug }} target="_blank">
               <WsIcon name="external" />
-              Страница на сайте
+              Public page
             </Link>
           ) : null}
         </nav>
@@ -251,24 +251,24 @@ function ModerationNav({ pathname }: { pathname: string }) {
   const profile = useQuery({ queryKey: ["admin-profile"], queryFn: adminProfile, retry: false });
   const queueActive = pathname === "/moderation" || pathname === "/moderation/" || /^\/moderation\/(?!leads|team|telegram|login)[^/]+$/.test(pathname);
   return (
-    <nav className="ws-nav" aria-label="Модерация">
-      <p className="ws-nav-title">Модерация</p>
+    <nav className="ws-nav" aria-label="Moderation">
+      <p className="ws-nav-title">Moderation</p>
       <Link to="/moderation" className={queueActive ? "is-active" : undefined}>
         <WsIcon name="queue" />
-        Очередь клиник
+        Clinic queue
       </Link>
       <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className={pathname.startsWith("/moderation/leads") ? "is-active" : undefined}>
         <WsIcon name="inbox" />
-        Заявки пациентов
+        Patient requests
       </Link>
       <Link to="/moderation/telegram" className={pathname.startsWith("/moderation/telegram") ? "is-active" : undefined}>
         <WsIcon name="send" />
-        Уведомления
+        Notifications
       </Link>
       {profile.data?.role === "administrator" ? (
         <Link to="/moderation/team" className={pathname.startsWith("/moderation/team") ? "is-active" : undefined}>
           <WsIcon name="team" />
-          Модераторы
+          Moderators
         </Link>
       ) : null}
     </nav>
@@ -279,10 +279,10 @@ function SideFoot({ kind }: { kind: Kind }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   return (
-    <nav className="ws-nav ws-side-foot" aria-label="Выход">
+    <nav className="ws-nav ws-side-foot" aria-label="Sign out">
       <Link to="/">
         <WsIcon name="home" />
-        На сайт
+        To the site
       </Link>
       <button
         type="button"
@@ -296,7 +296,7 @@ function SideFoot({ kind }: { kind: Kind }) {
         }}
       >
         <WsIcon name="logout" />
-        Выйти
+        Sign out
       </button>
     </nav>
   );
@@ -320,8 +320,8 @@ export function AuthLayout({
         <Link to="/" className="auth-logo">
           <img src="/brand/logo.svg" alt="" width={44} height={44} />
           <span>
-            <strong>Ассоциация</strong>
-            <span>медицинских организаций</span>
+            <strong>Association</strong>
+            <span>of Medical Organizations</span>
           </span>
         </Link>
         <div className="auth-brand-copy">
@@ -343,7 +343,7 @@ export function AuthLayout({
         <div className="auth-top">
           <Link to="/" className="ws-pill">
             <WsIcon name="home" size={16} />
-            На сайт
+            To the site
           </Link>
         </div>
         <div className="auth-card">{children}</div>

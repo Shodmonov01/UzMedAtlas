@@ -1,60 +1,63 @@
-export const CITY_OPTIONS = [
-  { value: "tashkent", label: "Ташкент" },
-  { value: "samarkand", label: "Самарканд" },
-  { value: "bukhara", label: "Бухара" },
-  { value: "andijan", label: "Андижан" },
-  { value: "fergana", label: "Фергана" },
-  { value: "namangan", label: "Наманган" },
-  { value: "nukus", label: "Нукус" },
-  { value: "qarshi", label: "Карши" },
-  { value: "termez", label: "Термез" },
-  { value: "urgench", label: "Ургенч" },
-  { value: "jizzakh", label: "Джизак" },
-  { value: "navoi", label: "Навои" },
-  { value: "kokand", label: "Коканд" },
-  { value: "margilan", label: "Маргилан" },
-  { value: "gulistan", label: "Гулистан" },
+/** The cities a clinic or branch can be in: the stored value, the English name, and the Russian and Uzbek names
+ *  that typed input is also matched against. */
+const CITIES = [
+  { value: "tashkent", label: "Tashkent", ru: "Ташкент", uz: "Toshkent" },
+  { value: "samarkand", label: "Samarkand", ru: "Самарканд", uz: "Samarqand" },
+  { value: "bukhara", label: "Bukhara", ru: "Бухара", uz: "Buxoro" },
+  { value: "andijan", label: "Andijan", ru: "Андижан", uz: "Andijon" },
+  { value: "fergana", label: "Fergana", ru: "Фергана", uz: "Fargʻona" },
+  { value: "namangan", label: "Namangan", ru: "Наманган", uz: "Namangan" },
+  { value: "nukus", label: "Nukus", ru: "Нукус", uz: "Nukus" },
+  { value: "qarshi", label: "Qarshi", ru: "Карши", uz: "Qarshi" },
+  { value: "termez", label: "Termez", ru: "Термез", uz: "Termiz" },
+  { value: "urgench", label: "Urgench", ru: "Ургенч", uz: "Urganch" },
+  { value: "jizzakh", label: "Jizzakh", ru: "Джизак", uz: "Jizzax" },
+  { value: "navoi", label: "Navoi", ru: "Навои", uz: "Navoiy" },
+  { value: "kokand", label: "Kokand", ru: "Коканд", uz: "Qoʻqon" },
+  { value: "margilan", label: "Margilan", ru: "Маргилан", uz: "Margʻilon" },
+  { value: "gulistan", label: "Gulistan", ru: "Гулистан", uz: "Guliston" },
 ] as const;
 
-const cityAliases = new Map(
-  CITY_OPTIONS.flatMap(({ value, label }) => [
-    [value.toLowerCase(), value],
-    [label.toLowerCase(), value],
-  ]),
+export const CITY_OPTIONS = CITIES.map(({ value, label }) => ({ value, label }));
+
+/** City value → English name. */
+export const CITY_LABELS: Record<string, string> = Object.fromEntries(CITIES.map(({ value, label }) => [value, label]));
+
+const cityAliases = new Map<string, string>(
+  CITIES.flatMap(({ value, label, ru, uz }) => [value, label, ru, uz].map((name) => [name.toLowerCase(), value] as [string, string])),
 );
 
+/** Typed city (in English, Russian or Uzbek) → stored value; anything unknown stays as typed. */
 export function normalizeCity(input: string) {
   const value = input.trim();
   return cityAliases.get(value.toLowerCase()) || value;
 }
 
-export function displayCity(input: string | null | undefined) {
-  if (!input) return "";
-  return CITY_OPTIONS.find(({ value }) => value === input)?.label || input;
-}
-
-/** City names for the public pages, in each site language (Uzbek in Latin script). */
-const CITY_NAMES: Record<string, { uz: string; en: string }> = {
-  tashkent: { uz: "Toshkent", en: "Tashkent" },
-  samarkand: { uz: "Samarqand", en: "Samarkand" },
-  bukhara: { uz: "Buxoro", en: "Bukhara" },
-  andijan: { uz: "Andijon", en: "Andijan" },
-  fergana: { uz: "Fargʻona", en: "Fergana" },
-  namangan: { uz: "Namangan", en: "Namangan" },
-  nukus: { uz: "Nukus", en: "Nukus" },
-  qarshi: { uz: "Qarshi", en: "Qarshi" },
-  termez: { uz: "Termiz", en: "Termez" },
-  urgench: { uz: "Urganch", en: "Urgench" },
-  jizzakh: { uz: "Jizzax", en: "Jizzakh" },
-  navoi: { uz: "Navoiy", en: "Navoi" },
-  kokand: { uz: "Qoʻqon", en: "Kokand" },
-  margilan: { uz: "Margʻilon", en: "Margilan" },
-  gulistan: { uz: "Guliston", en: "Gulistan" },
+/** Regions some clinics typed in Russian instead of a city, with their English names. */
+const REGIONS: Record<string, string> = {
+  "ташкентская область": "Tashkent Region",
+  "самаркандская область": "Samarkand Region",
+  "бухарская область": "Bukhara Region",
+  "андижанская область": "Andijan Region",
+  "ферганская область": "Fergana Region",
+  "наманганская область": "Namangan Region",
+  "кашкадарьинская область": "Kashkadarya Region",
+  "сурхандарьинская область": "Surkhandarya Region",
+  "хорезмская область": "Khorezm Region",
+  "джизакская область": "Jizzakh Region",
+  "навоийская область": "Navoi Region",
+  "сырдарьинская область": "Syrdarya Region",
+  "республика каракалпакстан": "Republic of Karakalpakstan",
 };
 
-/** A city's name in the given site language (Russian is the stored label); unknown cities come back as they are. */
-export function cityName(lang: "ru" | "uz" | "en", input: string | null | undefined) {
+/** Stored value (or a typed city or region in any language) → English name; anything unknown comes back as it is. */
+export function displayCity(input: string | null | undefined) {
   if (!input) return "";
-  if (lang !== "ru" && CITY_NAMES[input]) return CITY_NAMES[input][lang];
+  const key = input.trim().toLowerCase();
+  return CITY_LABELS[input] || CITY_LABELS[cityAliases.get(key) || ""] || REGIONS[key] || input;
+}
+
+/** A city's name on the public pages (always English now; the language argument is kept for older callers). */
+export function cityName(_lang: "ru" | "uz" | "en", input: string | null | undefined) {
   return displayCity(input);
 }

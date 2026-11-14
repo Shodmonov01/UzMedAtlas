@@ -116,7 +116,7 @@ export function BranchMap({ lat, lng, mode, onPick, className = "", height = 320
         setError(null);
       })
       .catch((err: Error) => {
-        if (!cancelled) setError(err.message || "Не удалось загрузить Яндекс.Карты");
+        if (!cancelled) setError(err.message || "Could not load Yandex Maps");
       });
 
     return () => {
@@ -170,7 +170,7 @@ export function BranchMap({ lat, lng, mode, onPick, className = "", height = 320
       style={{ height, width: "100%" }}
       role="img"
       aria-label={
-        mode === "pick" ? "Яндекс.Карта: кликните, чтобы указать точку филиала" : "Яндекс.Карта филиала"
+        mode === "pick" ? "Yandex map: click to set the branch location" : "Branch on Yandex Maps"
       }
     />
   );

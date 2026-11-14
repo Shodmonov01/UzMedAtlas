@@ -23,8 +23,8 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
 
   return (
     <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-      <h2 className="text-xl font-extrabold">Оборудование филиала</h2>
-      <p className="text-sm text-muted">Аппаратура и техника, доступные в этом филиале.</p>
+      <h2 className="text-xl font-extrabold">Branch equipment</h2>
+      <p className="text-sm text-muted">Machines and equipment available at this branch.</p>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
 
       <ul className="space-y-3">
@@ -49,18 +49,18 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                     setEditingId(null);
                     await onChanged();
                   } catch {
-                    setError("Не удалось обновить оборудование");
+                    setError("Could not update the equipment");
                   }
                 }}
               >
                 <div className="grid gap-3 md:grid-cols-2">
-                  <Field label="Название (RU) *">
+                  <Field label="Name (RU) *">
                     <input name="nameRu" required className="field" defaultValue={item.nameRu} />
                   </Field>
-                  <Field label="Название (EN) *">
+                  <Field label="Name (EN) *">
                     <input name="nameEn" required className="field" defaultValue={item.nameEn} />
                   </Field>
-                  <Field label="Производитель" wide>
+                  <Field label="Manufacturer" wide>
                     <input
                       name="manufacturer"
                       className="field"
@@ -68,7 +68,7 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                       placeholder="Siemens, GE, Philips…"
                     />
                   </Field>
-                  <Field label="Описание (RU)" wide>
+                  <Field label="Description (RU)" wide>
                     <textarea
                       name="descriptionRu"
                       rows={2}
@@ -76,7 +76,7 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                       defaultValue={item.descriptionRu || ""}
                     />
                   </Field>
-                  <Field label="Описание (EN)" wide>
+                  <Field label="Description (EN)" wide>
                     <textarea
                       name="descriptionEn"
                       rows={2}
@@ -84,7 +84,7 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                       defaultValue={item.descriptionEn || ""}
                     />
                   </Field>
-                  <Field label="Фото (ссылка)" wide>
+                  <Field label="Photo (link)" wide>
                     <input
                       name="photoUrl"
                       className="field"
@@ -95,10 +95,10 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                 </div>
                 <div className="flex gap-2">
                   <button type="submit" className="btn btn-primary text-sm">
-                    Сохранить
+                    Save
                   </button>
                   <button type="button" className="btn btn-ghost text-sm" onClick={() => setEditingId(null)}>
-                    Отмена
+                    Cancel
                   </button>
                 </div>
               </form>
@@ -132,7 +132,7 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                       className="text-sm font-bold text-primary"
                       onClick={() => setEditingId(item.id)}
                     >
-                      Изменить
+                      Edit
                     </button>
                     <button
                       type="button"
@@ -143,11 +143,11 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                           await deleteBranchEquipment(clinicId, branchId, item.id);
                           await onChanged();
                         } catch {
-                          setError("Не удалось удалить");
+                          setError("Could not delete");
                         }
                       }}
                     >
-                      Удалить
+                      Delete
                     </button>
                   </div>
                 ) : null}
@@ -155,7 +155,7 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
             )}
           </li>
         ))}
-        {!equipment.length ? <li className="text-sm text-muted">Оборудование пока не добавлено</li> : null}
+        {!equipment.length ? <li className="text-sm text-muted">No equipment added yet</li> : null}
       </ul>
 
       {!locked ? (
@@ -184,35 +184,35 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
               form.reset();
               await onChanged();
             } catch {
-              setError("Не удалось добавить оборудование");
+              setError("Could not add the equipment");
             } finally {
               setUploading(false);
             }
           }}
         >
           <div>
-            <h3 className="font-extrabold">Добавить оборудование</h3>
-            <p className="mt-1 text-sm text-muted">Поля со звёздочкой обязательны.</p>
+            <h3 className="font-extrabold">Add equipment</h3>
+            <p className="mt-1 text-sm text-muted">Fields with an asterisk are required.</p>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            <Field label="Название (RU) *">
-              <input name="nameRu" required className="field" placeholder="Например, МРТ 3 Тесла" />
+            <Field label="Name (RU) *">
+              <input name="nameRu" required className="field" placeholder="e.g. МРТ 3 Тесла" />
             </Field>
-            <Field label="Название (EN) *">
+            <Field label="Name (EN) *">
               <input name="nameEn" required className="field" placeholder="For example, 3T MRI" />
             </Field>
-            <Field label="Производитель" wide>
+            <Field label="Manufacturer" wide>
               <input name="manufacturer" className="field" placeholder="Siemens, GE, Philips…" />
             </Field>
-            <Field label="Описание (RU)" wide>
+            <Field label="Description (RU)" wide>
               <textarea
                 name="descriptionRu"
                 rows={2}
                 className="field"
-                placeholder="Для чего используется"
+                placeholder="What it is used for"
               />
             </Field>
-            <Field label="Описание (EN)" wide>
+            <Field label="Description (EN)" wide>
               <textarea
                 name="descriptionEn"
                 rows={2}
@@ -220,12 +220,12 @@ export function BranchEquipmentPanel({ clinicId, branchId, equipment, locked, on
                 placeholder="What it is used for"
               />
             </Field>
-            <Field label="Фото аппарата" wide>
+            <Field label="Equipment photo" wide>
               <input name="file" type="file" accept="image/*" className="field" />
             </Field>
           </div>
           <button type="submit" className="btn btn-primary text-sm" disabled={uploading}>
-            {uploading ? "Загрузка…" : "Добавить оборудование"}
+            {uploading ? "Uploading…" : "Add equipment"}
           </button>
         </form>
       ) : null}

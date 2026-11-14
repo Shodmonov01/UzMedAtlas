@@ -29,26 +29,26 @@ function CabinetHomePage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (auth.isLoading || !auth.data) return <WsLoading label="Проверка сессии…" />;
+  if (auth.isLoading || !auth.data) return <WsLoading label="Checking your session…" />;
 
   const list = clinics.data || [];
   const count = (...statuses: string[]) => list.filter((c) => statuses.includes(c.status)).length;
   const stats = [
-    { label: "Всего клиник", value: list.length, dot: "var(--ink)" },
-    { label: "Опубликованы", value: count("published"), dot: "var(--accent)" },
-    { label: "На проверке", value: count("moderation", "approved"), dot: "var(--warning)" },
-    { label: "Черновики и правки", value: count("draft", "needs_changes"), dot: "var(--brand-sky)" },
+    { label: "All clinics", value: list.length, dot: "var(--ink)" },
+    { label: "Published", value: count("published"), dot: "var(--accent)" },
+    { label: "In review", value: count("moderation", "approved"), dot: "var(--warning)" },
+    { label: "Drafts and changes", value: count("draft", "needs_changes"), dot: "var(--brand-sky)" },
   ];
 
   return (
     <div className="ws-stack">
       <PageHead
-        eyebrow="Личный кабинет"
-        title="Мои клиники"
-        lead="Заполняйте профиль по шагам, добавляйте филиалы и отвечайте на заявки пациентов."
+        eyebrow="Your cabinet"
+        title="My clinics"
+        lead="Fill in the profile step by step, add branches and answer patient requests."
         actions={
           <Link to="/cabinet/clinics/new" className="pill-btn is-ink">
-            Добавить клинику
+            Add a clinic
             <span className="pill-btn-icon">
               <WsIcon name="plus" size={18} />
             </span>
@@ -70,8 +70,8 @@ function CabinetHomePage() {
         </div>
       ) : null}
 
-      {clinics.isLoading ? <WsLoading label="Загружаем клиники…" inline /> : null}
-      {clinics.isError ? <WsNote tone="danger" title="Не удалось загрузить клиники">Обновите страницу через минуту.</WsNote> : null}
+      {clinics.isLoading ? <WsLoading label="Loading clinics…" inline /> : null}
+      {clinics.isError ? <WsNote tone="danger" title="Could not load the clinics">Refresh the page in a minute.</WsNote> : null}
 
       {list.length ? (
         <div className="ws-clinics">
@@ -96,33 +96,33 @@ function CabinetHomePage() {
                         <WsIcon name="pin" size={14} />
                         {CITY_LABELS[clinic.city] || clinic.city}
                       </span>
-                      <span>Филиалов: {clinic.branchCount ?? 0}</span>
-                      <span>Врачей: {clinic.doctorCount ?? 0}</span>
+                      <span>Branches: {clinic.branchCount ?? 0}</span>
+                      <span>Doctors: {clinic.doctorCount ?? 0}</span>
                     </p>
                   </div>
                 </div>
                 {clinic.moderatorNote ? (
                   <div className="ws-clinic-note">
-                    <WsNote tone="danger" title="Комментарий модератора">
+                    <WsNote tone="danger" title="Moderator comment">
                       <p>{clinic.moderatorNote}</p>
                     </WsNote>
                   </div>
                 ) : null}
-                <p className="ws-clinic-time">Обновлено {new Date(clinic.updatedAt).toLocaleString("ru-RU", { dateStyle: "long", timeStyle: "short" })}</p>
+                <p className="ws-clinic-time">Updated {new Date(clinic.updatedAt).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" })}</p>
                 <div className="ws-clinic-foot">
                   <Link to="/cabinet/clinics/$id" params={{ id: clinic.id }} className="ws-pill is-ink">
-                    {clinic.status === "moderation" ? "Просмотреть" : "Редактировать"}
+                    {clinic.status === "moderation" ? "View" : "Edit"}
                     <ArrowIcon size={14} />
                   </Link>
                   <Link to="/cabinet/clinics/$id/branches" params={{ id: clinic.id }} className="ws-pill">
-                    Филиалы <b>{clinic.branchCount ?? 0}</b>
+                    Branches <b>{clinic.branchCount ?? 0}</b>
                   </Link>
                   <Link to="/cabinet/clinics/$id/leads" params={{ id: clinic.id }} className="ws-pill">
-                    Заявки
+                    Requests
                   </Link>
                   {clinic.status === "published" ? (
                     <Link to="/clinics/$slug" params={{ slug: clinic.slug }} target="_blank" className="ws-pill">
-                      На сайте
+                      On the site
                       <WsIcon name="external" size={14} />
                     </Link>
                   ) : null}
@@ -130,10 +130,10 @@ function CabinetHomePage() {
                     <button
                       type="button"
                       className="ws-pill is-icon is-danger"
-                      aria-label={`Удалить клинику ${name}`}
-                      title="Удалить клинику"
+                      aria-label={`Delete clinic ${name}`}
+                      title="Delete clinic"
                       onClick={async () => {
-                        if (!window.confirm(`Удалить клинику «${name}»? Это действие нельзя отменить.`)) return;
+                        if (!window.confirm(`Delete the clinic “${name}”? This cannot be undone.`)) return;
                         await deleteCabinetClinic(clinic.id);
                         await qc.invalidateQueries({ queryKey: ["cabinet-clinics"] });
                       }}
@@ -153,10 +153,10 @@ function CabinetHomePage() {
           <span className="ws-empty-mark">
             <img src="/brand/logo.svg" alt="" width={40} height={40} />
           </span>
-          <h2>Пока нет клиник</h2>
-          <p>Создайте профиль по шагам: название, адрес, контакты и направления. Фото, филиалы и врачей можно добавить после создания.</p>
+          <h2>No clinics yet</h2>
+          <p>Create the profile step by step: name, address, contacts and specialties. Photos, branches and doctors can be added afterwards.</p>
           <Link to="/cabinet/clinics/new" className="pill-btn is-ink">
-            Добавить клинику
+            Add a clinic
             <span className="pill-btn-icon">
               <WsIcon name="plus" size={18} />
             </span>

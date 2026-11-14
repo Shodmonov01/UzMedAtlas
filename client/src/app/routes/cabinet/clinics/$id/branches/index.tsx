@@ -35,7 +35,7 @@ function BranchesListPage() {
   }, [auth.data, auth.isError, navigate]);
 
   if (!auth.data || clinic.isLoading) return <WsLoading />;
-  if (!clinic.data) return <WsNote tone="danger" title="Клиника не найдена" />;
+  if (!clinic.data) return <WsNote tone="danger" title="Clinic not found" />;
 
   const locked = clinic.data.status === "moderation";
   const list = (branches.data || []).filter(Boolean);
@@ -49,13 +49,13 @@ function BranchesListPage() {
             {clinic.data.nameRu || clinic.data.nameEn}
           </Link>
         }
-        eyebrow="Филиалы"
-        title="Филиалы клиники"
-        lead="Для модерации нужен хотя бы один филиал с адресом и телефоном. У каждого филиала своя страница в каталоге."
+        eyebrow="Branches"
+        title="Clinic branches"
+        lead="Review needs at least one branch with an address and a phone. Each branch has its own page in the catalog."
         actions={
           !locked ? (
             <Link to="/cabinet/clinics/$id/branches/new" params={{ id }} className="pill-btn is-ink">
-              Добавить филиал
+              Add a branch
               <span className="pill-btn-icon">
                 <WsIcon name="plus" size={18} />
               </span>
@@ -64,8 +64,8 @@ function BranchesListPage() {
         }
       />
 
-      {branches.isLoading ? <WsLoading label="Загружаем филиалы…" inline /> : null}
-      {branches.isError ? <WsNote tone="danger" title="Не удалось загрузить список филиалов" /> : null}
+      {branches.isLoading ? <WsLoading label="Loading branches…" inline /> : null}
+      {branches.isError ? <WsNote tone="danger" title="Could not load the branches" /> : null}
 
       {list.length ? (
         <div className="ws-rows">
@@ -88,8 +88,8 @@ function BranchesListPage() {
                 <p className="ws-row-meta">
                   <span>{CITY_LABELS[branch!.city] || branch!.city}</span>
                   {branch!.phone ? <span>{branch!.phone}</span> : null}
-                  <span>Врачей: {branch!.doctorCount ?? 0}</span>
-                  <span>Услуг: {branch!.serviceCount ?? 0}</span>
+                  <span>Doctors: {branch!.doctorCount ?? 0}</span>
+                  <span>Services: {branch!.serviceCount ?? 0}</span>
                 </p>
               </div>
               <div className="ws-row-end">
@@ -97,10 +97,10 @@ function BranchesListPage() {
                   <button
                     type="button"
                     className="ws-pill is-icon is-danger"
-                    aria-label="Удалить филиал"
-                    title="Удалить филиал"
+                    aria-label="Delete branch"
+                    title="Delete branch"
                     onClick={async () => {
-                      if (!window.confirm(`Удалить филиал «${branch!.nameRu || branch!.nameEn}»?`)) return;
+                      if (!window.confirm(`Delete the branch “${branch!.nameRu || branch!.nameEn}”?`)) return;
                       await deleteCabinetBranch(id, branch!.id);
                       await branches.refetch();
                     }}
@@ -122,11 +122,11 @@ function BranchesListPage() {
           <span className="ws-empty-mark">
             <img src="/brand/logo.svg" alt="" width={40} height={40} />
           </span>
-          <h2>Филиалов пока нет</h2>
-          <p>Добавьте первый филиал с адресом и телефоном — без него клинику не отправить на модерацию.</p>
+          <h2>No branches yet</h2>
+          <p>Add the first branch with an address and a phone. Without it the clinic cannot be sent for review.</p>
           {!locked ? (
             <Link to="/cabinet/clinics/$id/branches/new" params={{ id }} className="pill-btn is-ink">
-              Добавить филиал
+              Add a branch
               <span className="pill-btn-icon">
                 <WsIcon name="plus" size={18} />
               </span>
