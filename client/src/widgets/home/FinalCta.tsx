@@ -1,14 +1,13 @@
 import { useRef } from "react";
 import { MOTION_OK, SplitText, gsap, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { useLang, type Text } from "@/shared/i18n/lang";
 
 // The same wording the Health Checker uses (its first question, one of its examples, its duration choices).
-const DURATIONS: Text[] = [
-  { ru: "Несколько дней", uz: "Bir necha kun", en: "A few days" },
-  { ru: "Несколько недель", uz: "Bir necha hafta", en: "A few weeks" },
-  { ru: "Несколько месяцев", uz: "Bir necha oy", en: "A few months" },
-  { ru: "Больше года", uz: "Bir yildan ortiq", en: "Over a year" },
+const DURATIONS: string[] = [
+  "A few days",
+  "A few weeks",
+  "A few months",
+  "Over a year",
 ];
 const PICKED = 2;
 
@@ -17,7 +16,6 @@ const PICKED = 2;
  *  checker's own words, as the reader scrolls to it. With reduced motion the conversation is simply shown. */
 export function FinalCta() {
   const root = useRef<HTMLElement>(null);
-  const { lang, t } = useLang();
 
   useGSAP(
     () => {
@@ -71,26 +69,12 @@ export function FinalCta() {
               Health Checker
             </p>
             <h2 id="final-cta-title" className="final-cta-title">
-              {lang === "uz" ? (
-                <>
-                  Nima bezovta qilayotganini ayting. Biz <em>qayerga murojaat qilishni</em> aytamiz.
-                </>
-              ) : lang === "en" ? (
-                <>
+              <>
                   Tell us what bothers you. We will suggest <em>where to go.</em>
                 </>
-              ) : (
-                <>
-                  Расскажите, что беспокоит. Мы подскажем, <em>куда обратиться.</em>
-                </>
-              )}
             </h2>
             <p className="final-cta-text">
-              {t({
-                ru: "Ответьте на несколько вопросов, и Health Checker предложит направление и подходящие клиники. Диагноз он не ставит.",
-                uz: "Bir nechta savolga javob bering, Health Checker yoʻnalish va mos klinikalarni taklif qiladi. U tashxis qoʻymaydi.",
-                en: "Answer a few questions and Health Checker will suggest a specialty and suitable clinics. It does not make a diagnosis.",
-              })}
+              Answer a few questions and Health Checker will suggest a specialty and suitable clinics. It does not make a diagnosis.
             </p>
           </div>
 
@@ -103,18 +87,18 @@ export function FinalCta() {
                 </svg>
               </span>
               <strong>Health Checker</strong>
-              <span className="final-cta-chat-note">{t({ ru: "Это не диагноз", uz: "Bu tashxis emas", en: "Not a diagnosis" })}</span>
+              <span className="final-cta-chat-note">Not a diagnosis</span>
             </div>
 
             <div className="final-cta-chat-body">
-              <p className="final-cta-msg is-operator">{t({ ru: "Опишите, что вас беспокоит, своими словами.", uz: "Sizni nima bezovta qilayotganini oʻz soʻzlaringiz bilan yozing.", en: "Describe what bothers you in your own words." })}</p>
-              <p className="final-cta-msg is-user">{t({ ru: "Хочу проверить сердце", uz: "Yuragimni tekshirmoqchiman", en: "I want to check my heart" })}</p>
+              <p className="final-cta-msg is-operator">Describe what bothers you in your own words.</p>
+              <p className="final-cta-msg is-user">I want to check my heart</p>
               <div className="final-cta-msg is-operator">
-                {t({ ru: "Как давно это беспокоит?", uz: "Bu qachondan beri bezovta qilmoqda?", en: "How long has it bothered you?" })}
+                How long has it bothered you?
                 <span className="final-cta-choices">
                   {DURATIONS.map((label, i) => (
-                    <span key={label.ru} className={`final-cta-choice${i === PICKED ? " is-picked" : ""}`}>
-                      {t(label)}
+                    <span key={label} className={`final-cta-choice${i === PICKED ? " is-picked" : ""}`}>
+                      {label}
                     </span>
                   ))}
                 </span>
@@ -122,9 +106,9 @@ export function FinalCta() {
             </div>
 
             <div className="final-cta-result">
-              <span>{t({ ru: "Предварительное направление", uz: "Dastlabki yoʻnalish", en: "Preliminary specialty" })}</span>
+              <span>Preliminary specialty</span>
               <strong>
-                {t({ ru: "Кардиология", uz: "Kardiologiya", en: "Cardiology" })}
+                Cardiology
                 <ArrowIcon />
               </strong>
             </div>

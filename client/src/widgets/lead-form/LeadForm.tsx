@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { submitClinicLead, type LeadPayload } from "@/shared/api/client";
 import { createId } from "@/shared/lib/id";
-import { useLang } from "@/shared/i18n/lang";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 
 const COUNTRIES = [
@@ -56,7 +55,6 @@ function readCheckerMeta(): CheckerMeta | null {
 /** The request form on clinic and branch pages: a white card with the fields on paper and the ink send pill.
  *  The request goes to this clinic (its cabinet and Telegram) and to the platform's moderators. */
 export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHours }: Props) {
-  const { t } = useLang();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,13 +71,9 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
             <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
-        <h2>{t({ ru: "Заявка отправлена", uz: "Ariza yuborildi", en: "Request sent" })}</h2>
+        <h2>Request sent</h2>
         <p>
-          {t({
-            ru: `Координатор клиники «${clinicName}» свяжется с вами выбранным способом. Это запрос на обратный звонок, а не запись к врачу.`,
-            uz: `«${clinicName}» klinikasi koordinatori siz tanlagan usulda bogʻlanadi. Bu qayta qoʻngʻiroq soʻrovi, shifokorga yozilish emas.`,
-            en: `A coordinator from ${clinicName} will contact you the way you chose. This is a call-back request, not a booking.`,
-          })}
+          {`A coordinator from ${clinicName} will contact you the way you chose. This is a call-back request, not a booking.`}
         </p>
       </div>
     );
@@ -88,22 +82,18 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
   return (
     <div id="lead" className="cp-lead">
       <div className="cp-lead-head">
-        <h2>{t({ ru: "Оставить заявку", uz: "Ariza qoldirish", en: "Send a request" })}</h2>
+        <h2>Send a request</h2>
         <p>
-          {t({
-            ru: "Заявка придёт координатору клиники — он перезвонит или напишет удобным способом.",
-            uz: "Ariza klinika koordinatoriga boradi — u qulay usulda qoʻngʻiroq qiladi yoki yozadi.",
-            en: "The request goes to the clinic's coordinator, who will call or message you the way you prefer.",
-          })}
+          The request goes to the clinic's coordinator, who will call or message you the way you prefer.
         </p>
       </div>
       {fromChecker ? (
         <p className="cp-lead-note">
-          {t({ ru: "Заявка с учётом ваших ответов в Health Checker", uz: "Ariza Health Checker javoblaringiz bilan", en: "Includes your Health Checker answers" })}
+          Includes your Health Checker answers
         </p>
       ) : responseHours ? (
         <p className="cp-lead-note">
-          {t({ ru: `Обычно отвечают за ${responseHours} ч`, uz: `Odatda ${responseHours} soatda javob berishadi`, en: `Usually replies within ${responseHours} h` })}
+          {`Usually replies within ${responseHours} h`}
         </p>
       ) : null}
 
@@ -138,11 +128,7 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
             setDone(true);
           } catch {
             setError(
-              t({
-                ru: "Не удалось отправить. Проверьте телефон в формате +998…",
-                uz: "Yuborib boʻlmadi. Telefonni +998… formatida tekshiring",
-                en: "Could not send. Check the phone number, e.g. +998…",
-              }),
+              "Could not send. Check the phone number, e.g. +998…",
             );
           } finally {
             setLoading(false);
@@ -153,16 +139,16 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
         <input name="company" className="hidden" tabIndex={-1} autoComplete="off" />
 
         <label>
-          {t({ ru: "Имя", uz: "Ism", en: "Name" })}
-          <input name="fullName" required minLength={2} autoComplete="name" className="field" placeholder={t({ ru: "Как к вам обращаться", uz: "Sizga qanday murojaat qilaylik", en: "Your name" })} />
+          Name
+          <input name="fullName" required minLength={2} autoComplete="name" className="field" placeholder="Your name" />
         </label>
         <label>
-          {t({ ru: "Телефон с кодом страны", uz: "Telefon (mamlakat kodi bilan)", en: "Phone with country code" })}
+          Phone with country code
           <input name="phone" type="tel" inputMode="tel" autoComplete="tel" required className="field" placeholder="+998901234567" defaultValue="+998" />
         </label>
         <div className="cp-lead-row">
           <label>
-            {t({ ru: "Страна", uz: "Mamlakat", en: "Country" })}
+            Country
             <select name="country" className="field" defaultValue="Uzbekistan">
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>
@@ -172,48 +158,48 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
             </select>
           </label>
           <label>
-            {t({ ru: "Как связаться", uz: "Aloqa usuli", en: "Contact via" })}
+            Contact via
             <select name="contactMethod" className="field" defaultValue="whatsapp">
               <option value="whatsapp">WhatsApp</option>
               <option value="telegram">Telegram</option>
-              <option value="phone">{t({ ru: "Звонок", uz: "Qoʻngʻiroq", en: "Phone call" })}</option>
+              <option value="phone">Phone call</option>
               <option value="email">Email</option>
             </select>
           </label>
         </div>
         <label>
           <span>
-            Email <span className="font-medium text-muted">{t({ ru: "· необязательно", uz: "· ixtiyoriy", en: "· optional" })}</span>
+            Email <span className="font-medium text-muted">· optional</span>
           </span>
           <input name="email" type="email" autoComplete="email" className="field" placeholder="name@example.com" />
         </label>
         <div className="cp-lead-row">
           <label>
-            {t({ ru: "Сроки приезда", uz: "Kelish muddati", en: "When you plan to come" })}
+            When you plan to come
             <select name="arrivalType" className="field" defaultValue="undecided">
-              <option value="undecided">{t({ ru: "Пока не решил", uz: "Hali hal qilmadim", en: "Not decided yet" })}</option>
-              <option value="approximate">{t({ ru: "Примерно знаю", uz: "Taxminan bilaman", en: "Roughly known" })}</option>
-              <option value="exact">{t({ ru: "Точные даты", uz: "Aniq sanalar", en: "Exact dates" })}</option>
+              <option value="undecided">Not decided yet</option>
+              <option value="approximate">Roughly known</option>
+              <option value="exact">Exact dates</option>
             </select>
           </label>
           <label>
-            {t({ ru: "Удобное время", uz: "Qulay vaqt", en: "Best time" })}
+            Best time
             <select name="preferredHours" className="field" defaultValue="anytime">
-              <option value="anytime">{t({ ru: "Любое", uz: "Istalgan", en: "Any time" })}</option>
-              <option value="morning">{t({ ru: "Утро", uz: "Ertalab", en: "Morning" })}</option>
-              <option value="afternoon">{t({ ru: "День", uz: "Kunduzi", en: "Afternoon" })}</option>
-              <option value="evening">{t({ ru: "Вечер", uz: "Kechqurun", en: "Evening" })}</option>
+              <option value="anytime">Any time</option>
+              <option value="morning">Morning</option>
+              <option value="afternoon">Afternoon</option>
+              <option value="evening">Evening</option>
             </select>
           </label>
         </div>
         <label>
-          {t({ ru: "Что нужно", uz: "Nima kerak", en: "What you need" })}
+          What you need
           <textarea
             name="medicalNeed"
             rows={4}
             className="field"
             defaultValue={symptoms}
-            placeholder={t({ ru: "Кратко опишите запрос: диагноз, обследование, операция…", uz: "Soʻrovni qisqacha yozing: tashxis, tekshiruv, operatsiya…", en: "Briefly describe your request: diagnosis, check-up, surgery…" })}
+            placeholder="Briefly describe your request: diagnosis, check-up, surgery…"
             required={!fromChecker}
           />
         </label>
@@ -223,17 +209,13 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
           </p>
         ) : null}
         <button className="pill-btn is-ink" type="submit" disabled={loading}>
-          {loading ? t({ ru: "Отправляем…", uz: "Yuborilmoqda…", en: "Sending…" }) : t({ ru: "Отправить заявку", uz: "Arizani yuborish", en: "Send request" })}
+          {loading ? "Sending…" : "Send request"}
           <span className="pill-btn-icon">
             <ArrowIcon />
           </span>
         </button>
         <p className="cp-lead-fine">
-          {t({
-            ru: "Это запрос на обратный звонок, а не запись к врачу. Данные увидят только клиника и модераторы платформы.",
-            uz: "Bu qayta qoʻngʻiroq soʻrovi, shifokorga yozilish emas. Maʼlumotlarni faqat klinika va platforma moderatorlari koʻradi.",
-            en: "This is a call-back request, not a booking. Only the clinic and the platform's moderators see your details.",
-          })}
+          This is a call-back request, not a booking. Only the clinic and the platform's moderators see your details.
         </p>
       </form>
     </div>

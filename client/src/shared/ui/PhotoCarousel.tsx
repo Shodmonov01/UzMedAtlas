@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { CaretLeft, CaretRight, X } from "@phosphor-icons/react";
-import { useLang } from "@/shared/i18n/lang";
 import { FitImage } from "@/shared/ui/FitImage";
 
 export type GalleryPhoto = {
@@ -98,7 +97,6 @@ export function PhotoLightbox({
   index: number | null;
   onIndexChange: (index: number | null) => void;
 }) {
-  const { t } = useLang();
   const open = index != null && photos.length > 0;
   const track = useRef<HTMLDivElement>(null);
   const thumbs = useRef<HTMLDivElement>(null);
@@ -184,12 +182,12 @@ export function PhotoLightbox({
   const ratio = ratios[active.id] || 4 / 3;
 
   return createPortal(
-    <div className="lightbox" style={{ "--lightbox-ratio": ratio } as CSSProperties} role="dialog" aria-modal="true" aria-label={t({ ru: "Просмотр фотографий", uz: "Rasmlarni koʻrish", en: "Photo viewer" })}>
+    <div className="lightbox" style={{ "--lightbox-ratio": ratio } as CSSProperties} role="dialog" aria-modal="true" aria-label="Photo viewer">
       <div className="lightbox-bar">
         <span className="lightbox-count">
           {index + 1} / {photos.length}
         </span>
-        <button type="button" className="lightbox-close" aria-label={t({ ru: "Закрыть", uz: "Yopish", en: "Close" })} onClick={close}>
+        <button type="button" className="lightbox-close" aria-label="Close" onClick={close}>
           <X size={20} weight="bold" />
         </button>
       </div>
@@ -215,13 +213,13 @@ export function PhotoLightbox({
         </div>
         {many ? (
           <>
-            <button type="button" className="lightbox-arrow is-prev" aria-label={t({ ru: "Предыдущее", uz: "Oldingi", en: "Previous" })} disabled={index === 0} onClick={() => step(-1)}>
+            <button type="button" className="lightbox-arrow is-prev" aria-label="Previous" disabled={index === 0} onClick={() => step(-1)}>
               <CaretLeft size={22} weight="bold" />
             </button>
             <button
               type="button"
               className="lightbox-arrow is-next"
-              aria-label={t({ ru: "Следующее", uz: "Keyingi", en: "Next" })}
+              aria-label="Next"
               disabled={index === photos.length - 1}
               onClick={() => step(1)}
             >
