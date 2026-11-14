@@ -26,7 +26,7 @@ export function LogoTiles({ corner, seed = 1 }: { corner: Corner; seed?: number 
           }}
         >
           <img
-            src="/brand/logo.svg"
+            src="/brand/logo.svg?v=2"
             alt=""
             decoding="async"
             draggable={false}

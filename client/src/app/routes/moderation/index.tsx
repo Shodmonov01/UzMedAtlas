@@ -114,7 +114,7 @@ function ModerationQueuePage() {
       {queue.data && list.length === 0 ? (
         <div className="ws-empty">
           <span className="ws-empty-mark">
-            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+            <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
           </span>
           <h2>{needle ? "Nothing found" : "The queue is empty"}</h2>
           <p>{needle ? "Try another name or city." : "No new clinics to review. When an owner sends a profile, it shows up here."}</p>

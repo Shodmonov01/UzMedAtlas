@@ -243,7 +243,7 @@ function ClinicDetailPage() {
             photos={gallery}
             fallback={
               <div className="cp-gallery-fallback" aria-hidden="true">
-                <img src="/brand/logo.svg" alt="" width={88} height={88} />
+                <img src="/brand/logo.svg?v=2" alt="" width={88} height={88} />
               </div>
             }
           />
@@ -502,7 +502,7 @@ function ClinicDetailPage() {
                           <FitImage src={b.coverUrl} className="clinic-tile-photo" />
                         ) : (
                           <div className="clinic-tile-placeholder">
-                            <img src="/brand/logo.svg" alt="" width={64} height={64} />
+                            <img src="/brand/logo.svg?v=2" alt="" width={64} height={64} />
                           </div>
                         )}
                       </div>

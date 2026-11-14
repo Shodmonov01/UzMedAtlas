@@ -325,7 +325,7 @@
 .directions-row { --word: clamp(28px, 3.4vw, 52px); display: flex; align-items: center; width: max-content; color: var(--ink); will-change: transform; }
 .directions-row.is-muted { color: var(--muted); }
 .directions-row > li { display: flex; align-items: center; }
-.directions-row > li::after { content: ""; flex-shrink: 0; width: calc(var(--word) * .42); height: calc(var(--word) * .42); margin: 0 calc(var(--word) * .55); background: url("/brand/logo.svg") center / contain no-repeat; }
+.directions-row > li::after { content: ""; flex-shrink: 0; width: calc(var(--word) * .42); height: calc(var(--word) * .42); margin: 0 calc(var(--word) * .55); background: url("/brand/logo.svg?v=2") center / contain no-repeat; }
 .direction-link { color: inherit; font-size: var(--word); font-weight: 600; line-height: 1.25; letter-spacing: -.045em; white-space: nowrap; cursor: pointer; }
 .direction-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 8px; }
 .direction-skeleton { display: block; height: calc(var(--word) * .9); margin-right: 32px; border-radius: 999px; background: var(--primary-soft); }

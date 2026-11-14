@@ -95,7 +95,7 @@ export function Team() {
                 </>
             </p>
             <p className="team-sign">
-              <img src="/brand/logo.svg" alt="" width={28} height={28} />
+              <img src="/brand/logo.svg?v=2" alt="" width={28} height={28} />
               Medguide, 2026
             </p>
           </div>

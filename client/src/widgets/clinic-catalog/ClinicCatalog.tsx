@@ -343,7 +343,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                         <FitImage src={photo} className="clinic-tile-photo" />
                       ) : (
                         <div className="clinic-tile-placeholder">
-                          <img src="/brand/logo.svg" alt="" width={64} height={64} />
+                          <img src="/brand/logo.svg?v=2" alt="" width={64} height={64} />
                         </div>
                       )}
                       {clinic.logoUrl && hasPhoto(photo) ? <ClinicLogo src={clinic.logoUrl} name={name} className="clinic-tile-logo" wide /> : null}
