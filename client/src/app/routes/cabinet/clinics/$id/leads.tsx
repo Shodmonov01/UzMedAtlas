@@ -93,7 +93,7 @@ function CabinetLeadsPage() {
       {!leads.isLoading && leads.data?.length === 0 ? (
         <div className="ws-empty">
           <span className="ws-empty-mark">
-            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+            <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
           </span>
           <h2>{status ? "Nothing here" : "No requests yet"}</h2>
           <p>When a patient leaves a request on the clinic page, it shows up here. Connect Telegram in “My clinics” to hear about requests right away.</p>

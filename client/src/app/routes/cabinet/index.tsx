@@ -151,7 +151,7 @@ function CabinetHomePage() {
       {clinics.data?.length === 0 ? (
         <div className="ws-empty">
           <span className="ws-empty-mark">
-            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+            <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
           </span>
           <h2>No clinics yet</h2>
           <p>Create the profile step by step: name, address, contacts and specialties. Photos, branches and doctors can be added afterwards.</p>

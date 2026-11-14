@@ -156,7 +156,7 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
     <div className={`ws${open ? " is-open" : ""}`}>
       <div className="ws-top">
         <Link to={kind === "cabinet" ? "/cabinet" : "/moderation"} className="ws-brand">
-          <img src="/brand/logo.svg" alt="" width={36} height={36} />
+          <img src="/brand/logo.svg?v=2" alt="" width={36} height={36} />
           <span>
             <strong>Association</strong>
             <span>{roleLabel}</span>
@@ -169,7 +169,7 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
       <div className="ws-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />
       <aside className="ws-side" aria-label="Cabinet menu">
         <Link to="/" className="ws-brand">
-          <img src="/brand/logo.svg" alt="" width={40} height={40} />
+          <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
           <span>
             <strong>Association</strong>
             <span>of Medical Organizations</span>
@@ -318,7 +318,7 @@ export function AuthLayout({
     <div className="auth">
       <section className="auth-brand">
         <Link to="/" className="auth-logo">
-          <img src="/brand/logo.svg" alt="" width={44} height={44} />
+          <img src="/brand/logo.svg?v=2" alt="" width={44} height={44} />
           <span>
             <strong>Association</strong>
             <span>of Medical Organizations</span>

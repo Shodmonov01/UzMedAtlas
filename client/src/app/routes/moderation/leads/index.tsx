@@ -108,7 +108,7 @@ function AdminLeadsPage() {
       {!leads.isLoading && leads.data?.length === 0 ? (
         <div className="ws-empty">
           <span className="ws-empty-mark">
-            <img src="/brand/logo.svg" alt="" width={40} height={40} />
+            <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
           </span>
           <h2>No requests</h2>
           <p>Nothing matches these filters. Reset the filters or change the search.</p>

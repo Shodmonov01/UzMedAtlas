@@ -32,7 +32,7 @@ export function Footer() {
       <div className="site-footer-inner">
         <div className="site-footer-top">
           <Link to="/" className="site-footer-brand">
-            <img src="/brand/logo.svg" alt="" width={44} height={44} />
+            <img src="/brand/logo.svg?v=2" alt="" width={44} height={44} />
             <span>
               <strong>Association</strong>
               <span>of Medical Organizations</span>

@@ -127,7 +127,7 @@ export function Header() {
             window.scrollTo({ top: 0, behavior: "instant" });
           }}
         >
-          <img src="/brand/logo.svg" alt="" width={40} height={40} className="site-logo-mark" />
+          <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} className="site-logo-mark" />
           <span className="site-brand-text">
             <strong>{BRAND.title}</strong>
             <span>{BRAND.sub}</span>

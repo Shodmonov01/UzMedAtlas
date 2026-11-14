@@ -104,7 +104,7 @@ export function Gallery() {
                   decoding="async"
                 />
                 <span className="story-card-label">
-                  <img src="/brand/logo.svg" alt="" width={18} height={18} />
+                  <img src="/brand/logo.svg?v=2" alt="" width={18} height={18} />
                   <strong>{p.place}</strong>
                   <span>· {p.city}</span>
                 </span>

@@ -119,7 +119,7 @@ export function HomeHero() {
       <div className="home-hero-stage">
         <div className="home-hero-copy">
           <p className="home-hero-eyebrow">
-            <img src="/brand/logo.svg" alt="" width={24} height={24} />
+            <img src="/brand/logo.svg?v=2" alt="" width={24} height={24} />
             MEDGUIDE UZ
           </p>
           <h1 id="home-hero-title" className="home-hero-title is-split-pending">
