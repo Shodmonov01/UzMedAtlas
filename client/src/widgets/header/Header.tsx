@@ -3,19 +3,18 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { AirplaneTilt, Buildings, CaretRight, Stethoscope, UsersThree, type Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { ScrollTrigger, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { useLang, type Text } from "@/shared/i18n/lang";
 
 // Sections of the home page, in page order, linked from the nav.
-const SECTIONS: { id: string; label: Text; icon: PhosphorIcon }[] = [
-  { id: "medtourism", label: { ru: "Медтуризм", uz: "Tibbiy turizm", en: "Medical travel" }, icon: AirplaneTilt },
-  { id: "catalog", label: { ru: "Каталог клиник", uz: "Klinikalar", en: "Clinics" }, icon: Buildings },
-  { id: "team", label: { ru: "Команда", uz: "Jamoa", en: "Team" }, icon: UsersThree },
+const SECTIONS: { id: string; label: string; icon: PhosphorIcon }[] = [
+  { id: "medtourism", label: "Medical travel", icon: AirplaneTilt },
+  { id: "catalog", label: "Clinics", icon: Buildings },
+  { id: "team", label: "Team", icon: UsersThree },
 ];
-const PICKER: Text = { ru: "Подбор направления", uz: "Yoʻnalish tanlash", en: "Find a specialty" };
-const FOR_CLINICS: Text = { ru: "Для клиник", uz: "Klinikalar uchun", en: "For clinics" };
-const BRAND: { title: Text; sub: Text } = {
-  title: { ru: "Ассоциация", uz: "Assotsiatsiya", en: "Association" },
-  sub: { ru: "медицинских организаций", uz: "tibbiyot tashkilotlari", en: "of Medical Organizations" },
+const PICKER: string = "Find a specialty";
+const FOR_CLINICS: string = "For clinics";
+const BRAND: { title: string; sub: string } = {
+  title: "Association",
+  sub: "of Medical Organizations",
 };
 
 /** On the home page a section link glides to its section and leaves the URL (and the catalog filters in it) alone.
@@ -25,7 +24,6 @@ function goToSection(event: MouseEvent<HTMLAnchorElement>, id: string) {
 }
 
 export function Header() {
-  const { lang, t } = useLang();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   // A solid bar glued to the top and always in view; on the home page it is see-through over the hero film
   // and turns white once the film draws back.
@@ -55,7 +53,7 @@ export function Header() {
     else gsap.to(pill, { ...target, duration: 0.6, ease: "expo.out", overwrite: true });
   }, []);
 
-  useEffect(() => placePill(true), [active, pathname, lang, placePill]);
+  useEffect(() => placePill(true), [active, pathname, placePill]);
 
   useEffect(() => {
     const pill = indicatorRef.current;
@@ -132,11 +130,11 @@ export function Header() {
         >
           <img src="/brand/logo.svg" alt="" width={40} height={40} className="site-logo-mark" />
           <span className="site-brand-text">
-            <strong>{t(BRAND.title)}</strong>
-            <span>{t(BRAND.sub)}</span>
+            <strong>{BRAND.title}</strong>
+            <span>{BRAND.sub}</span>
           </span>
         </Link>
-        <nav ref={navRef} className="site-nav" aria-label={t({ ru: "Разделы", uz: "Boʻlimlar", en: "Sections" })}>
+        <nav ref={navRef} className="site-nav" aria-label="Sections">
           <span ref={indicatorRef} className="site-nav-indicator" aria-hidden="true" />
           {SECTIONS.map((section) => (
             <Link
@@ -146,16 +144,16 @@ export function Header() {
               className={active === section.id ? "is-active" : undefined}
               onClick={(event) => goToSection(event, section.id)}
             >
-              {t(section.label)}
+              {section.label}
             </Link>
           ))}
           <Link to="/checker" activeProps={{ className: "is-active" }}>
-            {t(PICKER)}
+            {PICKER}
           </Link>
         </nav>
         <div className="site-header-end">
           <Link to="/cabinet/login" className="site-header-action">
-            {t(FOR_CLINICS)}
+            {FOR_CLINICS}
             <span className="site-header-action-icon">
               <ArrowIcon />
             </span>
@@ -165,7 +163,7 @@ export function Header() {
             className="site-menu-button"
             aria-expanded={menuOpen}
             aria-controls="site-menu"
-            aria-label={menuOpen ? t({ ru: "Закрыть меню", uz: "Menyuni yopish", en: "Close menu" }) : t({ ru: "Открыть меню", uz: "Menyuni ochish", en: "Open menu" })}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
             onClick={() => setMenuOpen((open) => !open)}
           >
             <span />
@@ -176,7 +174,7 @@ export function Header() {
       <div className="site-menu-backdrop" hidden={!menuOpen} onClick={() => setMenuOpen(false)} />
       {/* Phones and tablets: a sheet under the bar with the sections as one grouped list (an icon tile, the name, a
           chevron), then the clinics entrance. */}
-      <nav id="site-menu" className="site-menu" aria-label={t({ ru: "Разделы", uz: "Boʻlimlar", en: "Sections" })} hidden={!menuOpen}>
+      <nav id="site-menu" className="site-menu" aria-label="Sections" hidden={!menuOpen}>
         <div className="site-menu-list">
           {SECTIONS.map((section, i) => {
             const Glyph = section.icon;
@@ -195,7 +193,7 @@ export function Header() {
                 <i aria-hidden="true">
                   <Glyph size={22} weight="duotone" />
                 </i>
-                <span>{t(section.label)}</span>
+                <span>{section.label}</span>
                 <CaretRight className="site-menu-chevron" size={18} weight="bold" aria-hidden="true" />
               </Link>
             );
@@ -204,12 +202,12 @@ export function Header() {
             <i aria-hidden="true">
               <Stethoscope size={22} weight="duotone" />
             </i>
-            <span>{t(PICKER)}</span>
+            <span>{PICKER}</span>
             <CaretRight className="site-menu-chevron" size={18} weight="bold" aria-hidden="true" />
           </Link>
         </div>
         <Link to="/cabinet/login" className="site-menu-action" onClick={() => setMenuOpen(false)}>
-          {t(FOR_CLINICS)}
+          {FOR_CLINICS}
           <span>
             <ArrowIcon />
           </span>

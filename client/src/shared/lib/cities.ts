@@ -57,7 +57,3 @@ export function displayCity(input: string | null | undefined) {
   return CITY_LABELS[input] || CITY_LABELS[cityAliases.get(key) || ""] || REGIONS[key] || input;
 }
 
-/** A city's name on the public pages (always English now; the language argument is kept for older callers). */
-export function cityName(_lang: "ru" | "uz" | "en", input: string | null | undefined) {
-  return displayCity(input);
-}

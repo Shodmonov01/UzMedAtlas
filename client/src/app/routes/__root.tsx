@@ -3,7 +3,6 @@ import { Header } from "@/widgets/header/Header";
 import { Footer } from "@/widgets/footer/Footer";
 import { HealthCheckerProvider } from "@/widgets/health-checker/HealthCheckerContext";
 import { HealthCheckerWidget } from "@/widgets/health-checker/HealthCheckerWidget";
-import { LanguageProvider, useLang } from "@/shared/i18n/lang";
 import { WorkspaceShell } from "@/widgets/workspace/Workspace";
 
 // The AI helper bubble is switched off for now; set to true to bring it back.
@@ -15,18 +14,17 @@ export const Route = createRootRoute({
 });
 
 function NotFoundPage() {
-  const { t } = useLang();
   return (
     <div className="mx-auto max-w-lg py-20 text-center">
       <p className="text-sm font-bold uppercase tracking-wide text-primary">404</p>
-      <h1 className="mt-2 text-3xl font-extrabold">{t({ ru: "Страница не найдена", uz: "Sahifa topilmadi", en: "Page not found" })}</h1>
-      <p className="mt-3 text-muted">{t({ ru: "Проверьте адрес или вернитесь в каталог клиник.", uz: "Manzilni tekshiring yoki klinikalar katalogiga qayting.", en: "Check the address or go back to the clinic catalog." })}</p>
+      <h1 className="mt-2 text-3xl font-extrabold">Page not found</h1>
+      <p className="mt-3 text-muted">Check the address or go back to the clinic catalog.</p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link to="/" className="btn btn-ghost">
-          {t({ ru: "На главную", uz: "Bosh sahifa", en: "Home" })}
+          Home
         </Link>
         <Link to="/" className="btn btn-primary">
-          {t({ ru: "Каталог", uz: "Katalog", en: "Catalog" })}
+          Catalog
         </Link>
       </div>
     </div>
@@ -35,15 +33,12 @@ function NotFoundPage() {
 
 function RootLayout() {
   return (
-    <LanguageProvider>
-      <RootShell />
-    </LanguageProvider>
+    <RootShell />
   );
 }
 
 /** The page frame. */
 function RootShell() {
-  const { lang } = useLang();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isWorkspace = pathname.startsWith("/cabinet") || pathname.startsWith("/moderation");
   const isSignIn = pathname === "/cabinet/login" || pathname === "/moderation/login";
@@ -57,10 +52,10 @@ function RootShell() {
     return (
       <HealthCheckerProvider>
         {isSignIn ? (
-          <Outlet key={lang} />
+          <Outlet />
         ) : (
           <WorkspaceShell kind={pathname.startsWith("/moderation") ? "moderation" : "cabinet"}>
-            <Outlet key={lang} />
+            <Outlet />
           </WorkspaceShell>
         )}
       </HealthCheckerProvider>
@@ -72,11 +67,11 @@ function RootShell() {
       <div className={`portal flex min-h-screen flex-col ${isHome ? "reference-portal" : ""}`}>
         <Header />
         <main className={isHome || isClinicPage ? "w-full flex-1" : "mx-auto w-full max-w-[calc(var(--page-width)+2rem)] flex-1 px-4 py-8 pb-28"}>
-          <Outlet key={lang} />
+          <Outlet />
         </main>
         <Footer />
         {/* No checker bubble on clinic and branch pages: it covered the content and the request dock. */}
-        {SHOW_HEALTH_CHECKER && !isClinicPage ? <HealthCheckerWidget key={lang} showTip={!isHome} hideOverHero={isHome} /> : null}
+        {SHOW_HEALTH_CHECKER && !isClinicPage ? <HealthCheckerWidget showTip={!isHome} hideOverHero={isHome} /> : null}
       </div>
     </HealthCheckerProvider>
   );

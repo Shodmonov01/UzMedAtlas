@@ -1,35 +1,22 @@
 import { useRef } from "react";
 import { MOTION_OK, SplitText, gsap, useGSAP } from "@/shared/lib/gsap";
-import { useLang, type Text } from "@/shared/i18n/lang";
 
-const STATS: { prefix?: Text; value: number; unit: Text; label: Text }[] = [
+const STATS: { prefix?: string; value: number; unit: string; label: string }[] = [
   {
-    prefix: { ru: "от", uz: "", en: "from" },
+    prefix: "from",
     value: 30,
-    unit: { ru: "%", uz: "%", en: "%" },
-    label: {
-      ru: "экономии по сравнению с клиниками за рубежом",
-      uz: "va undan koʻproq tejash — xorijiy klinikalarga nisbatan",
-      en: "savings compared with clinics abroad",
-    },
+    unit: "%",
+    label: "savings compared with clinics abroad",
   },
   {
     value: 24,
-    unit: { ru: "ч", uz: "soat", en: "h" },
-    label: {
-      ru: "на ответ клиники и предварительный план лечения",
-      uz: "ichida klinika javobi va dastlabki davolash rejasi",
-      en: "for the clinic's reply and a preliminary treatment plan",
-    },
+    unit: "h",
+    label: "for the clinic's reply and a preliminary treatment plan",
   },
   {
     value: 6,
-    unit: { ru: "языков", uz: "til", en: "languages" },
-    label: {
-      ru: "общения с координаторами и врачами",
-      uz: "da koordinatorlar va shifokorlar bilan muloqot",
-      en: "to talk with coordinators and doctors",
-    },
+    unit: "languages",
+    label: "to talk with coordinators and doctors",
   },
 ];
 
@@ -37,7 +24,6 @@ const STATS: { prefix?: Text; value: number; unit: Text; label: Text }[] = [
  *  then three figures that count up while their rules draw in. With reduced motion the text and figures are final. */
 export function Manifesto() {
   const root = useRef<HTMLElement>(null);
-  const { lang, t } = useLang();
 
   useGSAP(
     () => {
@@ -68,30 +54,18 @@ export function Manifesto() {
   );
 
   return (
-    <section ref={root} className="manifesto" aria-label={t({ ru: "О медицинском туризме", uz: "Tibbiy turizm haqida", en: "About medical tourism" })}>
+    <section ref={root} className="manifesto" aria-label="About medical tourism">
       <div className="wrap">
         <div className="manifesto-head">
           <p className="manifesto-kicker">
             <span className="manifesto-kicker-dot" aria-hidden="true" />
-            {t({ ru: "Почему Узбекистан", uz: "Nega Oʻzbekiston", en: "Why Uzbekistan" })}
+            Why Uzbekistan
           </p>
           <p className="manifesto-text">
-            {lang === "uz" ? (
-              <>
-                Oʻzbekiston <em>davolanish</em> uchun keladigan mamlakatga aylanmoqda. Biz <em>tekshirilgan klinikalar</em>,{" "}
-                <em>halol narxlar</em> va <span className="manifesto-keep">sizning tilingizda</span> gaplashadigan koordinatorlarni jamladik.
-              </>
-            ) : lang === "en" ? (
-              <>
+            <>
                 Uzbekistan is becoming a country people travel to <em>for treatment</em>. We have gathered <em>vetted clinics</em>,{" "}
                 <em>honest prices</em> and coordinators who speak <span className="manifesto-keep">your language.</span>
               </>
-            ) : (
-              <>
-                Узбекистан становится страной, куда приезжают <em>лечиться</em>. Мы собрали <em>проверенные клиники</em>,{" "}
-                <em>честные цены</em> и координаторов, которые говорят <span className="manifesto-keep">на вашем языке.</span>
-              </>
-            )}
           </p>
         </div>
 
@@ -101,11 +75,11 @@ export function Manifesto() {
               <span className="manifesto-rule" aria-hidden="true" />
               <div className="manifesto-stat-body">
                 <p className="manifesto-figure">
-                  {stat.prefix && t(stat.prefix) ? <small>{t(stat.prefix)}</small> : null}
+                  {stat.prefix && stat.prefix ? <small>{stat.prefix}</small> : null}
                   <span className="manifesto-count">{stat.value}</span>
-                  <small>{t(stat.unit)}</small>
+                  <small>{stat.unit}</small>
                 </p>
-                <p className="manifesto-label">{t(stat.label)}</p>
+                <p className="manifesto-label">{stat.label}</p>
               </div>
             </li>
           ))}

@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { analyzeChecker } from "@/shared/api/client";
 import { useHealthChecker } from "./HealthCheckerContext";
-import { pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
+import { pickName } from "@/shared/i18n/lang";
 
 type CheckerResult = Awaited<ReturnType<typeof analyzeChecker>>;
 
@@ -13,55 +13,43 @@ type ChatMessage =
 
 type Step = "symptoms" | "age" | "gender" | "duration" | "loading" | "done";
 
-const GENDER_OPTIONS: readonly { value: "female" | "male" | "prefer_not"; label: Text }[] = [
-  { value: "female", label: { ru: "Женский", uz: "Ayol", en: "Female" } },
-  { value: "male", label: { ru: "Мужской", uz: "Erkak", en: "Male" } },
-  { value: "prefer_not", label: { ru: "Предпочитаю не указывать", uz: "Koʻrsatmaslikni afzal koʻraman", en: "Prefer not to say" } },
+const GENDER_OPTIONS: readonly { value: "female" | "male" | "prefer_not"; label: string }[] = [
+  { value: "female", label: "Female" },
+  { value: "male", label: "Male" },
+  { value: "prefer_not", label: "Prefer not to say" },
 ];
 
-const DURATION_OPTIONS: readonly { value: "few_days" | "few_weeks" | "few_months" | "more_than_year"; label: Text }[] = [
-  { value: "few_days", label: { ru: "Несколько дней", uz: "Bir necha kun", en: "A few days" } },
-  { value: "few_weeks", label: { ru: "Несколько недель", uz: "Bir necha hafta", en: "A few weeks" } },
-  { value: "few_months", label: { ru: "Несколько месяцев", uz: "Bir necha oy", en: "A few months" } },
-  { value: "more_than_year", label: { ru: "Больше года", uz: "Bir yildan ortiq", en: "Over a year" } },
+const DURATION_OPTIONS: readonly { value: "few_days" | "few_weeks" | "few_months" | "more_than_year"; label: string }[] = [
+  { value: "few_days", label: "A few days" },
+  { value: "few_weeks", label: "A few weeks" },
+  { value: "few_months", label: "A few months" },
+  { value: "more_than_year", label: "Over a year" },
 ];
 
-const EXAMPLES: Text[] = [
-  { ru: "Болит колено при ходьбе", uz: "Yurganda tizzam ogʻriydi", en: "My knee hurts when I walk" },
-  { ru: "Часто болит голова и появляется головокружение", uz: "Boshim tez-tez ogʻriydi va aylanadi", en: "I often have headaches and dizziness" },
-  { ru: "Хочу проверить сердце", uz: "Yuragimni tekshirmoqchiman", en: "I want to check my heart" },
-  { ru: "Снизилось зрение на одном глазу", uz: "Bir koʻzimning koʻrishi pasaydi", en: "My sight got worse in one eye" },
+const EXAMPLES: string[] = [
+  "My knee hurts when I walk",
+  "I often have headaches and dizziness",
+  "I want to check my heart",
+  "My sight got worse in one eye",
 ];
 
 /** The chat's own lines in every language. */
 const L = {
-  hello: {
-    ru: "Здравствуйте! Я Health Checker — помогу подобрать предварительное направление. Это не диагноз.",
-    uz: "Assalomu alaykum! Men Health Checker — dastlabki yoʻnalishni tanlashga yordam beraman. Bu tashxis emas.",
-    en: "Hello! I am Health Checker and I will help you find a preliminary specialty. This is not a diagnosis.",
-  },
-  describe: {
-    ru: "Опишите, что вас беспокоит, своими словами.",
-    uz: "Sizni nima bezovta qilayotganini oʻz soʻzlaringiz bilan yozing.",
-    en: "Describe what bothers you in your own words.",
-  },
-  analyzing: { ru: "Смотрю симптомы и подбираю направление…", uz: "Belgilarni koʻrib, yoʻnalish tanlayapman…", en: "Looking at the symptoms and choosing a specialty…" },
-  failed: { ru: "Не удалось проанализировать симптомы. Попробуйте ещё раз.", uz: "Belgilarni tahlil qilib boʻlmadi. Yana urinib koʻring.", en: "Could not analyse the symptoms. Please try again." },
-  failedChat: {
-    ru: "Не получилось обработать запрос. Напишите симптомы ещё раз или выберите пример.",
-    uz: "Soʻrovni qayta ishlab boʻlmadi. Belgilarni qayta yozing yoki misolni tanlang.",
-    en: "The request could not be processed. Write the symptoms again or pick an example.",
-  },
-  tooShort: { ru: "Опишите симптомы чуть подробнее (от 8 символов).", uz: "Belgilarni biroz batafsilroq yozing (kamida 8 belgi).", en: "Describe the symptoms in a bit more detail (8 characters or more)." },
-  askAge: { ru: "Сколько вам лет? Можно просто числом.", uz: "Yoshingiz nechada? Shunchaki raqam bilan yozsangiz boʻladi.", en: "How old are you? A number is enough." },
-  badAge: { ru: "Укажите возраст от 1 до 120.", uz: "Yoshni 1 dan 120 gacha kiriting.", en: "Enter an age from 1 to 120." },
-  askGender: { ru: "Укажите пол (можно пропустить).", uz: "Jinsingizni koʻrsating (oʻtkazib yuborish mumkin).", en: "Your sex (you can skip this)." },
-  askDuration: { ru: "Как давно беспокоит?", uz: "Qachondan beri bezovta qilmoqda?", en: "How long has it bothered you?" },
-} satisfies Record<string, Text>;
+  hello: "Hello! I am Health Checker and I will help you find a preliminary specialty. This is not a diagnosis.",
+  describe: "Describe what bothers you in your own words.",
+  analyzing: "Looking at the symptoms and choosing a specialty…",
+  failed: "Could not analyse the symptoms. Please try again.",
+  failedChat: "The request could not be processed. Write the symptoms again or pick an example.",
+  tooShort: "Describe the symptoms in a bit more detail (8 characters or more).",
+  askAge: "How old are you? A number is enough.",
+  badAge: "Enter an age from 1 to 120.",
+  askGender: "Your sex (you can skip this).",
+  askDuration: "How long has it bothered you?",
+} satisfies Record<string, string>;
 
-const welcome = (lang: Lang): ChatMessage[] => [
-  { id: "welcome-1", role: "operator", text: L.hello[lang] },
-  { id: "welcome-2", role: "operator", text: L.describe[lang] },
+const welcome = (): ChatMessage[] => [
+  { id: "welcome-1", role: "operator", text: L.hello },
+  { id: "welcome-2", role: "operator", text: L.describe },
   { id: "welcome-examples", role: "operator", kind: "examples" },
 ];
 
@@ -81,12 +69,11 @@ function uid() {
 
 export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { showTip?: boolean; hideOverHero?: boolean }) {
   const { isOpen, open, close, toggle } = useHealthChecker();
-  const { lang, t } = useLang();
   const panelId = useId();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [messages, setMessages] = useState<ChatMessage[]>(() => welcome(lang));
+  const [messages, setMessages] = useState<ChatMessage[]>(() => welcome());
   const [step, setStep] = useState<Step>("symptoms");
   const [draft, setDraft] = useState("");
   const [symptoms, setSymptoms] = useState("");
@@ -142,7 +129,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
   }, [messages, isOpen, step]);
 
   function resetChat() {
-    setMessages(welcome(lang));
+    setMessages(welcome());
     setStep("symptoms");
     setDraft("");
     setSymptoms("");
@@ -161,7 +148,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
     setError(null);
     setMessages((prev) => [
       ...prev,
-      { id: uid(), role: "operator", text: t(L.analyzing) },
+      { id: uid(), role: "operator", text: L.analyzing },
     ]);
     try {
       const result = await analyzeChecker({
@@ -188,13 +175,13 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
       setMessages((prev) => [...prev, { id: uid(), role: "operator", kind: "result", result }]);
       setStep("done");
     } catch {
-      setError(t(L.failed));
+      setError(L.failed);
       setMessages((prev) => [
         ...prev,
         {
           id: uid(),
           role: "operator",
-          text: t(L.failedChat),
+          text: L.failedChat,
         },
       ]);
       setStep("symptoms");
@@ -204,7 +191,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
   function submitSymptoms(text: string) {
     const cleaned = text.trim();
     if (cleaned.length < 8) {
-      setError(t(L.tooShort));
+      setError(L.tooShort);
       return;
     }
     setError(null);
@@ -212,7 +199,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
     setMessages((prev) => [
       ...prev.filter((m) => !("kind" in m && m.kind === "examples")),
       { id: uid(), role: "user", text: cleaned },
-      { id: uid(), role: "operator", text: t(L.askAge) },
+      { id: uid(), role: "operator", text: L.askAge },
     ]);
     setDraft("");
     setStep("age");
@@ -221,7 +208,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
   function submitAge(text: string) {
     const nextAge = Number.parseInt(text.trim(), 10);
     if (!Number.isFinite(nextAge) || nextAge < 1 || nextAge > 120) {
-      setError(t(L.badAge));
+      setError(L.badAge);
       return;
     }
     setError(null);
@@ -229,7 +216,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
     setMessages((prev) => [
       ...prev,
       { id: uid(), role: "user", text: String(nextAge) },
-      { id: uid(), role: "operator", text: t(L.askGender) },
+      { id: uid(), role: "operator", text: L.askGender },
     ]);
     setDraft("");
     setStep("gender");
@@ -240,15 +227,15 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
     setGender(opt.value);
     setMessages((prev) => [
       ...prev,
-      { id: uid(), role: "user", text: t(opt.label) },
-      { id: uid(), role: "operator", text: t(L.askDuration) },
+      { id: uid(), role: "user", text: opt.label },
+      { id: uid(), role: "operator", text: L.askDuration },
     ]);
     setStep("duration");
   }
 
   function submitDuration(value: string) {
     const opt = DURATION_OPTIONS.find((o) => o.value === value) || DURATION_OPTIONS[1];
-    setMessages((prev) => [...prev, { id: uid(), role: "user", text: t(opt.label) }]);
+    setMessages((prev) => [...prev, { id: uid(), role: "user", text: opt.label }]);
     void runAnalyze(symptoms, age || 30, gender, opt.value);
   }
 
@@ -261,12 +248,12 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
   const inputDisabled = step === "loading" || step === "done" || step === "gender" || step === "duration";
   const placeholder =
     step === "age"
-      ? t({ ru: "Например, 42", uz: "Masalan, 42", en: "For example, 42" })
+      ? "For example, 42"
       : step === "done"
-        ? t({ ru: "Диалог завершён", uz: "Suhbat yakunlandi", en: "Conversation finished" })
+        ? "Conversation finished"
         : step === "gender" || step === "duration"
-          ? t({ ru: "Выберите вариант ниже", uz: "Quyidagi variantni tanlang", en: "Pick an option below" })
-          : t({ ru: "Напишите, что беспокоит…", uz: "Nima bezovta qilayotganini yozing…", en: "Write what bothers you…" });
+          ? "Pick an option below"
+          : "Write what bothers you…";
 
   return (
     <div className={`hc-widget pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6${overHero && !isOpen ? " is-tucked" : ""}`}>
@@ -284,12 +271,12 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[16px] font-bold tracking-tight">Health Checker</p>
-              <p className="truncate text-xs text-muted">{t({ ru: "Предварительное направление · не диагноз", uz: "Dastlabki yoʻnalish · tashxis emas", en: "Preliminary specialty · not a diagnosis" })}</p>
+              <p className="truncate text-xs text-muted">Preliminary specialty · not a diagnosis</p>
             </div>
             <button
               type="button"
               className="grid h-9 w-9 place-items-center rounded-full bg-paper text-ink transition hover:bg-[#e6eeee]"
-              aria-label={t({ ru: "Свернуть", uz: "Yigʻish", en: "Minimise" })}
+              aria-label="Minimise"
               onClick={close}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -305,12 +292,12 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                   <div key={message.id} className="flex flex-wrap gap-2 pl-1">
                     {EXAMPLES.map((example) => (
                       <button
-                        key={example.ru}
+                        key={example}
                         type="button"
                         className="rounded-full bg-white px-3 py-1.5 text-left text-xs font-semibold text-ink ring-1 ring-line transition hover:bg-ink hover:text-white hover:ring-ink"
-                        onClick={() => submitSymptoms(t(example))}
+                        onClick={() => submitSymptoms(example)}
                       >
-                        {t(example)}
+                        {example}
                       </button>
                     ))}
                   </div>
@@ -322,25 +309,21 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                 return (
                   <div key={message.id} className="max-w-[92%] space-y-2">
                     <div className="rounded-[16px] rounded-bl-md bg-white px-4 py-3.5 text-sm ring-1 ring-[#0b2a3d0d]">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{t({ ru: "Рекомендация", uz: "Tavsiya", en: "Recommendation" })}</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">Recommendation</p>
                       <p className="mt-1.5 text-lg font-semibold tracking-tight text-accent-deep">
-                        {pickName(lang, top?.nameRu, top?.nameEn) || t({ ru: "Уточните у врача", uz: "Shifokordan aniqlang", en: "Ask a doctor" })}
+                        {pickName(top?.nameRu, top?.nameEn) || "Ask a doctor"}
                       </p>
                       {message.result.doctorRecommendation ? (
-                        <p className="mt-1 text-sm font-semibold text-ink">{t({ ru: "Специалист", uz: "Mutaxassis", en: "Specialist" })}: {message.result.doctorRecommendation}</p>
+                        <p className="mt-1 text-sm font-semibold text-ink">Specialist: {message.result.doctorRecommendation}</p>
                       ) : null}
                       {(top?.explanationRu || top?.explanationEn) && (
                         <p className="mt-2 text-sm leading-snug text-muted">
-                          {pickName(lang, top.explanationRu, top.explanationEn)}
+                          {pickName(top.explanationRu, top.explanationEn)}
                         </p>
                       )}
                       {message.result.redFlags?.length ? (
                         <p className="mt-3 rounded-xl bg-danger-soft px-3 py-2 text-xs font-semibold text-danger">
-                          {t({
-                            ru: "Обнаружены признаки возможного неотложного состояния. Немедленно обратитесь за экстренной медицинской помощью.",
-                            uz: "Shoshilinch holat belgilari aniqlandi. Zudlik bilan tez tibbiy yordamga murojaat qiling.",
-                            en: "Signs of a possible emergency were found. Seek emergency medical help right away.",
-                          })}
+                          Signs of a possible emergency were found. Seek emergency medical help right away.
                         </p>
                       ) : null}
                     </div>
@@ -354,10 +337,10 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                         className="hc-action"
                         onClick={close}
                       >
-                        {t({ ru: "Найти клиники", uz: "Klinikalarni topish", en: "Find clinics" })}
+                        Find clinics
                       </Link>
                       <button type="button" className="hc-action is-ghost" onClick={resetChat}>
-                        {t({ ru: "Ещё раз", uz: "Qaytadan", en: "Start over" })}
+                        Start over
                       </button>
                     </div>
                   </div>
@@ -404,7 +387,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                     className="hc-option"
                     onClick={() => submitGender(opt.value)}
                   >
-                    {t(opt.label)}
+                    {opt.label}
                   </button>
                 ))}
               </div>
@@ -418,7 +401,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                     className="hc-option"
                     onClick={() => submitDuration(opt.value)}
                   >
-                    {t(opt.label)}
+                    {opt.label}
                   </button>
                 ))}
               </div>
@@ -431,13 +414,13 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={placeholder}
                 disabled={inputDisabled}
-                aria-label={t({ ru: "Сообщение для Health Checker", uz: "Health Checker uchun xabar", en: "Message to Health Checker" })}
+                aria-label="Message to Health Checker"
               />
               <button
                 type="submit"
                 className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink text-white transition hover:bg-[#134058] disabled:cursor-not-allowed disabled:opacity-30"
                 disabled={inputDisabled || !draft.trim()}
-                aria-label={t({ ru: "Отправить", uz: "Yuborish", en: "Send" })}
+                aria-label="Send"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M12 20.5a1.3 1.3 0 0 1-1.3-1.3V8.1l-3.9 3.9a1.3 1.3 0 1 1-1.8-1.8l6.1-6.1a1.3 1.3 0 0 1 1.8 0l6.1 6.1a1.3 1.3 0 1 1-1.8 1.8l-3.9-3.9v11.1a1.3 1.3 0 0 1-1.3 1.3Z" />
@@ -445,11 +428,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
               </button>
             </div>
             <p className="mt-2 px-2 pb-1 text-[11px] leading-snug text-muted">
-              {t({
-                ru: "Не заменяет консультацию врача. При острых симптомах обратитесь в неотложную помощь.",
-                uz: "Shifokor maslahatini almashtirmaydi. Oʻtkir belgilar boʻlsa, tez yordamga murojaat qiling.",
-                en: "This does not replace a doctor's advice. With acute symptoms, seek emergency care.",
-              })}
+              This does not replace a doctor's advice. With acute symptoms, seek emergency care.
             </p>
           </form>
         </section>
@@ -461,7 +440,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
           className="hc-tip pointer-events-auto hidden max-w-[240px] rounded-[16px] rounded-br-md bg-white px-4 py-3 text-left text-[13px] font-semibold leading-snug text-ink shadow-[0_16px_36px_-20px_rgba(11,42,61,0.5)] ring-1 ring-[#0b2a3d0f] sm:block"
           onClick={open}
         >
-          {t({ ru: "Нужна помощь с направлением? Напишите оператору", uz: "Yoʻnalish tanlashda yordam kerakmi? Operatorga yozing", en: "Need help choosing a specialty? Write to us" })}
+          Need help choosing a specialty? Write to us
         </button>
       ) : null}
 
@@ -470,7 +449,7 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
         className="hc-fab pointer-events-auto relative grid h-14 w-14 place-items-center rounded-full bg-ink text-white shadow-[0_18px_40px_-14px_rgba(11,42,61,0.7)] transition hover:bg-[#134058] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         aria-expanded={isOpen}
         aria-controls={panelId}
-        aria-label={isOpen ? t({ ru: "Закрыть Health Checker", uz: "Health Checker’ni yopish", en: "Close Health Checker" }) : t({ ru: "Открыть Health Checker", uz: "Health Checker’ni ochish", en: "Open Health Checker" })}
+        aria-label={isOpen ? "Close Health Checker" : "Open Health Checker"}
         onClick={toggle}
       >
         {isOpen ? (

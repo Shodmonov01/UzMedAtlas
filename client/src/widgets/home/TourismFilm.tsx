@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { MOTION_OK, SplitText, gsap, useGSAP } from "@/shared/lib/gsap";
 import { useAmbientFilm } from "@/shared/lib/use-ambient-film";
 import { SoundToggle } from "@/shared/ui/SoundToggle";
-import { useLang } from "@/shared/i18n/lang";
 
 /** Treatment and rest in one trip: the country film (horizons, mountains, valleys) over the whole screen at full
  *  size (no scroll effect on the film itself); the heading rises line by line as it comes into view, the sound
@@ -11,7 +10,6 @@ import { useLang } from "@/shared/i18n/lang";
 export function TourismFilm() {
   const root = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { t } = useLang();
   const { sound, toggleSound } = useAmbientFilm(videoRef, {
     desktop: "/videos/medtour/medtour-1080.mp4",
     mobile: "/videos/medtour/medtour-mobile.mp4",
@@ -53,14 +51,10 @@ export function TourismFilm() {
         <span className="film-shade" />
         <div className="film-copy">
           <h2 id="film-title" className="film-title">
-            {t({ ru: "Лечение и отдых в\u00a0одной поездке", uz: "Davolanish va dam olish bitta safarda", en: "Treatment and rest in\u00a0one trip" })}
+            {"Treatment and rest in\u00a0one trip"}
           </h2>
           <p className="film-text">
-            {t({
-              ru: "Горный воздух, тёплое солнце и бескрайние долины. Здесь легко восстанавливаться после лечения.",
-              uz: "Togʻ havosi, iliq quyosh va cheksiz vodiylar. Bu yerda davolanishdan keyin tiklanish oson.",
-              en: "Mountain air, warm sun and endless valleys. Here it is easy to recover after treatment.",
-            })}
+            Mountain air, warm sun and endless valleys. Here it is easy to recover after treatment.
           </p>
         </div>
         <SoundToggle on={sound} onToggle={toggleSound} className="film-sound" />

@@ -2,7 +2,6 @@ import { useRef, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { EASE_OUT, MOTION_OK, ScrollTrigger, SplitText, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { useLang } from "@/shared/i18n/lang";
 
 const WORD = "UZBEKISTAN";
 
@@ -14,7 +13,6 @@ const WORD = "UZBEKISTAN";
  *  front of it. With reduced motion everything is simply in place. */
 export function HomeHero() {
   const root = useRef<HTMLElement>(null);
-  const { t } = useLang();
 
   useGSAP(
     () => {
@@ -124,19 +122,19 @@ export function HomeHero() {
         </div>
 
         <div className="home-hero-copy">
-          <p className="home-hero-eyebrow">{t({ ru: "Медицинский туризм в Узбекистане", uz: "Oʻzbekistonda tibbiy turizm", en: "Medical tourism in Uzbekistan" })}</p>
+          <p className="home-hero-eyebrow">Medical tourism in Uzbekistan</p>
           <h1 id="home-hero-title" className="home-hero-title is-split-pending">
-            {t({ ru: "Медицина, которой можно доверять", uz: "Ishonsa boʻladigan tibbiyot", en: "Medicine you can trust" })}
+            Medicine you can trust
           </h1>
           <div className="home-hero-actions">
             <a href="#catalog" className="pill-btn is-light" onClick={toCatalog}>
-              {t({ ru: "Найти клинику", uz: "Klinika topish", en: "Find a clinic" })}
+              Find a clinic
               <span className="pill-btn-icon">
                 <ArrowIcon />
               </span>
             </a>
             <Link to="/checker" className="pill-btn is-outline-light">
-              {t({ ru: "Подобрать направление", uz: "Yoʻnalish tanlash", en: "Find a specialty" })}
+              Find a specialty
             </Link>
           </div>
         </div>

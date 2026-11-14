@@ -1,12 +1,10 @@
-import { useLang } from "@/shared/i18n/lang";
 
 type Props = { on: boolean; onToggle: () => void; className?: string };
 
 /** Sound on/off for an ambient film: a white pill with four equalizer bars that lie flat while the film is silent and
  *  rise and fall while its sound plays. The pill keeps its colour in both states; the bars and the label tell them apart. */
 export function SoundToggle({ on, onToggle, className = "" }: Props) {
-  const { t } = useLang();
-  const label = on ? t({ ru: "Выключить звук", uz: "Ovozni oʻchirish", en: "Sound off" }) : t({ ru: "Включить звук", uz: "Ovozni yoqish", en: "Sound on" });
+  const label = on ? "Sound off" : "Sound on";
   return (
     <button
       type="button"
