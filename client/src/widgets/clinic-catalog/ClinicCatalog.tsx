@@ -198,11 +198,18 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                 Choose a <em>clinic</em>
               </>
           </h2>
-          {!clinics.isLoading && clinics.data ? (
-            <p className="catalog-count">
-              {clinics.data.length} {(clinics.data.length === 1 ? "clinic" : "clinics")}
-            </p>
-          ) : null}
+          {/* The count and the sort order sit beside the heading, out of the search bar. */}
+          <div className="catalog-head-side">
+            {!clinics.isLoading && clinics.data ? (
+              <p className="catalog-count">
+                {clinics.data.length} {(clinics.data.length === 1 ? "clinic" : "clinics")}
+              </p>
+            ) : null}
+            <div className="catalog-sort">
+              <span>Sort</span>
+              <SelectField title="Sort" value={search.sort || "name"} options={SORT_OPTIONS} onChange={(value) => onPatchSearch({ sort: value === "name" ? undefined : value })} />
+            </div>
+          </div>
         </div>
 
         <form id="catalog-search" className="search" onSubmit={applyQuick}>
@@ -236,17 +243,13 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <span>Specialty</span>
               <SelectField title="Specialty" value={search.specialty || ""} options={specialtyOptions} onChange={(value) => onPatchSearch({ specialty: value || undefined })} />
             </div>
-            <div className="search-chip">
-              <span>Sort</span>
-              <SelectField title="Sort" value={search.sort || "name"} options={SORT_OPTIONS} onChange={(value) => onPatchSearch({ sort: value === "name" ? undefined : value })} />
-            </div>
             <button type="button" className="search-chip is-button" onClick={() => setModalOpen(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M4 7h10m4 0h2M4 17h4m4 0h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <circle cx="16" cy="7" r="2" stroke="currentColor" strokeWidth="2" />
                 <circle cx="10" cy="17" r="2" stroke="currentColor" strokeWidth="2" />
               </svg>
-              More filters
+              Filters
               {advancedCount ? <b>{advancedCount}</b> : null}
             </button>
           </div>

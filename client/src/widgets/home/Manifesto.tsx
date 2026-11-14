@@ -54,7 +54,7 @@ export function Manifesto() {
   );
 
   return (
-    <section ref={root} className="manifesto" aria-label="About medical tourism">
+    <section ref={root} id="medtourism" className="manifesto" aria-label="About medical tourism">
       <div className="wrap">
         <div className="manifesto-head">
           <p className="manifesto-kicker">
@@ -75,7 +75,7 @@ export function Manifesto() {
               <span className="manifesto-rule" aria-hidden="true" />
               <div className="manifesto-stat-body">
                 <p className="manifesto-figure">
-                  {stat.prefix && stat.prefix ? <small>{stat.prefix}</small> : null}
+                  {stat.prefix ? <small>{stat.prefix}</small> : null}
                   <span className="manifesto-count">{stat.value}</span>
                   <small>{stat.unit}</small>
                 </p>

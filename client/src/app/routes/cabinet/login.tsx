@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { isAxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { cabinetLogin, cabinetRegister } from "@/shared/api/cabinet";
@@ -32,8 +33,13 @@ function CabinetLoginPage() {
       }
       qc.clear();
       void navigate({ to: "/cabinet" });
-    } catch {
-      setError(mode === "register" ? "Could not register. This email may already be in use." : "Wrong email or password");
+    } catch (err) {
+      // Tell a lockout and a server problem apart from wrong credentials: the server answers 429 after 8 tries in
+      // 15 minutes from one browser, and then even the right password is refused.
+      const status = isAxiosError(err) ? err.response?.status : undefined;
+      if (status === 429) setError("Too many attempts. Wait 15 minutes and try again.");
+      else if (status === undefined || status >= 500) setError("The server is not responding. Please try again in a minute.");
+      else setError(mode === "register" ? "Could not register. This email may already be in use." : "Wrong email or password");
     } finally {
       setLoading(false);
     }

@@ -8,8 +8,11 @@
     <meta name="theme-color" content="#f4f8f8" />
     <meta property="og:site_name" content="MEDGUIDE UZ" />
     <link rel="icon" type="image/svg+xml" href="/brand/logo.svg" />
-    <link rel="preload" as="image" type="image/webp" href="/images/hero/khiva-sky.webp" fetchpriority="high" />
-    <link rel="preload" as="image" type="image/webp" href="/images/hero/khiva-city.webp" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/webp" media="(orientation: landscape)" fetchpriority="high"
+      imagesrcset="/images/hero/hero-desktop-1000.webp 1000w, /images/hero/hero-desktop.webp 1672w, /images/hero/hero-desktop-2400.webp 2400w"
+      imagesizes="(max-aspect-ratio: 1672/941) 178svh, 100vw" />
+    <link rel="preload" as="image" type="image/webp" media="(orientation: portrait)" fetchpriority="high"
+      imagesrcset="/images/hero/hero-mobile-1100.webp 1100w, /images/hero/hero-mobile.webp 1762w" imagesizes="66svh" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
