@@ -6,8 +6,8 @@ export function formatServicePrice(service: {
   unit?: string | null;
 }) {
   if (service.priceUsd == null) return null;
-  const amount = service.priceUsd.toLocaleString("ru-RU");
+  const amount = service.priceUsd.toLocaleString("en-US");
   const unit = service.unit ? ` / ${service.unit}` : "";
   if (service.currency === "USD") return `$${amount}${unit}`;
-  return `${amount} сум${unit}`;
+  return `${amount} UZS${unit}`;
 }

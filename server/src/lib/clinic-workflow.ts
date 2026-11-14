@@ -34,47 +34,47 @@ export function validateClinicForModeration(clinic: {
 }): ClinicValidationIssue[] {
   const issues: ClinicValidationIssue[] = [];
   if (!clinic.nameRu.trim() && !clinic.nameEn.trim()) {
-    issues.push({ field: "name", message: "Укажите название клиники" });
+    issues.push({ field: "name", message: "Enter the clinic name" });
   }
   if (!clinic.descriptionRu.trim() && !clinic.descriptionEn.trim()) {
-    issues.push({ field: "description", message: "Добавьте описание" });
+    issues.push({ field: "description", message: "Add a description" });
   }
   if (!clinic.phone.trim()) {
-    issues.push({ field: "phone", message: "Укажите телефон" });
+    issues.push({ field: "phone", message: "Enter a phone number" });
   }
   if (!clinic.email.trim()) {
-    issues.push({ field: "email", message: "Укажите email" });
+    issues.push({ field: "email", message: "Enter an email" });
   }
   if (!clinic.city.trim()) {
-    issues.push({ field: "city", message: "Укажите город" });
+    issues.push({ field: "city", message: "Enter the city" });
   }
   if (!clinic.addressRu.trim() && !clinic.addressEn.trim()) {
-    issues.push({ field: "address", message: "Укажите адрес" });
+    issues.push({ field: "address", message: "Enter the address" });
   }
   if (!clinic.specialties.length) {
-    issues.push({ field: "specialties", message: "Выберите хотя бы одно направление" });
+    issues.push({ field: "specialties", message: "Choose at least one specialty" });
   }
   if (!clinic.logoUrl) {
-    issues.push({ field: "logo", message: "Загрузите логотип клиники" });
+    issues.push({ field: "logo", message: "Upload the clinic logo" });
   }
   const branches = clinic.branches ?? [];
   if (!branches.length) {
-    issues.push({ field: "branches", message: "Добавьте хотя бы один филиал" });
+    issues.push({ field: "branches", message: "Add at least one branch" });
   } else {
     branches.forEach((branch, index) => {
       const n = index + 1;
       const branchField = `branches.${branch.id || index}`;
       if (!branch.city.trim()) {
-        issues.push({ field: `${branchField}.city`, message: `Филиал ${n}: укажите город` });
+        issues.push({ field: `${branchField}.city`, message: `Branch ${n}: enter the city` });
       }
       if (!branch.addressRu.trim() && !branch.addressEn.trim()) {
-        issues.push({ field: `${branchField}.address`, message: `Филиал ${n}: укажите адрес` });
+        issues.push({ field: `${branchField}.address`, message: `Branch ${n}: enter the address` });
       }
       if (!branch.phone.trim()) {
-        issues.push({ field: `${branchField}.phone`, message: `Филиал ${n}: укажите телефон` });
+        issues.push({ field: `${branchField}.phone`, message: `Branch ${n}: enter a phone number` });
       }
       if (!branch.specialties?.length) {
-        issues.push({ field: `${branchField}.specialties`, message: `Филиал ${n}: выберите направления` });
+        issues.push({ field: `${branchField}.specialties`, message: `Branch ${n}: choose specialties` });
       }
     });
   }
@@ -114,23 +114,23 @@ export function buildModerationChecklist(clinic: {
   const issueFields = new Set(issues.map((i) => i.field.split(".")[0]));
 
   const required = [
-    { key: "name", label: "Название клиники", ok: !issueFields.has("name") },
-    { key: "logo", label: "Логотип", ok: !issueFields.has("logo") },
-    { key: "description", label: "Описание", ok: !issueFields.has("description") },
-    { key: "contacts", label: "Телефон и email", ok: !issueFields.has("phone") && !issueFields.has("email") },
-    { key: "address", label: "Город и адрес", ok: !issueFields.has("city") && !issueFields.has("address") },
-    { key: "specialties", label: "Направления", ok: !issueFields.has("specialties") },
+    { key: "name", label: "Clinic name", ok: !issueFields.has("name") },
+    { key: "logo", label: "Logo", ok: !issueFields.has("logo") },
+    { key: "description", label: "Description", ok: !issueFields.has("description") },
+    { key: "contacts", label: "Phone and email", ok: !issueFields.has("phone") && !issueFields.has("email") },
+    { key: "address", label: "City and address", ok: !issueFields.has("city") && !issueFields.has("address") },
+    { key: "specialties", label: "Specialties", ok: !issueFields.has("specialties") },
     {
       key: "branches",
-      label: "Филиал с адресом, телефоном и направлением",
+      label: "A branch with an address, phone and specialty",
       ok: !issues.some((i) => i.field.startsWith("branches")),
     },
   ];
 
   const recommended = [
-    { key: "photos", label: "Фотографии", ok: (clinic.photos?.length ?? 0) > 0 },
-    { key: "doctors", label: "Специалисты", ok: (clinic.doctors?.length ?? 0) > 0 },
-    { key: "equipment", label: "Оборудование", ok: (clinic.equipment?.length ?? 0) > 0 },
+    { key: "photos", label: "Photos", ok: (clinic.photos?.length ?? 0) > 0 },
+    { key: "doctors", label: "Doctors", ok: (clinic.doctors?.length ?? 0) > 0 },
+    { key: "equipment", label: "Equipment", ok: (clinic.equipment?.length ?? 0) > 0 },
   ];
 
   return {

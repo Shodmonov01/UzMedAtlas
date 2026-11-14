@@ -28,7 +28,7 @@ function ModerationLoginPage() {
       qc.clear();
       void navigate({ to: "/moderation" });
     } catch {
-      setError("Не удалось войти. Проверьте данные или обратитесь к администратору.");
+      setError("Could not sign in. Check your details or contact the administrator.");
     } finally {
       setLoading(false);
     }
@@ -36,27 +36,27 @@ function ModerationLoginPage() {
 
   return (
     <AuthLayout
-      kicker="Модерация"
+      kicker="Moderation"
       title={
         <>
-          Проверка клиник <em>перед публикацией</em>
+          Clinic review <em>before publishing</em>
         </>
       }
       points={[
-        "Очередь клиник с чеклистом обязательных полей",
-        "Одобрение, возврат на доработку и публикация в каталоге",
-        "Заявки пациентов и уведомления в Telegram",
+        "A queue of clinics with a checklist of required fields",
+        "Approve, send back for changes, publish to the catalog",
+        "Patient requests and Telegram notifications",
       ]}
     >
-      <h2>Вход для модераторов</h2>
-      <p>Администратор входит по паролю, модератор — по email и паролю.</p>
+      <h2>Moderator sign-in</h2>
+      <p>The administrator signs in with a password, moderators with email and password.</p>
 
-      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Роль">
+      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Role">
         <button type="button" role="tab" aria-selected={mode === "administrator"} className={mode === "administrator" ? "is-active" : undefined} onClick={() => setMode("administrator")}>
-          Администратор
+          Administrator
         </button>
         <button type="button" role="tab" aria-selected={mode === "staff"} className={mode === "staff" ? "is-active" : undefined} onClick={() => setMode("staff")}>
-          Модератор
+          Moderator
         </button>
       </div>
 
@@ -66,7 +66,7 @@ function ModerationLoginPage() {
             <input type="email" autoComplete="username" className="field" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="name@example.uz" />
           </Field>
         ) : null}
-        <Field label="Пароль">
+        <Field label="Password">
           <input
             type="password"
             className="field"
@@ -84,7 +84,7 @@ function ModerationLoginPage() {
           </p>
         ) : null}
         <button className="pill-btn is-ink is-large" type="submit" disabled={loading}>
-          {loading ? "Вход…" : "Войти"}
+          {loading ? "Signing in…" : "Sign in"}
           <span className="pill-btn-icon">
             <ArrowIcon />
           </span>

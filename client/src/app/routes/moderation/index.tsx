@@ -13,11 +13,11 @@ export const Route = createFileRoute("/moderation/")({
 });
 
 const FILTERS = [
-  ["moderation", "На модерации"],
-  ["needs_changes", "Нужны изменения"],
-  ["approved", "Одобрены"],
-  ["published", "Опубликованы"],
-  ["all", "Все"],
+  ["moderation", "In review"],
+  ["needs_changes", "Needs changes"],
+  ["approved", "Approved"],
+  ["published", "Published"],
+  ["all", "All"],
 ] as const;
 
 function ModerationQueuePage() {
@@ -37,7 +37,7 @@ function ModerationQueuePage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (auth.isLoading || !auth.data) return <WsLoading label="Проверка сессии…" />;
+  if (auth.isLoading || !auth.data) return <WsLoading label="Checking your session…" />;
 
   const needle = q.trim().toLowerCase();
   const list = (queue.data || []).filter(
@@ -47,13 +47,13 @@ function ModerationQueuePage() {
   return (
     <div className="ws-stack">
       <PageHead
-        eyebrow="Модерация"
-        title="Очередь клиник"
-        lead="Проверьте профиль по чеклисту, затем одобрите и опубликуйте клинику или верните её на доработку с комментарием."
+        eyebrow="Moderation"
+        title="Clinic queue"
+        lead="Check the profile against the checklist, then approve and publish the clinic or send it back with a comment."
       />
 
       <div className="ws-toolbar">
-        <div className="ws-seg" role="tablist" aria-label="Статус">
+        <div className="ws-seg" role="tablist" aria-label="Status">
           {FILTERS.map(([value, label]) => (
             <button
               key={value}
@@ -72,12 +72,12 @@ function ModerationQueuePage() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Найти клинику или город" aria-label="Поиск клиники" />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a clinic or city" aria-label="Search clinics" />
         </label>
       </div>
 
-      {queue.isLoading ? <WsLoading label="Загружаем очередь…" inline /> : null}
-      {queue.isError ? <WsNote tone="danger" title="Не удалось загрузить очередь" /> : null}
+      {queue.isLoading ? <WsLoading label="Loading the queue…" inline /> : null}
+      {queue.isError ? <WsNote tone="danger" title="Could not load the queue" /> : null}
 
       {list.length ? (
         <div className="ws-rows">
@@ -95,12 +95,12 @@ function ModerationQueuePage() {
                   </h2>
                   <p className="ws-row-meta">
                     <span>{CITY_LABELS[clinic.city] || clinic.city}</span>
-                    {clinic.branchCount != null ? <span>Филиалов: {clinic.branchCount}</span> : null}
-                    <span>Обновлено {new Date(clinic.updatedAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</span>
+                    {clinic.branchCount != null ? <span>Branches: {clinic.branchCount}</span> : null}
+                    <span>Updated {new Date(clinic.updatedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</span>
                   </p>
                 </div>
                 <div className="ws-row-end">
-                  <span className="hidden text-sm font-semibold text-ink sm:inline">{clinic.status === "moderation" ? "Проверить" : "Открыть"}</span>
+                  <span className="hidden text-sm font-semibold text-ink sm:inline">{clinic.status === "moderation" ? "Review" : "Open"}</span>
                   <span className="ws-row-arrow" aria-hidden="true">
                     <ArrowIcon size={15} />
                   </span>
@@ -116,8 +116,8 @@ function ModerationQueuePage() {
           <span className="ws-empty-mark">
             <img src="/brand/logo.svg" alt="" width={40} height={40} />
           </span>
-          <h2>{needle ? "Ничего не нашлось" : "Очередь пуста"}</h2>
-          <p>{needle ? "Попробуйте другое название или город." : "Новых клиник на проверку нет. Когда владелец отправит профиль, он появится здесь."}</p>
+          <h2>{needle ? "Nothing found" : "The queue is empty"}</h2>
+          <p>{needle ? "Try another name or city." : "No new clinics to review. When an owner sends a profile, it shows up here."}</p>
         </div>
       ) : null}
     </div>

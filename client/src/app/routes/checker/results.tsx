@@ -15,5 +15,5 @@ function CheckerResultsPage() {
     void navigate({ to: "/" });
   }, [navigate, open]);
 
-  return <p className="text-muted">Открываем Health Checker…</p>;
+  return <p className="text-muted">Opening Health Checker…</p>;
 }

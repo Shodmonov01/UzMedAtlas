@@ -7,28 +7,28 @@ import { AddressMapSearchButton } from "@/shared/ui/AddressMapSearchButton";
 
 
 const LANGS = [
-  { code: "ru", label: "Русский" },
-  { code: "uz", label: "Узбекский" },
+  { code: "ru", label: "Russian" },
+  { code: "uz", label: "Uzbek" },
   { code: "en", label: "English" },
-  { code: "kz", label: "Қазақша" },
-  { code: "tr", label: "Türkçe" },
-  { code: "ar", label: "العربية" },
+  { code: "kz", label: "Kazakh" },
+  { code: "tr", label: "Turkish" },
+  { code: "ar", label: "Arabic" },
 ];
 
 const FIELD_LABELS: Record<string, string> = {
-  nameRu: "Название (RU)",
-  nameEn: "Название (EN)",
-  city: "Город",
-  slug: "Короткий адрес страницы",
-  addressRu: "Адрес (RU)",
-  addressEn: "Адрес (EN)",
-  lat: "Широта на карте",
-  lng: "Долгота на карте",
-  descriptionRu: "Описание (RU)",
-  descriptionEn: "Описание (EN)",
-  phone: "Телефон",
+  nameRu: "Name (RU)",
+  nameEn: "Name (EN)",
+  city: "City",
+  slug: "Short page address",
+  addressRu: "Address (RU)",
+  addressEn: "Address (EN)",
+  lat: "Map latitude",
+  lng: "Map longitude",
+  descriptionRu: "Description (RU)",
+  descriptionEn: "Description (EN)",
+  phone: "Phone",
   email: "Email",
-  languages: "Языки обслуживания",
+  languages: "Service languages",
 };
 
 type Props = {
@@ -124,7 +124,7 @@ export function ClinicEditorForm({
   specialties,
   initial,
   locked,
-  submitLabel = "Создать черновик",
+  submitLabel = "Create draft",
   onSubmit,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
@@ -162,7 +162,7 @@ export function ClinicEditorForm({
     }
     if (languages.length === 0) {
       setActiveStep(5);
-      setError("Выберите хотя бы один язык обслуживания.");
+      setError("Choose at least one service language.");
       return;
     }
     setLoading(true);
@@ -203,8 +203,8 @@ export function ClinicEditorForm({
       const invalidFields = Object.keys(fieldErrors || {}).map((field) => FIELD_LABELS[field] || field);
       setError(
         invalidFields.length
-          ? `Проверьте поля: ${invalidFields.join(", ")}. Убедитесь, что обязательные данные заполнены корректно.`
-          : "Не удалось сохранить. Проверьте подключение и попробуйте ещё раз.",
+          ? `Check these fields: ${invalidFields.join(", ")}. Make sure the required data is filled in correctly.`
+          : "Could not save. Check your connection and try again.",
       );
     } finally {
       setLoading(false);
@@ -217,13 +217,13 @@ export function ClinicEditorForm({
         <p className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">{error}</p>
       ) : null}
 
-      <nav aria-label="Этапы заполнения клиники" className="soft-card grid gap-1 p-2 sm:grid-cols-2 lg:grid-cols-5">
+      <nav aria-label="Clinic setup steps" className="soft-card grid gap-1 p-2 sm:grid-cols-2 lg:grid-cols-5">
         {[
-          { n: 1, title: "Основное", note: "Название и город" },
-          { n: 2, title: "Адрес", note: "Адрес и карта" },
-          { n: 3, title: "Контакты", note: "Телефон и связь" },
-          { n: 4, title: "О клинике", note: "Описание" },
-          { n: 5, title: "Направления", note: "Языки и услуги" },
+          { n: 1, title: "Basics", note: "Name and city" },
+          { n: 2, title: "Address", note: "Address and map" },
+          { n: 3, title: "Contacts", note: "Phone and messengers" },
+          { n: 4, title: "About", note: "Description" },
+          { n: 5, title: "Specialties", note: "Languages and services" },
         ].map((item) => (
           <button
             key={item.n}
@@ -237,26 +237,26 @@ export function ClinicEditorForm({
           </button>
         ))}
       </nav>
-      <p className="-mt-3 px-1 text-xs text-muted"><span className="font-bold text-danger">*</span> Обязательное поле. Точку на карте можно добавить сейчас или позже в редакторе клиники.</p>
+      <p className="-mt-3 px-1 text-xs text-muted"><span className="font-bold text-danger">*</span> Required field. The map location can be added now or later in the clinic editor.</p>
 
       <Section
         step="01"
-        title="Основное"
-        description="Как клиника будет называться в каталоге"
+        title="Basics"
+        description="How the clinic will be named in the catalog"
         active={activeStep === 1}
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Название (RU)" required>
+          <Field label="Name (RU)" required>
             <input name="nameRu" required minLength={2} maxLength={200} className="field" defaultValue={initial?.nameRu} disabled={locked} />
           </Field>
-          <Field label="Название (EN)" required>
+          <Field label="Name (EN)" required>
             <input name="nameEn" required minLength={2} maxLength={200} className="field" defaultValue={initial?.nameEn} disabled={locked} />
           </Field>
-          <Field label="Город" required>
+          <Field label="City" required>
             <input name="city" list="clinic-city-options" required minLength={2} maxLength={80} className="field" value={city} onChange={(event) => setCity(event.target.value)} disabled={locked} />
             <datalist id="clinic-city-options">{CITY_OPTIONS.map((city) => <option key={city.value} value={city.label} />)}</datalist>
           </Field>
-          <Field label="Адрес страницы" hint="необязательно">
+          <Field label="Page address" hint="optional">
             <input
               name="slug"
               minLength={2}
@@ -264,10 +264,10 @@ export function ClinicEditorForm({
               className="field"
               defaultValue={initial?.slug}
               disabled={locked}
-              placeholder="сгенерируется автоматически"
+              placeholder="generated automatically"
             />
           </Field>
-          <Field label="Цвет обложки" className="md:col-span-2">
+          <Field label="Cover colour" className="md:col-span-2">
             <div className="flex flex-wrap items-center gap-3">
               <input
                 type="color"
@@ -286,9 +286,9 @@ export function ClinicEditorForm({
         </div>
       </Section>
 
-      <Section step="02" title="Адрес и расположение" description="Укажите адрес текстом и отметьте точное место на карте. Филиалы можно добавить после создания клиники." active={activeStep === 2}>
+      <Section step="02" title="Address and location" description="Type the address and mark the exact spot on the map. Branches can be added after the clinic is created." active={activeStep === 2}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Адрес (RU)" required>
+          <Field label="Address (RU)" required>
             <div className="space-y-1.5">
               <input
                 name="addressRu"
@@ -310,14 +310,14 @@ export function ClinicEditorForm({
               />
             </div>
           </Field>
-          <Field label="Адрес (EN)" required>
+          <Field label="Address (EN)" required>
             <input name="addressEn" required minLength={3} maxLength={300} className="field" defaultValue={initial?.addressEn} disabled={locked} />
           </Field>
         </div>
         <div className="space-y-2">
           <div>
-            <p className="text-sm font-bold text-ink">Метка на карте <span className="font-medium text-muted">(необязательно)</span></p>
-            <p className="mt-1 text-sm text-muted">Нажмите на карту или перетащите метку, чтобы показать точное место клиники.</p>
+            <p className="text-sm font-bold text-ink">Map pin <span className="font-medium text-muted">(optional)</span></p>
+            <p className="mt-1 text-sm text-muted">Click the map or drag the pin to show the exact place of the clinic.</p>
           </div>
           <BranchMap
             mode={locked ? "view" : "pick"}
@@ -329,14 +329,14 @@ export function ClinicEditorForm({
             }}
           />
           <p className="text-xs text-muted">
-            {coords.lat != null && coords.lng != null ? `Выбрано: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : "Точка пока не выбрана"}
+            {coords.lat != null && coords.lng != null ? `Chosen: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : "No location chosen yet"}
           </p>
         </div>
       </Section>
 
-      <Section step="03" title="Контакты" description="Пациенты увидят эти данные на странице клиники" active={activeStep === 3}>
+      <Section step="03" title="Contacts" description="Patients will see these on the clinic page" active={activeStep === 3}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Телефон" required>
+          <Field label="Phone" required>
             <input name="phone" required minLength={5} maxLength={40} className="field" defaultValue={initial?.phone || "+998"} disabled={locked} />
           </Field>
           <Field label="Email" required>
@@ -350,16 +350,16 @@ export function ClinicEditorForm({
               disabled={locked}
             />
           </Field>
-          <Field label="Сайт" hint="необязательно">
+          <Field label="Website" hint="optional">
             <input name="website" className="field" defaultValue={initial?.website || ""} disabled={locked} />
           </Field>
-          <Field label="WhatsApp" hint="необязательно">
+          <Field label="WhatsApp" hint="optional">
             <input name="whatsapp" className="field" defaultValue={initial?.whatsapp || ""} disabled={locked} />
           </Field>
-          <Field label="Telegram" hint="необязательно">
+          <Field label="Telegram" hint="optional">
             <input name="telegram" className="field" defaultValue={initial?.telegram || ""} disabled={locked} />
           </Field>
-          <Field label="Координатор" hint="необязательно">
+          <Field label="Coordinator" hint="optional">
             <input
               name="coordinatorName"
               className="field"
@@ -367,7 +367,7 @@ export function ClinicEditorForm({
               disabled={locked}
             />
           </Field>
-          <Field label="Время ответа, часов">
+          <Field label="Reply time, hours">
             <input
               name="responseHours"
               type="number"
@@ -381,9 +381,9 @@ export function ClinicEditorForm({
         </div>
       </Section>
 
-      <Section step="04" title="О клинике" description="Короткое описание для карточки и страницы" active={activeStep === 4}>
+      <Section step="04" title="About the clinic" description="A short description for the card and the page" active={activeStep === 4}>
         <div className="grid gap-4">
-          <Field label="Описание (RU)" required>
+          <Field label="Description (RU)" required>
             <textarea
               name="descriptionRu"
               required
@@ -393,10 +393,10 @@ export function ClinicEditorForm({
               className="field"
               defaultValue={initial?.descriptionRu}
               disabled={locked}
-              placeholder="Чем занимается клиника, для кого подходит…"
+              placeholder="What the clinic does and who it suits…"
             />
           </Field>
-          <Field label="Описание (EN)" required>
+          <Field label="Description (EN)" required>
             <textarea
               name="descriptionEn"
               required
@@ -412,10 +412,10 @@ export function ClinicEditorForm({
         </div>
       </Section>
 
-      <Section step="05" title="Языки и направления" description="Можно изменить позже в редакторе профиля" active={activeStep === 5}>
+      <Section step="05" title="Languages and specialties" description="Can be changed later in the profile editor" active={activeStep === 5}>
         <div className="space-y-5">
           <div>
-            <p className="text-sm font-bold text-ink">Языки обслуживания <span className="text-danger">*</span></p>
+            <p className="text-sm font-bold text-ink">Service languages <span className="text-danger">*</span></p>
             <div className="mt-3 flex flex-wrap gap-2">
               {LANGS.map((lang) => {
                 const active = languages.includes(lang.code);
@@ -437,8 +437,8 @@ export function ClinicEditorForm({
             </div>
           </div>
           <div>
-            <p className="text-sm font-bold text-ink">Направления</p>
-            <p className="mt-1 text-xs text-muted">Выбрано: {specialtyIds.length + customSpecialties.length}</p>
+            <p className="text-sm font-bold text-ink">Specialties</p>
+            <p className="mt-1 text-xs text-muted">Chosen: {specialtyIds.length + customSpecialties.length}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {specialties.map((item) => {
                 const id = item.id || item.slug;
@@ -454,7 +454,7 @@ export function ClinicEditorForm({
                       );
                     }}
                   >
-                    {item.nameRu || item.nameEn}
+                    {item.nameEn || item.nameRu}
                   </ChipToggle>
                 );
               })}
@@ -472,11 +472,11 @@ export function ClinicEditorForm({
             {!locked ? (
               <div className="mt-4 space-y-2 rounded-2xl border border-dashed border-line p-4">
                 <div>
-                  <p className="text-sm font-bold text-ink">Добавить своё направление</p>
-                  <p className="mt-1 text-xs text-muted">Оно будет добавлено только в профиль этой клиники.</p>
+                  <p className="text-sm font-bold text-ink">Add your own specialty</p>
+                  <p className="mt-1 text-xs text-muted">It is added to this clinic profile only.</p>
                 </div>
-                <input name="customSpecialtyRu" minLength={2} maxLength={120} className="field" placeholder="Название на русском" />
-                <input name="customSpecialtyEn" minLength={2} maxLength={120} className="field" placeholder="Название на английском (необязательно)" />
+                <input name="customSpecialtyRu" minLength={2} maxLength={120} className="field" placeholder="Name in Russian" />
+                <input name="customSpecialtyEn" minLength={2} maxLength={120} className="field" placeholder="Name in English (optional)" />
                 <button
                   type="button"
                   className="btn btn-ghost text-sm"
@@ -487,11 +487,11 @@ export function ClinicEditorForm({
                     const nameRu = ru instanceof HTMLInputElement ? ru.value.trim() : "";
                     const nameEn = en instanceof HTMLInputElement ? en.value.trim() : "";
                     if (nameRu.length < 2 || nameRu.length > 120 || (nameEn && (nameEn.length < 2 || nameEn.length > 120))) {
-                      setError("Укажите название направления на русском (от 2 до 120 символов).");
+                      setError("Enter the specialty name in Russian (2 to 120 characters).");
                       return;
                     }
                     if (customSpecialties.some((item) => item.nameRu.toLocaleLowerCase("ru") === nameRu.toLocaleLowerCase("ru"))) {
-                      setError("Это направление уже добавлено.");
+                      setError("This specialty is already added.");
                       return;
                     }
                     setError(null);
@@ -500,7 +500,7 @@ export function ClinicEditorForm({
                     if (en instanceof HTMLInputElement) en.value = "";
                   }}
                 >
-                  Добавить направление
+                  Add specialty
                 </button>
               </div>
             ) : null}
@@ -511,12 +511,12 @@ export function ClinicEditorForm({
       {!locked ? (
         <div className="soft-card sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div>
-            <p className="text-sm font-bold text-ink">Шаг {activeStep} из 5</p>
-            <p className="text-xs text-muted">Черновик можно дополнить после создания</p>
+            <p className="text-sm font-bold text-ink">Step {activeStep} of 5</p>
+            <p className="text-xs text-muted">The draft can be completed after it is created</p>
           </div>
           <div className="flex gap-2">
             {activeStep > 1 ? (
-              <button className="btn btn-ghost" type="button" onClick={() => setActiveStep((step) => step - 1)}>Назад</button>
+              <button className="btn btn-ghost" type="button" onClick={() => setActiveStep((step) => step - 1)}>Back</button>
             ) : null}
             {activeStep < 5 ? (
               <button
@@ -528,10 +528,10 @@ export function ClinicEditorForm({
                   if (invalid) { invalid.reportValidity(); return; }
                   setActiveStep((step) => step + 1);
                 }}
-              >Продолжить</button>
+              >Continue</button>
             ) : (
               <button className="btn btn-primary min-w-[180px]" type="submit" disabled={loading}>
-                {loading ? "Создание…" : submitLabel}
+                {loading ? "Creating…" : submitLabel}
               </button>
             )}
           </div>

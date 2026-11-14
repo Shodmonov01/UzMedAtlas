@@ -704,7 +704,7 @@ export async function cabinetRoutes(app: FastifyInstance) {
         },
         include: clinicDetailInclude,
       });
-      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника отправлена на модерацию", audience: "staff" });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Clinic sent for review", audience: "staff" });
       return clinicUpdate;
     });
     return serializeClinic(updated);

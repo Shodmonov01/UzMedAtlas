@@ -44,7 +44,7 @@ export function PhotoSlides({ photos, className = "" }: { photos: Slide[]; class
             type="button"
             className={i === current ? "is-active" : undefined}
             onClick={() => setCurrent(i)}
-            aria-label={`Фото ${i + 1} из ${photos.length}`}
+            aria-label={`Photo ${i + 1} of ${photos.length}`}
             aria-current={i === current}
           />
         ))}

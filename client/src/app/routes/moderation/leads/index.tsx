@@ -15,10 +15,10 @@ export const Route = createFileRoute("/moderation/leads/")({
 });
 
 const STATUSES = [
-  { value: undefined, label: "Все" },
-  { value: "new", label: "Новые" },
-  { value: "contacted", label: "На связи" },
-  { value: "closed", label: "Закрыты" },
+  { value: undefined, label: "All" },
+  { value: "new", label: "New" },
+  { value: "contacted", label: "In contact" },
+  { value: "closed", label: "Closed" },
 ];
 
 function AdminLeadsPage() {
@@ -38,21 +38,21 @@ function AdminLeadsPage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (auth.isLoading || !auth.data) return <WsLoading label="Проверка сессии…" />;
+  if (auth.isLoading || !auth.data) return <WsLoading label="Checking your session…" />;
 
   const go = (next: Partial<typeof search>) => void navigate({ to: "/moderation/leads", search: { ...search, ...next } });
 
   return (
     <div className="ws-stack">
       <PageHead
-        eyebrow="Модерация"
-        title="Заявки пациентов"
-        lead="Все обращения со страниц клиник и из Health Checker. Клиника видит свои заявки в кабинете; здесь — общий список."
+        eyebrow="Moderation"
+        title="Patient requests"
+        lead="All requests from clinic pages and Health Checker. Each clinic sees its own in the cabinet; this is the full list."
       />
 
       <div className="ws-toolbar">
         <div className="flex flex-wrap gap-2">
-          <div className="ws-seg" role="tablist" aria-label="Статус">
+          <div className="ws-seg" role="tablist" aria-label="Status">
             {STATUSES.map((item) => (
               <button
                 key={item.label}
@@ -66,10 +66,10 @@ function AdminLeadsPage() {
               </button>
             ))}
           </div>
-          <div className="ws-seg" role="tablist" aria-label="Источник">
+          <div className="ws-seg" role="tablist" aria-label="Source">
             {[
-              { value: undefined, label: "Все источники" },
-              { value: "catalog", label: "Каталог" },
+              { value: undefined, label: "All sources" },
+              { value: "catalog", label: "Catalog" },
               { value: "checker", label: "Health Checker" },
             ].map((item) => (
               <button
@@ -96,22 +96,22 @@ function AdminLeadsPage() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14M20 20l-4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Имя, телефон или клиника" aria-label="Поиск заявок" />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Name, phone or clinic" aria-label="Search requests" />
           <button type="submit" className="ws-pill is-ink">
-            Найти
+            Search
           </button>
         </form>
       </div>
 
-      {leads.isLoading ? <WsLoading label="Загружаем заявки…" inline /> : null}
-      {leads.isError ? <WsNote tone="danger" title="Не удалось загрузить заявки" /> : null}
+      {leads.isLoading ? <WsLoading label="Loading requests…" inline /> : null}
+      {leads.isError ? <WsNote tone="danger" title="Could not load the requests" /> : null}
       {!leads.isLoading && leads.data?.length === 0 ? (
         <div className="ws-empty">
           <span className="ws-empty-mark">
             <img src="/brand/logo.svg" alt="" width={40} height={40} />
           </span>
-          <h2>Заявок нет</h2>
-          <p>По этим фильтрам ничего не нашлось. Сбросьте фильтры или измените запрос.</p>
+          <h2>No requests</h2>
+          <p>Nothing matches these filters. Reset the filters or change the search.</p>
         </div>
       ) : null}
 
@@ -120,11 +120,11 @@ function AdminLeadsPage() {
           <table className="ws-table">
             <thead>
               <tr>
-                <th>Пациент</th>
-                <th>Клиника</th>
-                <th>Источник</th>
-                <th>Статус</th>
-                <th>Дата</th>
+                <th>Patient</th>
+                <th>Clinic</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
@@ -137,11 +137,11 @@ function AdminLeadsPage() {
                     <small>{lead.phone}</small>
                   </td>
                   <td>{lead.clinic?.nameRu || lead.clinic?.nameEn || "—"}</td>
-                  <td>{lead.source === "checker" ? "Health Checker" : "Каталог"}</td>
+                  <td>{lead.source === "checker" ? "Health Checker" : "Catalog"}</td>
                   <td>
                     <LeadStatusBadge status={lead.status} />
                   </td>
-                  <td className="whitespace-nowrap text-muted">{new Date(lead.createdAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</td>
+                  <td className="whitespace-nowrap text-muted">{new Date(lead.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</td>
                 </tr>
               ))}
             </tbody>

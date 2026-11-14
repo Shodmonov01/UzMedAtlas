@@ -15,9 +15,9 @@ type Props = {
 };
 
 function formatPrice(service: CabinetService) {
-  if (service.priceUsd == null) return "без цены";
-  const amount = service.priceUsd.toLocaleString("ru-RU");
-  const currency = service.currency === "USD" ? "$" : "сум";
+  if (service.priceUsd == null) return "no price";
+  const amount = service.priceUsd.toLocaleString("en-US");
+  const currency = service.currency === "USD" ? "$" : "UZS";
   const unit = service.unit ? ` / ${service.unit}` : "";
   return service.currency === "USD" ? `$${amount}${unit}` : `${amount} ${currency}${unit}`;
 }
@@ -26,13 +26,13 @@ function formatPrice(service: CabinetService) {
 function ServiceFields({ service, specialties }: { service?: CabinetService; specialties: SpecialtyOption[] }) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
-      <Field label="Название (RU) *">
-        <input name="nameRu" required className="field" defaultValue={service?.nameRu} placeholder="Например, МРТ головного мозга" />
+      <Field label="Name (RU) *">
+        <input name="nameRu" required className="field" defaultValue={service?.nameRu} placeholder="e.g. МРТ головного мозга" />
       </Field>
-      <Field label="Название (EN) *">
+      <Field label="Name (EN) *">
         <input name="nameEn" required className="field" defaultValue={service?.nameEn} placeholder="For example, brain MRI" />
       </Field>
-      <Field label="Направление *" wide>
+      <Field label="Specialty *" wide>
         <select name="specialtyId" required={!service} className="field" defaultValue={service ? service.specialtyId : specialties[0]?.id}>
           {specialties.map((s) => (
             <option key={s.id} value={s.id}>
@@ -41,24 +41,24 @@ function ServiceFields({ service, specialties }: { service?: CabinetService; spe
           ))}
         </select>
       </Field>
-      <Field label="Цена" hint="Можно оставить пустым">
+      <Field label="Price" hint="Can be left empty">
         <input name="priceUsd" type="number" min={0} className="field" defaultValue={service?.priceUsd ?? ""} placeholder="500000" />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Валюта">
+        <Field label="Currency">
           <select name="currency" className="field" defaultValue={service?.currency || "UZS"}>
             <option value="UZS">UZS</option>
             <option value="USD">USD</option>
           </select>
         </Field>
-        <Field label="За что">
-          <input name="unit" className="field" defaultValue={service?.unit || ""} placeholder="приём, сеанс…" />
+        <Field label="Per">
+          <input name="unit" className="field" defaultValue={service?.unit || ""} placeholder="visit, session…" />
         </Field>
       </div>
-      <Field label="Описание (RU)" wide>
-        <textarea name="descriptionRu" rows={2} className="field" defaultValue={service?.descriptionRu} placeholder="Что входит в услугу" />
+      <Field label="Description (RU)" wide>
+        <textarea name="descriptionRu" rows={2} className="field" defaultValue={service?.descriptionRu} placeholder="What the service includes" />
       </Field>
-      <Field label="Описание (EN)" wide>
+      <Field label="Description (EN)" wide>
         <textarea name="descriptionEn" rows={2} className="field" defaultValue={service?.descriptionEn} placeholder="What the service includes" />
       </Field>
     </div>
@@ -79,15 +79,15 @@ export function BranchServicesPanel({
   if (!specialties.length) {
     return (
       <div className="soft-card rounded-[1.5rem] bg-white p-6">
-        <h2 className="text-xl font-extrabold">Услуги филиала</h2>
-        <p className="mt-2 text-sm text-muted">Сначала выберите направления у филиала.</p>
+        <h2 className="text-xl font-extrabold">Branch services</h2>
+        <p className="mt-2 text-sm text-muted">Choose the branch specialties first.</p>
       </div>
     );
   }
 
   return (
     <div className="soft-card space-y-4 rounded-[1.5rem] bg-white p-6">
-      <h2 className="text-xl font-extrabold">Услуги филиала</h2>
+      <h2 className="text-xl font-extrabold">Branch services</h2>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
 
       <ul className="space-y-3">
@@ -114,17 +114,17 @@ export function BranchServicesPanel({
                     setEditingId(null);
                     await onChanged();
                   } catch {
-                    setError("Не удалось обновить услугу");
+                    setError("Could not update the service");
                   }
                 }}
               >
                 <ServiceFields service={service} specialties={specialties} />
                 <div className="flex gap-2">
                   <button type="submit" className="btn btn-primary text-sm">
-                    Сохранить
+                    Save
                   </button>
                   <button type="button" className="btn btn-ghost text-sm" onClick={() => setEditingId(null)}>
-                    Отмена
+                    Cancel
                   </button>
                 </div>
               </form>
@@ -143,7 +143,7 @@ export function BranchServicesPanel({
                       className="text-sm font-bold text-primary"
                       onClick={() => setEditingId(service.id)}
                     >
-                      Изменить
+                      Edit
                     </button>
                     <button
                       type="button"
@@ -154,11 +154,11 @@ export function BranchServicesPanel({
                           await deleteBranchService(clinicId, branchId, service.id);
                           await onChanged();
                         } catch {
-                          setError("Не удалось удалить услугу");
+                          setError("Could not delete the service");
                         }
                       }}
                     >
-                      Удалить
+                      Delete
                     </button>
                   </div>
                 ) : null}
@@ -166,7 +166,7 @@ export function BranchServicesPanel({
             )}
           </li>
         ))}
-        {!services.length ? <li className="text-sm text-muted">Услуг пока нет</li> : null}
+        {!services.length ? <li className="text-sm text-muted">No services yet</li> : null}
       </ul>
 
       {!locked ? (
@@ -191,17 +191,17 @@ export function BranchServicesPanel({
               form.reset();
               await onChanged();
             } catch {
-              setError("Не удалось добавить услугу");
+              setError("Could not add the service");
             }
           }}
         >
           <div>
-            <h3 className="font-extrabold">Добавить услугу</h3>
-            <p className="mt-1 text-sm text-muted">Поля со звёздочкой обязательны, цену можно не указывать.</p>
+            <h3 className="font-extrabold">Add a service</h3>
+            <p className="mt-1 text-sm text-muted">Fields with an asterisk are required; the price is optional.</p>
           </div>
           <ServiceFields specialties={specialties} />
           <button type="submit" className="btn btn-primary text-sm">
-            Добавить услугу
+            Add a service
           </button>
         </form>
       ) : null}

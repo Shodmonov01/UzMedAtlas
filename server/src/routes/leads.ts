@@ -137,7 +137,7 @@ export async function leadsRoutes(app: FastifyInstance) {
         recommendedSpecialtyId: usedChecker ? specialtyId : null,
       },
     });
-      await queueClinicNotification(tx, { clinic, eventKey: `lead:${created.id}`, title: "Новая заявка пациента", audience: "both", leadId: created.id });
+      await queueClinicNotification(tx, { clinic, eventKey: `lead:${created.id}`, title: "New patient request", audience: "both", leadId: created.id });
       return created;
       });
     } catch (error) {

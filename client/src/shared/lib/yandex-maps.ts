@@ -65,7 +65,7 @@ const TASHKENT: YMapsCoords = [41.3111, 69.2797];
 
 let loadPromise: Promise<YMapsApi> | null = null;
 
-/** Optional — без ключа работает бесплатный JS API 2.1 */
+/** Optional: without a key the free JS API 2.1 is used. */
 export function getYandexMapsApiKey() {
   return import.meta.env.VITE_YANDEX_MAPS_API_KEY?.trim() || "";
 }
@@ -123,7 +123,7 @@ export async function geocodeYandexAddress(address: string) {
   const result = await ymaps.geocode(address, { results: 1, lang: "ru_RU" });
   const first = result.geoObjects.get(0);
   const coordinates = first?.geometry?.getCoordinates();
-  if (!coordinates) throw new Error("Адрес не найден на карте");
+  if (!coordinates) throw new Error("Address not found on the map");
   return {
     lat: coordinates[0],
     lng: coordinates[1],

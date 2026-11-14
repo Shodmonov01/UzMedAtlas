@@ -33,7 +33,7 @@ function CabinetLoginPage() {
       qc.clear();
       void navigate({ to: "/cabinet" });
     } catch {
-      setError(mode === "register" ? "Не удалось зарегистрироваться. Возможно, этот email уже занят." : "Неверный email или пароль");
+      setError(mode === "register" ? "Could not register. This email may already be in use." : "Wrong email or password");
     } finally {
       setLoading(false);
     }
@@ -41,40 +41,40 @@ function CabinetLoginPage() {
 
   return (
     <AuthLayout
-      kicker="Для клиник"
+      kicker="For clinics"
       title={
         <>
-          Кабинет клиники на <em>карте медтуризма</em>
+          Your clinic on the <em>medical travel map</em>
         </>
       }
       points={[
-        "Профиль клиники, филиалы, врачи и цены — в одном месте",
-        "Заявки пациентов из каталога и Health Checker",
-        "Проверка модератором перед публикацией в каталоге",
+        "Clinic profile, branches, doctors and prices in one place",
+        "Patient requests from the catalog and Health Checker",
+        "A moderator reviews the profile before it goes live",
       ]}
     >
-      <h2>{mode === "login" ? "Вход в кабинет" : "Регистрация клиники"}</h2>
-      <p>{mode === "login" ? "Войдите, чтобы управлять профилем клиники и заявками." : "Создайте аккаунт владельца — затем добавите клинику по шагам."}</p>
+      <h2>{mode === "login" ? "Sign in" : "Register a clinic"}</h2>
+      <p>{mode === "login" ? "Sign in to manage your clinic profile and requests." : "Create an owner account, then add your clinic step by step."}</p>
 
-      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Вход или регистрация">
+      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Sign in or register">
         <button type="button" role="tab" aria-selected={mode === "login"} className={mode === "login" ? "is-active" : undefined} onClick={() => { setMode("login"); setError(null); }}>
-          Вход
+          Sign in
         </button>
         <button type="button" role="tab" aria-selected={mode === "register"} className={mode === "register" ? "is-active" : undefined} onClick={() => { setMode("register"); setError(null); }}>
-          Регистрация
+          Register
         </button>
       </div>
 
       <form onSubmit={onSubmit} className="auth-form">
         {mode === "register" ? (
-          <Field label="Ваше имя">
-            <input className="field" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} autoComplete="name" placeholder="Например, Дилноза Юсупова" />
+          <Field label="Your name">
+            <input className="field" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} autoComplete="name" placeholder="e.g. Dilnoza Yusupova" />
           </Field>
         ) : null}
         <Field label="Email">
           <input type="email" className="field" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus autoComplete="username" placeholder="clinic@example.uz" />
         </Field>
-        <Field label="Пароль" hint={mode === "register" ? "Не меньше 8 символов" : undefined}>
+        <Field label="Password" hint={mode === "register" ? "At least 8 characters" : undefined}>
           <input
             type="password"
             className="field"
@@ -92,7 +92,7 @@ function CabinetLoginPage() {
           </p>
         ) : null}
         <button className="pill-btn is-ink is-large" type="submit" disabled={loading}>
-          {loading ? "Подождите…" : mode === "login" ? "Войти" : "Создать аккаунт"}
+          {loading ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
           <span className="pill-btn-icon">
             <ArrowIcon />
           </span>

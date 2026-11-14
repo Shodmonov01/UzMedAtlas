@@ -16,6 +16,6 @@ function CheckerPage() {
   }, [navigate, open]);
 
   return (
-    <p className="text-muted">Открываем Health Checker…</p>
+    <p className="text-muted">Opening Health Checker…</p>
   );
 }

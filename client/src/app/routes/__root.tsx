@@ -41,8 +41,7 @@ function RootLayout() {
   );
 }
 
-/** The page frame. A language change redraws the page and the checker from scratch (keyed by the language), so every
- *  text and every GSAP split and trigger is built again in the new language. */
+/** The page frame. */
 function RootShell() {
   const { lang } = useLang();
   const pathname = useRouterState({ select: (s) => s.location.pathname });

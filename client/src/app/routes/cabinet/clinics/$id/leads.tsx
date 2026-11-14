@@ -15,10 +15,10 @@ export const Route = createFileRoute("/cabinet/clinics/$id/leads")({
 });
 
 const STATUS_OPTIONS = [
-  { value: "", label: "Все" },
-  { value: "new", label: "Новые" },
-  { value: "contacted", label: "На связи" },
-  { value: "closed", label: "Закрыты" },
+  { value: "", label: "All" },
+  { value: "new", label: "New" },
+  { value: "contacted", label: "In contact" },
+  { value: "closed", label: "Closed" },
 ];
 
 function CabinetLeadsPage() {
@@ -56,7 +56,7 @@ function CabinetLeadsPage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (auth.isLoading || !auth.data) return <WsLoading label="Проверка сессии…" />;
+  if (auth.isLoading || !auth.data) return <WsLoading label="Checking your session…" />;
 
   return (
     <div className="ws-stack">
@@ -64,16 +64,16 @@ function CabinetLeadsPage() {
         back={
           <Link to="/cabinet/clinics/$id" params={{ id }} className="ws-back">
             <BackMark />
-            {clinic.data?.nameRu || clinic.data?.nameEn || "Клиника"}
+            {clinic.data?.nameRu || clinic.data?.nameEn || "Clinic"}
           </Link>
         }
-        eyebrow="Заявки"
-        title="Заявки пациентов"
-        lead="Обращения со страницы клиники в каталоге и из Health Checker. Это просьба перезвонить, а не запись к врачу — свяжитесь с пациентом удобным ему способом."
+        eyebrow="Requests"
+        title="Patient requests"
+        lead="Requests from the clinic page in the catalog and from Health Checker. This is a call-back request, not a booking: contact the patient the way they prefer."
       />
 
       <div className="ws-toolbar">
-        <div className="ws-seg" role="tablist" aria-label="Статус заявки">
+        <div className="ws-seg" role="tablist" aria-label="Request status">
           {STATUS_OPTIONS.map((opt) => (
             <button
               key={opt.value || "all"}
@@ -89,14 +89,14 @@ function CabinetLeadsPage() {
         </div>
       </div>
 
-      {leads.isLoading ? <WsLoading label="Загружаем заявки…" inline /> : null}
+      {leads.isLoading ? <WsLoading label="Loading requests…" inline /> : null}
       {!leads.isLoading && leads.data?.length === 0 ? (
         <div className="ws-empty">
           <span className="ws-empty-mark">
             <img src="/brand/logo.svg" alt="" width={40} height={40} />
           </span>
-          <h2>{status ? "Здесь пусто" : "Заявок пока нет"}</h2>
-          <p>Когда пациент оставит заявку на странице клиники, она появится здесь. Подключите Telegram в «Моих клиниках», чтобы узнавать о заявках сразу.</p>
+          <h2>{status ? "Nothing here" : "No requests yet"}</h2>
+          <p>When a patient leaves a request on the clinic page, it shows up here. Connect Telegram in “My clinics” to hear about requests right away.</p>
         </div>
       ) : null}
 
@@ -115,8 +115,8 @@ function CabinetLeadsPage() {
                     <h2 className="ws-card-title">{lead.fullName}</h2>
                     <p className="ws-row-meta">
                       <span>{lead.country}</span>
-                      <span>{new Date(lead.createdAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</span>
-                      <span>{lead.source === "checker" ? "Health Checker" : "Каталог"}</span>
+                      <span>{new Date(lead.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</span>
+                      <span>{lead.source === "checker" ? "Health Checker" : "Catalog"}</span>
                     </p>
                   </div>
                 </div>
@@ -125,13 +125,13 @@ function CabinetLeadsPage() {
 
               <dl className="ws-facts">
                 <div>
-                  <dt>Телефон</dt>
+                  <dt>Phone</dt>
                   <dd>
                     <a href={phoneHref}>{lead.phone}</a>
                   </dd>
                 </div>
                 <div>
-                  <dt>Как связаться</dt>
+                  <dt>Contact via</dt>
                   <dd>{CONTACT_LABELS[lead.contactMethod] || lead.contactMethod}</dd>
                 </div>
                 {lead.email ? (
@@ -144,26 +144,26 @@ function CabinetLeadsPage() {
                 ) : null}
                 {lead.recommendedSpecialty ? (
                   <div>
-                    <dt>Направление</dt>
+                    <dt>Specialty</dt>
                     <dd>{lead.recommendedSpecialty.nameRu || lead.recommendedSpecialty.nameEn}</dd>
                   </div>
                 ) : null}
                 {lead.age != null ? (
                   <div>
-                    <dt>Возраст</dt>
+                    <dt>Age</dt>
                     <dd>{lead.age}</dd>
                   </div>
                 ) : null}
                 {lead.symptoms || lead.medicalNeed ? (
                   <div className="is-wide">
-                    <dt>Запрос пациента</dt>
+                    <dt>Patient request</dt>
                     <dd className="is-text">{lead.symptoms || lead.medicalNeed}</dd>
                   </div>
                 ) : null}
               </dl>
 
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm font-semibold text-muted">Статус:</span>
+                <span className="text-sm font-semibold text-muted">Status:</span>
                 <div className="ws-seg">
                   {(["new", "contacted", "closed"] as const).map((s) => (
                     <button
@@ -180,12 +180,12 @@ function CabinetLeadsPage() {
               </div>
 
               <label className="ws-field">
-                <span className="ws-field-label">Заметки для команды</span>
+                <span className="ws-field-label">Notes for the team</span>
                 <textarea
                   className="field"
                   rows={2}
                   value={note}
-                  placeholder="Например: перезвонили, ждёт выписку из МРТ"
+                  placeholder="e.g. called back, waiting for the MRI report"
                   onChange={(e) => {
                     setSavedNote(null);
                     setNotesDraft((prev) => ({ ...prev, [lead.id]: e.target.value }));
@@ -199,12 +199,12 @@ function CabinetLeadsPage() {
                   disabled={patch.isPending || note === (lead.notes ?? "")}
                   onClick={() => patch.mutate({ leadId: lead.id, notes: note })}
                 >
-                  Сохранить заметку
+                  Save note
                 </button>
                 <a href={phoneHref} className="ws-pill">
-                  Позвонить
+                  Call
                 </a>
-                {savedNote === lead.id ? <span className="text-sm font-semibold text-accent-strong">Сохранено</span> : null}
+                {savedNote === lead.id ? <span className="text-sm font-semibold text-accent-strong">Saved</span> : null}
               </div>
             </article>
           );

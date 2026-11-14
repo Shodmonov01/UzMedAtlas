@@ -30,9 +30,9 @@ function NewBranchPage() {
   }, [auth.data, auth.isError, navigate]);
 
   if (!auth.data || clinic.isLoading) return <WsLoading />;
-  if (!clinic.data) return <WsNote tone="danger" title="Клиника не найдена" />;
+  if (!clinic.data) return <WsNote tone="danger" title="Clinic not found" />;
   if (clinic.data.status === "moderation") {
-    return <WsNote tone="info" title="Клиника на модерации">На модерации нельзя добавлять филиалы.</WsNote>;
+    return <WsNote tone="info" title="The clinic is in review">Branches cannot be added during review.</WsNote>;
   }
 
   return (
@@ -41,12 +41,12 @@ function NewBranchPage() {
         back={
           <Link to="/cabinet/clinics/$id/branches" params={{ id }} className="ws-back">
             <BackMark />
-            Филиалы · {clinic.data.nameRu || clinic.data.nameEn}
+            Branches · {clinic.data.nameRu || clinic.data.nameEn}
           </Link>
         }
-        eyebrow="Новый филиал"
-        title="Добавить филиал"
-        lead="Адрес, телефон и направления подставлены из профиля клиники — поправьте их под этот филиал. Услуги, врачи и фото добавите после сохранения."
+        eyebrow="New branch"
+        title="Add a branch"
+        lead="The address, phone and specialties are copied from the clinic profile; adjust them for this branch. Services, doctors and photos come after saving."
       />
       {specialties.data ? (
         <BranchEditorForm

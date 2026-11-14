@@ -1,55 +1,28 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
 
-/** The site's languages: Russian (the original), Uzbek (Latin script) and English. */
+/** The site is English only. Copy written earlier keeps its Russian and Uzbek next to the English
+ *  (t({ ru, uz, en })), and t() always picks the English. */
 export type Lang = "ru" | "uz" | "en";
-export const LANGS: { value: Lang; label: string; name: string }[] = [
-  { value: "ru", label: "RU", name: "Русский" },
-  { value: "uz", label: "UZ", name: "Oʻzbekcha" },
-  { value: "en", label: "EN", name: "English" },
-];
+export const SITE_LANG: Lang = "en";
 
 /** A piece of copy in every language, written next to where it is used. */
 export type Text = Record<Lang, string>;
 
-const STORAGE_KEY = "uma_lang";
+const LangContext = createContext<{ lang: Lang } | null>(null);
 
-function initialLang(): Lang {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "ru" || saved === "uz" || saved === "en") return saved;
-  } catch {
-    // Storage can be blocked; then the site opens in Russian.
-  }
-  // Russian until the reader picks another language (the inner pages are still Russian only).
-  return "ru";
-}
-
-const LangContext = createContext<{ lang: Lang; setLang: (lang: Lang) => void } | null>(null);
-
-/** Holds the chosen language, remembers it in this browser and keeps <html lang> in step. */
+/** Gives the page its language (always English). */
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>(initialLang);
-
-  useEffect(() => {
-    document.documentElement.lang = lang;
-    try {
-      localStorage.setItem(STORAGE_KEY, lang);
-    } catch {
-      // Not remembered across visits then; the switch still works.
-    }
-  }, [lang]);
-
-  const value = useMemo(() => ({ lang, setLang }), [lang]);
+  const value = useMemo(() => ({ lang: SITE_LANG }), []);
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
 }
 
-/** The current language, a way to change it, and t() to pick a piece of copy in it. */
+/** The site language and t() to pick a piece of copy in it. */
 export function useLang() {
   const ctx = useContext(LangContext);
   if (ctx === null) throw new Error("useLang must be used inside LanguageProvider");
-  const { lang, setLang } = ctx;
+  const { lang } = ctx;
   const t = useCallback((text: Text) => text[lang], [lang]);
-  return { lang, setLang, t };
+  return { lang, t };
 }
 
 /** A count with its noun in the current language: Russian has three forms (1, 2-4, 5+), English two, Uzbek one. */
@@ -63,8 +36,13 @@ export function countWord(lang: Lang, n: number, forms: { ru: [string, string, s
   return forms.ru[2];
 }
 
-/** A name from the API in the current language. The API has Russian and English; Uzbek readers get the Russian. */
+/** A name from the API in English, falling back to the Russian when the clinic has no English name yet. */
 export function pickName(lang: Lang, ru?: string | null, en?: string | null) {
   if (lang === "en") return en || ru || "";
   return ru || en || "";
+}
+
+/** English copy for code written without t(): a count with its noun ("1 clinic", "3 clinics"). */
+export function plural(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`;
 }

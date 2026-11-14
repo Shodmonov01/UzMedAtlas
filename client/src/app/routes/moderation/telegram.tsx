@@ -7,7 +7,7 @@ import { PageHead, WsLoading } from "@/widgets/workspace/Workspace";
 
 export const Route = createFileRoute("/moderation/telegram")({ component: TelegramPage });
 
-const LABELS: Record<string, string> = { pending: "Ожидают", sent: "Отправлены", failed: "Ошибка", cancelled: "Отменены" };
+const LABELS: Record<string, string> = { pending: "Pending", sent: "Sent", failed: "Failed", cancelled: "Cancelled" };
 const TONES: Record<string, string> = { pending: "is-moderation", sent: "is-published", failed: "is-needs_changes", cancelled: "is-draft" };
 
 function TelegramPage() {
@@ -20,22 +20,22 @@ function TelegramPage() {
     if (profile.isError) void navigate({ to: "/moderation/login" });
   }, [profile.isError, navigate]);
 
-  if (!profile.data) return <WsLoading label="Проверка сессии…" />;
+  if (!profile.data) return <WsLoading label="Checking your session…" />;
 
   return (
     <div className="ws-stack">
       <PageHead
-        eyebrow="Модерация"
-        title="Уведомления"
-        lead="Новые заявки и клиники на проверке приходят в Telegram. В сообщении нет данных пациента — только ссылка в кабинет."
+        eyebrow="Moderation"
+        title="Notifications"
+        lead="New requests and clinics to review arrive on Telegram. Messages carry no patient data, only a link to the cabinet."
       />
       <TelegramPanel />
 
       {profile.data.role === "administrator" ? (
         <section className="ws-card is-pad space-y-5">
           <div>
-            <h2 className="ws-card-title">Доставка сообщений</h2>
-            <p className="ws-card-text">Сообщения повторно отправляются при временных ошибках. Отозванные подключения больше не получают уведомлений.</p>
+            <h2 className="ws-card-title">Message delivery</h2>
+            <p className="ws-card-text">Messages are resent after temporary errors. Revoked connections no longer get notifications.</p>
           </div>
           <div className="ws-stats">
             {Object.entries(LABELS).map(([key, label]) => (
@@ -47,14 +47,14 @@ function TelegramPage() {
               </div>
             ))}
           </div>
-          {delivery.isError ? <p className="text-sm text-danger">Не удалось загрузить журнал</p> : null}
+          {delivery.isError ? <p className="text-sm text-danger">Could not load the log</p> : null}
           {delivery.data?.items.length ? (
             <ul className="ws-items">
               {delivery.data.items.map((item) => (
                 <li key={item.id} className="ws-item items-center">
                   <div className="ws-item-body">
-                    <strong>{new Date(item.createdAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</strong>
-                    <p>Попыток: {item.attempts}</p>
+                    <strong>{new Date(item.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</strong>
+                    <p>Attempts: {item.attempts}</p>
                   </div>
                   <span className={`ws-status ${TONES[item.status] || "is-draft"}`}>{LABELS[item.status] || item.status}</span>
                   {item.status === "failed" ? (
@@ -66,11 +66,11 @@ function TelegramPage() {
                           await retryDelivery(item.id);
                           await qc.invalidateQueries({ queryKey: ["telegram-deliveries"] });
                         } catch {
-                          window.alert("Подключение неактивно. Сначала подключите получателя заново.");
+                          window.alert("The connection is inactive. Connect the recipient again first.");
                         }
                       }}
                     >
-                      Повторить
+                      Retry
                     </button>
                   ) : null}
                 </li>

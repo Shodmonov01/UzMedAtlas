@@ -225,7 +225,7 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
-      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника одобрена", audience: "owner" });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Clinic approved", audience: "owner" });
       return clinicUpdate;
     });
     return serialize(updated);
@@ -260,7 +260,7 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
-      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника возвращена на доработку", audience: "owner" });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Clinic sent back for changes", audience: "owner" });
       return clinicUpdate;
     });
     return serialize(updated);
@@ -287,7 +287,7 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
-      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника опубликована", audience: "owner" });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Clinic published", audience: "owner" });
       return clinicUpdate;
     });
     return serialize(updated);
@@ -310,7 +310,7 @@ export async function adminRoutes(app: FastifyInstance) {
         },
         include: { specialties: { include: { specialty: true } } },
       });
-      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Клиника снята с публикации", audience: "owner" });
+      await queueClinicNotification(tx, { clinic: clinicUpdate, eventKey: `moderation:${log.id}`, title: "Clinic unpublished", audience: "owner" });
       return clinicUpdate;
     });
     return serialize(updated);

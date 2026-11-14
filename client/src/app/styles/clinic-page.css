@@ -511,9 +511,7 @@ a.cp-contact-row:hover > b { color: white; transform: translateX(2px); }
 .cp-hours { display: grid; gap: 6px; margin-top: 12px; font-size: 14px; }
 .cp-hours li { display: flex; justify-content: space-between; gap: 16px; padding: 4px 0; color: #ffffffb3; }
 .cp-hours li.is-today { margin: 0 -10px; padding: 6px 10px; border-radius: 12px; background: #163d54; color: white; font-weight: 700; }
-.cp-hours li.is-today > span:first-child::after { content: " · сегодня"; color: var(--accent); font-weight: 600; }
-html[lang="uz"] .cp-hours li.is-today > span:first-child::after { content: " · bugun"; }
-html[lang="en"] .cp-hours li.is-today > span:first-child::after { content: " · today"; }
+.cp-hours li.is-today > span:first-child::after { content: " · today"; color: var(--accent); font-weight: 600; }
 
 /* ---------- Phones: the request button docked along the bottom ---------- */
 .cp-dock { display: none; }

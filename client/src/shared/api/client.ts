@@ -138,20 +138,4 @@ export async function submitClinicLead(slug: string, payload: LeadPayload) {
   return data;
 }
 
-export const CITY_LABELS: Record<string, string> = {
-  tashkent: "Ташкент",
-  samarkand: "Самарканд",
-  bukhara: "Бухара",
-  andijan: "Андижан",
-  fergana: "Фергана",
-  namangan: "Наманган",
-  nukus: "Нукус",
-  qarshi: "Карши",
-  termez: "Термез",
-  urgench: "Ургенч",
-  jizzakh: "Джизак",
-  navoi: "Навои",
-  kokand: "Коканд",
-  margilan: "Маргилан",
-  gulistan: "Гулистан",
-};
+export { CITY_LABELS } from "../lib/cities";

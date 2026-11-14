@@ -88,32 +88,32 @@ export function splitPoints(value?: string | null) {
     .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
 }
 
-/** Languages in their own names, so a reader finds theirs at a glance. */
+/** Language names in English (the site language). */
 const LANGUAGE_NAMES: Record<string, string> = {
-  ru: "Русский",
-  uz: "Oʻzbekcha",
+  ru: "Russian",
+  uz: "Uzbek",
   en: "English",
-  tr: "Türkçe",
-  kz: "Қазақша",
-  kk: "Қазақша",
-  ky: "Кыргызча",
-  kg: "Кыргызча",
-  tg: "Тоҷикӣ",
-  tj: "Тоҷикӣ",
-  tk: "Türkmençe",
-  ko: "한국어",
-  kr: "한국어",
-  zh: "中文",
-  cn: "中文",
-  hi: "हिन्दी",
-  ar: "العربية",
-  fa: "فارسی",
-  de: "Deutsch",
-  fr: "Français",
-  es: "Español",
-  it: "Italiano",
-  he: "עברית",
-  az: "Azərbaycan",
+  tr: "Turkish",
+  kz: "Kazakh",
+  kk: "Kazakh",
+  ky: "Kyrgyz",
+  kg: "Kyrgyz",
+  tg: "Tajik",
+  tj: "Tajik",
+  tk: "Turkmen",
+  ko: "Korean",
+  kr: "Korean",
+  zh: "Chinese",
+  cn: "Chinese",
+  hi: "Hindi",
+  ar: "Arabic",
+  fa: "Persian",
+  de: "German",
+  fr: "French",
+  es: "Spanish",
+  it: "Italian",
+  he: "Hebrew",
+  az: "Azerbaijani",
 };
 
 export function languageName(code: string) {
@@ -547,7 +547,7 @@ type Service = {
 /** A service price in the reader's language: "$120", "500 000 сум / приём", "500 000 soʻm". */
 export function servicePrice(s: Service, lang: Lang) {
   if (s.priceUsd == null) return null;
-  const amount = s.priceUsd.toLocaleString("ru-RU");
+  const amount = s.priceUsd.toLocaleString("en-US");
   const unit = s.unit ? ` / ${s.unit}` : "";
   if (s.currency === "USD") return `$${amount}${unit}`;
   return `${amount} ${lang === "uz" ? "soʻm" : lang === "en" ? "UZS" : "сум"}${unit}`;
