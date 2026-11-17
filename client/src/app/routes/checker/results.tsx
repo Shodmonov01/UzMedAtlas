@@ -1,3 +1,4 @@
+import { SITE_NAME, useSeo } from "@/shared/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useHealthChecker } from "@/widgets/health-checker/HealthCheckerContext";
@@ -7,6 +8,7 @@ export const Route = createFileRoute("/checker/results")({
 });
 
 function CheckerResultsPage() {
+  useSeo({ title: `Health Checker results | ${SITE_NAME}`, noindex: true });
   const { open } = useHealthChecker();
   const navigate = Route.useNavigate();
 

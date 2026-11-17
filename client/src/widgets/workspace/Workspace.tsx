@@ -1,3 +1,4 @@
+import { SITE_NAME, useSeo } from "@/shared/lib/seo";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
@@ -153,6 +154,7 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
   // The moderation side stays in Russian for the association staff; the clinic cabinet is English.
   const ru = kind === "moderation";
   const roleLabel = kind === "cabinet" ? "Clinic cabinet" : "Модерация";
+  useSeo({ title: `${roleLabel} | ${SITE_NAME}`, noindex: true });
 
   return (
     <div className={`ws${open ? " is-open" : ""}`}>

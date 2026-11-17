@@ -31,7 +31,7 @@ export function Footer() {
 
         <div className="site-footer-grid">
           <p className="site-footer-about">
-            We help you find your way among Uzbekistan's clinics and choose the right course of treatment.
+            Medical tourism in Uzbekistan made simple: we help you find your way among the country's private clinics and choose the right course of treatment.
           </p>
 
           <nav className="site-footer-col" aria-label="For patients">
@@ -57,6 +57,22 @@ export function Footer() {
               </span>
             </Link>
           </div>
+        </div>
+
+        {/* What the site is about, in the words people search with in Russian and Uzbek too. */}
+        <div className="site-footer-seo">
+          <p>
+            <strong>Medical tourism in Uzbekistan.</strong> Treatment in Tashkent, Samarkand and Bukhara: private clinics, check-ups,
+            surgery, dentistry, cardiology and rehabilitation for international patients.
+          </p>
+          <p lang="ru">
+            <strong>Медицинский туризм в Узбекистане.</strong> Медтуризм и лечение в Узбекистане: проверенные частные клиники
+            Ташкента, Самарканда и Бухары, цены, врачи и заявка в клинику онлайн.
+          </p>
+          <p lang="uz">
+            <strong>O‘zbekistonda tibbiy turizm.</strong> Medturizm va davolanish: Toshkent, Samarqand va Buxorodagi tekshirilgan
+            xususiy klinikalar, narxlar, shifokorlar va klinikaga onlayn ariza.
+          </p>
         </div>
 
         <div className="site-footer-bottom">

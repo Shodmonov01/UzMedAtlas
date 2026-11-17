@@ -3,11 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MEDGUIDE UZ</title>
+    <!-- The server replaces everything between these markers with the page's own SEO tags (server/src/lib/seo.ts). -->
+    <!--seo:head-->
+    <title>Medical Tourism in Uzbekistan — Vetted Clinics & Treatment | MEDGUIDE UZ</title>
+    <meta name="description" content="Medical tourism in Uzbekistan: vetted private clinics in Tashkent, Samarkand and Bukhara. Compare doctors, prices and equipment, get a treatment plan within 24 hours and plan your medical trip." />
+    <!--/seo:head-->
     <meta name="application-name" content="MEDGUIDE UZ" />
+    <meta name="apple-mobile-web-app-title" content="MEDGUIDE UZ" />
     <meta name="theme-color" content="#f4f8f8" />
-    <meta property="og:site_name" content="MEDGUIDE UZ" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="icon" type="image/svg+xml" href="/brand/logo.svg?v=2" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/og/logo-192.png" />
+    <link rel="apple-touch-icon" href="/og/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" as="image" type="image/webp" media="(orientation: landscape)" fetchpriority="high"
       imagesrcset="/images/hero/hero-desktop-1000.webp 1000w, /images/hero/hero-desktop.webp 1672w, /images/hero/hero-desktop-2400.webp 2400w"
       imagesizes="(max-aspect-ratio: 1672/941) 178svh, 100vw" />
@@ -27,10 +35,12 @@
       .boot-mark::before { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 3px solid #e0eff2; border-top-color: #0187c5; animation: boot-spin .8s linear infinite; }
       @keyframes boot-spin { to { transform: rotate(360deg); } }
       @media (prefers-reduced-motion: reduce) { .boot-mark::before { animation-duration: 2.4s; } }
+      /* The page's text for crawlers and for browsers without JavaScript; React replaces it on mount. */
+      .seo-content { max-width: 860px; margin: 0 auto; padding: 32px 16px; font: 16px/1.6 Manrope, system-ui, sans-serif; color: #0b2a3d; }
     </style>
   </head>
   <body>
-    <div id="root"><div class="boot" role="status" aria-label="Loading"><span class="boot-mark"><img src="/brand/logo.svg?v=2" alt="" width="40" height="40" /></span></div></div>
+    <div id="root"><div class="boot" role="status" aria-label="Loading"><span class="boot-mark"><img src="/brand/logo.svg?v=2" alt="" width="40" height="40" /></span></div><!--seo:body--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

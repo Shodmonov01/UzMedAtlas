@@ -1,3 +1,4 @@
+import { SITE_NAME, useSeo } from "@/shared/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
@@ -127,6 +128,18 @@ function ClinicDetailPage() {
     queryKey: ["clinic", slug],
     queryFn: () => fetchClinic(slug),
   });
+  const seoData = clinic.data;
+  const seoCity = seoData ? CITY_LABELS[seoData.city] || seoData.city : "";
+  useSeo(
+    seoData
+      ? {
+          title: `${pickName(seoData.nameRu, seoData.nameEn)}, ${seoCity} — Treatment & Medical Tourism | ${SITE_NAME}`,
+          description: `${pickName(seoData.nameRu, seoData.nameEn)}, ${seoCity}: ${pickName(seoData.descriptionRu, seoData.descriptionEn)}`,
+        }
+      : clinic.isError
+        ? { title: `Clinic not found | ${SITE_NAME}`, noindex: true }
+        : null,
+  );
 
   const backToCatalog = (
     <Link to="/" hash="catalog" className="pill-btn is-ink">

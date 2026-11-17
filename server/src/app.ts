@@ -11,6 +11,7 @@ import { adminRoutes } from "./routes/admin";
 import { cabinetRoutes } from "./routes/cabinet";
 import { leadsRoutes } from "./routes/leads";
 import { telegramRoutes } from "./routes/telegram";
+import { loadTemplate, renderPage, robotsTxt, sitemapXml } from "./lib/seo";
 
 const clientOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173,http://localhost:5174")
   .split(",")
@@ -60,6 +61,13 @@ export async function buildApp(options: { logger?: boolean } = {}) {
 
   app.get("/api/health", async () => ({ ok: true, service: "uzmedatlas-server" }));
 
+  app.get("/robots.txt", async (_request, reply) =>
+    reply.type("text/plain; charset=utf-8").header("cache-control", "public, max-age=3600").send(robotsTxt()),
+  );
+  app.get("/sitemap.xml", async (_request, reply) =>
+    reply.type("application/xml; charset=utf-8").header("cache-control", "public, max-age=3600").send(await sitemapXml()),
+  );
+
   await app.register(clinicsRoutes);
   await app.register(specialtiesRoutes);
   await app.register(checkerRoutes);
@@ -73,11 +81,13 @@ export async function buildApp(options: { logger?: boolean } = {}) {
       root: clientDist,
       prefix: "/",
       wildcard: false,
+      // "/" is not served as a plain file: it goes through the SEO renderer below like every other page.
+      index: false,
       decorateReply: true,
       cacheControl: false,
       setHeaders: cacheHeaders,
     });
-    app.setNotFoundHandler((request, reply) => {
+    app.setNotFoundHandler(async (request, reply) => {
       if (request.method !== "GET" && request.method !== "HEAD") {
         return reply.status(404).send({ error: "not_found" });
       }
@@ -88,7 +98,10 @@ export async function buildApp(options: { logger?: boolean } = {}) {
       if (/\.[a-zA-Z0-9]+$/.test(urlPath)) {
         return reply.status(404).send({ error: "not_found" });
       }
-      return reply.sendFile("index.html");
+      // The page itself, with its title, description, social cards, JSON-LD and crawler-readable content.
+      const template = await loadTemplate(path.join(clientDist, "index.html"));
+      const page = await renderPage(template, urlPath);
+      return reply.code(page.status).type("text/html; charset=utf-8").header("cache-control", "no-cache").send(page.html);
     });
   }
 

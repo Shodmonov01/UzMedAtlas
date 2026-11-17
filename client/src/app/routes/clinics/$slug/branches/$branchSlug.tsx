@@ -1,3 +1,4 @@
+import { SITE_NAME, useSeo } from "@/shared/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
@@ -122,6 +123,20 @@ function BranchDetailPage() {
     queryKey: ["branch", slug, branchSlug],
     queryFn: () => fetchClinicBranch(slug, branchSlug),
   });
+  const seoData = branch.data;
+  const seoName = seoData ? pickName(seoData.nameRu, seoData.nameEn) : "";
+  const seoClinic = seoData ? pickName(seoData.clinic?.nameRu, seoData.clinic?.nameEn) : "";
+  const seoFull = seoName.toLowerCase().includes(seoClinic.toLowerCase()) ? seoName : `${seoClinic} — ${seoName}`;
+  useSeo(
+    seoData
+      ? {
+          title: `${seoFull}, ${CITY_LABELS[seoData.city] || seoData.city} — Address, Doctors & Prices | ${SITE_NAME}`,
+          description: `${seoFull}: ${pickName(seoData.addressRu, seoData.addressEn)}. ${pickName(seoData.descriptionRu, seoData.descriptionEn)}`,
+        }
+      : branch.isError
+        ? { title: `Page not found | ${SITE_NAME}`, noindex: true }
+        : null,
+  );
 
   const toClinic = (
     <Link to="/clinics/$slug" params={{ slug }} className="pill-btn is-ink">

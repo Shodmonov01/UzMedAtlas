@@ -1,3 +1,4 @@
+import { SITE_NAME, useSeo } from "@/shared/lib/seo";
 import { Link, Outlet, createRootRoute, useRouterState } from "@tanstack/react-router";
 import { Header } from "@/widgets/header/Header";
 import { Footer } from "@/widgets/footer/Footer";
@@ -15,6 +16,7 @@ export const Route = createRootRoute({
 });
 
 function NotFoundPage() {
+  useSeo({ title: `Page not found | ${SITE_NAME}`, noindex: true });
   return (
     <div className="mx-auto max-w-lg py-20 text-center">
       <p className="text-sm font-bold uppercase tracking-wide text-primary">404</p>

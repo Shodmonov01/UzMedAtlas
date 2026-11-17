@@ -1,3 +1,4 @@
+import { HOME_DESCRIPTION, HOME_TITLE, useSeo } from "@/shared/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { catalogSearchSchema } from "@/shared/lib/catalog-search";
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/")({
 
 /** The home page tells the medical-tourism story top to bottom: the film, why Uzbekistan, the country in photos, the directions, the clinic catalog, the team and the contacts. */
 function HomePage() {
+  useSeo({ title: HOME_TITLE, description: HOME_DESCRIPTION });
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
