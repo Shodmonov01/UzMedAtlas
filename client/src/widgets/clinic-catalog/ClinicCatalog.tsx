@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
-import { CITY_LABELS, fetchClinics, fetchSpecialties } from "@/shared/api/client";
+import { CITY_LABELS, fetchClinics, fetchSpecialties, type ClinicListItem } from "@/shared/api/client";
 import { SelectField } from "@/shared/ui/SelectField";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
@@ -115,6 +115,9 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
         medicalTourism: search.medicalTourism,
       }),
   });
+
+  const medical = (clinics.data ?? []).filter((clinic) => !isTourism(clinic));
+  const tourism = (clinics.data ?? []).filter(isTourism);
 
   useEffect(() => {
     setQ(search.q || "");
@@ -325,84 +328,38 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
             </div>
           ) : null}
 
-          {clinics.data?.length ? (
+          {medical.length ? (
             <div className="clinic-tiles">
-              {clinics.data.slice(0, shown).map((clinic) => {
-                const name = pickName(clinic.nameRu, clinic.nameEn);
-                const photo = clinic.photos?.[0]?.url;
-                const meta = [
-                  clinic.branchCount
-                    ? `${clinic.branchCount} ${(clinic.branchCount === 1 ? "branch" : "branches")}`
-                    : null,
-                  clinic.fromPrice != null ? `from $${clinic.fromPrice}` : null,
-                ].filter(Boolean);
-                return (
-                  <Link key={clinic.id} to="/clinics/$slug" params={{ slug: clinic.slug }} className="clinic-tile">
-                    <div className="clinic-tile-cover">
-                      {hasPhoto(photo) ? (
-                        <FitImage src={photo} className="clinic-tile-photo" />
-                      ) : (
-                        <div className="clinic-tile-placeholder">
-                          <img src="/brand/logo.svg?v=2" alt="" width={64} height={64} />
-                        </div>
-                      )}
-                      {clinic.logoUrl && hasPhoto(photo) ? <ClinicLogo src={clinic.logoUrl} name={name} className="clinic-tile-logo" wide /> : null}
-                    </div>
-                    <div className="clinic-tile-body">
-                      <h3>{name}</h3>
-                      <p className="clinic-tile-meta">
-                        <span className="clinic-tile-city">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2.5a7.5 7.5 0 0 0-7.5 7.5c0 5.2 6 10.6 6.8 11.3.4.3.9.3 1.3 0 .8-.7 6.9-6.1 6.9-11.3A7.5 7.5 0 0 0 12 2.5Zm0 10.3a2.8 2.8 0 1 1 0-5.6 2.8 2.8 0 0 1 0 5.6Z" />
-                          </svg>
-                          {displayCity(clinic.city) || CITY_LABELS[clinic.city] || clinic.city}
-                        </span>
-                        {meta.length ? <span>{meta.join(" · ")}</span> : null}
-                      </p>
-                      <p className="clinic-tile-text">{pickName(clinic.descriptionRu, clinic.descriptionEn)}</p>
-                      {clinic.specialties?.length ? (
-                        <p className="clinic-tile-tags">
-                          {clinic.specialties.slice(0, 3).map((s) => (
-                            <span key={s.slug}>{pickName(s.nameRu, s.nameEn)}</span>
-                          ))}
-                        </p>
-                      ) : null}
-                    </div>
-                    <p className="clinic-tile-foot">
-                      {clinic.responseHours ? (
-                        <span className="clinic-tile-reply">
-                          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm.9 9.1 3 2.2a.9.9 0 0 1-1 1.5l-3.4-2.5a.9.9 0 0 1-.4-.8V7.2a.9.9 0 0 1 1.8 0v4.4Z" />
-                          </svg>
-                          {`Reply ~${clinic.responseHours} h`}
-                        </span>
-                      ) : null}
-                      {clinic.languages?.length ? (
-                        <span className="clinic-tile-langs">
-                          {clinic.languages.slice(0, 4).map((code) => (
-                            <span key={code}>{code}</span>
-                          ))}
-                        </span>
-                      ) : null}
-                      <span className="clinic-tile-arrow" aria-hidden="true">
-                        <ArrowIcon size={15} />
-                      </span>
-                    </p>
-                  </Link>
-                );
-              })}
+              {medical.slice(0, shown).map((clinic) => (
+                <ClinicTile key={clinic.id} clinic={clinic} />
+              ))}
             </div>
           ) : null}
 
-          {clinics.data && clinics.data.length > shown ? (
+          {medical.length > shown ? (
             <div className="catalog-more">
               <button type="button" className="pill-btn is-outline" onClick={() => setShown((n) => n + PAGE)}>
                 Show more
-                <span className="catalog-more-count">{Math.min(PAGE, clinics.data.length - shown)}</span>
+                <span className="catalog-more-count">{Math.min(PAGE, medical.length - shown)}</span>
               </button>
               <p>
-                {`Showing ${shown} of ${clinics.data.length}`}
+                {`Showing ${shown} of ${medical.length}`}
               </p>
+            </div>
+          ) : null}
+
+          {tourism.length ? (
+            <div className="catalog-tourism">
+              <div className="catalog-tourism-head">
+                <span className="eyebrow">Tourism</span>
+                <h3>Travel partners</h3>
+                <p>Companies that plan your trip around the treatment: visas, flights, hotels and transfers.</p>
+              </div>
+              <div className="clinic-tiles">
+                {tourism.map((clinic) => (
+                  <ClinicTile key={clinic.id} clinic={clinic} />
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
@@ -504,6 +461,77 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 }
 
 /** A real cover photo; the seeded SVG drawings stand in for missing photos and get the brand cover instead. */
+function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
+    const name = pickName(clinic.nameRu, clinic.nameEn);
+    const photo = clinic.photos?.[0]?.url;
+    const meta = [
+      clinic.branchCount
+        ? `${clinic.branchCount} ${(clinic.branchCount === 1 ? "branch" : "branches")}`
+        : null,
+      clinic.fromPrice != null ? `from $${clinic.fromPrice}` : null,
+    ].filter(Boolean);
+    return (
+      <Link key={clinic.id} to="/clinics/$slug" params={{ slug: clinic.slug }} className="clinic-tile">
+        <div className="clinic-tile-cover">
+          {hasPhoto(photo) ? (
+            <FitImage src={photo} className="clinic-tile-photo" />
+          ) : (
+            <div className="clinic-tile-placeholder">
+              <img src="/brand/logo.svg?v=2" alt="" width={64} height={64} />
+            </div>
+          )}
+          {clinic.logoUrl && hasPhoto(photo) ? <ClinicLogo src={clinic.logoUrl} name={name} className="clinic-tile-logo" wide /> : null}
+        </div>
+        <div className="clinic-tile-body">
+          <h3>{name}</h3>
+          <p className="clinic-tile-meta">
+            <span className="clinic-tile-city">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                <path d="M12 2.5a7.5 7.5 0 0 0-7.5 7.5c0 5.2 6 10.6 6.8 11.3.4.3.9.3 1.3 0 .8-.7 6.9-6.1 6.9-11.3A7.5 7.5 0 0 0 12 2.5Zm0 10.3a2.8 2.8 0 1 1 0-5.6 2.8 2.8 0 0 1 0 5.6Z" />
+              </svg>
+              {displayCity(clinic.city) || CITY_LABELS[clinic.city] || clinic.city}
+            </span>
+            {meta.length ? <span>{meta.join(" · ")}</span> : null}
+          </p>
+          <p className="clinic-tile-text">{pickName(clinic.descriptionRu, clinic.descriptionEn)}</p>
+          {clinic.specialties?.length ? (
+            <p className="clinic-tile-tags">
+              {clinic.specialties.slice(0, 3).map((s) => (
+                <span key={s.slug}>{pickName(s.nameRu, s.nameEn)}</span>
+              ))}
+            </p>
+          ) : null}
+        </div>
+        <p className="clinic-tile-foot">
+          {clinic.responseHours ? (
+            <span className="clinic-tile-reply">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                <path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm.9 9.1 3 2.2a.9.9 0 0 1-1 1.5l-3.4-2.5a.9.9 0 0 1-.4-.8V7.2a.9.9 0 0 1 1.8 0v4.4Z" />
+              </svg>
+              {`Reply ~${clinic.responseHours} h`}
+            </span>
+          ) : null}
+          {clinic.languages?.length ? (
+            <span className="clinic-tile-langs">
+              {clinic.languages.slice(0, 4).map((code) => (
+                <span key={code}>{code}</span>
+              ))}
+            </span>
+          ) : null}
+          <span className="clinic-tile-arrow" aria-hidden="true">
+            <ArrowIcon size={15} />
+          </span>
+        </p>
+      </Link>
+    );
+}
+
+/** Travel companies sit in the clinic list with only medical-tourism specialties; they get their own block below the clinics. */
+function isTourism(clinic: ClinicListItem) {
+  const specs = clinic.specialties ?? [];
+  return specs.length > 0 && specs.every((s) => s.slug.startsWith("medical-tourism"));
+}
+
 function hasPhoto(url?: string | null): url is string {
   return Boolean(url) && !url!.toLowerCase().endsWith(".svg");
 }

@@ -473,6 +473,12 @@
 .catalog-more { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: clamp(32px, 4vw, 48px); }
 .catalog-more .pill-btn { padding-right: 8px; }
 .catalog-more-count { display: grid; place-items: center; min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--ink); color: white; font-size: 13px; font-weight: 700; }
+/* Travel companies get their own block under the clinics, set off by a thin line. */
+.catalog-tourism { margin-top: clamp(56px, 7vw, 96px); padding-top: clamp(40px, 5vw, 64px); border-top: 1px solid var(--line, rgba(0,0,0,.08)); }
+.catalog-tourism-head { display: flex; flex-direction: column; gap: 12px; max-width: 620px; margin-bottom: clamp(24px, 3vw, 36px); }
+.catalog-tourism-head h3 { color: var(--ink); font-size: clamp(26px, 3vw, 36px); font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
+.catalog-tourism-head p { color: var(--muted); font-size: 15px; line-height: 1.55; }
+.catalog-tourism-head .eyebrow { background: white; }
 .catalog-more > p { color: var(--muted); font-size: 13px; font-weight: 600; }
 @media (max-width: 1100px) {
   .clinic-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
