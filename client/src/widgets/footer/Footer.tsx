@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
-import { MOTION_OK, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
+import { glideTo } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 
 /** Site footer on white: the brand with a way back to the top, then the mission, two link columns and the
@@ -9,23 +9,6 @@ import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 export function Footer() {
   const root = useRef<HTMLElement>(null);
   const brand = "Association of Medical Organizations";
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.from(".site-footer-grid > *", {
-          y: 32,
-          autoAlpha: 0,
-          duration: 1,
-          stagger: 0.08,
-          ease: "expo.out",
-          scrollTrigger: { trigger: root.current, start: "top 85%", once: true },
-        });
-      });
-    },
-    { scope: root },
-  );
 
   return (
     <footer ref={root} className="site-footer">

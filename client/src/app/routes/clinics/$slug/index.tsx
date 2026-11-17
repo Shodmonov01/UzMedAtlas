@@ -37,7 +37,6 @@ import {
   socialHref,
   splitPoints,
   telHref,
-  useHeroIntro,
   type BarSection,
   type Certificate,
   type EquipmentItem,
@@ -128,7 +127,6 @@ function ClinicDetailPage() {
     queryKey: ["clinic", slug],
     queryFn: () => fetchClinic(slug),
   });
-  useHeroIntro(root, Boolean(clinic.data));
 
   const backToCatalog = (
     <Link to="/" hash="catalog" className="pill-btn is-ink">

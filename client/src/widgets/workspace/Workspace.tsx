@@ -150,7 +150,9 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const roleLabel = kind === "cabinet" ? "Clinic cabinet" : "Moderation";
+  // The moderation side stays in Russian for the association staff; the clinic cabinet is English.
+  const ru = kind === "moderation";
+  const roleLabel = kind === "cabinet" ? "Clinic cabinet" : "Модерация";
 
   return (
     <div className={`ws${open ? " is-open" : ""}`}>
@@ -158,21 +160,21 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
         <Link to={kind === "cabinet" ? "/cabinet" : "/moderation"} className="ws-brand">
           <img src="/brand/logo.svg?v=2" alt="" width={36} height={36} />
           <span>
-            <strong>Association</strong>
+            <strong>{ru ? "Ассоциация" : "Association"}</strong>
             <span>{roleLabel}</span>
           </span>
         </Link>
-        <button type="button" className="ws-menu-button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <button type="button" className="ws-menu-button" aria-label={ru ? (open ? "Закрыть меню" : "Открыть меню") : open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
           <WsIcon name={open ? "close" : "menu"} size={22} />
         </button>
       </div>
       <div className="ws-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />
-      <aside className="ws-side" aria-label="Cabinet menu">
+      <aside className="ws-side" aria-label={ru ? "Меню модерации" : "Cabinet menu"}>
         <Link to="/" className="ws-brand">
           <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
           <span>
-            <strong>Association</strong>
-            <span>of Medical Organizations</span>
+            <strong>{ru ? "Ассоциация" : "Association"}</strong>
+            <span>{ru ? "медицинских организаций" : "of Medical Organizations"}</span>
           </span>
         </Link>
         <p className="ws-role">
@@ -251,24 +253,24 @@ function ModerationNav({ pathname }: { pathname: string }) {
   const profile = useQuery({ queryKey: ["admin-profile"], queryFn: adminProfile, retry: false });
   const queueActive = pathname === "/moderation" || pathname === "/moderation/" || /^\/moderation\/(?!leads|team|telegram|login)[^/]+$/.test(pathname);
   return (
-    <nav className="ws-nav" aria-label="Moderation">
-      <p className="ws-nav-title">Moderation</p>
+    <nav className="ws-nav" aria-label="Модерация">
+      <p className="ws-nav-title">Модерация</p>
       <Link to="/moderation" className={queueActive ? "is-active" : undefined}>
         <WsIcon name="queue" />
-        Clinic queue
+        Очередь клиник
       </Link>
       <Link to="/moderation/leads" search={{ status: undefined, source: undefined, q: undefined }} className={pathname.startsWith("/moderation/leads") ? "is-active" : undefined}>
         <WsIcon name="inbox" />
-        Patient requests
+        Заявки пациентов
       </Link>
       <Link to="/moderation/telegram" className={pathname.startsWith("/moderation/telegram") ? "is-active" : undefined}>
         <WsIcon name="send" />
-        Notifications
+        Уведомления
       </Link>
       {profile.data?.role === "administrator" ? (
         <Link to="/moderation/team" className={pathname.startsWith("/moderation/team") ? "is-active" : undefined}>
           <WsIcon name="team" />
-          Moderators
+          Модераторы
         </Link>
       ) : null}
     </nav>
@@ -276,13 +278,14 @@ function ModerationNav({ pathname }: { pathname: string }) {
 }
 
 function SideFoot({ kind }: { kind: Kind }) {
+  const ru = kind === "moderation";
   const navigate = useNavigate();
   const qc = useQueryClient();
   return (
-    <nav className="ws-nav ws-side-foot" aria-label="Sign out">
+    <nav className="ws-nav ws-side-foot" aria-label={ru ? "Выход" : "Sign out"}>
       <Link to="/">
         <WsIcon name="home" />
-        To the site
+        {ru ? "На сайт" : "To the site"}
       </Link>
       <button
         type="button"
@@ -296,7 +299,7 @@ function SideFoot({ kind }: { kind: Kind }) {
         }}
       >
         <WsIcon name="logout" />
-        Sign out
+        {ru ? "Выйти" : "Sign out"}
       </button>
     </nav>
   );
@@ -308,11 +311,14 @@ export function AuthLayout({
   title,
   points,
   children,
+  ru = false,
 }: {
   kicker: string;
   title: ReactNode;
   points: string[];
   children: ReactNode;
+  /** Russian brand and links, for the moderation sign-in. */
+  ru?: boolean;
 }) {
   return (
     <div className="auth">
@@ -320,8 +326,8 @@ export function AuthLayout({
         <Link to="/" className="auth-logo">
           <img src="/brand/logo.svg?v=2" alt="" width={44} height={44} />
           <span>
-            <strong>Association</strong>
-            <span>of Medical Organizations</span>
+            <strong>{ru ? "Ассоциация" : "Association"}</strong>
+            <span>{ru ? "медицинских организаций" : "of Medical Organizations"}</span>
           </span>
         </Link>
         <div className="auth-brand-copy">
@@ -343,7 +349,7 @@ export function AuthLayout({
         <div className="auth-top">
           <Link to="/" className="ws-pill">
             <WsIcon name="home" size={16} />
-            To the site
+            {ru ? "На сайт" : "To the site"}
           </Link>
         </div>
         <div className="auth-card">{children}</div>

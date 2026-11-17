@@ -275,7 +275,8 @@ function draftStatusAfterEdit(status: string) {
 }
 
 export async function cabinetRoutes(app: FastifyInstance) {
-  await app.register(multipart, { limits: { fileSize: 5 * 1024 * 1024 } });
+  // Briefs (PDF/DOCX presentations) may be up to 20 MB; photos keep their own 5 MB cap in /api/cabinet/upload.
+  await app.register(multipart, { limits: { fileSize: 20 * 1024 * 1024 } });
 
   app.post("/api/cabinet/brief", async (request, reply) => {
     const ownerId = getClinicOwnerId(request);
@@ -371,6 +372,9 @@ export async function cabinetRoutes(app: FastifyInstance) {
       "value" in purpose && purpose.value === "logo";
     if (isLogo && buffer.byteLength > 2 * 1024 * 1024) {
       return reply.code(413).send({ error: "logo_too_large", maxBytes: 2 * 1024 * 1024 });
+    }
+    if (buffer.byteLength > 5 * 1024 * 1024) {
+      return reply.code(413).send({ error: "file_too_large", maxBytes: 5 * 1024 * 1024 });
     }
     try {
       const url = await saveUploadBuffer(buffer, file.mimetype, "uploads");

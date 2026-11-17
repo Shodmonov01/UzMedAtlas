@@ -28,7 +28,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 /** Preview mirrors the public `/clinics/$slug` page layout (§26 / §35). */
-export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
+/** `ru` shows the frame in Russian, for the moderation side; the cabinet keeps English. */
+export function ClinicPreview({ clinic, ru = false }: { clinic: CabinetClinic; ru?: boolean }) {
+  const L = (en: string, ruText: string) => (ru ? ruText : en);
   const cover =
     clinic.photos?.[0]?.url ||
     clinic.branches?.[0]?.coverUrl ||
@@ -49,7 +51,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-primary/20 bg-mint px-4 py-3 text-sm font-semibold text-primary">
-        Preview of the public page: this is how visitors will see the clinic once it is published
+        {L("Preview of the public page: this is how visitors will see the clinic once it is published", "Предпросмотр публичной страницы — так клинику увидят посетители после публикации")}
       </div>
 
       <div className="space-y-8">
@@ -77,8 +79,8 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                 <div className="min-w-0 flex-1 text-white">
                   <p className="text-sm font-semibold text-white/75">
                     {cityLabel}
-                    {clinic.foundedYear ? ` · since ${clinic.foundedYear}` : ""}
-                    {clinic.responseHours ? ` · replies in ~${clinic.responseHours}h` : ""}
+                    {clinic.foundedYear ? L(` · since ${clinic.foundedYear}`, ` · с ${clinic.foundedYear}`) : ""}
+                    {clinic.responseHours ? L(` · replies in ~${clinic.responseHours}h`, ` · ответ ~${clinic.responseHours}ч`) : ""}
                   </p>
                   <h2 className="mt-1 text-2xl font-extrabold tracking-tight md:text-3xl">
                     {clinic.nameRu || clinic.nameEn}
@@ -108,7 +110,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
               {clinic.languages?.length ? (
                 <span className="uppercase tracking-wide">{clinic.languages.join(" · ")}</span>
               ) : null}
-              {clinic.medicalTourism ? <span>Medical travel</span> : null}
+              {clinic.medicalTourism ? <span>{L("Medical travel", "Медтуризм")}</span> : null}
               {clinic.phone ? <span className="text-primary">{clinic.phone}</span> : null}
             </div>
           </div>
@@ -117,7 +119,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div className="min-w-0 space-y-10">
             {clinic.photos?.length ? (
-              <Section title="Photos">
+              <Section title={L("Photos", "Фотографии")}>
                 <PhotoCarousel
                   photos={clinic.photos.map((p) => ({
                     id: p.id,
@@ -129,17 +131,17 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {(history || mission) && (
-              <Section title="About the clinic">
+              <Section title={L("About the clinic", "О клинике")}>
                 <div className="grid gap-4 md:grid-cols-2">
                   {history ? (
                     <div className="rounded-2xl border border-line bg-white p-4">
-                      <p className="text-xs font-bold uppercase tracking-wide text-primary">History</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-primary">{L("History", "История")}</p>
                       <p className="mt-2 text-sm leading-relaxed text-muted">{history}</p>
                     </div>
                   ) : null}
                   {mission ? (
                     <div className="rounded-2xl border border-line bg-white p-4">
-                      <p className="text-xs font-bold uppercase tracking-wide text-primary">Mission</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-primary">{L("Mission", "Миссия")}</p>
                       <p className="mt-2 text-sm leading-relaxed text-muted">{mission}</p>
                     </div>
                   ) : null}
@@ -148,7 +150,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             )}
 
             {advantages.length ? (
-              <Section title="Advantages">
+              <Section title={L("Advantages", "Преимущества")}>
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {advantages.map((item) => (
                     <li
@@ -163,13 +165,13 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {why ? (
-              <Section title="Why patients choose it">
+              <Section title={L("Why patients choose it", "Почему выбирают")}>
                 <p className="text-sm leading-relaxed text-muted">{why}</p>
               </Section>
             ) : null}
 
             {(text(clinic.developmentPlansRu) || text(clinic.developmentPlansEn)) && (
-              <Section title="Development plans">
+              <Section title={L("Development plans", "Планы развития")}>
                 <p className="text-sm leading-relaxed text-muted">
                   {text(clinic.developmentPlansRu) || text(clinic.developmentPlansEn)}
                 </p>
@@ -177,7 +179,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             )}
 
             {clinic.founderName ? (
-              <Section title="Founder">
+              <Section title={L("Founder", "Основатель")}>
                 <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-4">
                   {clinic.founderPhotoUrl ? (
                     <img
@@ -206,7 +208,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.achievements?.length ? (
-              <Section title="Achievements">
+              <Section title={L("Achievements", "Достижения")}>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.achievements.map((a) => (
                     <li
@@ -227,7 +229,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.technologies?.length ? (
-              <Section title="Technologies and methods">
+              <Section title={L("Technologies and methods", "Технологии и методики")}>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.technologies.map((t) => (
                     <li
@@ -247,7 +249,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.chiefDoctorName || clinic.leaders?.length ? (
-              <Section title="Leadership">
+              <Section title={L("Leadership", "Руководство")}>
                 {clinic.chiefDoctorName ? (
                   <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-white p-4">
                     {clinic.chiefDoctorPhotoUrl ? (
@@ -302,7 +304,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.doctors?.length ? (
-              <Section title="Doctors">
+              <Section title={L("Doctors", "Специалисты")}>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.doctors.map((d) => (
                     <li key={d.id} className="rounded-2xl border border-line bg-white p-4">
@@ -323,12 +325,12 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                           <p className="text-sm text-muted">{d.roleRu || d.roleEn}</p>
                           {d.category ? (
                             <p className="mt-1 text-xs font-semibold text-primary">
-                              category: {d.category}
+                              {L("category", "категория")}: {d.category}
                             </p>
                           ) : null}
                           {d.experienceYears != null ? (
                             <p className="mt-1 text-xs font-semibold text-primary">
-                              {d.experienceYears} years of experience
+                              {L(`${d.experienceYears} years of experience`, `опыт ${d.experienceYears} лет`)}
                             </p>
                           ) : null}
                         </div>
@@ -348,7 +350,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {popular.length ? (
-              <Section title="Popular services">
+              <Section title={L("Popular services", "Популярные услуги")}>
                 <div className="rounded-2xl bg-mint px-4 py-3">
                   <ul className="space-y-1 text-sm text-ink">
                     {popular.map((item) => (
@@ -360,7 +362,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.equipment?.length ? (
-              <Section title="Equipment">
+              <Section title={L("Equipment", "Оборудование")}>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.equipment.map((e) => (
                     <li key={e.id} className="rounded-2xl border border-line bg-white p-4">
@@ -387,7 +389,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {clinic.certificates?.length ? (
-              <Section title="Certificates and licences">
+              <Section title={L("Certificates and licences", "Сертификаты и лицензии")}>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {clinic.certificates.map((c) => (
                     <li key={c.id} className="rounded-2xl border border-line bg-white p-4">
@@ -399,8 +401,8 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                           <p className="font-bold text-ink">{c.nameRu || c.nameEn}</p>
                           <p className="mt-1 text-sm text-muted">
                             {c.issuerRu || c.issuerEn}
-                            {c.receivedAt ? ` · issued ${c.receivedAt}` : c.year ? ` · ${c.year}` : ""}
-                            {c.validUntil ? ` · valid until ${c.validUntil}` : ""}
+                            {c.receivedAt ? L(` · issued ${c.receivedAt}`, ` · получен ${c.receivedAt}`) : c.year ? ` · ${c.year}` : ""}
+                            {c.validUntil ? L(` · valid until ${c.validUntil}`, ` · до ${c.validUntil}`) : ""}
                           </p>
                           {c.fileUrl ? (
                             <a
@@ -409,7 +411,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
                               rel="noreferrer"
                               className="mt-2 inline-block text-sm font-bold text-primary"
                             >
-                              Open file
+                              {L("Open file", "Открыть файл")}
                             </a>
                           ) : null}
                         </div>
@@ -421,13 +423,13 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
             ) : null}
 
             {tourism ? (
-              <Section title="Medical tourism">
+              <Section title={L("Medical tourism", "Медицинский туризм")}>
                 <p className="text-sm leading-relaxed text-muted">{tourism}</p>
               </Section>
             ) : null}
 
             {mapBranch && mapBranch.lat != null && mapBranch.lng != null ? (
-              <Section title="Location">
+              <Section title={L("Location", "Расположение")}>
                 {(mapBranch.addressRu || mapBranch.addressEn) && (
                   <p className="text-sm text-muted">{mapBranch.addressRu || mapBranch.addressEn}</p>
                 )}
@@ -442,10 +444,10 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
               </Section>
             ) : null}
 
-            <Section title="Branches">
+            <Section title={L("Branches", "Филиалы")}>
               {(clinic.branches || []).length === 0 ? (
                 <p className="rounded-xl bg-warning-soft px-3 py-2 text-sm">
-                  No branches added. Review is not available without them.
+                  {L("No branches added. Review is not available without them.", "Филиалы не добавлены — без них модерация недоступна.")}
                 </p>
               ) : (
                 <div className="grid gap-3 md:grid-cols-2">
@@ -483,7 +485,7 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
 
           <aside className="space-y-4 lg:self-start">
             <div className="rounded-3xl border border-line bg-primary-soft p-5 text-ink">
-              <p className="text-sm text-muted">Contacts</p>
+              <p className="text-sm text-muted">{L("Contacts", "Контакты")}</p>
               <p className="mt-3 text-lg font-bold">{clinic.phone}</p>
               {clinic.email ? <p className="mt-2 text-sm text-primary">{clinic.email}</p> : null}
               {clinic.website ? (
@@ -503,17 +505,17 @@ export function ClinicPreview({ clinic }: { clinic: CabinetClinic }) {
               </div>
               {clinic.coordinatorName ? (
                 <div className="mt-5 border-t border-line pt-4">
-                  <p className="text-xs uppercase tracking-wide text-muted">Coordinator</p>
+                  <p className="text-xs uppercase tracking-wide text-muted">{L("Coordinator", "Координатор")}</p>
                   <p className="mt-1 font-bold">{clinic.coordinatorName}</p>
                   <p className="text-sm text-muted">
                     {clinic.coordinatorRoleRu || clinic.coordinatorRoleEn}
                   </p>
                 </div>
               ) : null}
-              <p className="mt-4 text-sm text-muted">Replies in about {clinic.responseHours} h</p>
+              <p className="mt-4 text-sm text-muted">{L(`Replies in about ${clinic.responseHours} h`, `Ответ около ${clinic.responseHours} ч`)}</p>
             </div>
             <div className="rounded-2xl border border-dashed border-line bg-sand/50 px-4 py-5 text-center text-sm text-muted">
-              The request form will appear on the public page
+              {L("The request form will appear on the public page", "Форма заявки появится на публичной странице")}
             </div>
           </aside>
         </div>

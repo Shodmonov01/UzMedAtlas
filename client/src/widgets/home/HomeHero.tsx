@@ -1,7 +1,7 @@
 import { useRef, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChatCircleDots, SealCheck, Stethoscope, Tag } from "@phosphor-icons/react";
-import { EASE_OUT, MOTION_OK, ScrollTrigger, SplitText, glideTo, gsap, useGSAP } from "@/shared/lib/gsap";
+import { ScrollTrigger, glideTo, useGSAP } from "@/shared/lib/gsap";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 
 const POINTS = [
@@ -12,76 +12,16 @@ const POINTS = [
 
 /** The home page opens on a surgeon in the operating room over the whole screen: the surgeon on the
  *  right, the copy on the open blue to the left. Upright screens get the MEDGUIDE UZ cover portrait instead, with the
- *  copy below the face. Both photos come in several widths, picked by the size they are shown at, so they stay sharp;
- *  on arrival the photo settles in,
- *  then the label, the headline (line by line), the line and the buttons rise in. The photo stays hidden until it is
- *  decoded, so it never paints half loaded. With reduced motion everything is simply in place. */
+ *  copy below the face. Both photos come in several widths, picked by the size they are shown at, so they stay sharp.
+ *  Everything is in place from the first paint: no intro animation, so the page is usable at once. */
 export function HomeHero() {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
-      const hero = root.current;
-      if (hero === null) return;
-      const photo = hero.querySelector<HTMLImageElement>(".home-hero-photo");
-      const ready = photo ? photo.decode().catch(() => undefined) : Promise.resolve();
-      // The intro starts at one quiet moment: the photo decoded, the webfont in, and the page's first heavy render
-      // over (an idle callback, then a frame). Started earlier, its first frames would stutter.
-      const settled = Promise.all([ready, document.fonts.ready]).then(
-        () =>
-          new Promise<void>((resolve) => {
-            const next = () => requestAnimationFrame(() => resolve());
-            if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(next, { timeout: 700 });
-            else setTimeout(next, 60);
-          }),
-      );
-      let alive = true;
-
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        const intro = gsap
-          .timeline({ paused: true, defaults: { ease: EASE_OUT } })
-          .to(photo, { autoAlpha: 1, duration: 1, ease: "power1.out" }, 0)
-          .from(photo, { scale: 1.08, duration: 2.4, force3D: true, clearProps: "transform" }, 0)
-          .from(".home-hero-eyebrow", { y: 16, autoAlpha: 0, duration: 1 }, 0.35)
-          .from([".home-hero-lead", ".home-hero-actions > *", ".home-hero-points"], { y: 24, autoAlpha: 0, duration: 1.1, stagger: 0.08 }, 0.8);
-
-        void settled.then(() => {
-          if (!alive) return;
-          intro.play();
-          // The headline is split only now, with the webfont in, so it never splits twice; it stays hidden until then.
-          SplitText.create(".home-hero-title", {
-            type: "lines",
-            mask: "lines",
-            autoSplit: true,
-            onSplit: (self) => {
-              self.elements.forEach((el) => el.classList.remove("is-split-pending"));
-              return gsap.from(self.lines, { yPercent: 110, duration: 1.4, stagger: 0.12, ease: EASE_OUT, delay: 0.45 });
-            },
-          });
-        });
-
-        // Scrolling away, the photo drifts a little slower than the page.
-        gsap.to(photo, {
-          yPercent: 8,
-          ease: "none",
-          scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: 0.4 },
-        });
-      });
-
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        void ready.then(() => {
-          if (alive) gsap.set(photo, { autoAlpha: 1 });
-        });
-      });
-
       // This trigger only tells the header how long it sits over the photo
       // (until the hero's bottom edge is 80px from the top of the screen).
-      ScrollTrigger.create({ id: "home-hero", trigger: hero, start: "top top", end: "bottom top+=80" });
-
-      return () => {
-        alive = false;
-      };
+      ScrollTrigger.create({ id: "home-hero", trigger: root.current, start: "top top", end: "bottom top+=80" });
     },
     { scope: root },
   );
@@ -122,7 +62,7 @@ export function HomeHero() {
             <img src="/brand/logo.svg?v=2" alt="" width={24} height={24} />
             MEDGUIDE UZ
           </p>
-          <h1 id="home-hero-title" className="home-hero-title is-split-pending">
+          <h1 id="home-hero-title" className="home-hero-title">
             Medicine you can <em>trust</em>
           </h1>
           <p className="home-hero-lead">

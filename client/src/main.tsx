@@ -8,8 +8,10 @@ import "./app/styles/globals.css";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,
+      staleTime: 60_000,
       retry: 1,
+      // No refetch (and no loading bar) every time the tab regains focus.
+      refetchOnWindowFocus: false,
     },
   },
 });
@@ -19,6 +21,8 @@ const router = createRouter({
   context: { queryClient },
   // Keep the reader's place on reload and on back/forward.
   scrollRestoration: true,
+  // Load a page's code and data while the pointer rests on its link, so the click opens it at once.
+  defaultPreload: "intent",
 });
 
 declare module "@tanstack/react-router" {

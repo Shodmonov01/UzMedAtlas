@@ -4,6 +4,7 @@ import { Footer } from "@/widgets/footer/Footer";
 import { HealthCheckerProvider } from "@/widgets/health-checker/HealthCheckerContext";
 import { HealthCheckerWidget } from "@/widgets/health-checker/HealthCheckerWidget";
 import { WorkspaceShell } from "@/widgets/workspace/Workspace";
+import { LoadingBar } from "@/shared/ui/LoadingBar";
 
 // The AI helper bubble is switched off for now; set to true to bring it back.
 const SHOW_HEALTH_CHECKER = true;
@@ -33,7 +34,10 @@ function NotFoundPage() {
 
 function RootLayout() {
   return (
-    <RootShell />
+    <>
+      <LoadingBar />
+      <RootShell />
+    </>
   );
 }
 

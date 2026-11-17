@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   AirplaneTilt,
   BookOpenText,
@@ -45,7 +45,6 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
 import { pickName } from "@/shared/i18n/lang";
 
 /** Building blocks shared by the public clinic page and its branch pages, so both read as one design. */
@@ -1091,24 +1090,6 @@ export function MobileDock({ cta, phone }: { cta: string; phone?: string | null 
         </a>
       ) : null}
     </div>
-  );
-}
-
-/** The hero comes in once, when the page has its data: the photos settle into place, then the name and the facts
- *  rise line by line. With reduced motion it is simply there. */
-export function useHeroIntro(scope: RefObject<HTMLElement | null>, ready: boolean) {
-  useGSAP(
-    () => {
-      if (!ready) return;
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        const tl = gsap.timeline({ defaults: { ease: "expo.out", clearProps: "all" } });
-        tl.from(".cp-gallery-cell, .cp-strip, .cp-gallery.is-empty", { y: 24, autoAlpha: 0, duration: 1.1, stagger: 0.06 })
-          .from(".cp-id > *", { y: 22, autoAlpha: 0, duration: 0.9, stagger: 0.06 }, 0.15)
-          .from(".cp-stat", { y: 18, autoAlpha: 0, duration: 0.8, stagger: 0.06 }, 0.3);
-      });
-    },
-    { scope, dependencies: [ready] },
   );
 }
 

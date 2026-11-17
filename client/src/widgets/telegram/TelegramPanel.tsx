@@ -17,12 +17,12 @@ export function InvitationLink({ invite }: { invite: Invite }) {
   return (
     <div className="ws-group">
       <p className="text-sm leading-relaxed text-ink">
-        This one-time invitation is valid until <strong>{new Date(invite.expiresAt).toLocaleString("en-GB")}</strong>. Open the link and press “Start” in Telegram.
+        Одноразовое приглашение действует до <strong>{new Date(invite.expiresAt).toLocaleString("ru-RU")}</strong>. Откройте ссылку и нажмите «Запустить» в Telegram.
       </p>
-      <input aria-label="Invitation link" className="field" readOnly value={invite.url} onFocus={(e) => e.target.select()} />
+      <input aria-label="Ссылка приглашения" className="field" readOnly value={invite.url} onFocus={(e) => e.target.select()} />
       <div className="flex flex-wrap gap-2">
         <a href={invite.url} target="_blank" rel="noreferrer" className="ws-pill is-ink">
-          Open the bot
+          Открыть бота
           <WsIcon name="external" size={14} />
         </a>
         <button
@@ -37,7 +37,7 @@ export function InvitationLink({ invite }: { invite: Invite }) {
             }
           }}
         >
-          {copied ? "Link copied" : "Copy invitation"}
+          {copied ? "Ссылка скопирована" : "Скопировать приглашение"}
         </button>
       </div>
     </div>
@@ -62,7 +62,7 @@ export function TelegramPanel({ clinicId }: { clinicId?: string }) {
       }
       await qc.invalidateQueries({ queryKey: ["telegram", base] });
     } catch {
-      setError("The action failed. Refresh the page and try again.");
+      setError("Не удалось выполнить действие. Обновите страницу и попробуйте снова.");
     } finally {
       setBusy(false);
     }
@@ -73,19 +73,19 @@ export function TelegramPanel({ clinicId }: { clinicId?: string }) {
       <div className="flex items-start gap-4">
         <TelegramMark />
         <div className="min-w-0 flex-1">
-          <h2 className="ws-card-title">{clinicId ? "Bot for the clinic owner" : "My Telegram notifications"}</h2>
+          <h2 className="ws-card-title">{clinicId ? "Бот для владельца клиники" : "Мои уведомления в Telegram"}</h2>
           <p className="ws-card-text">
             {clinicId
-              ? "Create an invitation and give it to the owner. They will get notifications for this clinic only."
-              : "Get messages about new requests and clinics in review. Details open in the cabinet."}
+              ? "Создайте приглашение и передайте его владельцу. Он получит уведомления только по этой клинике."
+              : "Получайте сообщения о новых заявках и клиниках на модерации. Подробности открываются в кабинете."}
           </p>
         </div>
         {status.data ? (
-          <span className={`ws-status ${connection?.active ? "is-published" : "is-draft"}`}>{connection?.active ? "Connected" : "Not connected"}</span>
+          <span className={`ws-status ${connection?.active ? "is-published" : "is-draft"}`}>{connection?.active ? "Подключён" : "Не подключён"}</span>
         ) : null}
       </div>
-      {status.isLoading ? <p className="text-sm text-muted">Checking the connection…</p> : null}
-      {status.isError ? <p className="text-sm text-danger">Could not check the connection. The clinic must have an owner assigned.</p> : null}
+      {status.isLoading ? <p className="text-sm text-muted">Проверяем подключение…</p> : null}
+      {status.isError ? <p className="text-sm text-danger">Не удалось проверить подключение. У клиники должен быть назначен владелец.</p> : null}
       {status.data ? (
         <>
           {connection?.active ? (
@@ -97,16 +97,16 @@ export function TelegramPanel({ clinicId }: { clinicId?: string }) {
           {status.data.configured ? (
             <div className="flex flex-wrap gap-2">
               <button type="button" disabled={busy} onClick={() => void act("invite")} className="ws-pill is-ink">
-                {connection?.active ? "New invitation" : clinicId ? "Invite the owner" : "Connect the bot"}
+                {connection?.active ? "Новое приглашение" : clinicId ? "Пригласить владельца" : "Подключить бота"}
               </button>
               {connection?.active || invite ? (
                 <button type="button" disabled={busy} onClick={() => void act("disconnect")} className="ws-pill is-danger">
-                  Revoke the connection and invitations
+                  Отозвать подключение и приглашения
                 </button>
               ) : null}
             </div>
           ) : (
-            <p className="text-sm text-danger">The bot is not set up yet. Contact the administrator.</p>
+            <p className="text-sm text-danger">Бот пока не настроен. Обратитесь к администратору.</p>
           )}
         </>
       ) : null}

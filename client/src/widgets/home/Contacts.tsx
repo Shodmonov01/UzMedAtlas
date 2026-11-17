@@ -1,5 +1,4 @@
 import { useRef, type ReactNode } from "react";
-import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
 
 // The association's contacts, as published on uztta.uz; the section follows that site's contacts block.
 const line = (shape: ReactNode) => (
@@ -55,23 +54,6 @@ const CONTACTS: { label: string; value: string; href: string; external?: boolean
  *  value at the bottom. They rise in once when the section comes into view. */
 export function Contacts() {
   const root = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.from([".contacts-head > *", ".contact-card"], {
-          y: 32,
-          autoAlpha: 0,
-          duration: 1.1,
-          stagger: 0.08,
-          ease: "expo.out",
-          scrollTrigger: { trigger: root.current, start: "top 78%", once: true },
-        });
-      });
-    },
-    { scope: root },
-  );
 
   return (
     <section ref={root} id="contacts" className="contacts" aria-labelledby="contacts-title">

@@ -18,6 +18,7 @@ export function FitImage({ src, alt = "", className = "", tolerance = 0.12, load
   const imgRef = useRef<HTMLImageElement>(null);
   const [natural, setNatural] = useState<number | null>(null);
   const [frame, setFrame] = useState<number | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const el = frameRef.current;
@@ -34,14 +35,16 @@ export function FitImage({ src, alt = "", className = "", tolerance = 0.12, load
 
   useEffect(() => {
     const img = imgRef.current;
-    setNatural(img?.complete && img.naturalHeight ? img.naturalWidth / img.naturalHeight : null);
+    const done = Boolean(img?.complete && img.naturalHeight);
+    setNatural(done && img ? img.naturalWidth / img.naturalHeight : null);
+    setLoaded(done);
   }, [src]);
 
   const contained =
     natural != null && frame != null && 1 - Math.min(natural, frame) / Math.max(natural, frame) > tolerance;
 
   return (
-    <div ref={frameRef} className={`fit-image ${contained ? "is-contained" : ""} ${className}`}>
+    <div ref={frameRef} className={`fit-image ${contained ? "is-contained" : ""} ${loaded ? "is-loaded" : ""} ${className}`}>
       {contained ? <img src={src} alt="" aria-hidden="true" className="fit-image-backdrop" /> : null}
       <img
         ref={imgRef}
@@ -53,7 +56,10 @@ export function FitImage({ src, alt = "", className = "", tolerance = 0.12, load
         onLoad={(e) => {
           const img = e.currentTarget;
           if (img.naturalWidth && img.naturalHeight) setNatural(img.naturalWidth / img.naturalHeight);
+          setLoaded(true);
         }}
+        // A broken photo stops shimmering and leaves the plain frame.
+        onError={() => setLoaded(true)}
       />
     </div>
   );

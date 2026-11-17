@@ -47,6 +47,9 @@ export async function buildApp(options: { logger?: boolean } = {}) {
     root: process.env.UPLOADS_DIR || path.join(publicRoot, "uploads"),
     prefix: "/uploads/",
     decorateReply: false,
+    // Every upload gets a new unique name and is never rewritten, so browsers may keep it for a year.
+    maxAge: "365d",
+    immutable: true,
   });
   await app.register(fastifyStatic, {
     root: path.join(publicRoot, "clinics"),

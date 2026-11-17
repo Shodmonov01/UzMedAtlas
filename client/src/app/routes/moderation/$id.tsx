@@ -22,11 +22,25 @@ export const Route = createFileRoute("/moderation/$id")({
 });
 
 const ACTION_LABELS: Record<string, string> = {
-  submit: "Sent for review",
-  approve: "Approved",
-  reject: "Sent back for changes",
-  publish: "Published",
-  unpublish: "Unpublished",
+  submit: "Отправлено на модерацию",
+  approve: "Одобрено",
+  reject: "Возврат на доработку",
+  publish: "Опубликовано",
+  unpublish: "Снято с публикации",
+};
+
+/* The server sends the checklist in English (the cabinet reads it too); moderation shows it in Russian by key. */
+const CHECK_LABELS_RU: Record<string, string> = {
+  name: "Название клиники",
+  logo: "Логотип",
+  description: "Описание",
+  contacts: "Телефон и email",
+  address: "Город и адрес",
+  specialties: "Направления",
+  branches: "Филиал с адресом, телефоном и направлением",
+  photos: "Фото",
+  doctors: "Врачи",
+  equipment: "Оборудование",
 };
 
 function CheckList({ title, items }: { title: string; items: { key: string; label: string; ok: boolean }[] }) {
@@ -40,7 +54,7 @@ function CheckList({ title, items }: { title: string; items: { key: string; labe
             <span>
               <WsIcon name={item.ok ? "check" : "close"} size={13} />
             </span>
-            {item.label}
+            {CHECK_LABELS_RU[item.key] || item.label}
           </li>
         ))}
       </ul>
@@ -73,8 +87,8 @@ function ModerationDetailPage() {
     }
   }, [auth.data, auth.isError, navigate]);
 
-  if (!auth.data || clinic.isLoading) return <WsLoading />;
-  if (!clinic.data) return <WsNote tone="danger" title="Clinic not found" />;
+  if (!auth.data || clinic.isLoading) return <WsLoading label="Загрузка…" />;
+  if (!clinic.data) return <WsNote tone="danger" title="Клиника не найдена" />;
 
   const c = clinic.data;
   const checklist = c.checklist;
@@ -94,23 +108,23 @@ function ModerationDetailPage() {
         back={
           <Link to="/moderation" className="ws-back">
             <BackMark />
-            Clinic queue
+            Очередь клиник
           </Link>
         }
-        eyebrow="Clinic review"
+        eyebrow="Проверка клиники"
         title={c.nameRu || c.nameEn}
         meta={
           <>
-            <StatusBadge status={c.status} />
+            <StatusBadge status={c.status} ru />
             <span>{CITY_LABELS[c.city] || c.city}</span>
-            <span>Branches: {c.branchCount ?? c.branches?.length ?? 0}</span>
-            <span>Doctors: {c.doctorCount ?? c.doctors?.length ?? 0}</span>
+            <span>Филиалов: {c.branchCount ?? c.branches?.length ?? 0}</span>
+            <span>Врачей: {c.doctorCount ?? c.doctors?.length ?? 0}</span>
           </>
         }
         actions={
           c.status === "published" ? (
             <Link to="/clinics/$slug" params={{ slug: c.slug }} target="_blank" className="ws-pill">
-              Open in the catalog
+              Открыть в каталоге
               <WsIcon name="external" size={14} />
             </Link>
           ) : undefined
@@ -118,19 +132,19 @@ function ModerationDetailPage() {
       />
 
       {c.moderatorNote ? (
-        <WsNote tone="danger" title="Current moderator comment">
+        <WsNote tone="danger" title="Текущий комментарий модератора">
           <p>{c.moderatorNote}</p>
         </WsNote>
       ) : null}
 
       <div className="ws-split">
         <div className="grid min-w-0 gap-6">
-          <ClinicPreview clinic={c} />
+          <ClinicPreview clinic={c} ru />
 
           <section className="ws-card is-pad space-y-4">
-            <h2 className="ws-card-title">Branches</h2>
+            <h2 className="ws-card-title">Филиалы</h2>
             {(c.branches || []).length === 0 ? (
-              <WsNote tone="danger">There are no branches. A clinic without a branch cannot be approved.</WsNote>
+              <WsNote tone="danger">Филиалы отсутствуют — без филиала клинику нельзя одобрить.</WsNote>
             ) : (
               <ul className="ws-items">
                 {(c.branches || []).map((b) => (
@@ -146,7 +160,7 @@ function ModerationDetailPage() {
                       </p>
                       {b.addressRu || b.addressEn ? <p>{b.addressRu || b.addressEn}</p> : null}
                       <p>
-                        Specialties: {b.specialtyCount ?? b.specialties?.length ?? 0} · doctors: {b.doctorCount ?? 0} · photos: {b.photoCount ?? 0}
+                        Направлений: {b.specialtyCount ?? b.specialties?.length ?? 0} · врачей: {b.doctorCount ?? 0} · фото: {b.photoCount ?? 0}
                       </p>
                     </div>
                   </li>
@@ -159,19 +173,19 @@ function ModerationDetailPage() {
         <aside>
           <section className="ws-card is-pad space-y-5">
             <div>
-              <p className="ws-label">Decision</p>
+              <p className="ws-label">Решение</p>
               <h2 className="ws-card-title mt-2">
                 {c.status === "moderation"
                   ? checklist?.ready ?? true
-                    ? "Ready to approve"
-                    : `Required items missing: ${missing}`
+                    ? "Готово к одобрению"
+                    : `Не хватает обязательных пунктов: ${missing}`
                   : c.status === "approved"
-                    ? "Approved, ready to publish"
+                    ? "Одобрена — можно публиковать"
                     : c.status === "published"
-                      ? "Published in the catalog"
+                      ? "Опубликована в каталоге"
                       : c.status === "needs_changes"
-                        ? "Waiting for the clinic to make changes"
-                        : "Clinic draft"}
+                        ? "Ждём правок от клиники"
+                        : "Черновик клиники"}
               </h2>
             </div>
 
@@ -186,33 +200,33 @@ function ModerationDetailPage() {
                     try {
                       await approveClinic(id);
                       await refresh();
-                      setMessage("Clinic approved");
+                      setMessage("Клиника одобрена");
                     } catch (err) {
                       if (axios.isAxiosError(err) && err.response?.data?.error === "checklist_failed") {
-                        setError("Cannot approve: required fields are empty");
+                        setError("Нельзя одобрить: не заполнены обязательные поля");
                         await refresh();
                       } else {
-                        setError("Could not approve");
+                        setError("Не удалось одобрить");
                       }
                     }
                   }}
                 >
-                  Approve
+                  Одобрить
                   <span className="pill-btn-icon">
                     <WsIcon name="check" size={18} />
                   </span>
                 </button>
-                {!canApprove ? <p className="text-sm font-semibold text-danger">The clinic must first fill in the required checklist items.</p> : null}
+                {!canApprove ? <p className="text-sm font-semibold text-danger">Сначала клиника должна заполнить обязательные пункты чеклиста.</p> : null}
                 <div className="ws-group">
                   <label className="ws-field">
-                    <span className="ws-field-label">Send back for changes</span>
+                    <span className="ws-field-label">Вернуть на доработку</span>
                     <textarea
                       className="field min-h-24"
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
-                      placeholder="e.g. add a photo of the facade and the branch’s current phone number"
+                      placeholder="Например: добавьте фото фасада и актуальный телефон филиала"
                     />
-                    <span className="ws-field-hint">The clinic will see this comment in its cabinet.</span>
+                    <span className="ws-field-hint">Клиника увидит этот комментарий в кабинете.</span>
                   </label>
                   <button
                     type="button"
@@ -221,11 +235,11 @@ function ModerationDetailPage() {
                     onClick={async () => {
                       await rejectClinic(id, note.trim());
                       await refresh();
-                      setMessage("Sent back for changes");
+                      setMessage("Возвращено на доработку");
                       setNote("");
                     }}
                   >
-                    Needs changes
+                    Нужны изменения
                   </button>
                 </div>
               </>
@@ -238,10 +252,10 @@ function ModerationDetailPage() {
                 onClick={async () => {
                   await publishClinic(id);
                   await refresh();
-                  setMessage("Published in the catalog");
+                  setMessage("Опубликовано в каталоге");
                 }}
               >
-                Publish
+                Опубликовать
                 <span className="pill-btn-icon">
                   <ArrowIcon />
                 </span>
@@ -253,35 +267,35 @@ function ModerationDetailPage() {
                 type="button"
                 className="ws-pill is-danger w-full"
                 onClick={async () => {
-                  if (!window.confirm("Unpublish the clinic? It will disappear from the catalog.")) return;
+                  if (!window.confirm("Снять клинику с публикации? Она пропадёт из каталога.")) return;
                   await unpublishClinic(id);
                   await refresh();
-                  setMessage("Unpublished");
+                  setMessage("Снято с публикации");
                 }}
               >
-                Unpublish
+                Снять с публикации
               </button>
             ) : null}
           </section>
 
           {checklist ? (
             <section className="ws-card is-pad space-y-5">
-              <h2 className="ws-card-title">Checklist</h2>
-              <CheckList title="Required" items={checklist.required} />
-              <CheckList title="Recommended" items={checklist.recommended} />
+              <h2 className="ws-card-title">Чеклист</h2>
+              <CheckList title="Обязательно" items={checklist.required} />
+              <CheckList title="Рекомендуется" items={checklist.recommended} />
             </section>
           ) : null}
 
           <section className="ws-card is-pad">
-            <h2 className="ws-card-title">Decision history</h2>
+            <h2 className="ws-card-title">История решений</h2>
             {(c.moderationLogs || []).length === 0 ? (
-              <p className="ws-card-text">Nothing yet</p>
+              <p className="ws-card-text">Пока пусто</p>
             ) : (
               <ul className="ws-timeline">
                 {(c.moderationLogs || []).map((log) => (
                   <li key={log.id}>
                     <strong>{ACTION_LABELS[log.action] || log.action}</strong>
-                    <small>{new Date(log.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</small>
+                    <small>{new Date(log.createdAt).toLocaleString("ru-RU", { dateStyle: "medium", timeStyle: "short" })}</small>
                     {log.note ? <p>{log.note}</p> : null}
                   </li>
                 ))}

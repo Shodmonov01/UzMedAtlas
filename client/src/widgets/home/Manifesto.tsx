@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { MOTION_OK, SplitText, gsap, useGSAP } from "@/shared/lib/gsap";
 
 const STATS: { prefix?: string; value: number; unit: string; label: string }[] = [
   {
@@ -24,34 +23,6 @@ const STATS: { prefix?: string; value: number; unit: string; label: string }[] =
  *  then three figures that count up while their rules draw in. With reduced motion the text and figures are final. */
 export function Manifesto() {
   const root = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        const split = SplitText.create(".manifesto-text", { type: "words", wordsClass: "manifesto-word" });
-        gsap.fromTo(
-          split.words,
-          { opacity: 0.14 },
-          {
-            opacity: 1,
-            ease: "none",
-            stagger: 0.1,
-            scrollTrigger: { trigger: ".manifesto-text", start: "top 78%", end: "bottom 42%", scrub: true },
-          },
-        );
-
-        const stats = gsap.timeline({ scrollTrigger: { trigger: ".manifesto-stats", start: "top 82%", once: true } });
-        stats
-          .from(".manifesto-rule", { scaleX: 0, transformOrigin: "left center", duration: 1.4, stagger: 0.12, ease: "expo.inOut" }, 0)
-          .from(".manifesto-stat-body", { y: 28, autoAlpha: 0, duration: 1, stagger: 0.12 }, 0.25);
-        gsap.utils.toArray<HTMLElement>(".manifesto-count").forEach((el, i) => {
-          stats.from(el, { textContent: 0, snap: { textContent: 1 }, duration: 1.8, ease: "power2.out" }, 0.3 + i * 0.12);
-        });
-      });
-    },
-    { scope: root },
-  );
 
   return (
     <section ref={root} id="medtourism" className="manifesto" aria-label="About medical tourism">

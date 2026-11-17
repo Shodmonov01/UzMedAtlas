@@ -28,14 +28,6 @@ export function Directions({ onPick }: Props) {
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        gsap.from(".directions-head > *", {
-          y: 28,
-          autoAlpha: 0,
-          duration: 1,
-          stagger: 0.1,
-          ease: "expo.out",
-          scrollTrigger: { trigger: root.current, start: "top 78%", once: true },
-        });
         // Each row loops over the width of one copy of its words, so the wrap from one end to the other is seamless.
         const lanes = gsap.utils.toArray<HTMLElement>(".directions-row").map((row, i) => ({
           row,

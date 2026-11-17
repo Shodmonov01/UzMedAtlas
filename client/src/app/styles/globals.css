@@ -911,3 +911,19 @@ select.field {
 @media (prefers-reduced-motion: reduce) {
   .lightbox { animation: none; }
 }
+
+/* Top loading bar: a sliding brand-gradient streak while a page or its data loads. */
+.loading-bar { position: fixed; z-index: 9999; top: 0; left: 0; right: 0; height: 3px; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity .25s ease; }
+.loading-bar.is-active { opacity: 1; }
+.loading-bar::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; border-radius: 999px; background: var(--brand-gradient); animation: loading-bar 1.1s ease-in-out infinite; }
+@keyframes loading-bar { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+
+/* A photo still on its way shows a soft shimmer, then fades in. */
+.fit-image:not(.is-loaded)::before { content: ""; position: absolute; z-index: 0; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .55) 50%, transparent 80%) var(--sand); background-size: 200% 100%; animation: img-shimmer 1.3s linear infinite; }
+.fit-image-main { transition: opacity .3s ease; }
+.fit-image:not(.is-loaded) .fit-image-main { opacity: 0; }
+@keyframes img-shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar::before, .fit-image:not(.is-loaded)::before { animation-duration: 3s; }
+}

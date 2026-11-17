@@ -33,7 +33,6 @@ import {
   socialHref,
   splitPoints,
   telHref,
-  useHeroIntro,
   type BarSection,
   type EquipmentItem,
   type HeroStat,
@@ -123,7 +122,6 @@ function BranchDetailPage() {
     queryKey: ["branch", slug, branchSlug],
     queryFn: () => fetchClinicBranch(slug, branchSlug),
   });
-  useHeroIntro(root, Boolean(branch.data));
 
   const toClinic = (
     <Link to="/clinics/$slug" params={{ slug }} className="pill-btn is-ink">

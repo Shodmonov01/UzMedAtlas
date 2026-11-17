@@ -179,7 +179,7 @@
   background: linear-gradient(90deg, #00326c 0%, #01468d 42%, #025db1 70%, #3f7bbd 100%); }
 .home-hero picture { display: contents; }
 .home-hero-photo { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; object-position: 64% 0%;
-  visibility: hidden; user-select: none; pointer-events: none; }
+  user-select: none; pointer-events: none; }
 .home-hero-shade { position: absolute; z-index: 1; inset: 0; pointer-events: none;
   background: linear-gradient(90deg, #0b2a3de6 0%, #0b2a3db3 22%, #0b2a3d4d 40%, transparent 56%), linear-gradient(to bottom, #0b2a3d59, transparent 12%), linear-gradient(to top, #0b2a3d80, transparent 26%); }
 /* The copy sits in the open blue at the upper left, clear of the raised hand below it. */

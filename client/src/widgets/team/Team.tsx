@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
 
 type Member = { role: string; name: string; org?: string; url?: string };
 
@@ -18,33 +17,6 @@ const CLINICS_COUNT = 26;
  *  drawing in and the names rising as the list scrolls in; then the thanks to the clinics around a large counting "26". */
 export function Team() {
   const root = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
-        gsap.from(".team-head > *", {
-          y: 32,
-          autoAlpha: 0,
-          duration: 1.1,
-          stagger: 0.1,
-          ease: "expo.out",
-          scrollTrigger: { trigger: ".team-head", start: "top 82%", once: true },
-        });
-        gsap.utils.toArray<HTMLElement>(".team-row").forEach((row) => {
-          gsap
-            .timeline({ scrollTrigger: { trigger: row, start: "top 90%", once: true } })
-            .from(row.querySelector(".team-row-rule"), { scaleX: 0, transformOrigin: "left center", duration: 1.3, ease: "expo.inOut" }, 0)
-            .from(row.querySelectorAll(".team-row-role, .team-row-name, .team-row-org"), { yPercent: 60, autoAlpha: 0, duration: 1, stagger: 0.06, ease: "expo.out" }, 0.2);
-        });
-        gsap
-          .timeline({ scrollTrigger: { trigger: ".team-thanks", start: "top 80%", once: true } })
-          .from(".team-thanks-count strong", { textContent: 0, snap: { textContent: 1 }, duration: 1.8, ease: "power2.out" }, 0)
-          .from(".team-thanks-copy > *", { y: 28, autoAlpha: 0, duration: 1, stagger: 0.1, ease: "expo.out" }, 0.2);
-      });
-    },
-    { scope: root },
-  );
 
   return (
     <section ref={root} id="team" className="team" aria-labelledby="team-title">

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { MOTION_OK, SplitText, gsap, useGSAP } from "@/shared/lib/gsap";
+import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
 import { PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 
 type Place = { photo: string; place: string; city: string; alt: string };
@@ -36,28 +36,6 @@ export function Gallery() {
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        SplitText.create(".story-title", {
-          type: "lines",
-          mask: "lines",
-          autoSplit: true,
-          onSplit: (self) =>
-            gsap.from(self.lines, {
-              yPercent: 110,
-              duration: 1.3,
-              stagger: 0.1,
-              ease: "expo.out",
-              scrollTrigger: { trigger: ".story-head", start: "top 80%", once: true },
-            }),
-        });
-        gsap.from([".story-chip", ".story-lead"], {
-          y: 20,
-          autoAlpha: 0,
-          duration: 1,
-          stagger: 0.08,
-          delay: 0.2,
-          scrollTrigger: { trigger: ".story-head", start: "top 80%", once: true },
-        });
-
         // Each row starts shifted left by most of what it overflows and ends shifted right of where it began,
         // so the photos come in from the left and leave to the right while the section crosses the screen.
         gsap.utils.toArray<HTMLElement>(".story-track").forEach((track, i) => {

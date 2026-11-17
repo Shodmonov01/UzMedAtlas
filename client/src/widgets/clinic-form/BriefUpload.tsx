@@ -24,12 +24,12 @@ export function BriefUpload({ onApply, disabled }: { onApply: (fields: Record<st
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
       </span>
       <div className="min-w-0"><h2 className="ws-card-title">Fill in from a brief</h2>
-      <p className="ws-card-text">Have a brief or a presentation of the clinic? Upload a PDF, DOCX or TXT up to 5 MB and the fields fill in by themselves. Groq reads the text; check the data before applying it.</p></div>
+      <p className="ws-card-text">Have a brief or a presentation of the clinic? Upload a PDF, DOCX or TXT up to 20 MB and the fields fill in by themselves. Groq reads the text; check the data before applying it.</p></div>
     </div>
     <input type="file" accept=".pdf,.docx,.txt,.md,.csv,.json" disabled={disabled || busy} aria-label="Upload the clinic brief" onChange={async event => {
       const file = event.target.files?.[0]; event.target.value = "";
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { setError("The maximum size is 5 MB."); return; }
+      if (file.size > 20 * 1024 * 1024) { setError("The maximum size is 20 MB."); return; }
       setBusy(true); setError(""); setResult(null);
       try { const form = new FormData(); form.append("file", file); const { data } = await api.post<Result>("/api/cabinet/brief", form); setResult(data); }
       catch (err) { const code = (err as { response?: { data?: { error?: string } } }).response?.data?.error || ""; setError(messages[code] || "Could not parse the brief. Please try again."); }

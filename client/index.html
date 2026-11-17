@@ -19,9 +19,18 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <style>
+      /* Shown until the app mounts (React replaces the contents of #root). */
+      .boot { position: fixed; inset: 0; display: grid; place-items: center; background: #f4f8f8; }
+      .boot-mark { position: relative; display: grid; place-items: center; width: 72px; height: 72px; }
+      .boot-mark img { width: 40px; height: 40px; }
+      .boot-mark::before { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 3px solid #e0eff2; border-top-color: #0187c5; animation: boot-spin .8s linear infinite; }
+      @keyframes boot-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .boot-mark::before { animation-duration: 2.4s; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="boot" role="status" aria-label="Loading"><span class="boot-mark"><img src="/brand/logo.svg?v=2" alt="" width="40" height="40" /></span></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
