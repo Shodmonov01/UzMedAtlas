@@ -38,6 +38,7 @@ import {
   socialHref,
   splitPoints,
   telHref,
+  splitPhones,
   type BarSection,
   type Certificate,
   type EquipmentItem,
@@ -160,6 +161,7 @@ function ClinicDetailPage() {
     return first.length ? first : splitPoints(ru);
   };
   const name: string = pickName(data.nameRu, data.nameEn);
+  const phones = splitPhones(data.phone);
   const shortName = text(data.shortName);
   const description = pick(data.descriptionRu, data.descriptionEn);
   const gallery: GalleryPhoto[] = (data.photos || []).map((p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
@@ -287,10 +289,10 @@ function ClinicDetailPage() {
                     <ArrowIcon />
                   </span>
                 </a>
-                {data.phone ? (
-                  <a href={telHref(String(data.phone))} className="pill-btn is-outline">
+                {phones[0] ? (
+                  <a href={telHref(phones[0])} className="pill-btn is-outline">
                     <Icon name="phone" size={17} />
-                    {data.phone}
+                    {phones[0]}
                   </a>
                 ) : null}
                 {data.whatsapp ? (
@@ -553,7 +555,7 @@ function ClinicDetailPage() {
           <ContactCard
             logoUrl={data.logoUrl}
             name={name}
-            phones={data.phone ? [data.phone] : []}
+            phones={phones}
             email={data.email}
             website={data.website}
             whatsapp={data.whatsapp}
@@ -578,11 +580,11 @@ function ClinicDetailPage() {
               </div>
             ) : null}
           </ContactCard>
-          <QuickContact name={name} phone={data.phone} whatsapp={data.whatsapp} telegram={data.telegram} responseHours={data.responseHours} cta={L.request} />
+          <QuickContact name={name} phone={phones[0]} whatsapp={data.whatsapp} telegram={data.telegram} responseHours={data.responseHours} cta={L.request} />
         </aside>
       </div>
 
-      <MobileDock cta={L.request} phone={data.phone} />
+      <MobileDock cta={L.request} phone={phones[0]} />
     </div>
   );
 }

@@ -172,7 +172,7 @@ export function WorkspaceShell({ kind, children }: { kind: Kind; children: React
       </div>
       <div className="ws-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />
       <aside className="ws-side" aria-label={ru ? "Меню модерации" : "Cabinet menu"}>
-        <Link to="/" className="ws-brand">
+        <Link to="/" reloadDocument className="ws-brand">
           <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
           <span>
             <strong>{ru ? "Ассоциация" : "Association"}</strong>
@@ -285,7 +285,7 @@ function SideFoot({ kind }: { kind: Kind }) {
   const qc = useQueryClient();
   return (
     <nav className="ws-nav ws-side-foot" aria-label={ru ? "Выход" : "Sign out"}>
-      <Link to="/">
+      <Link to="/" reloadDocument>
         <WsIcon name="home" />
         {ru ? "На сайт" : "To the site"}
       </Link>
@@ -309,53 +309,37 @@ function SideFoot({ kind }: { kind: Kind }) {
 
 /** The sign-in frame: the brand panel with a promise and three points on the left, the form on the right. */
 export function AuthLayout({
-  kicker,
   title,
-  points,
+  subtitle,
   children,
   ru = false,
 }: {
-  kicker: string;
   title: ReactNode;
-  points: string[];
+  subtitle: ReactNode;
   children: ReactNode;
   /** Russian brand and links, for the moderation sign-in. */
   ru?: boolean;
 }) {
+  // Links back to the public site load it afresh (reloadDocument): the site's scroll animations and its opening
+  // loader start clean instead of picking up where the cabinet left the page.
   return (
     <div className="auth">
-      <section className="auth-brand">
-        <Link to="/" className="auth-logo">
-          <img src="/brand/logo.svg?v=2" alt="" width={44} height={44} />
-          <span>
-            <strong>{ru ? "Ассоциация" : "Association"}</strong>
-            <span>{ru ? "медицинских организаций" : "of Medical Organizations"}</span>
-          </span>
-        </Link>
-        <div className="auth-brand-copy">
-          <p className="auth-kicker">{kicker}</p>
-          <h1>{title}</h1>
-          <ul className="auth-points">
-            {points.map((point) => (
-              <li key={point}>
-                <span>
-                  <WsIcon name="check" size={15} />
-                </span>
-                {point}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-      <section className="auth-panel">
-        <div className="auth-top">
-          <Link to="/" className="ws-pill">
-            <WsIcon name="home" size={16} />
-            {ru ? "На сайт" : "To the site"}
-          </Link>
-        </div>
-        <div className="auth-card">{children}</div>
-      </section>
+      <Link to="/" reloadDocument className="auth-logo">
+        <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} />
+        <span>
+          <strong>{ru ? "Ассоциация" : "Association"}</strong>
+          <span>{ru ? "медицинских организаций" : "of Medical Organizations"}</span>
+        </span>
+      </Link>
+      <div className="auth-card">
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
+        {children}
+      </div>
+      <Link to="/" reloadDocument className="auth-back">
+        <WsIcon name="home" size={16} />
+        {ru ? "Вернуться на сайт" : "Back to the site"}
+      </Link>
     </div>
   );
 }

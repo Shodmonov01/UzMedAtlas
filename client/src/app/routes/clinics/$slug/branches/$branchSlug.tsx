@@ -34,6 +34,7 @@ import {
   socialHref,
   splitPoints,
   telHref,
+  splitPhones,
   type BarSection,
   type EquipmentItem,
   type HeroStat,
@@ -165,7 +166,7 @@ function BranchDetailPage() {
   const lng = data.lng != null ? Number(data.lng) : null;
   const hasCoords = lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng);
   const mapsUrl = hasCoords ? yandexPointUrl(lat, lng) : address ? `https://yandex.uz/maps/?text=${encodeURIComponent(address)}` : null;
-  const phones: string[] = Array.isArray(data.phones) && data.phones.length ? data.phones : data.phone ? [data.phone] : [];
+  const phones: string[] = splitPhones(...(Array.isArray(data.phones) && data.phones.length ? data.phones : [data.phone]));
   const gallery: GalleryPhoto[] = (data.photos || []).map((p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
     id: p.id,
     url: p.url,

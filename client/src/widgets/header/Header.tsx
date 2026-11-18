@@ -120,11 +120,12 @@ export function Header() {
         <Link
           to="/"
           className="site-brand"
-          // Always back to the very top of the home page, also when already on it.
+          // Always back to the very top of the home page: from another page it opens at the top, and on the home page
+          // itself the page glides up smoothly instead of jumping.
           resetScroll
-          onClick={() => {
+          onClick={(event) => {
             setMenuOpen(false);
-            window.scrollTo({ top: 0, behavior: "instant" });
+            if (pathname === "/" && glideTo(0)) event.preventDefault();
           }}
         >
           <img src="/brand/logo.svg?v=2" alt="" width={40} height={40} className="site-logo-mark" />

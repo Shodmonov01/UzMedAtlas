@@ -59,22 +59,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* What the site is about, in the words people search with in Russian and Uzbek too. */}
-        <div className="site-footer-seo">
-          <p>
-            <strong>Medical tourism in Uzbekistan.</strong> Treatment in Tashkent, Samarkand and Bukhara: private clinics, check-ups,
-            surgery, dentistry, cardiology and rehabilitation for international patients.
-          </p>
-          <p lang="ru">
-            <strong>Медицинский туризм в Узбекистане.</strong> Медтуризм и лечение в Узбекистане: проверенные частные клиники
-            Ташкента, Самарканда и Бухары, цены, врачи и заявка в клинику онлайн.
-          </p>
-          <p lang="uz">
-            <strong>O‘zbekistonda tibbiy turizm.</strong> Medturizm va davolanish: Toshkent, Samarqand va Buxorodagi tekshirilgan
-            xususiy klinikalar, narxlar, shifokorlar va klinikaga onlayn ariza.
-          </p>
-        </div>
-
         <div className="site-footer-bottom">
           <span>© {new Date().getFullYear()} {brand}</span>
           <span>Health Checker helps choose a specialty and does not make a diagnosis.</span>

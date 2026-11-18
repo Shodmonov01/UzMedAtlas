@@ -2,7 +2,9 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { LazyMotion, domAnimation } from "motion/react";
 import { routeTree } from "./app/router/routeTree.gen";
+import { Preloader } from "./shared/ui/Preloader";
 import "./app/styles/globals.css";
 
 const queryClient = new QueryClient({
@@ -33,8 +35,13 @@ declare module "@tanstack/react-router" {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    {/* Motion's animation features are loaded once here; components use the light `m` elements. */}
+    <LazyMotion features={domAnimation}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+      {/* Outside the router, so it is on screen from the very first render, before the page's code has arrived. */}
+      <Preloader />
+    </LazyMotion>
   </StrictMode>,
 );

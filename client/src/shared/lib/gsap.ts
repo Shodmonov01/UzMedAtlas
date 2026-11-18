@@ -58,9 +58,12 @@ export function glideTo(target: string | HTMLElement | number, offset = 0) {
     inputs.forEach((name) => window.removeEventListener(name, stop));
     html.style.scrollBehavior = behavior;
   };
+  // Long trips (the footer back to the top) take a little longer, so the page never races past.
+  const targetY = typeof el === "number" ? el : el.getBoundingClientRect().top + window.scrollY - offset;
+  const duration = Math.min(2, Math.max(1.3, 0.9 + Math.abs(targetY - window.scrollY) / 8000));
   const tween = gsap.to(window, {
     scrollTo: { y: el, offsetY: offset, autoKill: false },
-    duration: still ? 0 : 1.3,
+    duration: still ? 0 : duration,
     ease: "power3.inOut",
     overwrite: true,
     onComplete: release,

@@ -94,6 +94,7 @@
 .cp-hero-actions .pill-btn.is-outline { background: white; }
 .cp-hero-actions .pill-btn.is-outline:hover { background: var(--paper); }
 .cp-hero-actions .pill-btn > svg { flex-shrink: 0; color: var(--ink); }
+.cp-hero-actions .pill-btn.is-outline { min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .cp-round-btn { display: grid; flex-shrink: 0; place-items: center; width: 54px; height: 54px; border-radius: 999px; background: white; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); transition: background-color .25s ease, color .25s ease, box-shadow .25s ease; }
 .cp-round-btn:hover { background: var(--ink); box-shadow: none; color: white; }
 
@@ -198,7 +199,7 @@
 .cp-quick-note > svg { color: var(--ink); }
 .cp-quick-card .pill-btn { justify-content: space-between; }
 .cp-quick-row { display: flex; gap: 8px; }
-.cp-quick-phone { display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: 10px; min-width: 0; height: 50px; padding: 0 16px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 15px; font-weight: 600; white-space: nowrap; transition: background-color .25s ease; }
+.cp-quick-phone { display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: 10px; min-width: 0; height: 50px; padding: 0 16px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color .25s ease; }
 .cp-quick-phone:hover, .cp-quick-icon:hover { background: var(--paper); }
 .cp-quick-icon { display: grid; flex-shrink: 0; place-items: center; width: 50px; height: 50px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); transition: background-color .25s ease; }
 

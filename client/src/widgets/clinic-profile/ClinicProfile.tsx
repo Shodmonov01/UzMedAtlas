@@ -75,7 +75,26 @@ export function initials(name: string) {
 }
 
 export function telHref(phone: string) {
-  return `tel:${phone.replace(/[^\d+]/g, "")}`;
+  // A note in brackets ("(call centre 1142)") is not part of the number.
+  return `tel:${phone.replace(/\(.*?\)/g, "").replace(/[^\d+]/g, "")}`;
+}
+
+/** One phone field may hold several numbers ("+998 78 113-08-88, +998 55 500-05-50", "1223; +998 …", a call-centre
+ *  number in brackets). Each becomes its own entry, full numbers first, so buttons and links show and dial one number. */
+export function splitPhones(...values: (string | null | undefined)[]) {
+  const phones: string[] = [];
+  for (const value of values) {
+    if (!value) continue;
+    for (const part of value.split(/[,;\n]+/)) {
+      const bracketed = [...part.matchAll(/\(([^)]*)\)/g)].map((m) => m[1].replace(/[^\d+]/g, "")).filter((d) => d.length >= 3);
+      const number = part.replace(/\(.*?\)/g, "").trim();
+      for (const phone of [number, ...bracketed]) {
+        if (phone.replace(/\D/g, "").length >= 3 && !phones.includes(phone)) phones.push(phone);
+      }
+    }
+  }
+  const digits = (phone: string) => phone.replace(/\D/g, "").length;
+  return phones.sort((a, b) => Number(digits(b) >= 9) - Number(digits(a) >= 9));
 }
 
 /** "JCI; университетская клиника\n• робот-центр." → ["JCI", "Университетская клиника", "Робот-центр"] */

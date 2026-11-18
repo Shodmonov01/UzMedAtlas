@@ -35,24 +35,8 @@ function ModerationLoginPage() {
   }
 
   return (
-    <AuthLayout
-      ru
-      kicker="Модерация"
-      title={
-        <>
-          Проверка клиник <em>перед публикацией</em>
-        </>
-      }
-      points={[
-        "Очередь клиник с чеклистом обязательных полей",
-        "Одобрение, возврат на доработку и публикация в каталоге",
-        "Заявки пациентов и уведомления в Telegram",
-      ]}
-    >
-      <h2>Вход для модераторов</h2>
-      <p>Администратор входит по паролю, модератор — по email и паролю.</p>
-
-      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Роль">
+    <AuthLayout ru title="Вход в модерацию" subtitle="Администратор входит по паролю, модератор — по email и паролю.">
+      <div className="ws-seg is-block mt-6" role="tablist" aria-label="Роль">
         <button type="button" role="tab" aria-selected={mode === "administrator"} className={mode === "administrator" ? "is-active" : undefined} onClick={() => setMode("administrator")}>
           Администратор
         </button>

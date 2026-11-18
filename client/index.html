@@ -29,19 +29,14 @@
       rel="stylesheet"
     />
     <style>
-      /* Shown until the app mounts (React replaces the contents of #root). */
-      .boot { position: fixed; inset: 0; display: grid; place-items: center; background: #f4f8f8; }
-      .boot-mark { position: relative; display: grid; place-items: center; width: 72px; height: 72px; }
-      .boot-mark img { width: 40px; height: 40px; }
-      .boot-mark::before { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 3px solid #e0eff2; border-top-color: #0187c5; animation: boot-spin .8s linear infinite; }
-      @keyframes boot-spin { to { transform: rotate(360deg); } }
-      @media (prefers-reduced-motion: reduce) { .boot-mark::before { animation-duration: 2.4s; } }
+      /* Shown until the app mounts: the empty paper the app's loader (src/shared/ui/Preloader.tsx) starts on. */
+      .boot { position: fixed; z-index: 10000; inset: 0; background: #f4f8f8; }
       /* The page's text for crawlers and for browsers without JavaScript; React replaces it on mount. */
       .seo-content { max-width: 860px; margin: 0 auto; padding: 32px 16px; font: 16px/1.6 Manrope, system-ui, sans-serif; color: #0b2a3d; }
     </style>
   </head>
   <body translate="no" class="notranslate">
-    <div id="root"><div class="boot" role="status" aria-label="Loading"><span class="boot-mark"><img src="/brand/logo.svg?v=2" alt="" width="40" height="40" /></span></div><!--seo:body--></div>
+    <div id="root"><div class="boot" aria-hidden="true"></div><!--seo:body--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

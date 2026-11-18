@@ -179,7 +179,7 @@
   background: linear-gradient(90deg, #00326c 0%, #01468d 42%, #025db1 70%, #3f7bbd 100%); }
 .home-hero picture { display: contents; }
 .home-hero-photo { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; object-position: 64% 0%;
-  user-select: none; pointer-events: none; }
+  user-select: none; pointer-events: none; transform-origin: 64% 0%; }
 .home-hero-shade { position: absolute; z-index: 1; inset: 0; pointer-events: none;
   background: linear-gradient(90deg, #0b2a3de6 0%, #0b2a3db3 22%, #0b2a3d4d 40%, transparent 56%), linear-gradient(to bottom, #0b2a3d59, transparent 12%), linear-gradient(to top, #0b2a3d80, transparent 26%); }
 /* The copy sits in the open blue at the upper left, clear of the raised hand below it. */
@@ -189,6 +189,10 @@
 .home-hero-title { margin-top: 22px; color: white; font-size: clamp(44px, min(5.2cqw, 9cqh), 88px); font-weight: 500; line-height: .98; letter-spacing: -.055em; text-wrap: balance; }
 .home-hero-title > div { padding-bottom: .1em; margin-bottom: -.1em; }
 .home-hero-title em { color: var(--accent); font-style: normal; }
+/* Each title word slides up inside its own mask (Motion, HomeHero.tsx); the padding keeps descenders and the tight
+   letter-spacing from being clipped. */
+.hero-word { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .06em .16em; margin: 0 -.06em -.16em; }
+.hero-word > * { display: inline-block; }
 .home-hero-lead { max-width: 30ch; margin-top: 22px; color: #ffffffd9; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.55; }
 .home-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
 /* Three short promises on one solid white bar, centred along the bottom; thin rules between them. */
@@ -204,7 +208,7 @@
 
 @media (orientation: portrait) {
   .home-hero { background: linear-gradient(to bottom, #1e6fa9 0%, #1e6fa9 40%, var(--ink) 75%); }
-  .home-hero-photo { inset: auto; top: var(--header-h); left: 0; height: calc(74% - var(--header-h)); object-position: 70% 0%;
+  .home-hero-photo { inset: auto; top: var(--header-h); left: 0; height: calc(74% - var(--header-h)); object-position: 40% 0%; transform-origin: 40% 0%;
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 3%); mask-image: linear-gradient(to bottom, transparent, #000 3%); }
   .home-hero-shade { background: linear-gradient(to bottom, transparent 40%, #0b2a3dcc 60%, var(--ink) 74%); }
   .home-hero-stage { align-items: flex-end; padding-bottom: clamp(28px, 5cqh, 56px); }
@@ -236,7 +240,7 @@
 }
 .manifesto-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 3vw, 48px); margin-top: clamp(72px, 9vw, 136px); }
 .manifesto-stat { position: relative; padding-top: 28px; }
-.manifesto-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: white; opacity: .22; }
+.manifesto-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: white; opacity: .22; transform-origin: 0 50%; }
 .manifesto-figure { display: flex; align-items: baseline; gap: 8px; color: white; font-size: clamp(64px, 7.4vw, 120px); font-weight: 600; line-height: .9; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
 .manifesto-figure small { color: var(--accent); font-size: .3em; font-weight: 600; letter-spacing: -.02em; }
 .manifesto-label { max-width: 26ch; margin-top: 18px; color: #ffffffb3; font-size: 15px; line-height: 1.5; }
@@ -611,9 +615,6 @@
 
 .site-footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding: 24px 0 32px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 /* Three short lines about medical tourism in English, Russian and Uzbek, quiet above the fine print. */
-.site-footer-seo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 32px; padding: 0 0 28px; color: var(--muted); font-size: 13px; line-height: 1.6; }
-.site-footer-seo strong { color: inherit; font-weight: 700; }
-@media (max-width: 767px) { .site-footer-seo { grid-template-columns: minmax(0, 1fr); } }
 
 @media (max-width: 1023px) {
   .site-footer-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px 32px; }

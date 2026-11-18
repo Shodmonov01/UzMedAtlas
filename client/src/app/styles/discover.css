@@ -241,7 +241,7 @@ li:last-child > .dest-list-item { border-bottom: 1px solid var(--line); }
 .site-footer-col a:hover { color: white; }
 .site-footer-cta-title { color: white; }
 .site-footer-cta > p:not(.site-footer-cta-title) { color: #ffffffb3; }
-.site-footer-bottom, .site-footer-seo { color: #ffffff80; }
+.site-footer-bottom { color: #ffffff80; }
 /* An agency pill that links out: on hover only its colours change (no underline). */
 a.team-row-org { transition: color .25s ease, box-shadow .25s ease; }
 a.team-row-org:hover { color: white; box-shadow: inset 0 0 0 1px var(--accent); }

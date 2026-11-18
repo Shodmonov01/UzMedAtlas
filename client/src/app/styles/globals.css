@@ -927,3 +927,16 @@ select.field {
 @media (prefers-reduced-motion: reduce) {
   .loading-bar::before, .fit-image:not(.is-loaded)::before { animation-duration: 3s; }
 }
+
+/* Opening loader (shared/ui/Preloader.tsx), as on uztta.uz: the logo and the association's name in the middle of the
+   paper, which is then wiped up like a curtain. The boot screen in index.html is the same empty paper. */
+.preloader { position: fixed; z-index: 10000; inset: 0; overflow: hidden; background: var(--paper); color: var(--ink); }
+.preloader-inner { position: absolute; inset: 0; display: grid; place-items: center; }
+.preloader-stack { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.preloader-breathe { display: block; }
+.preloader-mark { display: block; width: 56px; height: 56px; user-select: none; }
+.preloader-word-mask { overflow: hidden; }
+.preloader-word { display: block; font-size: 18px; font-weight: 500; line-height: 1.25; letter-spacing: -.03em; text-align: center; }
+.preloader-word > span { display: block; }
+@media (min-width: 640px) { .preloader-word { font-size: 20px; } }
+@media (min-width: 768px) { .preloader-mark { width: 80px; height: 80px; } }

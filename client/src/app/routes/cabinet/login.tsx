@@ -47,22 +47,10 @@ function CabinetLoginPage() {
 
   return (
     <AuthLayout
-      kicker="For clinics"
-      title={
-        <>
-          Your clinic on the <em>medical travel map</em>
-        </>
-      }
-      points={[
-        "Clinic profile, branches, doctors and prices in one place",
-        "Patient requests from the catalog and Health Checker",
-        "A moderator reviews the profile before it goes live",
-      ]}
+      title={mode === "login" ? "Clinic sign in" : "Register a clinic"}
+      subtitle={mode === "login" ? "Manage your clinic profile and patient requests." : "Create an owner account, then add your clinic step by step."}
     >
-      <h2>{mode === "login" ? "Sign in" : "Register a clinic"}</h2>
-      <p>{mode === "login" ? "Sign in to manage your clinic profile and requests." : "Create an owner account, then add your clinic step by step."}</p>
-
-      <div className="ws-seg is-block mt-7" role="tablist" aria-label="Sign in or register">
+      <div className="ws-seg is-block mt-6" role="tablist" aria-label="Sign in or register">
         <button type="button" role="tab" aria-selected={mode === "login"} className={mode === "login" ? "is-active" : undefined} onClick={() => { setMode("login"); setError(null); }}>
           Sign in
         </button>
