@@ -328,11 +328,17 @@
 .cp-person-body h3 { margin-top: 6px; color: var(--ink); font-size: 19px; font-weight: 700; line-height: 1.25; letter-spacing: -.025em; }
 .cp-person-bio { margin-top: 8px; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
 .cp-person:not(.is-wide) .cp-person-bio { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+/* Phones: compact. A small upright portrait (the whole head and shoulders, not a wide crop) with the role and the name
+   beside it; the bio runs under both at the full width of the card. */
 @media (max-width: 767px) {
   .cp-people { grid-template-columns: minmax(0, 1fr); }
-  .cp-person, .cp-person.is-wide { flex-direction: column; gap: 12px; padding: 12px; }
-  .cp-person .cp-avatar, .cp-person.is-wide .cp-avatar { width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 18px; }
-  .cp-person-body { padding: 0 4px 4px; }
+  .cp-person, .cp-person.is-wide { display: grid; grid-template-columns: 76px minmax(0, 1fr); grid-template-rows: 1fr auto auto 1fr auto;
+    gap: 0 14px; padding: 12px; border-radius: 22px; }
+  .cp-person .cp-avatar, .cp-person.is-wide .cp-avatar { grid-column: 1; grid-row: 1 / 5; width: 76px; height: 92px; border-radius: 16px; font-size: 20px; }
+  .cp-person-body { display: contents; }
+  .cp-person-body > .cp-label { grid-column: 2; grid-row: 2; margin: 0; }
+  .cp-person-body > h3 { grid-column: 2; grid-row: 3; margin: 4px 0 0; font-size: 18px; }
+  .cp-person-bio { grid-column: 1 / -1; grid-row: 5; margin: 12px 0 0; padding: 0 2px 2px; }
 }
 
 /* Services and prices: one white card of rows, a search pill above when the list is long. */
