@@ -1,4 +1,4 @@
-# UzMedAtlas
+# Uzmedguide
 
 Медицинский каталог: **Vite + React** (`client`) и **Fastify + Prisma** (`server`).
 
