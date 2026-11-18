@@ -11,6 +11,8 @@ type Props = {
   className?: string;
   /** Shown as the heading of the phone sheet (the field's own label, e.g. "City"). */
   title?: string;
+  /** Phones: a smaller sheet floating clear of the screen edges instead of the full-width one (the request form). */
+  compact?: boolean;
   onChange: (value: string) => void;
 };
 
@@ -27,6 +29,7 @@ export function SelectField({
   placeholder,
   className = "",
   title,
+  compact = false,
   onChange,
 }: Props) {
   const id = useId();
@@ -158,7 +161,7 @@ export function SelectField({
               />
               <div
                 ref={sheetRef}
-                className="select-sheet"
+                className={`select-sheet${compact ? " is-compact" : ""}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={`${id}-title`}

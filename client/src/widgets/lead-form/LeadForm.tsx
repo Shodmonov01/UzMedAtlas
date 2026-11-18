@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { submitClinicLead, type LeadPayload } from "@/shared/api/client";
 import { createId } from "@/shared/lib/id";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
+import { SelectField, type SelectOption } from "@/shared/ui/SelectField";
 
 const COUNTRIES = [
   "Uzbekistan",
@@ -19,6 +20,25 @@ const COUNTRIES = [
   "United Kingdom",
   "United States",
   "Other",
+];
+
+const COUNTRY_OPTIONS: SelectOption[] = COUNTRIES.map((c) => ({ value: c, label: c }));
+const CONTACT_OPTIONS: SelectOption[] = [
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "telegram", label: "Telegram" },
+  { value: "phone", label: "Phone call" },
+  { value: "email", label: "Email" },
+];
+const ARRIVAL_OPTIONS: SelectOption[] = [
+  { value: "undecided", label: "Not decided yet" },
+  { value: "approximate", label: "Roughly known" },
+  { value: "exact", label: "Exact dates" },
+];
+const HOURS_OPTIONS: SelectOption[] = [
+  { value: "anytime", label: "Any time" },
+  { value: "morning", label: "Morning" },
+  { value: "afternoon", label: "Afternoon" },
+  { value: "evening", label: "Evening" },
 ];
 
 type CheckerMeta = {
@@ -59,6 +79,12 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [idempotencyKey] = useState(() => createId());
+  // The pickers are the site's own (a card on wide screens, a compact sheet on phones) rather than the browser's
+  // native select, whose phone dialog is big and plain; each writes its value into a hidden field of the form.
+  const [country, setCountry] = useState("Uzbekistan");
+  const [contactMethod, setContactMethod] = useState("whatsapp");
+  const [arrivalType, setArrivalType] = useState("undecided");
+  const [preferredHours, setPreferredHours] = useState("anytime");
   const checker = useMemo(() => readCheckerMeta(), []);
   const symptoms = defaultSymptoms || checker?.symptoms || "";
   const fromChecker = Boolean(symptoms || checker?.specialtySlug);
@@ -149,22 +175,11 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
         <div className="cp-lead-row">
           <label>
             Country
-            <select name="country" className="field" defaultValue="Uzbekistan">
-              {COUNTRIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            <SelectField compact name="country" title="Country" value={country} options={COUNTRY_OPTIONS} onChange={setCountry} />
           </label>
           <label>
             Contact via
-            <select name="contactMethod" className="field" defaultValue="whatsapp">
-              <option value="whatsapp">WhatsApp</option>
-              <option value="telegram">Telegram</option>
-              <option value="phone">Phone call</option>
-              <option value="email">Email</option>
-            </select>
+            <SelectField compact name="contactMethod" title="Contact via" value={contactMethod} options={CONTACT_OPTIONS} onChange={setContactMethod} />
           </label>
         </div>
         <label>
@@ -176,20 +191,11 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
         <div className="cp-lead-row">
           <label>
             When you plan to come
-            <select name="arrivalType" className="field" defaultValue="undecided">
-              <option value="undecided">Not decided yet</option>
-              <option value="approximate">Roughly known</option>
-              <option value="exact">Exact dates</option>
-            </select>
+            <SelectField compact name="arrivalType" title="When you plan to come" value={arrivalType} options={ARRIVAL_OPTIONS} onChange={setArrivalType} />
           </label>
           <label>
             Best time
-            <select name="preferredHours" className="field" defaultValue="anytime">
-              <option value="anytime">Any time</option>
-              <option value="morning">Morning</option>
-              <option value="afternoon">Afternoon</option>
-              <option value="evening">Evening</option>
-            </select>
+            <SelectField compact name="preferredHours" title="Best time" value={preferredHours} options={HOURS_OPTIONS} onChange={setPreferredHours} />
           </label>
         </div>
         <label>
