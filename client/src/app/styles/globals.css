@@ -864,17 +864,16 @@ select.field {
 .select-sheet .select-options button { min-height: 52px; padding: 12px 14px; font-size: 16px; }
 @keyframes select-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @keyframes select-fade { from { opacity: 0; } to { opacity: 1; } }
-/* The compact sheet (the request form on clinic pages): a smaller card floating 8px clear of the screen edges and above
-   the home bar, no taller than 60% of the visible screen; only its list scrolls. */
-.select-sheet.is-compact { inset: auto 8px max(8px, env(safe-area-inset-bottom)); max-height: 60svh; max-height: 60dvh; padding: 8px;
-  overflow: hidden; border-radius: 24px; box-shadow: 0 0 0 1px #0b2a3d0f, 0 24px 60px -16px #0b2a3d73; animation-name: select-sheet-pop; }
+/* The compact sheet (the request form on clinic pages): flush with the bottom and both sides of the screen like the
+   regular sheet, but no taller than 60% of the visible screen, with smaller rows; only its list scrolls, and its last
+   row clears the home bar. */
+.select-sheet.is-compact { max-height: 60svh; max-height: 60dvh; padding: 8px 8px max(12px, env(safe-area-inset-bottom)); overflow: hidden; border-radius: 24px 24px 0 0; }
 .select-sheet.is-compact .select-sheet-handle { flex-shrink: 0; width: 36px; height: 4px; }
 .select-sheet.is-compact .select-sheet-head { flex-shrink: 0; padding: 2px 6px 8px 10px; }
 .select-sheet.is-compact .select-sheet-head > p { font-size: 17px; }
 .select-sheet.is-compact .select-sheet-close { width: 36px; height: 36px; }
 .select-sheet.is-compact .select-options { flex: 1 1 auto; min-height: 0; }
 .select-sheet.is-compact .select-options button { min-height: 46px; padding: 10px 14px; font-size: 15px; }
-@keyframes select-sheet-pop { from { transform: translateY(calc(100% + 16px)); } to { transform: none; } }
 @keyframes select-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
 
 /* ---------- Photo viewer (clinic pages, previews) ----------
