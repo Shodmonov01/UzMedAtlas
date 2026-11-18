@@ -54,7 +54,10 @@
    On the home page it is see-through over the hero film with white type, and turns solid white once the film draws back.
    The current section sits on a soft pill that glides between the links (Header moves it with GSAP); hovering a link
    only darkens its text. */
-.site-header { position: sticky; top: 0; z-index: 30; }
+.site-header { position: sticky; top: 0; z-index: 30; transition: transform .45s var(--ease-out); }
+/* Scrolling down slides the bar up out of view; scrolling up brings it back (Header.tsx). */
+.site-header.is-hidden { transform: translateY(-100%); }
+@media (prefers-reduced-motion: reduce) { .site-header { transition: none; } }
 /* While the phone menu is open it sits above everything, the docked request bar included. */
 .site-header.is-open { z-index: 70; }
 .reference-portal .site-header { position: fixed; left: 0; right: 0; }

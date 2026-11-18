@@ -153,6 +153,10 @@
 /* Solid, glued under the site header: the page's sections as pills (the current one on ink) and the request
    button at the end. Scrolls sideways on phones. */
 .cp-bar { position: sticky; top: var(--bar-top); z-index: 20; margin-top: clamp(24px, 3vw, 40px); background: var(--paper); }
+/* While the site header is slid away (scrolling down), the section bar and the side card move up into its place. */
+.cp-bar, .cp-quick { transition: top .45s var(--ease-out); }
+.is-header-hidden .cp { --bar-top: 0px; }
+@media (prefers-reduced-motion: reduce) { .cp-bar, .cp-quick { transition: none; } }
 .cp-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; box-shadow: 0 1px 0 var(--line); }
 .cp-bar.is-stuck { background: white; box-shadow: 0 1px 0 var(--line), 0 18px 40px -32px #0b2a3d59; }
 .cp-bar.is-stuck .cp-bar-inner { box-shadow: none; }

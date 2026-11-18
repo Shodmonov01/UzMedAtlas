@@ -24,10 +24,13 @@ function goToSection(event: MouseEvent<HTMLAnchorElement>, id: string) {
 
 export function Header() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  // A solid bar glued to the top and always in view; on the home page it is see-through over the hero film
-  // and turns white once the film draws back.
+  // A solid white bar at the top. On the home page it is see-through over the hero only while the page is at its very
+  // top; as soon as the reader scrolls it is white. It slides away while the reader scrolls down and comes back as soon
+  // as they scroll up.
   const [scrolled, setScrolled] = useState(false);
   const [overFilm, setOverFilm] = useState(pathname === "/");
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
   const [menuOpen, setMenuOpen] = useState(false);
   // The section the reader is in, highlighted in the nav.
   const [active, setActive] = useState("");
@@ -69,11 +72,14 @@ export function Header() {
     () => {
       const update = (y: number) => {
         setScrolled(y > 24);
-        // Over the film until the hero's trigger ends (its bottom edge just under the header). The hero sets up its
-        // trigger after the header does; until then the top of the home page counts as over the film.
-        // Measured from the scroll position, not the trigger's own progress, which may not have caught up with a jump yet.
-        const hero = ScrollTrigger.getById("home-hero");
-        setOverFilm(hero ? y < hero.end : pathname === "/" && y < 40);
+        setOverFilm(pathname === "/" && y <= 24);
+        // Near the top the bar is always shown; further down it hides on the way down and returns on the way up
+        // (small jitters of a few pixels are ignored).
+        const delta = y - lastY.current;
+        if (y < 120) setHidden(false);
+        else if (delta > 4) setHidden(true);
+        else if (delta < -4) setHidden(false);
+        if (y < 120 || Math.abs(delta) > 4) lastY.current = y;
         // The last section whose top has passed the upper third of the screen.
         let current = "";
         for (const { id } of SECTIONS) {
@@ -92,6 +98,13 @@ export function Header() {
     },
     { dependencies: [pathname], revertOnUpdate: true },
   );
+
+  // Sticky bars under the header (the clinic page's section bar) move up into its place while it is away.
+  const away = hidden && !menuOpen;
+  useEffect(() => {
+    document.documentElement.classList.toggle("is-header-hidden", away);
+    return () => document.documentElement.classList.remove("is-header-hidden");
+  }, [away]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -115,7 +128,7 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header className={`site-header${scrolled ? " is-scrolled" : ""}${overFilm ? " is-over-film" : ""}${menuOpen ? " is-open" : ""}`}>
+    <header className={`site-header${scrolled ? " is-scrolled" : ""}${overFilm ? " is-over-film" : ""}${away ? " is-hidden" : ""}${menuOpen ? " is-open" : ""}`}>
       <div className="site-header-bar">
         <Link
           to="/"
