@@ -34,8 +34,8 @@ const lift: Variants = {
 const TITLE = ["Medicine", "you", "can"];
 
 /** The home page opens on a surgeon in the operating room over the whole screen: the surgeon on the
- *  right, the copy on the open blue to the left. Upright screens get the MEDGUIDE UZ cover portrait instead, with the
- *  copy below the face. Both photos come in several widths, picked by the size they are shown at, so they stay sharp.
+ *  right, the copy on the open blue to the left. Upright screens get an upright shot of the surgeon with the implant
+ *  instead, the whole width of the screen, with the copy below his face. Both photos come in several widths, picked by the size they are shown at, so they stay sharp.
  *  It comes in as the opening loader lifts (Motion): the photo settles from a slight zoom, the title words slide up
  *  one after another, then the lead, the buttons and the promise bar. With reduced motion it is simply there. */
 export function HomeHero() {
@@ -65,12 +65,11 @@ export function HomeHero() {
       animate={still || introDone ? "shown" : "hidden"}
     >
       <picture>
-        {/* Upright screens: the cover portrait, taller and sharper for that shape (shown in the top 74% of the
-            hero, so about 0.88 x 74% of the screen height wide). */}
+        {/* Upright screens: the portrait of the surgeon with the implant, as wide as the screen (home.css). */}
         <source
           media="(orientation: portrait)"
-          srcSet="/images/hero/hero-mobile-1100.webp 1100w, /images/hero/hero-mobile.webp 1762w"
-          sizes="66svh"
+          srcSet="/images/hero/hero-portrait-640.webp 640w, /images/hero/hero-portrait.webp 941w"
+          sizes="100vw"
         />
         {/* Wide screens: the operating-room shot. It covers the screen, so on screens narrower than 16:9 it is as
             wide as the screen is tall times 1.777. */}

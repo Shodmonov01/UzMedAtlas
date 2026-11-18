@@ -229,8 +229,8 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
-            <button className="pill-btn is-ink" type="submit">
-              Search
+            <button className="pill-btn is-ink" type="submit" aria-label="Search">
+              <span className="search-submit-text">Search</span>
               <span className="pill-btn-icon">
                 <ArrowIcon />
               </span>
@@ -246,13 +246,13 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               <span>Specialty</span>
               <SelectField title="Specialty" value={search.specialty || ""} options={specialtyOptions} onChange={(value) => onPatchSearch({ specialty: value || undefined })} />
             </div>
-            <button type="button" className="search-chip is-button" onClick={() => setModalOpen(true)}>
+            <button type="button" className="search-chip is-button" aria-label="More filters" onClick={() => setModalOpen(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M4 7h10m4 0h2M4 17h4m4 0h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <circle cx="16" cy="7" r="2" stroke="currentColor" strokeWidth="2" />
                 <circle cx="10" cy="17" r="2" stroke="currentColor" strokeWidth="2" />
               </svg>
-              Filters
+              <span className="search-chip-text">Filters</span>
               {advancedCount ? <b>{advancedCount}</b> : null}
             </button>
           </div>

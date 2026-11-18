@@ -206,12 +206,17 @@
   .home-hero-points { display: none; }
 }
 
+/* Upright screens: the portrait photo is as wide as the screen at its own shape, from the top edge (behind the
+   see-through header; the head sits well below it), so nothing of the surgeon is cut. The copy starts under his chin
+   (60% down the photo), or lower on tall screens so it sits at the bottom; it never covers the face. On short phones
+   the hero simply grows taller than the screen. Under the photo the hero is ink. */
 @media (orientation: portrait) {
-  .home-hero { background: linear-gradient(to bottom, #1e6fa9 0%, #1e6fa9 40%, var(--ink) 75%); }
-  .home-hero-photo { inset: auto; top: var(--header-h); left: 0; height: calc(74% - var(--header-h)); object-position: 40% 0%; transform-origin: 40% 0%;
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 3%); mask-image: linear-gradient(to bottom, transparent, #000 3%); }
-  .home-hero-shade { background: linear-gradient(to bottom, transparent 40%, #0b2a3dcc 60%, var(--ink) 74%); }
-  .home-hero-stage { align-items: flex-end; padding-bottom: clamp(28px, 5cqh, 56px); }
+  .home-hero { --photo-h: calc(100vw * 1672 / 941); container-type: normal; display: flex; flex-direction: column; justify-content: flex-end;
+    height: auto; min-height: 100svh; background: var(--ink); }
+  .home-hero-photo { inset: auto; top: 0; left: 0; width: 100%; height: var(--photo-h); object-position: 50% 0%; transform-origin: 50% 30%; }
+  .home-hero-shade { bottom: auto; height: var(--photo-h);
+    background: linear-gradient(to bottom, #0b2a3d59 0%, transparent 12%, transparent 50%, #0b2a3dcc 64%, var(--ink) 84%); }
+  .home-hero-stage { position: relative; inset: auto; padding: calc(var(--photo-h) * .6) var(--gutter) 40px; }
   .home-hero-copy { width: min(560px, 100%); }
 }
 @media (max-width: 767px) {
@@ -380,14 +385,24 @@
 .catalog-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; max-width: 520px; padding: 8px 0; color: var(--muted); font-size: 15px; }
 .catalog-empty-title { color: var(--ink); font-size: 24px; font-weight: 600; letter-spacing: -.03em; }
 .catalog-empty .pill-btn { margin-top: 12px; }
+/* Phones: compact. The search is one field with a round arrow button; City, Specialty and Filters share one row (the
+   values say what they are, so the "City"/"Specialty" labels go, and Filters is an icon); the quick specialty row is
+   left out, as on wide screens, since the Specialty field does the same job. */
 @media (max-width: 639px) {
-  .search-main { height: 62px; gap: 10px; padding: 0 7px 0 20px; }
+  .search-main { height: 56px; gap: 10px; padding: 0 6px 0 18px; }
   .search-main-input { font-size: 16px; }
-  .search-main .pill-btn { height: 48px; padding-left: 18px; gap: 10px; }
-  .search-main .pill-btn-icon { width: 36px; height: 36px; }
-  .search-chips { gap: 8px; }
-  .search-chip { height: 46px; padding-left: 16px; }
-  .search-chip.is-button { padding: 0 16px; }
+  .search-main .pill-btn { width: 44px; height: 44px; padding: 0; gap: 0; justify-content: center; background: transparent; }
+  .search-submit-text { display: none; }
+  .search-main .pill-btn-icon { width: 44px; height: 44px; }
+  .search-chips { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr) auto; gap: 8px; margin-top: 10px; }
+  .search-chip { min-width: 0; height: 44px; padding: 0 2px 0 4px; }
+  .search-chip > span { display: none; }
+  .search-chip .select-field { flex: 1; min-width: 0; }
+  .search-chip .field { width: 100%; height: 40px; padding: 0 8px 0 12px; font-size: 13px; }
+  .search-chip.is-button { position: relative; justify-content: center; width: 44px; padding: 0; }
+  .search-chip-text { display: none; }
+  .search-chip.is-button > b { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; font-size: 11px; }
+  .catalog .catalog-quick { display: none; }
 }
 
 /* More-filters dialog: a white sheet over a dimmed page (no blur). Labelled pill fields on the paper tint that turn
