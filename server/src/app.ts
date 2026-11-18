@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
+import compress from "@fastify/compress";
 import fastifyStatic from "@fastify/static";
 import fs from "node:fs";
 import path from "node:path";
@@ -42,6 +43,9 @@ export async function buildApp(options: { logger?: boolean } = {}) {
     credentials: true,
   });
   await app.register(cookie);
+  // API answers (the clinic list is ~280 KB of JSON) and pages go out brotli/gzip-compressed. Bundles from client/dist
+  // are compressed once at build time (see preCompressed below), so they are not compressed again on every request.
+  await app.register(compress, { encodings: ["br", "gzip"], threshold: 1024 });
 
   // Media only — never register public/ at "/" with default wildcard (it swallows /assets).
   await app.register(fastifyStatic, {
@@ -83,6 +87,8 @@ export async function buildApp(options: { logger?: boolean } = {}) {
       wildcard: false,
       // "/" is not served as a plain file: it goes through the SEO renderer below like every other page.
       index: false,
+      // The build writes .br and .gz copies next to every script, stylesheet and SVG (client/vite.config.ts).
+      preCompressed: true,
       decorateReply: true,
       cacheControl: false,
       setHeaders: cacheHeaders,

@@ -1,14 +1,25 @@
-import { z } from "zod";
+const CATALOG_SEARCH_KEYS = [
+  "q",
+  "city",
+  "specialty",
+  "lang",
+  "sort",
+  "service",
+  "priceMin",
+  "priceMax",
+  "responseMax",
+  "medicalTourism",
+] as const;
 
-export const catalogSearchSchema = z.object({
-  q: z.string().optional().catch(undefined),
-  city: z.string().optional().catch(undefined),
-  specialty: z.string().optional().catch(undefined),
-  lang: z.string().optional().catch(undefined),
-  sort: z.string().optional().catch(undefined),
-  service: z.string().optional().catch(undefined),
-  priceMin: z.string().optional().catch(undefined),
-  priceMax: z.string().optional().catch(undefined),
-  responseMax: z.string().optional().catch(undefined),
-  medicalTourism: z.string().optional().catch(undefined),
-});
+export type CatalogSearchParams = Partial<Record<(typeof CATALOG_SEARCH_KEYS)[number], string>>;
+
+/** The catalog's URL filters: every known key that holds text is kept, anything else (unknown keys, numbers, lists)
+ *  is dropped. A plain function instead of a schema library keeps that library out of the first download. */
+export function catalogSearchSchema(input: Record<string, unknown>): CatalogSearchParams {
+  const search: CatalogSearchParams = {};
+  for (const key of CATALOG_SEARCH_KEYS) {
+    const value = input[key];
+    if (typeof value === "string") search[key] = value;
+  }
+  return search;
+}

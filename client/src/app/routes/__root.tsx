@@ -3,9 +3,14 @@ import { Link, Outlet, createRootRoute, useRouterState } from "@tanstack/react-r
 import { Header } from "@/widgets/header/Header";
 import { Footer } from "@/widgets/footer/Footer";
 import { HealthCheckerProvider } from "@/widgets/health-checker/HealthCheckerContext";
-import { HealthCheckerWidget } from "@/widgets/health-checker/HealthCheckerWidget";
 import { WorkspaceShell } from "@/widgets/workspace/Workspace";
 import { LoadingBar } from "@/shared/ui/LoadingBar";
+import { Suspense, lazy } from "react";
+
+// The helper bubble sits in a corner and is not needed for the first paint, so its code arrives after the page.
+const HealthCheckerWidget = lazy(() =>
+  import("@/widgets/health-checker/HealthCheckerWidget").then((m) => ({ default: m.HealthCheckerWidget })),
+);
 
 // The AI helper bubble is switched off for now; set to true to bring it back.
 const SHOW_HEALTH_CHECKER = true;
@@ -77,7 +82,11 @@ function RootShell() {
         </main>
         <Footer />
         {/* No checker bubble on clinic and branch pages: it covered the content and the request dock. */}
-        {SHOW_HEALTH_CHECKER && !isClinicPage ? <HealthCheckerWidget showTip={!isHome} hideOverHero={isHome} /> : null}
+        {SHOW_HEALTH_CHECKER && !isClinicPage ? (
+          <Suspense fallback={null}>
+            <HealthCheckerWidget showTip={!isHome} hideOverHero={isHome} />
+          </Suspense>
+        ) : null}
       </div>
     </HealthCheckerProvider>
   );
