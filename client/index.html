@@ -3,6 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // iPhone and iPad zoom the page in when a field is focused; maximum-scale stops that there (iOS still allows
+      // pinch-zoom). Other systems keep the plain viewport, so their pinch-zoom is untouched.
+      (function () {
+        var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        if (ios) document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1");
+      })();
+    </script>
     <meta name="google" content="notranslate" />
     <!-- The server replaces everything between these markers with the page's own SEO tags (server/src/lib/seo.ts). -->
     <!--seo:head-->

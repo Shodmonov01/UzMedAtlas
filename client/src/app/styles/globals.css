@@ -835,7 +835,7 @@ select.field {
 
 /* Phones and tablets zoom the page in when a focused field's text is under 16px; keep every typed-in field at 16px there,
    whatever text size it inherits from its label (pinch-zoom stays available). */
-@media (pointer: coarse) {
+@media (pointer: coarse), (any-pointer: coarse) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
   select,
   textarea { font-size: 16px !important; }
