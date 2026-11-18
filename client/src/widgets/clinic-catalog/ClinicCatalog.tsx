@@ -39,13 +39,6 @@ const SERVICE_OPTIONS: { value: string; label: string }[] = [
   { value: "endoscopy", label: "Endoscopy" },
 ];
 
-const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: "name", label: "A to Z" },
-  { value: "response", label: "Fastest reply" },
-  { value: "price", label: "Price" },
-  { value: "city", label: "City" },
-];
-
 const RESPONSE_OPTIONS: { value: string; label: string }[] = [
   { value: "", label: "Any time" },
   { value: "6", label: "Within 6 hours" },
@@ -201,17 +194,13 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                 Choose a <em>clinic</em>
               </>
           </h2>
-          {/* The count and the sort order sit beside the heading, out of the search bar. */}
+          {/* The count sits beside the heading, out of the search bar. */}
           <div className="catalog-head-side">
             {!clinics.isLoading && clinics.data ? (
               <p className="catalog-count">
                 {clinics.data.length} {(clinics.data.length === 1 ? "clinic" : "clinics")}
               </p>
             ) : null}
-            <div className="catalog-sort">
-              <span>Sort</span>
-              <SelectField title="Sort" value={search.sort || "name"} options={SORT_OPTIONS} onChange={(value) => onPatchSearch({ sort: value === "name" ? undefined : value })} />
-            </div>
           </div>
         </div>
 
