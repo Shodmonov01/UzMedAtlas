@@ -1,38 +1,39 @@
-name: Deploy production
+name: Application checks
 on:
-  workflow_run:
-    workflows: ["Application checks"]
-    types: [completed]
+  push:
     branches: [main]
-  workflow_dispatch:
+  pull_request:
 permissions:
   contents: read
-concurrency:
-  group: uzmedatlas-production
-  cancel-in-progress: false
 jobs:
-  deploy:
-    if: >-
-      vars.UZMED_DEPLOY_ENABLED == 'true' &&
-      (github.event_name == 'workflow_dispatch' ||
-       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
+  checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
-      - name: Prepare SSH
-        env:
-          DEPLOY_KEY: ${{ secrets.UZMED_DEPLOY_KEY }}
-          KNOWN_HOSTS: ${{ secrets.UZMED_KNOWN_HOSTS }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+      - name: Validate deploy scripts
         run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
-      - name: Deploy exact commit
+          bash -n deploy/install.sh deploy/watch-main.sh deploy/release.sh
+          node --check deploy/verify.mjs
+      - name: Check API
+        working-directory: server
         env:
-          DEPLOY_HOST: ${{ secrets.UZMED_HOST }}
-          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DATABASE_URL: file:./ci.db
         run: |
-          test -n "$DEPLOY_HOST"
-          ssh -T -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o ServerAliveInterval=30 \
-            "rakhimovd@$DEPLOY_HOST" "deploy $SHA"
+          npm ci --no-audit --no-fund
+          npm run prisma:generate
+          npm test
+          npm run build
+      - name: Check website
+        working-directory: client
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+          npm run build
