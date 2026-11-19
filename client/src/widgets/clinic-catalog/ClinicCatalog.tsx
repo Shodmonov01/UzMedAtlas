@@ -3,11 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
 import { CITY_LABELS, fetchClinics, fetchSpecialties, type ClinicListItem } from "@/shared/api/client";
 import { SelectField } from "@/shared/ui/SelectField";
+import { languageName } from "@/widgets/clinic-profile/ClinicProfile";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { CITY_OPTIONS, displayCity } from "@/shared/lib/cities";
-import { pickName } from "@/shared/i18n/lang";
+import { CITY_OPTIONS, cityName } from "@/shared/lib/cities";
+import { briefText, clinicName, countWord, pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 
 export type CatalogSearch = {
   q?: string;
@@ -28,34 +29,30 @@ type Props = {
   onClearSearch: () => void;
 };
 
-const SERVICE_OPTIONS: { value: string; label: string }[] = [
-  { value: "", label: "Any service" },
-  { value: "mri", label: "MRI" },
-  { value: "ct", label: "CT" },
-  { value: "ultrasound", label: "Ultrasound" },
-  { value: "checkup", label: "Check-up" },
-  { value: "consultation", label: "Consultation" },
-  { value: "surgery", label: "Surgery" },
-  { value: "endoscopy", label: "Endoscopy" },
+const SERVICE_OPTIONS: { value: string; label: Text }[] = [
+  { value: "", label: { ru: "Любая услуга", uz: "Istalgan xizmat", en: "Any service" } },
+  { value: "mri", label: { ru: "МРТ", uz: "MRT", en: "MRI" } },
+  { value: "ct", label: { ru: "КТ", uz: "KT", en: "CT" } },
+  { value: "ultrasound", label: { ru: "УЗИ", uz: "UTT", en: "Ultrasound" } },
+  { value: "checkup", label: { ru: "Check-up", uz: "Check-up", en: "Check-up" } },
+  { value: "consultation", label: { ru: "Консультация", uz: "Konsultatsiya", en: "Consultation" } },
+  { value: "surgery", label: { ru: "Операция", uz: "Operatsiya", en: "Surgery" } },
+  { value: "endoscopy", label: { ru: "Эндоскопия", uz: "Endoskopiya", en: "Endoscopy" } },
 ];
 
-const RESPONSE_OPTIONS: { value: string; label: string }[] = [
-  { value: "", label: "Any time" },
-  { value: "6", label: "Within 6 hours" },
-  { value: "12", label: "Within 12 hours" },
-  { value: "24", label: "Within 24 hours" },
-  { value: "48", label: "Within 48 hours" },
+const RESPONSE_OPTIONS: { value: string; label: Text }[] = [
+  { value: "", label: { ru: "Не важно", uz: "Farqi yoʻq", en: "Any time" } },
+  { value: "6", label: { ru: "До 6 часов", uz: "6 soatgacha", en: "Within 6 hours" } },
+  { value: "12", label: { ru: "До 12 часов", uz: "12 soatgacha", en: "Within 12 hours" } },
+  { value: "24", label: { ru: "До 24 часов", uz: "24 soatgacha", en: "Within 24 hours" } },
+  { value: "48", label: { ru: "До 48 часов", uz: "48 soatgacha", en: "Within 48 hours" } },
 ];
 
-const LANG_OPTIONS = [
-  { value: "", label: "Any language" },
-  { value: "ru", label: "Russian" },
-  { value: "en", label: "English" },
-  { value: "uz", label: "Uzbek" },
-  { value: "tr", label: "Turkish" },
-  { value: "ar", label: "Arabic" },
-  { value: "kz", label: "Kazakh" },
-];
+/** A list of options with its labels in the current language, ready for a SelectField. */
+const inLang = (lang: Lang, options: { value: string; label: Text }[]) => options.map((o) => ({ value: o.value, label: o.label[lang] }));
+
+/** The spoken languages a clinic can be filtered by; their names come from languageName in the site language. */
+const LANG_CODES = ["ru", "en", "uz", "tr", "ar", "kz"];
 
 /** How many clinics one page of results shows. */
 const PAGE = 9;
@@ -84,6 +81,7 @@ function hasAnyFilter(search: CatalogSearch) {
 export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   const root = useRef<HTMLElement>(null);
   const titleId = useId();
+  const { lang, t } = useLang();
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState<CatalogSearch>(search);
   const [q, setQ] = useState(search.q || "");
@@ -152,17 +150,21 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
   const advancedCount = countAdvanced(search);
   const specialtyOptions = [
-    { value: "", label: "All specialties" },
-    ...(specialties.data || []).map((s) => ({ value: s.slug, label: pickName(s.nameRu, s.nameEn) })),
+    { value: "", label: t({ ru: "Все направления", uz: "Barcha yoʻnalishlar", en: "All specialties" }) },
+    ...(specialties.data || []).map((s) => ({ value: s.slug, label: pickName(lang, s.nameRu, s.nameEn) })),
   ];
   const specialtyName = (slug: string) => {
     const found = (specialties.data || []).find((s) => s.slug === slug);
-    return found ? pickName(found.nameRu, found.nameEn) : slug;
+    return found ? pickName(lang, found.nameRu, found.nameEn) : slug;
   };
+  const langOptions = [
+    { value: "", label: t({ ru: "Любой язык", uz: "Istalgan til", en: "Any language" }) },
+    ...LANG_CODES.map((code) => ({ value: code, label: languageName(code, lang) })),
+  ];
 
   const cityOptions = [
-    { value: "", label: "All cities" },
-    ...CITY_OPTIONS.map((c) => ({ value: c.value, label: displayCity(c.value) })),
+    { value: "", label: t({ ru: "Все города", uz: "Barcha shaharlar", en: "All cities" }) },
+    ...CITY_OPTIONS.map((c) => ({ value: c.value, label: cityName(lang, c.value) })),
   ];
   // A city in the URL that is not in the list (typed into an old link) still shows as its own option.
   if (search.city && !cityOptions.some((c) => c.value === search.city)) cityOptions.push({ value: search.city, label: search.city });
@@ -190,15 +192,25 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
       <div className="wrap">
         <div className="catalog-head">
           <h2 id="catalog-title" className="section-title">
-            <>
+            {lang === "uz" ? (
+              <>
+                <em>Klinikani</em> tanlang
+              </>
+            ) : lang === "en" ? (
+              <>
                 Choose a <em>clinic</em>
               </>
+            ) : (
+              <>
+                Выберите <em>клинику</em>
+              </>
+            )}
           </h2>
           {/* The count sits beside the heading, out of the search bar. */}
           <div className="catalog-head-side">
             {!clinics.isLoading && clinics.data ? (
               <p className="catalog-count">
-                {clinics.data.length} {(clinics.data.length === 1 ? "clinic" : "clinics")}
+                {clinics.data.length} {countWord(lang, clinics.data.length, { ru: ["клиника", "клиники", "клиник"], uz: "ta klinika", en: ["clinic", "clinics"] })}
               </p>
             ) : null}
           </div>
@@ -213,13 +225,13 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
             <input
               className="search-main-input"
               type="search"
-              aria-label="Clinic, service or specialty"
-              placeholder="Clinic, service or specialty"
+              aria-label={t({ ru: "Клиника, услуга или направление", uz: "Klinika, xizmat yoki yoʻnalish", en: "Clinic, service or specialty" })}
+              placeholder={t({ ru: "Клиника, услуга или направление", uz: "Klinika, xizmat yoki yoʻnalish", en: "Clinic, service or specialty" })}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
-            <button className="pill-btn is-ink" type="submit" aria-label="Search">
-              <span className="search-submit-text">Search</span>
+            <button className="pill-btn is-ink" type="submit" aria-label={t({ ru: "Найти", uz: "Topish", en: "Search" })}>
+              <span className="search-submit-text">{t({ ru: "Найти", uz: "Topish", en: "Search" })}</span>
               <span className="pill-btn-icon">
                 <ArrowIcon />
               </span>
@@ -228,20 +240,20 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
           <div className="search-chips">
             <div className="search-chip">
-              <span>City</span>
-              <SelectField title="City" value={search.city || ""} options={cityOptions} onChange={(value) => onPatchSearch({ city: value || undefined })} />
+              <span>{t({ ru: "Город", uz: "Shahar", en: "City" })}</span>
+              <SelectField title={t({ ru: "Город", uz: "Shahar", en: "City" })} value={search.city || ""} options={cityOptions} onChange={(value) => onPatchSearch({ city: value || undefined })} />
             </div>
             <div className="search-chip">
-              <span>Specialty</span>
-              <SelectField title="Specialty" value={search.specialty || ""} options={specialtyOptions} onChange={(value) => onPatchSearch({ specialty: value || undefined })} />
+              <span>{t({ ru: "Направление", uz: "Yoʻnalish", en: "Specialty" })}</span>
+              <SelectField title={t({ ru: "Направление", uz: "Yoʻnalish", en: "Specialty" })} value={search.specialty || ""} options={specialtyOptions} onChange={(value) => onPatchSearch({ specialty: value || undefined })} />
             </div>
-            <button type="button" className="search-chip is-button" aria-label="More filters" onClick={() => setModalOpen(true)}>
+            <button type="button" className="search-chip is-button" aria-label={t({ ru: "Ещё фильтры", uz: "Boshqa filtrlar", en: "More filters" })} onClick={() => setModalOpen(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M4 7h10m4 0h2M4 17h4m4 0h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <circle cx="16" cy="7" r="2" stroke="currentColor" strokeWidth="2" />
                 <circle cx="10" cy="17" r="2" stroke="currentColor" strokeWidth="2" />
               </svg>
-              <span className="search-chip-text">Filters</span>
+              <span className="search-chip-text">{t({ ru: "Фильтры", uz: "Filtrlar", en: "Filters" })}</span>
               {advancedCount ? <b>{advancedCount}</b> : null}
             </button>
           </div>
@@ -249,9 +261,9 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
         {/* One tap on a specialty filters the list (and a second tap on it clears it). */}
         {specialties.data?.length ? (
-          <div className="catalog-quick" role="group" aria-label="Quick specialty filter">
+          <div className="catalog-quick" role="group" aria-label={t({ ru: "Быстрый выбор направления", uz: "Yoʻnalishni tez tanlash", en: "Quick specialty filter" })}>
             <button type="button" aria-pressed={!search.specialty} className={!search.specialty ? "is-active" : undefined} onClick={() => onPatchSearch({ specialty: undefined })}>
-              All
+              {t({ ru: "Все", uz: "Barchasi", en: "All" })}
             </button>
             {specialties.data.map((s) => (
               <button
@@ -261,7 +273,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                 className={search.specialty === s.slug ? "is-active" : undefined}
                 onClick={() => onPatchSearch({ specialty: search.specialty === s.slug ? undefined : s.slug })}
               >
-                {pickName(s.nameRu, s.nameEn)}
+                {pickName(lang, s.nameRu, s.nameEn)}
               </button>
             ))}
           </div>
@@ -269,25 +281,25 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
         {search.specialty ? (
           <p className="catalog-note">
-            Clinics for the specialty «{specialtyName(search.specialty)}»
+            {t({ ru: "Подборка по направлению", uz: "Yoʻnalish boʻyicha tanlov:", en: "Clinics for the specialty" })} «{specialtyName(search.specialty)}»
           </p>
         ) : null}
 
         {hasAnyFilter(search) ? (
           <div className="catalog-chips">
-            {search.city ? <span className="chip">{displayCity(search.city) || CITY_LABELS[search.city] || search.city}</span> : null}
+            {search.city ? <span className="chip">{cityName(lang, search.city) || CITY_LABELS[search.city] || search.city}</span> : null}
             {search.specialty ? <span className="chip">{specialtyName(search.specialty)}</span> : null}
             {search.lang ? <span className="chip">{search.lang.toUpperCase()}</span> : null}
-            {search.service ? <span className="chip">{SERVICE_OPTIONS.find((s) => s.value === search.service)?.label || search.service}</span> : null}
+            {search.service ? <span className="chip">{SERVICE_OPTIONS.find((s) => s.value === search.service)?.label[lang] || search.service}</span> : null}
             {search.priceMin || search.priceMax ? (
               <span className="chip">
                 ${search.priceMin || "0"}-{search.priceMax || "∞"}
               </span>
             ) : null}
-            {search.responseMax ? <span className="chip">{`reply within ${search.responseMax} h`}</span> : null}
-            {search.medicalTourism === "1" ? <span className="chip">medical travel</span> : null}
+            {search.responseMax ? <span className="chip">{t({ ru: `ответ до ${search.responseMax} ч`, uz: `javob ${search.responseMax} soatgacha`, en: `reply within ${search.responseMax} h` })}</span> : null}
+            {search.medicalTourism === "1" ? <span className="chip">{t({ ru: "медтуризм", uz: "tibbiy turizm", en: "medical travel" })}</span> : null}
             <button type="button" className="catalog-reset" onClick={onClearSearch}>
-              Clear
+              {t({ ru: "Сбросить", uz: "Tozalash", en: "Clear" })}
             </button>
           </div>
         ) : null}
@@ -305,14 +317,14 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
             </div>
           ) : null}
 
-          {clinics.isError ? <p className="catalog-error">Could not load the clinics. Try reloading the page.</p> : null}
+          {clinics.isError ? <p className="catalog-error">{t({ ru: "Не удалось загрузить клиники. Попробуйте обновить страницу.", uz: "Klinikalarni yuklab boʻlmadi. Sahifani yangilab koʻring.", en: "Could not load the clinics. Try reloading the page." })}</p> : null}
 
           {!clinics.isLoading && clinics.data?.length === 0 ? (
             <div className="catalog-empty">
-              <p className="catalog-empty-title">No matches yet</p>
-              <p>Try removing some filters or picking another specialty.</p>
+              <p className="catalog-empty-title">{t({ ru: "Пока не нашли совпадений", uz: "Hozircha mos klinika topilmadi", en: "No matches yet" })}</p>
+              <p>{t({ ru: "Попробуйте убрать часть фильтров или выбрать другое направление.", uz: "Ayrim filtrlarni olib tashlang yoki boshqa yoʻnalishni tanlang.", en: "Try removing some filters or picking another specialty." })}</p>
               <button type="button" className="pill-btn is-outline" onClick={onClearSearch}>
-                Clear filters
+                {t({ ru: "Сбросить фильтры", uz: "Filtrlarni tozalash", en: "Clear filters" })}
               </button>
             </div>
           ) : null}
@@ -328,11 +340,15 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           {medical.length > shown ? (
             <div className="catalog-more">
               <button type="button" className="pill-btn is-outline" onClick={() => setShown((n) => n + PAGE)}>
-                Show more
+                {t({ ru: "Показать ещё", uz: "Yana koʻrsatish", en: "Show more" })}
                 <span className="catalog-more-count">{Math.min(PAGE, medical.length - shown)}</span>
               </button>
               <p>
-                {`Showing ${shown} of ${medical.length}`}
+                {t({
+                  ru: `Показано ${shown} из ${medical.length}`,
+                  uz: `${medical.length} tadan ${shown} tasi koʻrsatildi`,
+                  en: `Showing ${shown} of ${medical.length}`,
+                })}
               </p>
             </div>
           ) : null}
@@ -340,9 +356,15 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           {tourism.length ? (
             <div className="catalog-tourism">
               <div className="catalog-tourism-head">
-                <span className="eyebrow">Tourism</span>
-                <h3>Travel partners</h3>
-                <p>Companies that plan your trip around the treatment: visas, flights, hotels and transfers.</p>
+                <span className="eyebrow">{t({ ru: "Туризм", uz: "Turizm", en: "Tourism" })}</span>
+                <h3>{t({ ru: "Туристические партнёры", uz: "Sayohat hamkorlari", en: "Travel partners" })}</h3>
+                <p>
+                  {t({
+                    ru: "Компании, которые организуют поездку вокруг лечения: визы, перелёты, отели и трансферы.",
+                    uz: "Davolanish atrofida safaringizni tashkil qiladigan kompaniyalar: viza, parvozlar, mehmonxona va transfer.",
+                    en: "Companies that plan your trip around the treatment: visas, flights, hotels and transfers.",
+                  })}
+                </p>
               </div>
               <div className="clinic-tiles">
                 {tourism.map((clinic) => (
@@ -359,10 +381,10 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
           <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="filters-modal" onClick={(e) => e.stopPropagation()}>
             <div className="filters-head">
               <div>
-                <h2 id={titleId}>More filters</h2>
-                <p>Price, service, language and medical travel</p>
+                <h2 id={titleId}>{t({ ru: "Дополнительные фильтры", uz: "Qoʻshimcha filtrlar", en: "More filters" })}</h2>
+                <p>{t({ ru: "Цена, услуга, язык и медтуризм", uz: "Narx, xizmat, til va tibbiy turizm", en: "Price, service, language and medical travel" })}</p>
               </div>
-              <button type="button" className="filters-close" aria-label="Close" onClick={() => setModalOpen(false)}>
+              <button type="button" className="filters-close" aria-label={t({ ru: "Закрыть", uz: "Yopish", en: "Close" })} onClick={() => setModalOpen(false)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
@@ -371,18 +393,18 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
             <div className="filters-body">
               <div className="filters-field">
-                <span>Service language</span>
-                <SelectField value={draft.lang || ""} options={LANG_OPTIONS} onChange={(value) => setDraft((d) => ({ ...d, lang: value || undefined }))} />
+                <span>{t({ ru: "Язык обслуживания", uz: "Xizmat tili", en: "Service language" })}</span>
+                <SelectField value={draft.lang || ""} options={langOptions} onChange={(value) => setDraft((d) => ({ ...d, lang: value || undefined }))} />
               </div>
 
               <div className="filters-field">
-                <span>Service</span>
-                <SelectField value={draft.service || ""} options={SERVICE_OPTIONS} onChange={(value) => setDraft((d) => ({ ...d, service: value || undefined }))} />
+                <span>{t({ ru: "Услуга", uz: "Xizmat", en: "Service" })}</span>
+                <SelectField value={draft.service || ""} options={inLang(lang, SERVICE_OPTIONS)} onChange={(value) => setDraft((d) => ({ ...d, service: value || undefined }))} />
               </div>
 
               <div className="filters-row">
                 <label className="filters-field">
-                  <span>Price from, $</span>
+                  <span>{t({ ru: "Цена от, $", uz: "Narx dan, $", en: "Price from, $" })}</span>
                   <input
                     type="number"
                     min={0}
@@ -394,7 +416,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                   />
                 </label>
                 <label className="filters-field">
-                  <span>Price up to, $</span>
+                  <span>{t({ ru: "Цена до, $", uz: "Narx gacha, $", en: "Price up to, $" })}</span>
                   <input
                     type="number"
                     min={0}
@@ -408,12 +430,12 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
               </div>
 
               <div className="filters-field">
-                <span>Coordinator reply</span>
-                <SelectField value={draft.responseMax || ""} options={RESPONSE_OPTIONS} onChange={(value) => setDraft((d) => ({ ...d, responseMax: value || undefined }))} />
+                <span>{t({ ru: "Ответ координатора", uz: "Koordinator javobi", en: "Coordinator reply" })}</span>
+                <SelectField value={draft.responseMax || ""} options={inLang(lang, RESPONSE_OPTIONS)} onChange={(value) => setDraft((d) => ({ ...d, responseMax: value || undefined }))} />
               </div>
 
               <label className="filters-switch">
-                <span>Supports medical travel</span>
+                <span>{t({ ru: "Поддержка медицинского туризма", uz: "Tibbiy turizmni qoʻllab-quvvatlash", en: "Supports medical travel" })}</span>
                 <input
                   type="checkbox"
                   role="switch"
@@ -433,10 +455,10 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                   setModalOpen(false);
                 }}
               >
-                Clear
+                {t({ ru: "Сбросить", uz: "Tozalash", en: "Clear" })}
               </button>
               <button type="button" className="pill-btn is-ink" onClick={applyAdvanced}>
-                Apply
+                {t({ ru: "Применить", uz: "Qoʻllash", en: "Apply" })}
                 <span className="pill-btn-icon">
                   <ArrowIcon />
                 </span>
@@ -451,13 +473,14 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 
 /** A real cover photo; the seeded SVG drawings stand in for missing photos and get the brand cover instead. */
 function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
-    const name = pickName(clinic.nameRu, clinic.nameEn);
+    const { lang, t } = useLang();
+    const name = clinicName(clinic);
     const photo = clinic.photos?.[0]?.url;
     const meta = [
       clinic.branchCount
-        ? `${clinic.branchCount} ${(clinic.branchCount === 1 ? "branch" : "branches")}`
+        ? `${clinic.branchCount} ${countWord(lang, clinic.branchCount, { ru: ["филиал", "филиала", "филиалов"], uz: "ta filial", en: ["branch", "branches"] })}`
         : null,
-      clinic.fromPrice != null ? `from $${clinic.fromPrice}` : null,
+      clinic.fromPrice != null ? t({ ru: `от ${clinic.fromPrice}`, uz: `${clinic.fromPrice} dan`, en: `from ${clinic.fromPrice}` }) : null,
     ].filter(Boolean);
     return (
       <Link key={clinic.id} to="/clinics/$slug" params={{ slug: clinic.slug }} className="clinic-tile">
@@ -478,15 +501,15 @@ function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
                 <path d="M12 2.5a7.5 7.5 0 0 0-7.5 7.5c0 5.2 6 10.6 6.8 11.3.4.3.9.3 1.3 0 .8-.7 6.9-6.1 6.9-11.3A7.5 7.5 0 0 0 12 2.5Zm0 10.3a2.8 2.8 0 1 1 0-5.6 2.8 2.8 0 0 1 0 5.6Z" />
               </svg>
-              {displayCity(clinic.city) || CITY_LABELS[clinic.city] || clinic.city}
+              {cityName(lang, clinic.city)}
             </span>
             {meta.length ? <span>{meta.join(" · ")}</span> : null}
           </p>
-          <p className="clinic-tile-text">{pickName(clinic.descriptionRu, clinic.descriptionEn)}</p>
+          <p className="clinic-tile-text">{briefText(clinic.descriptionRu, clinic.descriptionEn)}</p>
           {clinic.specialties?.length ? (
             <p className="clinic-tile-tags">
               {clinic.specialties.slice(0, 3).map((s) => (
-                <span key={s.slug}>{pickName(s.nameRu, s.nameEn)}</span>
+                <span key={s.slug}>{pickName(lang, s.nameRu, s.nameEn)}</span>
               ))}
             </p>
           ) : null}
@@ -497,7 +520,7 @@ function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
               <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
                 <path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm.9 9.1 3 2.2a.9.9 0 0 1-1 1.5l-3.4-2.5a.9.9 0 0 1-.4-.8V7.2a.9.9 0 0 1 1.8 0v4.4Z" />
               </svg>
-              {`Reply ~${clinic.responseHours} h`}
+              {t({ ru: `Ответ ~${clinic.responseHours} ч`, uz: `Javob ~${clinic.responseHours} soat`, en: `Reply ~${clinic.responseHours} h` })}
             </span>
           ) : null}
           {clinic.languages?.length ? (

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { CaretLeft, CaretRight, X } from "@phosphor-icons/react";
+import { useLang } from "@/shared/i18n/lang";
 import { FitImage } from "@/shared/ui/FitImage";
 
 export type GalleryPhoto = {
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function PhotoCarousel({ photos, className = "" }: Props) {
+  const { t } = useLang();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -35,7 +37,7 @@ export function PhotoCarousel({ photos, className = "" }: Props) {
           <>
             <button
               type="button"
-              aria-label="Previous photo"
+              aria-label={t({ ru: "Предыдущее фото", uz: "Oldingi surat", en: "Previous photo" })}
               className="absolute left-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-lg font-bold text-ink shadow-md hover:bg-white sm:grid"
               onClick={() => scrollByCard(-1)}
             >
@@ -43,7 +45,7 @@ export function PhotoCarousel({ photos, className = "" }: Props) {
             </button>
             <button
               type="button"
-              aria-label="Next photo"
+              aria-label={t({ ru: "Следующее фото", uz: "Keyingi surat", en: "Next photo" })}
               className="absolute right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-lg font-bold text-ink shadow-md hover:bg-white sm:grid"
               onClick={() => scrollByCard(1)}
             >
@@ -97,6 +99,7 @@ export function PhotoLightbox({
   index: number | null;
   onIndexChange: (index: number | null) => void;
 }) {
+  const { t } = useLang();
   const open = index != null && photos.length > 0;
   const track = useRef<HTMLDivElement>(null);
   const thumbs = useRef<HTMLDivElement>(null);
@@ -182,12 +185,12 @@ export function PhotoLightbox({
   const ratio = ratios[active.id] || 4 / 3;
 
   return createPortal(
-    <div className="lightbox" style={{ "--lightbox-ratio": ratio } as CSSProperties} role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <div className="lightbox" style={{ "--lightbox-ratio": ratio } as CSSProperties} role="dialog" aria-modal="true" aria-label={t({ ru: "Просмотр фотографий", uz: "Rasmlarni koʻrish", en: "Photo viewer" })}>
       <div className="lightbox-bar">
         <span className="lightbox-count">
           {index + 1} / {photos.length}
         </span>
-        <button type="button" className="lightbox-close" aria-label="Close" onClick={close}>
+        <button type="button" className="lightbox-close" aria-label={t({ ru: "Закрыть", uz: "Yopish", en: "Close" })} onClick={close}>
           <X size={20} weight="bold" />
         </button>
       </div>
@@ -213,13 +216,13 @@ export function PhotoLightbox({
         </div>
         {many ? (
           <>
-            <button type="button" className="lightbox-arrow is-prev" aria-label="Previous" disabled={index === 0} onClick={() => step(-1)}>
+            <button type="button" className="lightbox-arrow is-prev" aria-label={t({ ru: "Предыдущее", uz: "Oldingi", en: "Previous" })} disabled={index === 0} onClick={() => step(-1)}>
               <CaretLeft size={22} weight="bold" />
             </button>
             <button
               type="button"
               className="lightbox-arrow is-next"
-              aria-label="Next"
+              aria-label={t({ ru: "Следующее", uz: "Keyingi", en: "Next" })}
               disabled={index === photos.length - 1}
               onClick={() => step(1)}
             >

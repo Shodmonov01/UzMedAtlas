@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { pickName } from "@/shared/i18n/lang";
+import { pickName, useLang } from "@/shared/i18n/lang";
 import { fetchSpecialties, type Specialty } from "@/shared/api/client";
 import { MOTION_OK, ScrollTrigger, gsap, useGSAP } from "@/shared/lib/gsap";
 
@@ -18,6 +18,7 @@ const MAX_BOOST = 0.6;
  *  while the section is on screen. Each word opens the catalog filtered to its direction (no hover effect).
  *  With reduced motion the rows stand still and wrap, each direction shown once. */
 export function Directions({ onPick }: Props) {
+  const { lang } = useLang();
   const root = useRef<HTMLElement>(null);
   const specialties = useQuery({ queryKey: ["specialties"], queryFn: fetchSpecialties });
   const items = specialties.data || [];
@@ -80,12 +81,26 @@ export function Directions({ onPick }: Props) {
     <section ref={root} className="directions" aria-labelledby="directions-title">
       <div className="directions-head wrap">
         <h2 id="directions-title" className="section-title">
-          <>
+          {lang === "uz" ? (
+            <>
+              Davolash <em>yoʻnalishlari</em>
+            </>
+          ) : lang === "en" ? (
+            <>
               Treatment <em>specialties</em>
             </>
+          ) : (
+            <>
+              Направления <em>лечения</em>
+            </>
+          )}
         </h2>
         <p className="section-lead">
-          Pick a specialty and we will show the clinics that work in it.
+          {lang === "uz"
+            ? "Yoʻnalishni tanlang, biz u bilan ishlaydigan klinikalarni koʻrsatamiz."
+            : lang === "en"
+              ? "Pick a specialty and we will show the clinics that work in it."
+              : "Выберите направление, и мы покажем клиники, которые с ним работают."}
         </p>
       </div>
 
@@ -106,6 +121,7 @@ export function Directions({ onPick }: Props) {
 
 /** One row: the directions, then repeats that only fill the row (hidden from assistive tech and the keyboard). */
 function DirectionsRow({ items, muted, onPick }: { items: Specialty[]; muted: boolean; onPick: (slug: string) => void }) {
+  const { lang } = useLang();
   return (
     <ul className={`directions-row${muted ? " is-muted" : ""}`} data-count={items.length}>
       {Array.from({ length: COPIES }, (_, copy) =>
@@ -115,10 +131,10 @@ function DirectionsRow({ items, muted, onPick }: { items: Specialty[]; muted: bo
               type="button"
               className="direction-link"
               tabIndex={copy ? -1 : undefined}
-              title={pickName(item.descriptionRu, item.descriptionEn) || undefined}
+              title={pickName(lang, item.descriptionRu, item.descriptionEn) || undefined}
               onClick={() => onPick(item.slug)}
             >
-              {pickName(item.nameRu, item.nameEn)}
+              {pickName(lang, item.nameRu, item.nameEn)}
             </button>
           </li>
         )),

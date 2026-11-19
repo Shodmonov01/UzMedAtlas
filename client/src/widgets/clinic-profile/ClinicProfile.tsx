@@ -45,7 +45,7 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { pickName } from "@/shared/i18n/lang";
+import { briefText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 
 /** Building blocks shared by the public clinic page and its branch pages, so both read as one design. */
 
@@ -134,8 +134,20 @@ const LANGUAGE_NAMES: Record<string, string> = {
   az: "Azerbaijani",
 };
 
-export function languageName(code: string) {
-  return LANGUAGE_NAMES[code.toLowerCase()] || code.toUpperCase();
+/** Clinics sometimes type country codes instead of language codes; these are the language codes meant. */
+const LANGUAGE_CODE_FIXES: Record<string, string> = { kz: "kk", kg: "ky", tj: "tg", cn: "zh", kr: "ko" };
+
+/** A spoken language's name in the site language ("Russian", "Русский", "Rus"); unknown codes are shown in capitals. */
+export function languageName(code: string, lang: Lang = "en") {
+  const key = code.toLowerCase();
+  if (lang === "en") return LANGUAGE_NAMES[key] || code.toUpperCase();
+  try {
+    const name = new Intl.DisplayNames([lang], { type: "language", fallback: "none" }).of(LANGUAGE_CODE_FIXES[key] || key);
+    if (name) return name.charAt(0).toUpperCase() + name.slice(1);
+  } catch {
+    // An odd code or an old browser: fall back to the English name below.
+  }
+  return LANGUAGE_NAMES[key] || code.toUpperCase();
 }
 
 /** Smooth, rounded icons in the iOS manner (Phosphor): plain strokes next to text, two-tone inside the tiles. */
@@ -246,6 +258,7 @@ export function InfoCard({ icon, label, wide, children }: { icon: IconName; labe
 
 /** Long text folded to a few lines with a "Read more" toggle. */
 export function ReadMore({ text, className = "", limit = 420 }: { text: string; className?: string; limit?: number }) {
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
   const long = text.length > limit;
   return (
@@ -253,7 +266,7 @@ export function ReadMore({ text, className = "", limit = 420 }: { text: string; 
       <p className={`${className}${long && !open ? " is-clamped" : ""}`}>{text}</p>
       {long ? (
         <button type="button" className="cp-link-btn" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-          {open ? "Show less" : "Read more"}
+          {open ? t({ ru: "Свернуть", uz: "Yigʻish", en: "Show less" }) : t({ ru: "Читать полностью", uz: "Toʻliq oʻqish", en: "Read more" })}
           <span className={open ? "is-up" : undefined}>
             <Icon name="chevron" size={15} />
           </span>
@@ -266,6 +279,7 @@ export function ReadMore({ text, className = "", limit = 420 }: { text: string; 
 /** The photos across the top of the page: one large picture and up to four smaller ones on wide screens,
  *  a swipeable strip with a counter on phones. Any picture opens the full set. */
 export function HeroGallery({ photos, fallback }: { photos: GalleryPhoto[]; fallback?: ReactNode }) {
+  const { t } = useLang();
   const [index, setIndex] = useState<number | null>(null);
   const [current, setCurrent] = useState(0);
   const strip = useRef<HTMLDivElement>(null);
@@ -291,7 +305,7 @@ export function HeroGallery({ photos, fallback }: { photos: GalleryPhoto[]; fall
 
   if (!photos.length) return <div className="cp-gallery is-empty">{fallback}</div>;
 
-  const allLabel = `${"All photos"} · ${photos.length}`;
+  const allLabel = `${t({ ru: "Все фото", uz: "Barcha rasmlar", en: "All photos" })} · ${photos.length}`;
   return (
     <>
       <div className={`cp-gallery has-${shown.length}`}>
@@ -300,7 +314,7 @@ export function HeroGallery({ photos, fallback }: { photos: GalleryPhoto[]; fall
             key={photo.id}
             type="button"
             className="cp-gallery-cell"
-            aria-label={`${"Open photo"} ${i + 1}`}
+            aria-label={`${t({ ru: "Открыть фото", uz: "Rasmni ochish", en: "Open photo" })} ${i + 1}`}
             onClick={() => setIndex(i)}
           >
             <FitImage src={photo.url} alt={photo.alt} tolerance={0.25} loading={i === 0 ? "eager" : "lazy"} />
@@ -317,7 +331,7 @@ export function HeroGallery({ photos, fallback }: { photos: GalleryPhoto[]; fall
       <div className="cp-strip">
         <div ref={strip} className="cp-strip-track">
           {photos.map((photo, i) => (
-            <button key={photo.id} type="button" className="cp-strip-cell" aria-label={`${"Open photo"} ${i + 1}`} onClick={() => setIndex(i)}>
+            <button key={photo.id} type="button" className="cp-strip-cell" aria-label={`${t({ ru: "Открыть фото", uz: "Rasmni ochish", en: "Open photo" })} ${i + 1}`} onClick={() => setIndex(i)}>
               <FitImage src={photo.url} alt={photo.alt} tolerance={0.25} loading={i === 0 ? "eager" : "lazy"} />
             </button>
           ))}
@@ -344,9 +358,10 @@ export function HeroGallery({ photos, fallback }: { photos: GalleryPhoto[]; fall
 /** The photo section: a bento grid (one large picture, five smaller; on phones one large and four), the last tile
  *  saying how many more there are. Any tile, or "View all" in the heading, opens the full set. */
 export function PhotoSection({ photos, kicker, title }: { photos: GalleryPhoto[]; kicker: string; title: string }) {
+  const { t } = useLang();
   const [index, setIndex] = useState<number | null>(null);
   const shown = photos.slice(0, 6);
-  const open = "Open photo";
+  const open = t({ ru: "Открыть фото", uz: "Rasmni ochish", en: "Open photo" });
   return (
     <ProfileSection
       icon="photos"
@@ -356,7 +371,7 @@ export function PhotoSection({ photos, kicker, title }: { photos: GalleryPhoto[]
       aside={
         <button type="button" className="cp-head-btn" onClick={() => setIndex(0)}>
           <Icon name="grid" size={16} />
-          View all
+          {t({ ru: "Смотреть все", uz: "Barchasini koʻrish", en: "View all" })}
         </button>
       }
     >
@@ -447,38 +462,40 @@ export type ProfileDoctor = {
   achievementsRu?: string;
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  highest: "Top category",
-  first: "First category",
-  second: "Second category",
+const CATEGORY_LABELS: Record<string, Text> = {
+  highest: { ru: "Высшая категория", uz: "Oliy toifa", en: "Top category" },
+  first: { ru: "Первая категория", uz: "Birinchi toifa", en: "First category" },
+  second: { ru: "Вторая категория", uz: "Ikkinchi toifa", en: "Second category" },
 };
 
 const DOCTORS_PREVIEW = 6;
 
-function doctorDetails(d: ProfileDoctor): { label: string; value: string }[] {
+function doctorDetails(d: ProfileDoctor, lang: Lang): { label: string; value: string }[] {
+  const L = (text: Text) => text[lang];
   const details: { label: string; value?: string }[] = [
-    { label: "Qualifications", value: d.certsEn || d.certsRu },
-    { label: "Further training", value: d.continuingEducationRu },
-    { label: "Experience abroad", value: d.internationalExperienceRu },
-    { label: "Research", value: d.researchActivityRu },
-    { label: "Awards", value: d.awardsRu },
-    { label: "Achievements", value: d.achievementsRu },
+    { label: L({ ru: "Квалификация", uz: "Malaka", en: "Qualifications" }), value: briefText(d.certsRu, d.certsEn) },
+    { label: L({ ru: "Повышение квалификации", uz: "Malaka oshirish", en: "Further training" }), value: d.continuingEducationRu },
+    { label: L({ ru: "Опыт за рубежом", uz: "Xorijdagi tajriba", en: "Experience abroad" }), value: d.internationalExperienceRu },
+    { label: L({ ru: "Научная работа", uz: "Ilmiy faoliyat", en: "Research" }), value: d.researchActivityRu },
+    { label: L({ ru: "Награды", uz: "Mukofotlar", en: "Awards" }), value: d.awardsRu },
+    { label: L({ ru: "Достижения", uz: "Yutuqlar", en: "Achievements" }), value: d.achievementsRu },
   ];
   return details.filter((item): item is { label: string; value: string } => Boolean(item.value?.trim()));
 }
 
 /** Doctors as portrait cards (photo on top, experience on the photo), six at first; the credentials fold away. */
 export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
+  const { lang, t } = useLang();
   const [all, setAll] = useState(false);
   const shown = all ? doctors : doctors.slice(0, DOCTORS_PREVIEW);
   return (
     <>
       <ul className="cp-doctors">
         {shown.map((d) => {
-          const name = pickName(d.nameRu, d.nameEn);
-          const role = pickName(d.roleRu, d.roleEn);
-          const bio = pickName(d.bioRu, d.bioEn);
-          const details = doctorDetails(d);
+          const name = briefText(d.nameRu, d.nameEn);
+          const role = briefText(d.roleRu, d.roleEn);
+          const bio = briefText(d.bioRu, d.bioEn);
+          const details = doctorDetails(d, lang);
           const years = d.experienceYears != null && d.experienceYears !== "" ? d.experienceYears : null;
           return (
             <li key={d.id} className="cp-doctor">
@@ -487,7 +504,7 @@ export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
                 {years ? (
                   <span className="cp-doctor-badge">
                     <Icon name="briefcase" size={14} />
-                    {`${years} yrs experience`}
+                    {t({ ru: `${years} лет опыта`, uz: `${years} yil tajriba`, en: `${years} yrs experience` })}
                   </span>
                 ) : null}
               </div>
@@ -500,12 +517,12 @@ export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
                 {/* Every card keeps the same rows (empty ones held open), so the cards line up at one height. */}
                 <p className={`cp-doctor-cat${d.category ? "" : " is-blank"}`} aria-hidden={d.category ? undefined : true}>
                   <Icon name="award" size={15} />
-                  {d.category ? (CATEGORY_LABELS[d.category] ? CATEGORY_LABELS[d.category] : d.category) : " "}
+                  {d.category ? (CATEGORY_LABELS[d.category] ? t(CATEGORY_LABELS[d.category]) : d.category) : " "}
                 </p>
                 <p className="cp-doctor-bio">{bio || " "}</p>
                 {details.length ? (
                   <details className="cp-more">
-                    <summary>More about the doctor</summary>
+                    <summary>{t({ ru: "Подробнее о враче", uz: "Shifokor haqida batafsil", en: "More about the doctor" })}</summary>
                     <dl>
                       {details.map(({ label, value }) => (
                         <div key={label}>
@@ -524,8 +541,8 @@ export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
       {doctors.length > DOCTORS_PREVIEW ? (
         <button type="button" className="pill-btn is-outline cp-show-all" onClick={() => setAll((v) => !v)}>
           {all
-            ? "Show fewer"
-            : `Show all specialists · ${doctors.length}`}
+            ? t({ ru: "Свернуть", uz: "Yigʻish", en: "Show fewer" })
+            : t({ ru: `Показать всех специалистов · ${doctors.length}`, uz: `Barcha mutaxassislar · ${doctors.length}`, en: `Show all specialists · ${doctors.length}` })}
         </button>
       ) : null}
     </>
@@ -557,19 +574,20 @@ type Service = {
   unit?: string;
 };
 
-/** A service price: "$120", "500,000 UZS / visit". */
-export function servicePrice(s: Service) {
+/** A service price in the reader's language: "$120", "500 000 сум / приём", "500 000 soʻm". */
+export function servicePrice(s: Service, lang: Lang) {
   if (s.priceUsd == null) return null;
   const amount = s.priceUsd.toLocaleString("en-US");
   const unit = s.unit ? ` / ${s.unit}` : "";
   if (s.currency === "USD") return `$${amount}${unit}`;
-  return `${amount} UZS${unit}`;
+  return `${amount} ${lang === "uz" ? "soʻm" : lang === "en" ? "UZS" : "сум"}${unit}`;
 }
 
 const SERVICES_PREVIEW = 8;
 
 /** Services and prices as rows in one card; a search pill above when there are many, the first eight at first. */
 export function ServicesList({ services }: { services: Service[] }) {
+  const { lang, t } = useLang();
   const [q, setQ] = useState("");
   const [all, setAll] = useState(false);
   const needle = q.trim().toLowerCase();
@@ -587,35 +605,35 @@ export function ServicesList({ services }: { services: Service[] }) {
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Find a service"
-            aria-label="Search services"
+            placeholder={t({ ru: "Найти услугу", uz: "Xizmatni topish", en: "Find a service" })}
+            aria-label={t({ ru: "Поиск по услугам", uz: "Xizmatlar boʻyicha qidiruv", en: "Search services" })}
           />
         </label>
       ) : null}
       <ul className="cp-services">
         {shown.map((s) => {
-          const price = servicePrice(s);
-          const description = pickName(s.descriptionRu, s.descriptionEn);
+          const price = servicePrice(s, lang);
+          const description = briefText(s.descriptionRu, s.descriptionEn);
           return (
             <li key={s.id} className="cp-service">
               <span className="cp-service-icon" aria-hidden="true">
                 <Icon name="stethoscope" size={20} weight="duotone" />
               </span>
               <div className="cp-service-text">
-                <h3>{pickName(s.nameRu, s.nameEn)}</h3>
+                <h3>{briefText(s.nameRu, s.nameEn)}</h3>
                 {description ? <p>{description}</p> : null}
               </div>
-              <span className={`cp-price${price ? "" : " is-ask"}`}>{price || "Price on request"}</span>
+              <span className={`cp-price${price ? "" : " is-ask"}`}>{price || t({ ru: "Цена по запросу", uz: "Narx soʻrov boʻyicha", en: "Price on request" })}</span>
             </li>
           );
         })}
-        {!shown.length ? <li className="cp-services-empty">Nothing found</li> : null}
+        {!shown.length ? <li className="cp-services-empty">{t({ ru: "Ничего не нашлось", uz: "Hech narsa topilmadi", en: "Nothing found" })}</li> : null}
       </ul>
       {!needle && found.length > SERVICES_PREVIEW ? (
         <button type="button" className="pill-btn is-outline cp-show-all" onClick={() => setAll((v) => !v)}>
           {all
-            ? "Show fewer"
-            : `All services · ${found.length}`}
+            ? t({ ru: "Свернуть", uz: "Yigʻish", en: "Show fewer" })
+            : t({ ru: `Все услуги · ${found.length}`, uz: `Barcha xizmatlar · ${found.length}`, en: `All services · ${found.length}` })}
         </button>
       ) : null}
     </>
@@ -635,8 +653,8 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
         items={items.map((e) => ({
           key: e.id,
           label: e.manufacturer || null,
-          title: pickName(e.nameRu, e.nameEn),
-          text: pickName(e.descriptionRu, e.descriptionEn).trim() || null,
+          title: briefText(e.nameRu, e.nameEn),
+          text: briefText(e.descriptionRu, e.descriptionEn).trim() || null,
         }))}
       />
     );
@@ -644,7 +662,7 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
   return (
     <ul className="cp-media-grid">
       {items.map((e) => {
-        const description = pickName(e.descriptionRu, e.descriptionEn).trim();
+        const description = briefText(e.descriptionRu, e.descriptionEn).trim();
         return (
           <li key={e.id} className="cp-media">
             <div className="cp-media-photo">
@@ -658,7 +676,7 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
             </div>
             <div className="cp-media-body">
               {e.manufacturer ? <p className="cp-label">{e.manufacturer}</p> : null}
-              <h3>{pickName(e.nameRu, e.nameEn)}</h3>
+              <h3>{briefText(e.nameRu, e.nameEn)}</h3>
               {description ? <p className="cp-media-text">{description}</p> : null}
             </div>
           </li>
@@ -719,29 +737,30 @@ export type Certificate = {
 
 /** Certificates and licences: the scan (or an award tile), the name, who issued it and the dates. */
 export function CertificateList({ items }: { items: Certificate[] }) {
+  const { t } = useLang();
   return (
     <ul className="cp-certs">
       {items.map((c) => {
-        const issuer = pickName(c.issuerRu, c.issuerEn).trim();
+        const issuer = briefText(c.issuerRu, c.issuerEn).trim();
         const issued = c.receivedAt || (c.year ? String(c.year) : null);
         return (
           <li key={c.id} className="cp-cert">
             <div className={`cp-cert-thumb${c.imageUrl ? "" : " is-icon"}`}>{c.imageUrl ? <FitImage src={c.imageUrl} className="absolute inset-0" tolerance={0.4} /> : <Icon name="seal" size={26} weight="duotone" />}</div>
             <div className="cp-cert-body">
-              <h3>{pickName(c.nameRu, c.nameEn)}</h3>
+              <h3>{briefText(c.nameRu, c.nameEn)}</h3>
               {issuer ? <p>{issuer}</p> : null}
               {issued || c.validUntil ? (
                 <div className="cp-cert-dates">
                   {issued ? (
                     <span>
                       <Icon name="calendar" size={13} />
-                      Issued {issued}
+                      {t({ ru: "Получен", uz: "Olingan", en: "Issued" })} {issued}
                     </span>
                   ) : null}
                   {c.validUntil ? (
                     <span>
                       <Icon name="shield" size={13} />
-                      Valid until {c.validUntil}
+                      {t({ ru: "До", uz: "Amal qiladi", en: "Valid until" })} {c.validUntil}
                     </span>
                   ) : null}
                 </div>
@@ -749,7 +768,7 @@ export function CertificateList({ items }: { items: Certificate[] }) {
               {c.fileUrl ? (
                 <a href={c.fileUrl} target="_blank" rel="noreferrer" className="cp-cert-link">
                   <Icon name="file" size={15} />
-                  Open document
+                  {t({ ru: "Открыть документ", uz: "Hujjatni ochish", en: "Open document" })}
                 </a>
               ) : null}
             </div>
@@ -796,6 +815,7 @@ export function LocationBlock({
   mapsUrl?: string | null;
   extra?: ReactNode;
 }) {
+  const { t } = useLang();
   const hasMap = lat != null && lng != null;
   return (
     <div className={`cp-location${hasMap ? "" : " is-plain"}`}>
@@ -810,7 +830,7 @@ export function LocationBlock({
             <Icon name="pin" size={22} weight="duotone" />
           </span>
           <div className="min-w-0">
-            <p className="cp-label">Address</p>
+            <p className="cp-label">{t({ ru: "Адрес", uz: "Manzil", en: "Address" })}</p>
             <p className="cp-address-text">{address}</p>
           </div>
         </div>
@@ -819,7 +839,7 @@ export function LocationBlock({
           <div className="cp-address-actions">
             {routeUrl ? (
               <a className="pill-btn is-ink" href={routeUrl} target="_blank" rel="noreferrer">
-                Get directions
+                {t({ ru: "Построить маршрут", uz: "Yoʻnalish qurish", en: "Get directions" })}
                 <span className="pill-btn-icon">
                   <Icon name="route" size={17} />
                 </span>
@@ -827,7 +847,7 @@ export function LocationBlock({
             ) : null}
             {mapsUrl ? (
               <a className="pill-btn is-outline" href={mapsUrl} target="_blank" rel="noreferrer">
-                Yandex Maps
+                {t({ ru: "Яндекс Карты", uz: "Yandex Xaritalar", en: "Yandex Maps" })}
               </a>
             ) : null}
           </div>
@@ -897,6 +917,7 @@ export function ContactCard({
   responseHours,
   children,
 }: ContactCardProps) {
+  const { t } = useLang();
   const covered = new Set(
     [whatsapp && "whatsapp", telegram && "telegram", instagram && "instagram", youtube && "youtube"].filter(Boolean),
   );
@@ -906,13 +927,13 @@ export function ContactCard({
       <div className="cp-contact-head">
         <ClinicLogo src={logoUrl} name={name} className="h-12 w-12 rounded-2xl" />
         <div className="min-w-0">
-          <small>{label || "Contacts"}</small>
+          <small>{label || t({ ru: "Контакты", uz: "Aloqa", en: "Contacts" })}</small>
           <strong>{name}</strong>
         </div>
       </div>
       <div className="cp-contact-rows">
         {phones.map((phone, index) => (
-          <ContactRow key={phone} href={telHref(phone)} icon="phone" label="Phone" value={phone} main={index === 0} />
+          <ContactRow key={phone} href={telHref(phone)} icon="phone" label={t({ ru: "Телефон", uz: "Telefon", en: "Phone" })} value={phone} main={index === 0} />
         ))}
         {whatsapp ? <ContactRow href={socialHref("whatsapp", whatsapp)} external icon="chat" label="WhatsApp" value={socialLabel(whatsapp)} /> : null}
         {telegram ? <ContactRow href={socialHref("telegram", telegram)} external icon="send" label="Telegram" value={socialLabel(telegram)} /> : null}
@@ -922,7 +943,7 @@ export function ContactCard({
             href={/^https?:\/\//i.test(website) ? website : `https://${website}`}
             external
             icon="globe"
-            label="Website"
+            label={t({ ru: "Сайт", uz: "Sayt", en: "Website" })}
             value={website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
           />
         ) : null}
@@ -934,8 +955,8 @@ export function ContactCard({
         {responseHours ? (
           <ContactRow
             icon="clock"
-            label="Response time"
-            value={`Within about ${responseHours} h`}
+            label={t({ ru: "Скорость ответа", uz: "Javob tezligi", en: "Response time" })}
+            value={t({ ru: `Отвечают примерно за ${responseHours} ч`, uz: `Taxminan ${responseHours} soatda`, en: `Within about ${responseHours} h` })}
           />
         ) : null}
       </div>
@@ -961,15 +982,16 @@ export function QuickContact({
   responseHours?: number | null;
   cta: string;
 }) {
+  const { t } = useLang();
   return (
     <div className="cp-quick">
       <div className="cp-quick-card">
-        <p className="cp-label">Contact the clinic</p>
+        <p className="cp-label">{t({ ru: "Связаться с клиникой", uz: "Klinika bilan bogʻlanish", en: "Contact the clinic" })}</p>
         <p className="cp-quick-name">{name}</p>
         {responseHours ? (
           <p className="cp-quick-note">
             <Icon name="clock" size={15} />
-            {`Usually reply within ${responseHours} h`}
+            {t({ ru: `Отвечают примерно за ${responseHours} ч`, uz: `Taxminan ${responseHours} soatda javob berishadi`, en: `Usually reply within ${responseHours} h` })}
           </p>
         ) : null}
         <a href="#lead" className="pill-btn is-ink">
@@ -1081,6 +1103,7 @@ export function SectionBar({ sections, cta }: { sections: BarSection[]; cta: str
 /** Phones and tablets: the request button (and a call button) docked along the bottom edge. It steps aside while the
  *  form itself is on screen. */
 export function MobileDock({ cta, phone }: { cta: string; phone?: string | null }) {
+  const { t } = useLang();
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
     document.documentElement.classList.add("has-cp-dock");
@@ -1104,7 +1127,7 @@ export function MobileDock({ cta, phone }: { cta: string; phone?: string | null 
         </span>
       </a>
       {phone ? (
-        <a href={telHref(phone)} className="cp-dock-call" aria-label="Call">
+        <a href={telHref(phone)} className="cp-dock-call" aria-label={t({ ru: "Позвонить", uz: "Qoʻngʻiroq qilish", en: "Call" })}>
           <Icon name="phone" size={20} />
         </a>
       ) : null}

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLang } from "@/shared/i18n/lang";
 
 export type SelectOption = { value: string; label: string };
 
@@ -33,12 +34,13 @@ export function SelectField({
   onChange,
 }: Props) {
   const id = useId();
+  const { t } = useLang();
   const rootRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState(false);
   const selected = options.find((o) => o.value === value);
-  const label = selected?.label || placeholder || "Choose";
+  const label = selected?.label || placeholder || t({ ru: "Выбрать", uz: "Tanlash", en: "Choose" });
 
   useEffect(() => {
     if (!open) return;
@@ -172,7 +174,7 @@ export function SelectField({
                   <button
                     type="button"
                     className="select-sheet-close"
-                    aria-label="Close"
+                    aria-label={t({ ru: "Закрыть", uz: "Yopish", en: "Close" })}
                     onClick={() => setOpen(false)}
                   >
                     <svg

@@ -1,6 +1,15 @@
 import { m } from "motion/react";
 import { useEffect, useState } from "react";
 import { finishIntro } from "@/shared/lib/intro";
+import { initialLang } from "@/shared/i18n/lang";
+
+/** The brand under the logo; the loader runs before the page (outside the language provider), so it reads the
+ *  remembered language itself. */
+const BRAND = {
+  ru: { title: "Ассоциация", sub: "медицинских организаций" },
+  uz: { title: "Assotsiatsiya", sub: "tibbiyot tashkilotlari" },
+  en: { title: "Association", sub: "of Medical Organizations" },
+} as const;
 
 const LOGO = "/brand/logo.svg?v=2";
 
@@ -51,6 +60,7 @@ function heroPhoto(alive: () => boolean) {
  *  The boot screen of index.html is the same empty paper, so the handover is invisible. Skipped in the cabinet and the
  *  moderation desk. */
 export function Preloader() {
+  const [lang] = useState(initialLang);
   const [active] = useState(() => !/^\/(cabinet|moderation)(\/|$)/.test(window.location.pathname));
   const [stage, setStage] = useState<Stage>(active ? "waiting" : "gone");
   const [still] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -149,8 +159,8 @@ export function Preloader() {
               animate={shown ? { y: "0%" } : undefined}
               transition={{ duration: still ? 0.2 : 0.8, delay: still ? 0 : 0.3, ease: EASE_OUT }}
             >
-              <span>Association</span>
-              <span>of Medical Organizations</span>
+              <span>{BRAND[lang].title}</span>
+              <span>{BRAND[lang].sub}</span>
             </m.span>
           </span>
         </div>

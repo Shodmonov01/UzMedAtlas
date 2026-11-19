@@ -5,11 +5,12 @@ import { m, type Variants } from "motion/react";
 import { ScrollTrigger, glideTo, useGSAP } from "@/shared/lib/gsap";
 import { useIntroDone } from "@/shared/lib/intro";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
+import { useLang, type Text } from "@/shared/i18n/lang";
 
-const POINTS = [
-  { icon: SealCheck, text: "Vetted private clinics" },
-  { icon: Tag, text: "Clear prices before you travel" },
-  { icon: ChatCircleDots, text: "A reply within 24 hours" },
+const POINTS: { icon: typeof SealCheck; text: Text }[] = [
+  { icon: SealCheck, text: { ru: "Проверенные частные клиники", uz: "Tekshirilgan xususiy klinikalar", en: "Vetted private clinics" } },
+  { icon: Tag, text: { ru: "Понятные цены до поездки", uz: "Safardan oldin aniq narxlar", en: "Clear prices before you travel" } },
+  { icon: ChatCircleDots, text: { ru: "Ответ в течение 24 часов", uz: "24 soat ichida javob", en: "A reply within 24 hours" } },
 ];
 
 /** The site's easing: a quick start that settles slowly. */
@@ -31,7 +32,12 @@ const lift: Variants = {
   shown: (delay: number) => ({ y: "0%", transition: { duration: 0.9, ease: EASE, delay } }),
 };
 
-const TITLE = ["Medicine", "you", "can"];
+/** The title, word by word; the last word is set apart (light, in the logo gradient). */
+const TITLE: Record<"ru" | "uz" | "en", { words: string[]; last: string }> = {
+  ru: { words: ["Медицина,", "которой", "можно"], last: "доверять" },
+  uz: { words: ["Ishonsa", "boʻladigan"], last: "tibbiyot" },
+  en: { words: ["Medicine", "you", "can"], last: "trust" },
+};
 
 /** The home page opens on a surgeon in the operating room over the whole screen: the surgeon on the
  *  right, the copy on the open blue to the left. Upright screens get an upright shot of the surgeon with the implant
@@ -42,6 +48,8 @@ export function HomeHero() {
   const root = useRef<HTMLElement>(null);
   const introDone = useIntroDone();
   const [still] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const { lang, t } = useLang();
+  const title = TITLE[lang];
 
   useGSAP(
     () => {
@@ -79,7 +87,11 @@ export function HomeHero() {
           src="/images/hero/hero-desktop.webp"
           srcSet="/images/hero/hero-desktop-1000.webp 1000w, /images/hero/hero-desktop.webp 1672w, /images/hero/hero-desktop-2400.webp 2400w"
           sizes="(max-aspect-ratio: 1672/941) 178svh, 100vw"
-          alt="A surgeon in a cap, mask and magnifying loupes looks at a tiny implant in his gloved hand"
+          alt={t({
+            ru: "Хирург в шапочке, маске и бинокулярных лупах рассматривает крошечный имплант в руке в перчатке",
+            uz: "Qalpoq, niqob va kattalashtiruvchi lupa taqqan jarroh qoʻlqopli qoʻlidagi kichkina implantga qarayapti",
+            en: "A surgeon in a cap, mask and magnifying loupes looks at a tiny implant in his gloved hand",
+          })}
           width={1672}
           height={941}
           fetchPriority="high"
@@ -95,7 +107,7 @@ export function HomeHero() {
             MEDGUIDE UZ
           </m.p>
           <h1 id="home-hero-title" className="home-hero-title">
-            {TITLE.map((word, i) => (
+            {title.words.map((word, i) => (
               <span key={word}>
                 <span className="hero-word">
                   <m.span variants={lift} custom={0.18 + i * 0.06}>
@@ -105,25 +117,28 @@ export function HomeHero() {
               </span>
             ))}
             <span className="hero-word">
-              <m.em variants={lift} custom={0.18 + TITLE.length * 0.06}>
-                trust
+              <m.em variants={lift} custom={0.18 + title.words.length * 0.06}>
+                {title.last}
               </m.em>
             </span>
           </h1>
           <m.p className="home-hero-lead" variants={rise} custom={0.45}>
-            One catalog of vetted private clinics across Uzbekistan. Compare doctors, prices and equipment, then send a
-            request in a few clicks.
+            {t({
+              ru: "Единый каталог проверенных частных клиник Узбекистана. Сравните врачей, цены и оборудование и отправьте заявку в пару кликов.",
+              uz: "Oʻzbekistondagi tekshirilgan xususiy klinikalarning yagona katalogi. Shifokorlar, narxlar va jihozlarni solishtiring va bir necha bosishda ariza yuboring.",
+              en: "One catalog of vetted private clinics across Uzbekistan. Compare doctors, prices and equipment, then send a request in a few clicks.",
+            })}
           </m.p>
           <m.div className="home-hero-actions" variants={rise} custom={0.55}>
             <a href="#catalog" className="pill-btn is-brand" onClick={toCatalog}>
-              Find a clinic
+              {t({ ru: "Найти клинику", uz: "Klinika topish", en: "Find a clinic" })}
               <span className="pill-btn-icon">
                 <ArrowIcon />
               </span>
             </a>
             <Link to="/checker" className="pill-btn is-outline-light">
               <Stethoscope size={18} weight="bold" aria-hidden="true" />
-              Find a specialty
+              {t({ ru: "Подобрать направление", uz: "Yoʻnalish tanlash", en: "Find a specialty" })}
             </Link>
           </m.div>
         </div>
@@ -131,11 +146,11 @@ export function HomeHero() {
         {/* Three short promises on a white bar along the bottom of the hero. */}
         <m.ul className="home-hero-points" variants={rise} custom={0.7}>
           {POINTS.map(({ icon: Icon, text }) => (
-            <li key={text}>
+            <li key={text.en}>
               <i aria-hidden="true">
                 <Icon size={16} weight="bold" />
               </i>
-              {text}
+              {t(text)}
             </li>
           ))}
         </m.ul>

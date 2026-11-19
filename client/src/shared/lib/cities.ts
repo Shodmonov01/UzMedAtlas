@@ -33,22 +33,23 @@ export function normalizeCity(input: string) {
   return cityAliases.get(value.toLowerCase()) || value;
 }
 
-/** Regions some clinics typed in Russian instead of a city, with their English names. */
-const REGIONS: Record<string, string> = {
-  "ташкентская область": "Tashkent Region",
-  "самаркандская область": "Samarkand Region",
-  "бухарская область": "Bukhara Region",
-  "андижанская область": "Andijan Region",
-  "ферганская область": "Fergana Region",
-  "наманганская область": "Namangan Region",
-  "кашкадарьинская область": "Kashkadarya Region",
-  "сурхандарьинская область": "Surkhandarya Region",
-  "хорезмская область": "Khorezm Region",
-  "джизакская область": "Jizzakh Region",
-  "навоийская область": "Navoi Region",
-  "сырдарьинская область": "Syrdarya Region",
-  "республика каракалпакстан": "Republic of Karakalpakstan",
+/** Regions some clinics typed in Russian instead of a city, with their names in each language. */
+const REGION_NAMES: Record<string, { ru: string; uz: string; en: string }> = {
+  "ташкентская область": { ru: "Ташкентская область", uz: "Toshkent viloyati", en: "Tashkent Region" },
+  "самаркандская область": { ru: "Самаркандская область", uz: "Samarqand viloyati", en: "Samarkand Region" },
+  "бухарская область": { ru: "Бухарская область", uz: "Buxoro viloyati", en: "Bukhara Region" },
+  "андижанская область": { ru: "Андижанская область", uz: "Andijon viloyati", en: "Andijan Region" },
+  "ферганская область": { ru: "Ферганская область", uz: "Fargʻona viloyati", en: "Fergana Region" },
+  "наманганская область": { ru: "Наманганская область", uz: "Namangan viloyati", en: "Namangan Region" },
+  "кашкадарьинская область": { ru: "Кашкадарьинская область", uz: "Qashqadaryo viloyati", en: "Kashkadarya Region" },
+  "сурхандарьинская область": { ru: "Сурхандарьинская область", uz: "Surxondaryo viloyati", en: "Surkhandarya Region" },
+  "хорезмская область": { ru: "Хорезмская область", uz: "Xorazm viloyati", en: "Khorezm Region" },
+  "джизакская область": { ru: "Джизакская область", uz: "Jizzax viloyati", en: "Jizzakh Region" },
+  "навоийская область": { ru: "Навоийская область", uz: "Navoiy viloyati", en: "Navoi Region" },
+  "сырдарьинская область": { ru: "Сырдарьинская область", uz: "Sirdaryo viloyati", en: "Syrdarya Region" },
+  "республика каракалпакстан": { ru: "Республика Каракалпакстан", uz: "Qoraqalpogʻiston Respublikasi", en: "Republic of Karakalpakstan" },
 };
+const REGIONS: Record<string, string> = Object.fromEntries(Object.entries(REGION_NAMES).map(([key, names]) => [key, names.en]));
 
 /** Stored value (or a typed city or region in any language) → English name; anything unknown comes back as it is. */
 export function displayCity(input: string | null | undefined) {
@@ -57,3 +58,13 @@ export function displayCity(input: string | null | undefined) {
   return CITY_LABELS[input] || CITY_LABELS[cityAliases.get(key) || ""] || REGIONS[key] || input;
 }
 
+/** A city's (or region's) name on the public pages in the site language; anything unknown comes back as it is. */
+export function cityName(lang: "ru" | "uz" | "en", input: string | null | undefined) {
+  if (!input) return "";
+  if (lang === "en") return displayCity(input);
+  const key = input.trim().toLowerCase();
+  const value = CITY_LABELS[input] ? input : cityAliases.get(key);
+  const city = CITIES.find((item) => item.value === value);
+  if (city) return city[lang];
+  return REGION_NAMES[key]?.[lang] || input;
+}
