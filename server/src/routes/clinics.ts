@@ -10,6 +10,7 @@ import {
   serializeDoctor,
   serializeService,
 } from "../lib/clinic-serialize";
+import { withContentTranslations } from "../lib/content-i18n";
 import { prisma } from "../lib/db";
 import { parseLanguages } from "../lib/format";
 
@@ -90,6 +91,9 @@ function serializePublicClinic(clinic: any) {
 }
 
 export async function clinicsRoutes(app: FastifyInstance) {
+  // Every answer here carries the clinics' texts in Uzbek and English beside the Russian of their briefs.
+  app.addHook("preSerialization", async (_request, _reply, payload) => withContentTranslations(payload));
+
   app.get("/api/clinics", async (request) => {
     const query = request.query as Record<string, string | undefined>;
     const clinics = await queryClinics({

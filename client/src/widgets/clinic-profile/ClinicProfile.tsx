@@ -45,7 +45,7 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { briefText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
+import { localText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 
 /** Building blocks shared by the public clinic page and its branch pages, so both read as one design. */
 
@@ -107,31 +107,27 @@ export function splitPoints(value?: string | null) {
 }
 
 /** Language names in English (the site language). */
-const LANGUAGE_NAMES: Record<string, string> = {
-  ru: "Russian",
-  uz: "Uzbek",
-  en: "English",
-  tr: "Turkish",
-  kz: "Kazakh",
-  kk: "Kazakh",
-  ky: "Kyrgyz",
-  kg: "Kyrgyz",
-  tg: "Tajik",
-  tj: "Tajik",
-  tk: "Turkmen",
-  ko: "Korean",
-  kr: "Korean",
-  zh: "Chinese",
-  cn: "Chinese",
-  hi: "Hindi",
-  ar: "Arabic",
-  fa: "Persian",
-  de: "German",
-  fr: "French",
-  es: "Spanish",
-  it: "Italian",
-  he: "Hebrew",
-  az: "Azerbaijani",
+/** Spoken-language names in each site language (the Uzbek ones are the plain adjective: "Rus", "Ingliz"). */
+const LANGUAGE_NAMES: Record<string, Text> = {
+  ru: { en: "Russian", ru: "Русский", uz: "Rus" },
+  uz: { en: "Uzbek", ru: "Узбекский", uz: "Oʻzbek" },
+  en: { en: "English", ru: "Английский", uz: "Ingliz" },
+  tr: { en: "Turkish", ru: "Турецкий", uz: "Turk" },
+  kk: { en: "Kazakh", ru: "Казахский", uz: "Qozoq" },
+  ky: { en: "Kyrgyz", ru: "Киргизский", uz: "Qirgʻiz" },
+  tg: { en: "Tajik", ru: "Таджикский", uz: "Tojik" },
+  tk: { en: "Turkmen", ru: "Туркменский", uz: "Turkman" },
+  ko: { en: "Korean", ru: "Корейский", uz: "Koreys" },
+  zh: { en: "Chinese", ru: "Китайский", uz: "Xitoy" },
+  hi: { en: "Hindi", ru: "Хинди", uz: "Hind" },
+  ar: { en: "Arabic", ru: "Арабский", uz: "Arab" },
+  fa: { en: "Persian", ru: "Персидский", uz: "Fors" },
+  de: { en: "German", ru: "Немецкий", uz: "Nemis" },
+  fr: { en: "French", ru: "Французский", uz: "Fransuz" },
+  es: { en: "Spanish", ru: "Испанский", uz: "Ispan" },
+  it: { en: "Italian", ru: "Итальянский", uz: "Italyan" },
+  he: { en: "Hebrew", ru: "Иврит", uz: "Ivrit" },
+  az: { en: "Azerbaijani", ru: "Азербайджанский", uz: "Ozarbayjon" },
 };
 
 /** Clinics sometimes type country codes instead of language codes; these are the language codes meant. */
@@ -140,14 +136,8 @@ const LANGUAGE_CODE_FIXES: Record<string, string> = { kz: "kk", kg: "ky", tj: "t
 /** A spoken language's name in the site language ("Russian", "Русский", "Rus"); unknown codes are shown in capitals. */
 export function languageName(code: string, lang: Lang = "en") {
   const key = code.toLowerCase();
-  if (lang === "en") return LANGUAGE_NAMES[key] || code.toUpperCase();
-  try {
-    const name = new Intl.DisplayNames([lang], { type: "language", fallback: "none" }).of(LANGUAGE_CODE_FIXES[key] || key);
-    if (name) return name.charAt(0).toUpperCase() + name.slice(1);
-  } catch {
-    // An odd code or an old browser: fall back to the English name below.
-  }
-  return LANGUAGE_NAMES[key] || code.toUpperCase();
+  const names = LANGUAGE_NAMES[LANGUAGE_CODE_FIXES[key] || key];
+  return names ? names[lang] : code.toUpperCase();
 }
 
 /** Smooth, rounded icons in the iOS manner (Phosphor): plain strokes next to text, two-tone inside the tiles. */
@@ -473,7 +463,7 @@ const DOCTORS_PREVIEW = 6;
 function doctorDetails(d: ProfileDoctor, lang: Lang): { label: string; value: string }[] {
   const L = (text: Text) => text[lang];
   const details: { label: string; value?: string }[] = [
-    { label: L({ ru: "Квалификация", uz: "Malaka", en: "Qualifications" }), value: briefText(d.certsRu, d.certsEn) },
+    { label: L({ ru: "Квалификация", uz: "Malaka", en: "Qualifications" }), value: localText(lang, d, "certs") },
     { label: L({ ru: "Повышение квалификации", uz: "Malaka oshirish", en: "Further training" }), value: d.continuingEducationRu },
     { label: L({ ru: "Опыт за рубежом", uz: "Xorijdagi tajriba", en: "Experience abroad" }), value: d.internationalExperienceRu },
     { label: L({ ru: "Научная работа", uz: "Ilmiy faoliyat", en: "Research" }), value: d.researchActivityRu },
@@ -492,9 +482,9 @@ export function DoctorList({ doctors }: { doctors: ProfileDoctor[] }) {
     <>
       <ul className="cp-doctors">
         {shown.map((d) => {
-          const name = briefText(d.nameRu, d.nameEn);
-          const role = briefText(d.roleRu, d.roleEn);
-          const bio = briefText(d.bioRu, d.bioEn);
+          const name = localText(lang, d, "name");
+          const role = localText(lang, d, "role");
+          const bio = localText(lang, d, "bio");
           const details = doctorDetails(d, lang);
           const years = d.experienceYears != null && d.experienceYears !== "" ? d.experienceYears : null;
           return (
@@ -613,14 +603,14 @@ export function ServicesList({ services }: { services: Service[] }) {
       <ul className="cp-services">
         {shown.map((s) => {
           const price = servicePrice(s, lang);
-          const description = briefText(s.descriptionRu, s.descriptionEn);
+          const description = localText(lang, s, "description");
           return (
             <li key={s.id} className="cp-service">
               <span className="cp-service-icon" aria-hidden="true">
                 <Icon name="stethoscope" size={20} weight="duotone" />
               </span>
               <div className="cp-service-text">
-                <h3>{briefText(s.nameRu, s.nameEn)}</h3>
+                <h3>{localText(lang, s, "name")}</h3>
                 {description ? <p>{description}</p> : null}
               </div>
               <span className={`cp-price${price ? "" : " is-ask"}`}>{price || t({ ru: "Цена по запросу", uz: "Narx soʻrov boʻyicha", en: "Price on request" })}</span>
@@ -644,6 +634,7 @@ export type EquipmentItem = { id: string; nameRu?: string; nameEn: string; manuf
 
 /** Equipment as picture cards: the photo on top (or an icon panel), the maker, the name and a few words. */
 export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
+  const { lang } = useLang();
   // Without any pictures the cards stay compact: an icon tile beside the words.
   const compact = !items.some((e) => e.photoUrl);
   if (compact) {
@@ -653,8 +644,8 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
         items={items.map((e) => ({
           key: e.id,
           label: e.manufacturer || null,
-          title: briefText(e.nameRu, e.nameEn),
-          text: briefText(e.descriptionRu, e.descriptionEn).trim() || null,
+          title: localText(lang, e, "name"),
+          text: localText(lang, e, "description").trim() || null,
         }))}
       />
     );
@@ -662,7 +653,7 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
   return (
     <ul className="cp-media-grid">
       {items.map((e) => {
-        const description = briefText(e.descriptionRu, e.descriptionEn).trim();
+        const description = localText(lang, e, "description").trim();
         return (
           <li key={e.id} className="cp-media">
             <div className="cp-media-photo">
@@ -676,7 +667,7 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
             </div>
             <div className="cp-media-body">
               {e.manufacturer ? <p className="cp-label">{e.manufacturer}</p> : null}
-              <h3>{briefText(e.nameRu, e.nameEn)}</h3>
+              <h3>{localText(lang, e, "name")}</h3>
               {description ? <p className="cp-media-text">{description}</p> : null}
             </div>
           </li>
@@ -737,17 +728,17 @@ export type Certificate = {
 
 /** Certificates and licences: the scan (or an award tile), the name, who issued it and the dates. */
 export function CertificateList({ items }: { items: Certificate[] }) {
-  const { t } = useLang();
+  const { lang, t } = useLang();
   return (
     <ul className="cp-certs">
       {items.map((c) => {
-        const issuer = briefText(c.issuerRu, c.issuerEn).trim();
+        const issuer = localText(lang, c, "issuer").trim();
         const issued = c.receivedAt || (c.year ? String(c.year) : null);
         return (
           <li key={c.id} className="cp-cert">
             <div className={`cp-cert-thumb${c.imageUrl ? "" : " is-icon"}`}>{c.imageUrl ? <FitImage src={c.imageUrl} className="absolute inset-0" tolerance={0.4} /> : <Icon name="seal" size={26} weight="duotone" />}</div>
             <div className="cp-cert-body">
-              <h3>{briefText(c.nameRu, c.nameEn)}</h3>
+              <h3>{localText(lang, c, "name")}</h3>
               {issuer ? <p>{issuer}</p> : null}
               {issued || c.validUntil ? (
                 <div className="cp-cert-dates">

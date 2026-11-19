@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { pickName, useLang } from "@/shared/i18n/lang";
+import { localText, useLang } from "@/shared/i18n/lang";
 import { fetchSpecialties, type Specialty } from "@/shared/api/client";
 import { MOTION_OK, ScrollTrigger, gsap, useGSAP } from "@/shared/lib/gsap";
 
@@ -131,10 +131,10 @@ function DirectionsRow({ items, muted, onPick }: { items: Specialty[]; muted: bo
               type="button"
               className="direction-link"
               tabIndex={copy ? -1 : undefined}
-              title={pickName(lang, item.descriptionRu, item.descriptionEn) || undefined}
+              title={localText(lang, item, "description") || undefined}
               onClick={() => onPick(item.slug)}
             >
-              {pickName(lang, item.nameRu, item.nameEn)}
+              {localText(lang, item, "name")}
             </button>
           </li>
         )),

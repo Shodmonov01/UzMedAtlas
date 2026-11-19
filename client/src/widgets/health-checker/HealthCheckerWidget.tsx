@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { analyzeChecker } from "@/shared/api/client";
 import { useHealthChecker } from "./HealthCheckerContext";
-import { pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
+import { localText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 
 type CheckerResult = Awaited<ReturnType<typeof analyzeChecker>>;
 
@@ -324,14 +324,14 @@ export function HealthCheckerWidget({ showTip = true, hideOverHero = false }: { 
                     <div className="rounded-[16px] rounded-bl-md bg-white px-4 py-3.5 text-sm ring-1 ring-[#0b2a3d0d]">
                       <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted">{t({ ru: "Рекомендация", uz: "Tavsiya", en: "Recommendation" })}</p>
                       <p className="mt-1.5 text-lg font-semibold tracking-tight text-accent-deep">
-                        {pickName(lang, top?.nameRu, top?.nameEn) || t({ ru: "Уточните у врача", uz: "Shifokordan aniqlang", en: "Ask a doctor" })}
+                        {localText(lang, top, "name") || t({ ru: "Уточните у врача", uz: "Shifokordan aniqlang", en: "Ask a doctor" })}
                       </p>
                       {message.result.doctorRecommendation ? (
                         <p className="mt-1 text-sm font-semibold text-ink">{t({ ru: "Специалист", uz: "Mutaxassis", en: "Specialist" })}: {message.result.doctorRecommendation}</p>
                       ) : null}
                       {(top?.explanationRu || top?.explanationEn) && (
                         <p className="mt-2 text-sm leading-snug text-muted">
-                          {pickName(lang, top.explanationRu, top.explanationEn)}
+                          {localText(lang, top, "explanation")}
                         </p>
                       )}
                       {message.result.redFlags?.length ? (

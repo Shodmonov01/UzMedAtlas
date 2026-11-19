@@ -8,7 +8,7 @@ import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { CITY_OPTIONS, cityName } from "@/shared/lib/cities";
-import { briefText, clinicName, countWord, pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
+import { clinicName, countWord, localText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 
 export type CatalogSearch = {
   q?: string;
@@ -151,11 +151,11 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
   const advancedCount = countAdvanced(search);
   const specialtyOptions = [
     { value: "", label: t({ ru: "Все направления", uz: "Barcha yoʻnalishlar", en: "All specialties" }) },
-    ...(specialties.data || []).map((s) => ({ value: s.slug, label: pickName(lang, s.nameRu, s.nameEn) })),
+    ...(specialties.data || []).map((s) => ({ value: s.slug, label: localText(lang, s, "name") })),
   ];
   const specialtyName = (slug: string) => {
     const found = (specialties.data || []).find((s) => s.slug === slug);
-    return found ? pickName(lang, found.nameRu, found.nameEn) : slug;
+    return found ? localText(lang, found, "name") : slug;
   };
   const langOptions = [
     { value: "", label: t({ ru: "Любой язык", uz: "Istalgan til", en: "Any language" }) },
@@ -273,7 +273,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
                 className={search.specialty === s.slug ? "is-active" : undefined}
                 onClick={() => onPatchSearch({ specialty: search.specialty === s.slug ? undefined : s.slug })}
               >
-                {pickName(lang, s.nameRu, s.nameEn)}
+                {localText(lang, s, "name")}
               </button>
             ))}
           </div>
@@ -505,11 +505,11 @@ function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
             </span>
             {meta.length ? <span>{meta.join(" · ")}</span> : null}
           </p>
-          <p className="clinic-tile-text">{briefText(clinic.descriptionRu, clinic.descriptionEn)}</p>
+          <p className="clinic-tile-text">{localText(lang, clinic, "description")}</p>
           {clinic.specialties?.length ? (
             <p className="clinic-tile-tags">
               {clinic.specialties.slice(0, 3).map((s) => (
-                <span key={s.slug}>{pickName(lang, s.nameRu, s.nameEn)}</span>
+                <span key={s.slug}>{localText(lang, s, "name")}</span>
               ))}
             </p>
           ) : null}

@@ -64,18 +64,25 @@ export function countWord(lang: Lang, n: number, forms: { ru: [string, string, s
   return forms.ru[2];
 }
 
-/** A name from the site's own lists (specialties, services) in the current language. The API has Russian and
- *  English; Uzbek readers get the Russian. */
-export function pickName(lang: Lang, ru?: string | null, en?: string | null) {
+/** A text in the current language from its Russian, English and Uzbek versions; a missing one falls back to the
+ *  Russian (the language clinics write their briefs in), then the English. */
+export function pickName(lang: Lang, ru?: string | null, en?: string | null, uz?: string | null) {
+  if (lang === "uz") return uz || ru || en || "";
   if (lang === "en") return en || ru || "";
   return ru || en || "";
 }
 
-/** A clinic's own text (descriptions, doctors, services, achievements...) as the clinic wrote it in its brief, whatever
- *  the site language. Briefs come in Russian and their English is only a partial translation, so taking the original
- *  everywhere keeps a page from mixing the two languages. */
-export function briefText(ru?: string | null, en?: string | null) {
-  return ru || en || "";
+/** A text from the API in the current language: `item[field + "Ru" | "En" | "Uz"]`. Clinics write in Russian; the API
+ *  adds the reviewed Uzbek and English translations beside it (server/src/lib/content-i18n.ts), so a page is all in
+ *  one language. A text not translated yet shows in Russian. */
+export function localText(lang: Lang, item: object | null | undefined, field: string) {
+  if (!item) return "";
+  const record = item as Record<string, unknown>;
+  const get = (suffix: string) => {
+    const value = record[field + suffix];
+    return typeof value === "string" ? value.trim() : "";
+  };
+  return pickName(lang, get("Ru"), get("En"), get("Uz"));
 }
 
 /** A clinic's (or branch's) name: its brand name in Latin letters, the one the catalog sorts by A–Z. The original

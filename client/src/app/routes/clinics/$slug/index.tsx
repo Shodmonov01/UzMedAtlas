@@ -9,7 +9,7 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
-import { briefText, clinicName, countWord, pickName, useLang, type Text } from "@/shared/i18n/lang";
+import { clinicName, countWord, localText, useLang, type Text } from "@/shared/i18n/lang";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
 import {
   CertificateList,
@@ -137,7 +137,7 @@ function ClinicDetailPage() {
     seoData
       ? {
           title: `${clinicName(seoData)}, ${seoCity} — ${t({ ru: "лечение и медицинский туризм", uz: "davolanish va tibbiy turizm", en: "Treatment & Medical Tourism" })} | ${SITE_NAME}`,
-          description: `${clinicName(seoData)}, ${seoCity}: ${briefText(seoData.descriptionRu, seoData.descriptionEn)}`,
+          description: `${clinicName(seoData)}, ${seoCity}: ${localText(lang, seoData, "description")}`,
         }
       : clinic.isError
         ? { title: `${t({ ru: "Клиника не найдена", uz: "Klinika topilmadi", en: "Clinic not found" })} | ${SITE_NAME}`, noindex: true }
@@ -157,44 +157,41 @@ function ClinicDetailPage() {
   if (!clinic.data) return <PageState title={t(L.notFound)} text={t(L.notFoundText)} action={backToCatalog} />;
 
   const data = clinic.data;
-  // The clinic's own texts stay in the language of its brief, whatever the site language (see briefText).
-  const pick = (ru?: string | null, en?: string | null) => text(briefText(ru, en));
-  const pickPoints = (ru?: string | null, en?: string | null) => {
-    const first = splitPoints(ru);
-    return first.length ? first : splitPoints(en);
-  };
+  // The clinic's own texts in the site language (Russian from the brief, Uzbek and English from the translations).
+  const pick = (item: object | null | undefined, field: string) => text(localText(lang, item, field));
+  const pickPoints = (item: object | null | undefined, field: string) => splitPoints(localText(lang, item, field));
   const name: string = clinicName(data);
   const phones = splitPhones(data.phone);
   const shortName = text(data.shortName);
-  const description = pick(data.descriptionRu, data.descriptionEn);
+  const description = pick(data, "description");
   const gallery: GalleryPhoto[] = (data.photos || []).map((p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
     id: p.id,
     url: p.url,
-    alt: briefText(p.altRu, p.altEn),
+    alt: localText(lang, p, "alt"),
   }));
   if (!gallery.length && data.branches?.[0]?.coverUrl) {
     gallery.push({ id: "branch-cover", url: data.branches[0].coverUrl, alt: name });
   }
-  const history = pick(data.historyRu, data.historyEn);
-  const mission = pick(data.missionRu, data.missionEn);
-  const advantages = pickPoints(data.advantagesRu, data.advantagesEn);
-  const why = pick(data.whyChooseRu, data.whyChooseEn);
-  const plans = pick(data.developmentPlansRu, data.developmentPlansEn);
-  const popular = (pick(data.popularServicesRu, data.popularServicesEn) || "")
+  const history = pick(data, "history");
+  const mission = pick(data, "mission");
+  const advantages = pickPoints(data, "advantages");
+  const why = pick(data, "whyChoose");
+  const plans = pick(data, "developmentPlans");
+  const popular = (pick(data, "popularServices") || "")
     .split(/[;,\n]/)
     .map((item) => item.replace(/^[•\-*–]\s*/, "").replace(/\.$/, "").trim())
     .filter(Boolean)
     .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
-  const tourism = pick(data.medicalTourismRu, data.medicalTourismEn);
+  const tourism = pick(data, "medicalTourism");
   const cityLabel = cityName(lang, data.city);
   const branches: Branch[] = data.branches || [];
   const mapBranch = branches.find((b) => b.lat != null && b.lng != null && Number.isFinite(b.lat) && Number.isFinite(b.lng)) as (Branch & { lat: number; lng: number }) | undefined;
   const mapLocation = mapBranch
-    ? { lat: mapBranch.lat, lng: mapBranch.lng, address: pick(mapBranch.addressRu, mapBranch.addressEn) }
+    ? { lat: mapBranch.lat, lng: mapBranch.lng, address: pick(mapBranch, "address") }
     : data.lat != null && data.lng != null && Number.isFinite(data.lat) && Number.isFinite(data.lng)
-      ? { lat: data.lat as number, lng: data.lng as number, address: pick(data.addressRu, data.addressEn) }
+      ? { lat: data.lat as number, lng: data.lng as number, address: pick(data, "address") }
       : null;
-  const address = mapLocation?.address || pick(data.addressRu, data.addressEn);
+  const address = mapLocation?.address || pick(data, "address");
   const cities: string = data.cities?.length ? data.cities.map((c: string) => cityName(lang, c)).join(", ") : cityLabel;
   const doctors = data.doctors || [];
   const specialties: { slug: string; nameRu?: string; nameEn: string }[] = data.specialties || [];
@@ -343,7 +340,7 @@ function ClinicDetailPage() {
                     {specialties.map((s) => (
                       <li key={s.slug}>
                         <Icon name="check" size={15} />
-                        {pickName(lang, s.nameRu, s.nameEn)}
+                        {localText(lang, s, "name")}
                       </li>
                     ))}
                   </ul>
@@ -395,8 +392,8 @@ function ClinicDetailPage() {
                   <PersonCard
                     wide
                     name={data.founderName}
-                    role={pick(data.founderRoleRu, data.founderRoleEn) || t(L.founder)}
-                    bio={pick(data.founderBioRu, data.founderBioEn)}
+                    role={pick(data, "founderRole") || t(L.founder)}
+                    bio={pick(data, "founderBio")}
                     photoUrl={data.founderPhotoUrl}
                   />
                 ) : null}
@@ -404,13 +401,13 @@ function ClinicDetailPage() {
                   <PersonCard
                     wide={!data.founderName}
                     name={data.chiefDoctorName}
-                    role={pick(data.chiefDoctorRoleRu, data.chiefDoctorRoleEn) || t(L.chief)}
-                    bio={pick(data.chiefDoctorBioRu, data.chiefDoctorBioEn)}
+                    role={pick(data, "chiefDoctorRole") || t(L.chief)}
+                    bio={pick(data, "chiefDoctorBio")}
                     photoUrl={data.chiefDoctorPhotoUrl}
                   />
                 ) : null}
                 {leaders.map((l) => (
-                  <PersonCard key={l.id || l.name} name={l.name} role={pick(l.roleRu, l.roleEn)} bio={pick(l.bioRu, l.bioEn)} photoUrl={l.photoUrl} />
+                  <PersonCard key={l.id || l.name} name={l.name} role={pick(l, "role")} bio={pick(l, "bio")} photoUrl={l.photoUrl} />
                 ))}
               </ul>
             </ProfileSection>
@@ -454,8 +451,8 @@ function ClinicDetailPage() {
                   <FeatureGrid
                     items={technologies.map((item, i) => ({
                       key: item.id || item.nameRu || String(i),
-                      title: briefText(item.nameRu, item.nameEn),
-                      text: pick(item.descriptionRu, item.descriptionEn),
+                      title: localText(lang, item, "name"),
+                      text: pick(item, "description"),
                     }))}
                   />
                 </>
@@ -480,8 +477,8 @@ function ClinicDetailPage() {
                       .map((a, i) => ({
                         key: a.id || a.titleRu || String(i),
                         year: a.year,
-                        title: briefText(a.titleRu, a.titleEn),
-                        text: pick(a.descriptionRu, a.descriptionEn),
+                        title: localText(lang, a, "title"),
+                        text: pick(a, "description"),
                       }))}
                   />
                 </>
@@ -510,7 +507,7 @@ function ClinicDetailPage() {
             ) : (
               <div className="clinic-tiles cp-branches">
                 {branches.map((b) => {
-                  const branchAddress = pick(b.addressRu, b.addressEn);
+                  const branchAddress = pick(b, "address");
                   return (
                     <Link key={b.id} to="/clinics/$slug/branches/$branchSlug" params={{ slug, branchSlug: b.slug }} className="clinic-tile">
                       <div className="clinic-tile-cover">
@@ -577,7 +574,7 @@ function ClinicDetailPage() {
                   </i>
                   <span>
                     <b>{data.coordinatorName}</b>
-                    {pick(data.coordinatorRoleRu, data.coordinatorRoleEn) ? <span>{pick(data.coordinatorRoleRu, data.coordinatorRoleEn)}</span> : null}
+                    {pick(data, "coordinatorRole") ? <span>{pick(data, "coordinatorRole")}</span> : null}
                   </span>
                 </p>
               </div>

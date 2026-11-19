@@ -10,7 +10,7 @@ import { LogoTiles } from "@/shared/ui/LogoTiles";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
-import { briefText, clinicName as nameOf, countWord, pickName, useLang, type Lang, type Text } from "@/shared/i18n/lang";
+import { clinicName as nameOf, countWord, localText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
 import {
   CheckList,
@@ -134,7 +134,7 @@ function BranchDetailPage() {
     seoData
       ? {
           title: `${seoFull}, ${cityName(lang, seoData.city)} — ${t({ ru: "адрес, врачи и цены", uz: "manzil, shifokorlar va narxlar", en: "Address, Doctors & Prices" })} | ${SITE_NAME}`,
-          description: `${seoFull}: ${briefText(seoData.addressRu, seoData.addressEn)}. ${briefText(seoData.descriptionRu, seoData.descriptionEn)}`,
+          description: `${seoFull}: ${localText(lang, seoData, "address")}. ${localText(lang, seoData, "description")}`,
         }
       : branch.isError
         ? { title: `${t({ ru: "Страница не найдена", uz: "Sahifa topilmadi", en: "Page not found" })} | ${SITE_NAME}`, noindex: true }
@@ -154,12 +154,12 @@ function BranchDetailPage() {
   if (!branch.data) return <PageState title={t(L.notFound)} text={t(L.notFoundText)} action={toClinic} />;
 
   const data = branch.data;
-  // The branch's own texts stay in the language of its brief, whatever the site language (see briefText).
-  const pick = (ru?: string | null, en?: string | null) => briefText(ru, en).trim() || null;
+  // The branch's own texts in the site language (Russian from the brief, Uzbek and English from the translations).
+  const pick = (item: object | null | undefined, field: string) => localText(lang, item, field) || null;
   const name: string = nameOf(data);
   const clinicName: string = nameOf(data.clinic || {}) || t(L.clinic);
-  const description = pick(data.descriptionRu, data.descriptionEn);
-  const address = pick(data.addressRu, data.addressEn);
+  const description = pick(data, "description");
+  const address = pick(data, "address");
   const schedule: Record<string, DayHours> = data.schedule || {};
   const hasSchedule = Object.keys(schedule).length > 0;
   const allDay = hasSchedule && DAYS.every(({ key }) => schedule[key]?.roundTheClock);
@@ -173,14 +173,14 @@ function BranchDetailPage() {
   const gallery: GalleryPhoto[] = (data.photos || []).map((p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
     id: p.id,
     url: p.url,
-    alt: briefText(p.altRu, p.altEn),
+    alt: localText(lang, p, "alt"),
   }));
   if (data.coverUrl && !gallery.some((p) => p.url === data.coverUrl)) {
     gallery.unshift({ id: "cover", url: data.coverUrl, alt: name });
   }
-  const advantages = splitPoints(pick(data.advantagesRu, data.advantagesEn));
-  const features = splitPoints(pick(data.featuresRu, data.featuresEn));
-  const tourism = data.medicalTourism ? pick(data.medicalTourismInfoRu, data.medicalTourismInfoEn) : null;
+  const advantages = splitPoints(pick(data, "advantages"));
+  const features = splitPoints(pick(data, "features"));
+  const tourism = data.medicalTourism ? pick(data, "medicalTourismInfo") : null;
   const specialties: { slug: string; nameRu?: string; nameEn: string }[] = data.specialties || [];
   const doctors: ProfileDoctor[] = data.doctors || [];
   const services = data.services || [];
@@ -360,7 +360,7 @@ function BranchDetailPage() {
                   {specialties.map((s) => (
                     <li key={s.slug}>
                       <Icon name="check" size={15} />
-                      {pickName(lang, s.nameRu, s.nameEn)}
+                      {localText(lang, s, "name")}
                     </li>
                   ))}
                 </ul>

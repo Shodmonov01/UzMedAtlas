@@ -17,6 +17,16 @@ describe("clinic brief", () => {
     expect((await parseBrief("Клиника Тест")).fields).toEqual({ nameRu: "Тест" });
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe("Bearer test-key");
   });
+  it("falls back to Groq's current model when the configured one was retired", async () => {
+    vi.stubEnv("GROQ_API_KEY", "test-key");
+    vi.stubEnv("GROQ_MODEL", "llama-3.3-70b-versatile");
+    const ok = { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: JSON.stringify({ fields: { nameRu: "Тест" }, notes: [] }) } }] }) };
+    const gone = { ok: false, status: 404, clone: () => ({ text: async () => "model_not_found" }) };
+    const fetchMock = vi.fn().mockResolvedValueOnce(gone).mockResolvedValueOnce(ok);
+    vi.stubGlobal("fetch", fetchMock);
+    expect((await parseBrief("Клиника Тест")).fields).toEqual({ nameRu: "Тест" });
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).model).toBe("openai/gpt-oss-120b");
+  });
   it("rejects malformed provider output", async () => {
     vi.stubEnv("GROQ_API_KEY", "test-key");
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ choices: [{ message: { content: "invalid" } }] }) }));
