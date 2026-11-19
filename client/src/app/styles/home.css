@@ -197,18 +197,24 @@
    over a soft ink shade from that side.
    Upright screens: the cover portrait starts under the header (so the cap is never under it), fills the upper part on
    the photo's own blue and fades into ink, with the copy below the face. */
-.home-hero { --header-h: 72px; position: relative; height: 100svh; min-height: 600px; overflow: hidden; container-type: size;
+.home-hero { --header-h: 72px; --points-bottom: clamp(24px, 4.5svh, 44px); position: relative; display: flex; min-height: max(100svh, 600px); overflow: hidden;
   background: linear-gradient(90deg, #00326c 0%, #01468d 42%, #025db1 70%, #3f7bbd 100%); }
 .home-hero picture { display: contents; }
 .home-hero-photo { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; object-fit: cover; object-position: 64% 0%;
   user-select: none; pointer-events: none; transform-origin: 64% 0%; }
 .home-hero-shade { position: absolute; z-index: 1; inset: 0; pointer-events: none;
   background: linear-gradient(90deg, #0b2a3de6 0%, #0b2a3db3 22%, #0b2a3d4d 40%, transparent 56%), linear-gradient(to bottom, #0b2a3d59, transparent 12%), linear-gradient(to top, #0b2a3d80, transparent 26%); }
-/* The copy sits in the open blue at the upper left, clear of the raised hand below it. */
-.home-hero-stage { position: absolute; z-index: 2; inset: 0; display: flex; align-items: flex-start;
-  padding: calc(var(--header-h) + clamp(40px, 13cqh, 150px)) max(var(--gutter), calc((100% - var(--page-width)) / 2)) 48px; }
+/* The copy sits in the open blue at the upper left, clear of the raised hand below it. The bottom padding keeps room
+   for the promise bar (its 50px, its offset and a 32px gap), so the buttons never touch it: when a longer title (Russian,
+   Uzbek) does not fit, the hero grows taller than the screen instead. */
+.home-hero-stage { position: relative; z-index: 2; flex: 1; display: flex; align-items: flex-start;
+  padding: calc(var(--header-h) + clamp(40px, 13svh, 150px)) max(var(--gutter), calc((100% - var(--page-width)) / 2)) calc(var(--points-bottom) + 82px); }
+/* Short wide screens (laptops): less air above the copy. */
+@media (orientation: landscape) and (max-height: 820px) {
+  .home-hero-stage { padding-top: calc(var(--header-h) + clamp(28px, 8svh, 80px)); }
+}
 .home-hero-copy { display: flex; flex-direction: column; align-items: flex-start; width: min(540px, 38%); color: white; }
-.home-hero-title { margin-top: 22px; color: white; font-size: clamp(44px, min(5.2cqw, 9cqh), 88px); font-weight: 500; line-height: .98; letter-spacing: -.055em; text-wrap: balance; }
+.home-hero-title { margin-top: 22px; color: white; font-size: clamp(44px, min(5.2vw, 9svh), 88px); font-weight: 500; line-height: .98; letter-spacing: -.055em; text-wrap: balance; }
 .home-hero-title > div { padding-bottom: .1em; margin-bottom: -.1em; }
 .home-hero-title em { color: var(--accent); font-style: normal; }
 /* Each title word slides up inside its own mask (Motion, HomeHero.tsx); the padding keeps descenders and the tight
@@ -218,7 +224,7 @@
 .home-hero-lead { max-width: 30ch; margin-top: 22px; color: #ffffffd9; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.55; }
 .home-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
 /* Three short promises on one solid white bar, centred along the bottom; thin rules between them. */
-.home-hero-points { position: absolute; bottom: clamp(24px, 4.5cqh, 44px); left: 50%; translate: -50% 0;
+.home-hero-points { position: absolute; bottom: var(--points-bottom); left: 50%; translate: -50% 0;
   display: flex; align-items: center; padding: 8px; border-radius: 999px; background: white; box-shadow: 0 24px 48px -24px #0b2a3d99; }
 .home-hero-points li { display: flex; align-items: center; gap: 10px; padding: 0 22px 0 8px; color: var(--ink); font-size: 14px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; }
 .home-hero-points li + li { padding-left: 22px; box-shadow: inset 1px 0 0 var(--line); }
@@ -226,6 +232,7 @@
 .home-hero-points i { display: grid; flex-shrink: 0; place-items: center; width: 34px; height: 34px; border-radius: 999px; background: var(--paper); color: var(--accent-deep); }
 @media (orientation: portrait), (max-height: 640px) {
   .home-hero-points { display: none; }
+  .home-hero-stage { padding-bottom: 48px; }
 }
 
 /* Upright screens: the portrait photo is as wide as the screen at its own shape, from the top edge (behind the
@@ -233,12 +240,11 @@
    (60% down the photo), or lower on tall screens so it sits at the bottom; it never covers the face. On short phones
    the hero simply grows taller than the screen. Under the photo the hero is ink. */
 @media (orientation: portrait) {
-  .home-hero { --photo-h: calc(100vw * 1672 / 941); container-type: normal; display: flex; flex-direction: column; justify-content: flex-end;
-    height: auto; min-height: 100svh; background: var(--ink); }
+  .home-hero { --photo-h: calc(100vw * 1672 / 941); flex-direction: column; justify-content: flex-end; min-height: 100svh; background: var(--ink); }
   .home-hero-photo { inset: auto; top: 0; left: 0; width: 100%; height: var(--photo-h); object-position: 50% 0%; transform-origin: 50% 30%; }
   .home-hero-shade { bottom: auto; height: var(--photo-h);
     background: linear-gradient(to bottom, #0b2a3d59 0%, transparent 12%, transparent 50%, #0b2a3dcc 64%, var(--ink) 84%); }
-  .home-hero-stage { position: relative; inset: auto; padding: calc(var(--photo-h) * .6) var(--gutter) 40px; }
+  .home-hero-stage { flex: none; padding: calc(var(--photo-h) * .6) var(--gutter) 40px; }
   .home-hero-copy { width: min(560px, 100%); }
 }
 @media (max-width: 767px) {
