@@ -7,6 +7,11 @@
 
 const origin = (process.argv[2] || "https://uzmedguide.uz").replace(/\/$/, "");
 
+/** Fields kept in one language only that can hold Russian (people's names, equipment makers) — the same list as
+ *  PLAIN_KEYS in src/lib/content-i18n.ts. Their texts always need English too. */
+const PLAIN_KEYS = new Set(["founderName", "chiefDoctorName", "coordinatorName", "name", "manufacturer"]);
+const CYRILLIC = /[Ѐ-ӿ]/;
+
 /** Every non-empty string under a key ending in "Ru", anywhere in the value; those without an English sibling also go
  *  to `noEnglish`. */
 function collectRussianTexts(value, out, noEnglish) {
@@ -20,6 +25,9 @@ function collectRussianTexts(value, out, noEnglish) {
         out.add(text);
         const english = value[`${key.slice(0, -2)}En`];
         if (typeof english !== "string" || !english.trim()) noEnglish.add(text);
+      } else if (PLAIN_KEYS.has(key) && typeof item === "string" && CYRILLIC.test(item)) {
+        out.add(item.trim());
+        noEnglish.add(item.trim());
       } else if (item && typeof item === "object") {
         collectRussianTexts(item, out, noEnglish);
       }

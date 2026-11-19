@@ -76,6 +76,10 @@
   "5 современных операционных блоков": {
    "uz": "5 ta zamonaviy operatsiya bloki"
   },
+  "Аббосова Дилафруз Авазбековна": {
+   "uz": "Abbosova Dilafruz Avazbekovna",
+   "en": "Abbosova Dilafruz Avazbekovna"
+  },
   "Аббосходжа Баходирходжаев": {
    "uz": "Abbosxodja Bahodirxodjayev"
   },
@@ -86,10 +90,12 @@
    "uz": "Abduvahob Malikov"
   },
   "Абдугафур Маликов": {
-   "uz": "Abdugafur Malikov"
+   "uz": "Abdugafur Malikov",
+   "en": "Abdugafur Malikov"
   },
   "Абдужалилова Лайло Абдумаджитова": {
-   "uz": "Abdujalilova Laylo Abdumadjitova"
+   "uz": "Abdujalilova Laylo Abdumadjitova",
+   "en": "Abdujalilova Laylo Abdumadjitova"
   },
   "Абдукаххаров Азимжон Зохиджонович": {
    "uz": "Abdukaxxarov Azimjon Zohidjonovich"
@@ -125,7 +131,12 @@
    "uz": "Abdurahmonova Fariza Abdurahimovna"
   },
   "Абзалов Бобур Баходырович": {
-   "uz": "Abzalov Bobur Bahodirovich"
+   "uz": "Abzalov Bobur Bahodirovich",
+   "en": "Abzalov Bobur Bakhodyrovich"
+  },
+  "Абзалова Гулзода Джаббаровна": {
+   "uz": "Abzalova Gulzoda Djabbarovna",
+   "en": "Abzalova Gulzoda Djabbarovna"
   },
   "Аблокулова Машхура Ульмасовна": {
    "uz": "Ablokulova Mashxura Ulmasovna"
@@ -315,7 +326,8 @@
    "uz": "Ahtamova Farida Salohitdinovna"
   },
   "Ачилова Ширин Сухробовна": {
-   "uz": "Achilova Shirin Suhrobovna"
+   "uz": "Achilova Shirin Suhrobovna",
+   "en": "Achilova Shirin Sukhrobovna"
   },
   "Аширов Руслан Сапарбаевич": {
    "uz": "Ashirov Ruslan Saparbayevich"
@@ -325,7 +337,8 @@
    "en": "Aerosol intraperitoneal chemotherapy"
   },
   "Аюпов Абдулбосит Шерзодович": {
-   "uz": "Ayupov Abdulbosit Sherzodovich"
+   "uz": "Ayupov Abdulbosit Sherzodovich",
+   "en": "Ayupov Abdulbosit Sherzodovich"
   },
   "Бабакулов Абдуазиз Шадиевич": {
    "uz": "Babakulov Abduaziz Shadiyevich"
@@ -390,7 +403,8 @@
    "uz": "Bozorov Tohir Mizropovich"
   },
   "Боймурадов Шахризод Элмурадович": {
-   "uz": "Boymuradov Shahrizod Elmuradovich"
+   "uz": "Boymuradov Shahrizod Elmuradovich",
+   "en": "Boymuradov Shakhrizod Elmuradovich"
   },
   "Более 1 353 медицинских услуг и более 70 врачей-специалистов\nРежим 24/7: круглосуточные консультации, ночные и выходные приёмы, неотложная помощь\n97% пациентов оценивают клинику на 5 звёзд (Google 4,7/5, Яндекс.Карты 5/5)\nМРТ United Imaging uMR 670 и ангиографический комплекс uAngio AVIVA CX\n5 многопрофильных операционных": {
    "uz": "1 353 dan ortiq tibbiy xizmat va 70 dan ortiq mutaxassis shifokor\n24/7 rejim: kecha-kunduz konsultatsiyalar, tungi va dam olish kunlari qabul, shoshilinch yordam\nBemorlarning 97% klinikani 5 yulduzga baholaydi (Google 4,7/5, Yandex Xaritalar 5/5)\nUnited Imaging uMR 670 MRT va uAngio AVIVA CX angiografik kompleksi\n5 ta koʻp tarmoqli operatsiya xonasi"
@@ -749,6 +763,10 @@
   "Гепатолог, гастроэнтеролог": {
    "uz": "Gepatolog, gastroenterolog"
   },
+  "Германия, Япония": {
+   "uz": "Germaniya, Yaponiya",
+   "en": "Germany, Japan"
+  },
   "Гигиенист": {
    "uz": "Gigiyenist"
   },
@@ -874,6 +892,10 @@
   },
   "Дадашев Шавкат Таирович": {
    "uz": "Dadashev Shavkat Tairovich"
+  },
+  "Далеров Амир Дилшодович": {
+   "uz": "Dalerov Amir Dilshodovich",
+   "en": "Dalerov Amir Dilshodovich"
   },
   "Дальнейшее развитие многопрофильной медицинской помощи, расширение диагностических и хирургических возможностей, внедрение современных медицинских технологий и совершенствование качества обслуживания. Развитие международного сотрудничества и медицинского туризма. Запуск новых многопрофильных клиник в Бухаре и Карши. Повышение профессионального уровня врачей и развитие высокотехнологичных направлений лечения.": {
    "uz": "Koʻp tarmoqli tibbiy yordamni yanada rivojlantirish, diagnostika va jarrohlik imkoniyatlarini kengaytirish, zamonaviy tibbiy texnologiyalarni joriy etish va xizmat sifatini takomillashtirish. Xalqaro hamkorlik va tibbiy turizmni rivojlantirish. Buxoro va Qarshida yangi koʻp tarmoqli klinikalarni ishga tushirish. Shifokorlarning kasbiy darajasini oshirish va yuqori texnologiyali davolash yoʻnalishlarini rivojlantirish."
@@ -1042,6 +1064,10 @@
   "Донияров Шохрух": {
    "uz": "Doniyarov Shohrux"
   },
+  "Европейское производство": {
+   "uz": "Yevropada ishlab chiqarilgan",
+   "en": "Made in Europe"
+  },
   "Ёлдашев Мухриддин Мақсудали ўғли": {
    "uz": "Yoldashev Muhriddin Maqsudali oʻgʻli"
   },
@@ -1066,11 +1092,16 @@
   "Женское здоровье, планирование беременности и гинекологическая помощь.": {
    "uz": "Ayollar salomatligi, homiladorlikni rejalashtirish va ginekologik yordam."
   },
+  "Жуманиязов Сарвар Сафарбоевич": {
+   "uz": "Jumaniyazov Sarvar Safarboyevich",
+   "en": "Jumaniyazov Sarvar Safarboyevich"
+  },
   "Жуманов Рустам Октамбоевич": {
    "uz": "Jumanov Rustam Oktamboyevich"
   },
   "Жўраев Ҳасан Каримович": {
-   "uz": "Joʻrayev Hasan Karimovich"
+   "uz": "Joʻrayev Hasan Karimovich",
+   "en": "Jorayev Hasan Karimovich"
   },
   "Журалиев Музаффар Журалиевич": {
    "uz": "Juraliyev Muzaffar Juraliyevich"
@@ -1247,6 +1278,10 @@
   "Исмаилова Муножот Хаятовна": {
    "uz": "Ismailova Munojot Xayatovna"
   },
+  "Исматиллаев Равшан Гайбуллаевич": {
+   "uz": "Ismatillayev Ravshan Gaybullayevich",
+   "en": "Ismatillayev Ravshan Gaybullayevich"
+  },
   "Исматуллаев Равшан Гайбуллаевич": {
    "uz": "Ismatullayev Ravshan Gaybullayevich"
   },
@@ -1300,6 +1335,14 @@
   },
   "Камалов Элёр Махамедюсупович": {
    "uz": "Kamalov Elyor Mahamedyusupovich"
+  },
+  "Камариддинова Хуснора Фахриддиновна": {
+   "uz": "Kamariddinova Xusnora Fahriddinovna",
+   "en": "Kamariddinova Khusnora Fakhriddinovna"
+  },
+  "Камилджанова (Файзиева) Нозима Абдурасуловна": {
+   "uz": "Kamildjanova (Fayziyeva) Nozima Abdurasulovna",
+   "en": "Kamildjanova (Fayziyeva) Nozima Abdurasulovna"
   },
   "Камола Мухитдинова": {
    "uz": "Kamola Muhitdinova"
@@ -1376,6 +1419,10 @@
   },
   "Каюмов А. Р.": {
    "uz": "Kayumov A. R."
+  },
+  "Каюмова Саодат Шухратовна": {
+   "uz": "Kayumova Saodat Shuhratovna",
+   "en": "Kayumova Saodat Shukhratovna"
   },
   "Келдиёров Бобоер Келдиёрович": {
    "uz": "Keldiyorov Boboyer Keldiyorovich"
@@ -1476,6 +1523,10 @@
    "uz": "Nano Medical Clinic jamoasi",
    "en": "Nano Medical Clinic team"
   },
+  "Комилов Насимжон Қобилжонович": {
+   "uz": "Komilov Nasimjon Qobiljonovich",
+   "en": "Komilov Nasimjon Qobiljonovich"
+  },
   "Компактный аппарат для экстренных случаев, качественное изображение": {
    "uz": "Favqulodda holatlar uchun ixcham qurilma, sifatli tasvir",
    "en": "Compact unit for emergencies with high image quality"
@@ -1552,7 +1603,8 @@
    "uz": "Kurbanov Elmurod Xushvaktovich"
   },
   "Курбанова Гулбахор Ахмедовна": {
-   "uz": "Kurbanova Gulbahor Ahmedovna"
+   "uz": "Kurbanova Gulbahor Ahmedovna",
+   "en": "Kurbanova Gulbakhor Akhmedovna"
   },
   "Курмукова Наргис Анваровна": {
    "uz": "Kurmukova Nargis Anvarovna"
@@ -1853,6 +1905,14 @@
   "Микроскопическая эндодонтия": {
    "uz": "Mikroskopik endodontiya"
   },
+  "Мирзаев Абдуфарух Абдусоламович": {
+   "uz": "Mirzayev Abdufarux Abdusolamovich",
+   "en": "Mirzayev Abdufarukh Abdusolamovich"
+  },
+  "Мирзаев Шохрух Абдуфарух угли": {
+   "uz": "Mirzayev Shohrux Abdufarux oʻgʻli",
+   "en": "Mirzayev Shokhrukh Abdufarukh ugli"
+  },
   "Мирзаева Гульнора Шухратовна": {
    "uz": "Mirzayeva Gulnora Shuhratovna"
   },
@@ -1944,6 +2004,10 @@
   "Мулликбоев Нурбек Уразкулович": {
    "uz": "Mullikboyev Nurbek Urazkulovich"
   },
+  "Мун Ольга": {
+   "uz": "Mun Olga",
+   "en": "Mun Olga"
+  },
   "Мусабаева Дилором Акбаровна": {
    "uz": "Musabayeva Dilorom Akbarovna"
   },
@@ -1961,6 +2025,10 @@
   },
   "Мухаммаджанова Мадина Омануллаевна": {
    "uz": "Muhammadjanova Madina Omanullayevna"
+  },
+  "Мухитдинов Шерзод Шавкатович": {
+   "uz": "Muhitdinov Sherzod Shavkatovich",
+   "en": "Mukhitdinov Sherzod Shavkatovich"
   },
   "Мы сохраняем и возвращаем здоровье людей, предоставляя безопасную, высокотехнологичную и доступную медицинскую помощь международного уровня. Объединяя профессионализм врачей, передовые технологии, доказательную медицину и искреннюю заботу, мы создаем систему здравоохранения, которой доверяют пациенты, сотрудники и общество. Ценности: пациент прежде всего, безопасность, качество, профессионализм, инновации, ответственность, командная работа, непрерывное развитие.": {
    "uz": "Biz xavfsiz, yuqori texnologiyali va hamyonbop xalqaro darajadagi tibbiy yordam koʻrsatib, odamlar salomatligini saqlaymiz va tiklaymiz. Shifokorlar professionalligi, ilgʻor texnologiyalar, dalillarga asoslangan tibbiyot va samimiy gʻamxoʻrlikni birlashtirib, bemorlar, xodimlar va jamiyat ishonadigan sogʻliqni saqlash tizimini yaratamiz. Qadriyatlar: bemor — birinchi oʻrinda, xavfsizlik, sifat, professionalizm, innovatsiyalar, masʼuliyat, jamoaviy ish, uzluksiz rivojlanish."
@@ -2106,6 +2174,10 @@
   "Нуриддин Хусниддинов": {
    "uz": "Nuriddin Xusniddinov"
   },
+  "Нуритдинов Нуриддин": {
+   "uz": "Nuritdinov Nuriddin",
+   "en": "Nuritdinov Nuriddin"
+  },
   "Обеспечивать пациентам доступ к качественной, безопасной и современной медицинской помощи, основанной на точной диагностике, профессионализме врачей и индивидуальном подходе.": {
    "uz": "Bemorlarga aniq diagnostika, shifokorlar professionalligi va individual yondashuvga asoslangan sifatli, xavfsiz va zamonaviy tibbiy yordam olish imkoniyatini taʼminlash."
   },
@@ -2165,6 +2237,10 @@
   },
   "Оказание высококвалифицированной медицинской помощи на уровне мировых стандартов. Ваше здоровье — наш приоритет.": {
    "uz": "Jahon standartlari darajasida yuqori malakali tibbiy yordam koʻrsatish. Sogʻligʻingiz — bizning ustuvor vazifamiz."
+  },
+  "Окилов Зокиржон Улугжон угли": {
+   "uz": "Okilov Zokirjon Ulugjon oʻgʻli",
+   "en": "Okilov Zokirjon Ulugjon ugli"
   },
   "ОКТ-биометр Carl Zeiss IOLMaster 700": {
    "uz": "Carl Zeiss IOLMaster 700 OKT-biometri"
@@ -2626,6 +2702,10 @@
   "Психотерапевт": {
    "uz": "Psixoterapevt"
   },
+  "Пулатов Зафар Уткурович": {
+   "uz": "Pulatov Zafar Utkurovich",
+   "en": "Pulatov Zafar Utkurovich"
+  },
   "Работа с аутологичными клеточными компонентами": {
    "uz": "Autologik hujayra komponentlari bilan ishlash",
    "en": "Work with autologous cellular components"
@@ -2720,8 +2800,16 @@
   "Рахманов Хожиакбар": {
    "uz": "Rahmanov Xojiakbar"
   },
+  "Рахмонов Ойбек Мухаммадмуйдинович": {
+   "uz": "Rahmonov Oybek Muhammadmuydinovich",
+   "en": "Rakhmonov Oybek Mukhammadmuydinovich"
+  },
   "Рашидов Бобур Баходирович": {
    "uz": "Rashidov Bobur Bahodirovich"
+  },
+  "Рашидов Рустам Абдурасулович": {
+   "uz": "Rashidov Rustam Abdurasulovich",
+   "en": "Rashidov Rustam Abdurasulovich"
   },
   "Реабилитация": {
    "uz": "Reabilitatsiya"
@@ -2873,7 +2961,8 @@
    "uz": "Salidjanov Anvar Shuhratovich"
   },
   "Салихов Собирхон": {
-   "uz": "Salihov Sobirxon"
+   "uz": "Salihov Sobirxon",
+   "en": "Salikhov Sobirkhon"
   },
   "Самарканд": {
    "uz": "Samarqand"
@@ -2907,6 +2996,10 @@
   },
   "Сахиба Камилова": {
    "uz": "Sahiba Kamilova"
+  },
+  "Сахобов Бахром Олимович": {
+   "uz": "Sahobov Bahrom Olimovich",
+   "en": "Sakhobov Bakhrom Olimovich"
   },
   "Сбой цикла, планирование беременности или женский check-up — это гинекология.": {
    "uz": "Hayz sikli buzilishi, homiladorlikni rejalashtirish yoki ayollar check-upi — bu ginekologiya."
@@ -3089,7 +3182,7 @@
    "uz": "Stomatolog-gnatolog, stomatolog-ortoped"
   },
   "Стоматолог-ортопед, стоматолог-хирург": {
-   "uz": "Stomatolog-ortoped, stomatolog-jarrohlik"
+   "uz": "Stomatolog-ortoped, stomatolog-jarroh"
   },
   "Стоматолог-терапевт": {
    "uz": "Stomatolog-terapevt"
@@ -3216,6 +3309,10 @@
   },
   "Тилляшайхов Мирзагалеб Нигматович": {
    "uz": "Tillyashayxov Mirzagaleb Nigmatovich"
+  },
+  "Толибова Лола Амонджановна": {
+   "uz": "Tolibova Lola Amondjanovna",
+   "en": "Tolibova Lola Amondjanovna"
   },
   "Торакальная хирургия": {
    "uz": "Torakal jarrohlik"
@@ -3370,7 +3467,8 @@
    "uz": "Umarov Bahtiyer Abduhamitovich"
   },
   "Умаров Равшанбек Зияиддинович": {
-   "uz": "Umarov Ravshanbek Ziyaiddinovich"
+   "uz": "Umarov Ravshanbek Ziyaiddinovich",
+   "en": "Umarov Ravshanbek Ziyaiddinovich"
   },
   "Умаров Хайитбой Мамашарипович": {
    "uz": "Umarov Xayitboy Mamasharipovich"
@@ -3522,10 +3620,16 @@
    "uz": "Xaydarov Saidazim Saidahmad oʻgʻli"
   },
   "Халилов Илёс Жуманазарович": {
-   "uz": "Xalilov Ilyos Jumanazarovich"
+   "uz": "Xalilov Ilyos Jumanazarovich",
+   "en": "Khalilov Ilyos Jumanazarovich"
   },
   "Халмурзаева Нозимахон Равшанджановна": {
-   "uz": "Xalmurzayeva Nozimahon Ravshandjanovna"
+   "uz": "Xalmurzayeva Nozimahon Ravshandjanovna",
+   "en": "Khalmurzayeva Nozimakhon Ravshandjanovna"
+  },
+  "Хамдамова Дилафруз Толмасовна": {
+   "uz": "Xamdamova Dilafruz Tolmasovna",
+   "en": "Khamdamova Dilafruz Tolmasovna"
   },
   "Хамидуллаева Фазлинисо Иззатиллаевна": {
    "uz": "Xamidullayeva Fazliniso Izzatillayevna"
@@ -3607,7 +3711,8 @@
    "uz": "Xodjayeva Kamola Gafurdjanovna"
   },
   "Ходиев Зафар Тоджиевич": {
-   "uz": "Xodiyev Zafar Todjiyevich"
+   "uz": "Xodiyev Zafar Todjiyevich",
+   "en": "Khodiyev Zafar Todjiyevich"
   },
   "Ходиева Гулсанам Абдуллаевна": {
    "uz": "Xodiyeva Gulsanam Abdullayevna"
@@ -3713,6 +3818,10 @@
   "Шахбоз Убайдуллаев": {
    "uz": "Shahboz Ubaydullayev"
   },
+  "Шаюсупов Н. Р.": {
+   "uz": "Shayusupov N. R.",
+   "en": "Shayusupov N. R."
+  },
   "Шаюсупов Нариман Рамизович": {
    "uz": "Shayusupov Nariman Ramizovich"
   },
@@ -3758,7 +3867,8 @@
    "uz": "Shohida Djurabekova"
   },
   "Шукуров Равшан Тулкунович": {
-   "uz": "Shukurov Ravshan Tulkunovich"
+   "uz": "Shukurov Ravshan Tulkunovich",
+   "en": "Shukurov Ravshan Tulkunovich"
   },
   "Шухрат Азизов": {
    "uz": "Shuhrat Azizov"
@@ -3895,6 +4005,14 @@
   "Эргашев Алишер Расулджанович": {
    "uz": "Ergashev Alisher Rasuldjanovich"
   },
+  "Эрматов Кудрат Кучкарович": {
+   "uz": "Ermatov Kudrat Kuchkarovich",
+   "en": "Ermatov Kudrat Kuchkarovich"
+  },
+  "Эрматова Шоира Уктамовна": {
+   "uz": "Ermatova Shoira Uktamovna",
+   "en": "Ermatova Shoira Uktamovna"
+  },
   "Эстетическая медицина": {
    "uz": "Estetik tibbiyot"
   },
@@ -3924,7 +4042,8 @@
    "uz": "Yunusov Dilmurod Samihovich"
   },
   "Юнусова Гульноза Яркиновна": {
-   "uz": "Yunusova Gulnoza Yarkinovna"
+   "uz": "Yunusova Gulnoza Yarkinovna",
+   "en": "Yunusova Gulnoza Yarkinovna"
   },
   "Юсупова Дилфуза Сувановна": {
    "uz": "Yusupova Dilfuza Suvanovna"
@@ -4022,6 +4141,10 @@
    "uz": "Boku",
    "en": "Baku"
   },
+  "Bausch + Lomb (США)": {
+   "uz": "Bausch + Lomb (AQSh)",
+   "en": "Bausch + Lomb (USA)"
+  },
   "BIO NUR MED SERVIS — Самарканд": {
    "uz": "BIO NUR MED SERVIS — Samarqand"
   },
@@ -4037,6 +4160,10 @@
   },
   "CAD/CAM в стоматологии (коронки PMMA, цирконий, E-max, виниры)": {
    "uz": "Stomatologiyada CAD/CAM (PMMA, sirkoniy, E-max koronkalar, vinirlar)"
+  },
+  "Carl Zeiss (Германия)": {
+   "uz": "Carl Zeiss (Germaniya)",
+   "en": "Carl Zeiss (Germany)"
   },
   "Carl Zeiss MEL 90": {
    "uz": "Carl Zeiss MEL 90"
@@ -4120,6 +4247,10 @@
   "Doctor Hasan, фото 6": {
    "uz": "Doctor Hasan, 6-surat"
   },
+  "Dräger (Германия)": {
+   "uz": "Dräger (Germaniya)",
+   "en": "Dräger (Germany)"
+  },
   "Dynasty Dental Clinic": {
    "uz": "Dynasty Dental Clinic"
   },
@@ -4146,6 +4277,14 @@
   },
   "FibroScan": {
    "uz": "FibroScan"
+  },
+  "GE Healthcare (США)": {
+   "uz": "GE Healthcare (AQSh)",
+   "en": "GE Healthcare (USA)"
+  },
+  "GE OEC Medical Systems (Германия)": {
+   "uz": "GE OEC Medical Systems (Germaniya)",
+   "en": "GE OEC Medical Systems (Germany)"
   },
   "Global International Hospital — международный многопрофильный медицинский центр в Сергелийском районе Ташкента, работает круглосуточно. Приоритеты — кардиология, онкология, неврология и высокотехнологичная хирургия. Врачи из Узбекистана, России и Турции. Диагностика на оборудовании Philips (МРТ 1,5 Тл, КТ 128 срезов, ангиограф Azurion, маммограф MicroDose), лаборатория, эндоскопия Olympus, Check-Up, стационар, телемедицина, медтуризм. Главный врач — Арипходжаев Фузлиддин Зиявиддинович, нейрохирург высшей категории.": {
    "uz": "Global International Hospital — Toshkentning Sergeli tumanidagi kecha-kunduz ishlaydigan xalqaro koʻp tarmoqli tibbiyot markazi. Ustuvor yoʻnalishlar — kardiologiya, onkologiya, nevrologiya va yuqori texnologiyali jarrohlik. Shifokorlar — Oʻzbekiston, Rossiya va Turkiyadan. Philips uskunalarida diagnostika (1,5 Tl MRT, 128 kesimli KT, Azurion angiografi, MicroDose mammografi), laboratoriya, Olympus endoskopiyasi, check-up, statsionar, telemeditsina, tibbiy turizm. Bosh shifokor — Aripxodjayev Fuzliddin Ziyaviddinovich, oliy toifali neyrojarroh."
@@ -4193,6 +4332,10 @@
   },
   "Jiyanbekov Bahodir Sheraliyevich": {
    "uz": "Jiyanbekov Bahodir Sheraliyevich"
+  },
+  "JMEDITECH (Южная Корея)": {
+   "uz": "JMEDITECH (Janubiy Koreya)",
+   "en": "JMEDITECH (South Korea)"
   },
   "Joint Commission International (JCI)": {
    "uz": "Joint Commission International (JCI)"
@@ -4281,6 +4424,14 @@
   "Oertli CataRhex 3": {
    "uz": "Oertli CataRhex 3"
   },
+  "Olympus (Япония)": {
+   "uz": "Olympus (Yaponiya)",
+   "en": "Olympus (Japan)"
+  },
+  "Pentax (Япония)": {
+   "uz": "Pentax (Yaponiya)",
+   "en": "Pentax (Japan)"
+  },
   "PhD": {
    "uz": "PhD",
    "en": "PhD"
@@ -4300,6 +4451,10 @@
   "PhD. Более 4500 операций. Стажировки: Россия, Украина, Индия, Грузия, Япония, Испания, Великобритания. Автор исследования остеонекроза после COVID-19 (556 пациентов), Journal of Orthopaedic Surgery and Research, 2025.": {
    "uz": "PhD. 4500 dan ortiq operatsiya. Malaka oshirish: Rossiya, Ukraina, Hindiston, Gruziya, Yaponiya, Ispaniya, Buyuk Britaniya. COVID-19 dan keyingi osteonekroz boʻyicha tadqiqot muallifi (556 bemor), Journal of Orthopaedic Surgery and Research, 2025.",
    "en": "PhD. More than 4,500 operations. Training in Russia, Ukraine, India, Georgia, Japan, Spain and the United Kingdom. Author of a study of osteonecrosis after COVID-19 (556 patients), Journal of Orthopaedic Surgery and Research, 2025."
+  },
+  "Philips (Нидерланды)": {
+   "uz": "Philips (Niderlandiya)",
+   "en": "Philips (Netherlands)"
   },
   "PIPAC": {
    "uz": "PIPAC"
@@ -4351,6 +4506,10 @@
   "SADAF Dental Clinic — первая частная стоматологическая клиника в Узбекистане и на территории бывшего СССР (с 1988 года). Многопрофильный стоматологический центр: диагностика, терапия, хирургия, ортодонтия, ортопедия, имплантация, детская стоматология; собственная зуботехническая лаборатория. Сертификация ISO 7101 и ISO 9001.": {
    "uz": "SADAF Dental Clinic — Oʻzbekistonda va sobiq SSSR hududida birinchi xususiy stomatologiya klinikasi (1988-yildan). Koʻp tarmoqli stomatologiya markazi: diagnostika, terapiya, jarrohlik, ortodontiya, ortopediya, implantatsiya, bolalar stomatologiyasi; oʻz tish texnikasi laboratoriyasi. ISO 7101 va ISO 9001 sertifikatlari."
   },
+  "Samsung Medison (Южная Корея)": {
+   "uz": "Samsung Medison (Janubiy Koreya)",
+   "en": "Samsung Medison (South Korea)"
+  },
   "Shox International Hospital": {
    "uz": "Shox International Hospital"
   },
@@ -4392,6 +4551,10 @@
   },
   "Tuychieva Madina Shukhrat qizi": {
    "uz": "Tuychieva Madina Shukhrat qizi"
+  },
+  "Ulrich Medical (Германия)": {
+   "uz": "Ulrich Medical (Germaniya)",
+   "en": "Ulrich Medical (Germany)"
   },
   "Women's Life Clinic": {
    "uz": "Women's Life Clinic"

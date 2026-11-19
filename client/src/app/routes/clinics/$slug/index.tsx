@@ -9,7 +9,7 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
-import { clinicName, countWord, localText, useLang, type Text } from "@/shared/i18n/lang";
+import { clinicName, countWord, localText, plainText, useLang, type Text } from "@/shared/i18n/lang";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
 import {
   CertificateList,
@@ -391,7 +391,7 @@ function ClinicDetailPage() {
                 {data.founderName ? (
                   <PersonCard
                     wide
-                    name={data.founderName}
+                    name={plainText(lang, data, "founderName")}
                     role={pick(data, "founderRole") || t(L.founder)}
                     bio={pick(data, "founderBio")}
                     photoUrl={data.founderPhotoUrl}
@@ -400,14 +400,14 @@ function ClinicDetailPage() {
                 {data.chiefDoctorName ? (
                   <PersonCard
                     wide={!data.founderName}
-                    name={data.chiefDoctorName}
+                    name={plainText(lang, data, "chiefDoctorName")}
                     role={pick(data, "chiefDoctorRole") || t(L.chief)}
                     bio={pick(data, "chiefDoctorBio")}
                     photoUrl={data.chiefDoctorPhotoUrl}
                   />
                 ) : null}
                 {leaders.map((l) => (
-                  <PersonCard key={l.id || l.name} name={l.name} role={pick(l, "role")} bio={pick(l, "bio")} photoUrl={l.photoUrl} />
+                  <PersonCard key={l.id || l.name} name={plainText(lang, l, "name")} role={pick(l, "role")} bio={pick(l, "bio")} photoUrl={l.photoUrl} />
                 ))}
               </ul>
             </ProfileSection>
@@ -573,7 +573,7 @@ function ClinicDetailPage() {
                     <Icon name="user" size={22} weight="duotone" />
                   </i>
                   <span>
-                    <b>{data.coordinatorName}</b>
+                    <b>{plainText(lang, data, "coordinatorName")}</b>
                     {pick(data, "coordinatorRole") ? <span>{pick(data, "coordinatorRole")}</span> : null}
                   </span>
                 </p>

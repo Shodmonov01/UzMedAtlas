@@ -32,6 +32,11 @@ export function setContentTranslations(entries: Record<string, Entry> | null) {
   table = entries ? new Map(Object.entries(entries)) : null;
 }
 
+/** Fields kept in one language only (no fooRu/fooEn pair) that still show Russian text: people's names and equipment
+ *  makers. They get fooUz and fooEn beside them when the translations know the text. */
+const PLAIN_KEYS = new Set(["founderName", "chiefDoctorName", "coordinatorName", "name", "manufacturer"]);
+const CYRILLIC = /[Ѐ-ӿ]/;
+
 function addTranslations(value: unknown, entries: Map<string, Entry>) {
   if (Array.isArray(value)) {
     for (const item of value) addTranslations(item, entries);
@@ -49,6 +54,10 @@ function addTranslations(value: unknown, entries: Map<string, Entry>) {
       if (entry.uz && !filled(`${base}Uz`)) record[`${base}Uz`] = entry.uz;
       // An English text the clinic or a moderator wrote is kept; the translation only fills a missing one.
       if (entry.en && !filled(`${base}En`)) record[`${base}En`] = entry.en;
+    } else if (PLAIN_KEYS.has(key) && typeof item === "string" && CYRILLIC.test(item)) {
+      const entry = entries.get(item.trim());
+      if (entry?.uz) record[`${key}Uz`] = entry.uz;
+      if (entry?.en) record[`${key}En`] = entry.en;
     } else if (item && typeof item === "object") {
       addTranslations(item, entries);
     }

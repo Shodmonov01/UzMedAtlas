@@ -85,6 +85,17 @@ export function localText(lang: Lang, item: object | null | undefined, field: st
   return pickName(lang, get("Ru"), get("En"), get("Uz"));
 }
 
+/** A field kept in one language only (a person's name, an equipment maker) in the current language: the API adds
+ *  fooUz and fooEn beside foo when the text is Russian. */
+export function plainText(lang: Lang, item: object | null | undefined, key: string) {
+  if (!item) return "";
+  const record = item as Record<string, unknown>;
+  const original = typeof record[key] === "string" ? (record[key] as string) : "";
+  if (lang === "ru") return original;
+  const translated = record[key + (lang === "uz" ? "Uz" : "En")];
+  return typeof translated === "string" && translated ? translated : original;
+}
+
 /** A clinic's (or branch's) name: its brand name in Latin letters, the one the catalog sorts by A–Z. The original
  *  from the brief stands in when there is none. */
 export function clinicName(item: { nameRu?: string | null; nameEn?: string | null }) {

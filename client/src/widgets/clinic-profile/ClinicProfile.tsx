@@ -45,7 +45,7 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { BranchMap } from "@/shared/ui/BranchMap";
 import { PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
-import { localText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
+import { localText, plainText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 
 /** Building blocks shared by the public clinic page and its branch pages, so both read as one design. */
 
@@ -643,7 +643,7 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
         icon="cpu"
         items={items.map((e) => ({
           key: e.id,
-          label: e.manufacturer || null,
+          label: plainText(lang, e, "manufacturer") || null,
           title: localText(lang, e, "name"),
           text: localText(lang, e, "description").trim() || null,
         }))}
@@ -666,7 +666,7 @@ export function EquipmentGrid({ items }: { items: EquipmentItem[] }) {
               )}
             </div>
             <div className="cp-media-body">
-              {e.manufacturer ? <p className="cp-label">{e.manufacturer}</p> : null}
+              {e.manufacturer ? <p className="cp-label">{plainText(lang, e, "manufacturer")}</p> : null}
               <h3>{localText(lang, e, "name")}</h3>
               {description ? <p className="cp-media-text">{description}</p> : null}
             </div>
