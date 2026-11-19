@@ -95,8 +95,9 @@ export function withFromPrice<T extends { services: { priceUsd: number | null }[
 export function sortCatalogClinics<
   T extends { nameEn: string; nameRu: string; city: string; responseHours: number; fromPrice: number | null },
 >(clinics: T[], sort?: string) {
-  // Alphabetical by the name the catalog shows (Russian, falling back to English).
-  const byName = (a: T, b: T) => (a.nameRu || a.nameEn).localeCompare(b.nameRu || b.nameEn);
+  // A–Z by the name the catalog shows (English, falling back to Russian), in English collation.
+  const byName = (a: T, b: T) =>
+    (a.nameEn || a.nameRu).localeCompare(b.nameEn || b.nameRu, "en", { sensitivity: "base" });
   return [...clinics].sort((a, b) => {
     if (sort === "city") return a.city.localeCompare(b.city) || byName(a, b);
     if (sort === "price") {
