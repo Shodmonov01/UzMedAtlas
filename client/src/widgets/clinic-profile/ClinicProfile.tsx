@@ -464,11 +464,11 @@ function doctorDetails(d: ProfileDoctor, lang: Lang): { label: string; value: st
   const L = (text: Text) => text[lang];
   const details: { label: string; value?: string }[] = [
     { label: L({ ru: "Квалификация", uz: "Malaka", en: "Qualifications" }), value: localText(lang, d, "certs") },
-    { label: L({ ru: "Повышение квалификации", uz: "Malaka oshirish", en: "Further training" }), value: d.continuingEducationRu },
-    { label: L({ ru: "Опыт за рубежом", uz: "Xorijdagi tajriba", en: "Experience abroad" }), value: d.internationalExperienceRu },
-    { label: L({ ru: "Научная работа", uz: "Ilmiy faoliyat", en: "Research" }), value: d.researchActivityRu },
-    { label: L({ ru: "Награды", uz: "Mukofotlar", en: "Awards" }), value: d.awardsRu },
-    { label: L({ ru: "Достижения", uz: "Yutuqlar", en: "Achievements" }), value: d.achievementsRu },
+    { label: L({ ru: "Повышение квалификации", uz: "Malaka oshirish", en: "Further training" }), value: localText(lang, d, "continuingEducation") },
+    { label: L({ ru: "Опыт за рубежом", uz: "Xorijdagi tajriba", en: "Experience abroad" }), value: localText(lang, d, "internationalExperience") },
+    { label: L({ ru: "Научная работа", uz: "Ilmiy faoliyat", en: "Research" }), value: localText(lang, d, "researchActivity") },
+    { label: L({ ru: "Награды", uz: "Mukofotlar", en: "Awards" }), value: localText(lang, d, "awards") },
+    { label: L({ ru: "Достижения", uz: "Yutuqlar", en: "Achievements" }), value: localText(lang, d, "achievements") },
   ];
   return details.filter((item): item is { label: string; value: string } => Boolean(item.value?.trim()));
 }
