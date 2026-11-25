@@ -8,6 +8,7 @@ import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { CITY_OPTIONS, cityName } from "@/shared/lib/cities";
+import { COMPANY_LANGUAGES_MORE, companyLanguages, isTourismCompany } from "@/shared/lib/tourism";
 import { clinicName, countWord, localText, useLang, type Lang, type Text } from "@/shared/i18n/lang";
 
 export type CatalogSearch = {
@@ -357,7 +358,7 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
             <div className="catalog-tourism">
               <div className="catalog-tourism-head">
                 <span className="eyebrow">{t({ ru: "Туризм", uz: "Turizm", en: "Tourism" })}</span>
-                <h3>{t({ ru: "Туристические партнёры", uz: "Sayohat hamkorlari", en: "Travel partners" })}</h3>
+                <h3>{t({ ru: "Партнеры по туризму", uz: "Sayohat hamkorlari", en: "Travel partners" })}</h3>
                 <p>
                   {t({
                     ru: "Компании, которые организуют поездку вокруг лечения: визы, перелёты, отели и трансферы.",
@@ -474,8 +475,11 @@ export function ClinicCatalog({ search, onPatchSearch, onClearSearch }: Props) {
 /** A real cover photo; the seeded SVG drawings stand in for missing photos and get the brand cover instead. */
 function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
     const { lang, t } = useLang();
-    const name = clinicName(clinic);
+    const name = clinicName(clinic, lang);
     const photo = clinic.photos?.[0]?.url;
+    // A travel company shows no reply time, and its languages end with "and others".
+    const company = isTourism(clinic);
+    const languages = company ? companyLanguages(clinic.languages) : clinic.languages ?? [];
     const meta = [
       clinic.branchCount
         ? `${clinic.branchCount} ${countWord(lang, clinic.branchCount, { ru: ["филиал", "филиала", "филиалов"], uz: "ta filial", en: ["branch", "branches"] })}`
@@ -515,7 +519,7 @@ function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
           ) : null}
         </div>
         <p className="clinic-tile-foot">
-          {clinic.responseHours ? (
+          {clinic.responseHours && !company ? (
             <span className="clinic-tile-reply">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
                 <path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm.9 9.1 3 2.2a.9.9 0 0 1-1 1.5l-3.4-2.5a.9.9 0 0 1-.4-.8V7.2a.9.9 0 0 1 1.8 0v4.4Z" />
@@ -523,11 +527,12 @@ function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
               {t({ ru: `Ответ ~${clinic.responseHours} ч`, uz: `Javob ~${clinic.responseHours} soat`, en: `Reply ~${clinic.responseHours} h` })}
             </span>
           ) : null}
-          {clinic.languages?.length ? (
+          {languages.length ? (
             <span className="clinic-tile-langs">
-              {clinic.languages.slice(0, 4).map((code) => (
+              {languages.slice(0, 4).map((code) => (
                 <span key={code}>{code}</span>
               ))}
+              {company ? <span className="clinic-tile-langs-more">{t(COMPANY_LANGUAGES_MORE)}</span> : null}
             </span>
           ) : null}
           <span className="clinic-tile-arrow" aria-hidden="true">
@@ -540,8 +545,7 @@ function ClinicTile({ clinic }: { clinic: ClinicListItem }) {
 
 /** Travel companies sit in the clinic list with only medical-tourism specialties; they get their own block below the clinics. */
 function isTourism(clinic: ClinicListItem) {
-  const specs = clinic.specialties ?? [];
-  return specs.length > 0 && specs.every((s) => s.slug.startsWith("medical-tourism"));
+  return isTourismCompany(clinic.specialties);
 }
 
 function hasPhoto(url?: string | null): url is string {

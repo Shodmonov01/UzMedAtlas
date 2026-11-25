@@ -247,6 +247,7 @@
 .cp-info-body, .cp-info-body .cp-readmore > p { color: var(--muted); font-size: 15px; line-height: 1.7; white-space: pre-line; }
 .cp-pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .cp-pills > span { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px 0 6px; border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 14px; font-weight: 600; }
+.cp-pills > span.cp-pill-more { padding: 0 16px; color: var(--muted); }
 .cp-pills > span > b { display: grid; place-items: center; min-width: 30px; height: 28px; padding: 0 6px; border-radius: 999px; background: white; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
 .cp-spec-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px 20px; }
 .cp-spec-list > li { display: flex; align-items: flex-start; gap: 10px; color: var(--ink); font-size: 15px; font-weight: 600; line-height: 1.4; }

@@ -6,6 +6,9 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, SplitText, useGSAP);
 gsap.defaults({ ease: "power3.out", duration: 0.9 });
+// A phone's address bar showing or hiding while scrolling only changes the window height: no re-measure for it, which
+// would make the scroll animations skip mid-scroll.
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /** Media query for every scroll and entrance animation; with reduced motion the page is simply there. */
 export const MOTION_OK = "(prefers-reduced-motion: no-preference)";

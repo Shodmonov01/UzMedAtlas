@@ -48,18 +48,24 @@ export function Directions({ onPick }: Props) {
         };
         measure();
 
+        // The boost a scroll asks for (`wanted`) and the one the words move with (`boost`), which eases toward it: a
+        // phone's scroll velocity jumps from frame to frame, and taken as is it would jerk the words. Both are frame-rate
+        // independent (60 or 120 Hz screens).
+        let wanted = 0;
         let boost = 0;
         const watch = ScrollTrigger.create({
           trigger: root.current,
           start: "top bottom",
           end: "bottom top",
           onUpdate: (self) => {
-            boost = Math.min(Math.abs(self.getVelocity()) / 4000, MAX_BOOST);
+            wanted = Math.min(Math.abs(self.getVelocity()) / 4000, MAX_BOOST);
           },
           onRefresh: measure,
         });
         const tick = (_time: number, delta: number) => {
-          boost *= 0.94;
+          const frames = Math.min(delta, 50) / (1000 / 60);
+          boost += (wanted - boost) * Math.min(1, 0.1 * frames);
+          wanted *= Math.pow(0.92, frames);
           if (!watch.isActive) return;
           const step = (DRIFT + boost) * Math.min(delta, 50);
           lanes.forEach((lane) => {

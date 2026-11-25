@@ -44,7 +44,9 @@ maʼlumot, sanʼat), sh, ch, ng; no Cyrillic letters. Use standard Uzbek medical
 негосударственный → nodavlat; номинация → nominatsiya; европейского уровня → Yevropa darajasidagi;
 лечение → davolash; диагностика → diagnostika; приём → qabul; консультация → konsultatsiya; анализы → tahlillar;
 изжога → jigʻildon qaynashi; желудок → oshqozon; онемение → uvishish; судороги → tirishish;
-тазобедренный сустав → chanoq-son boʻgʻimi; направление (from a doctor) → yoʻllanma; интервенционная → interventsion;
+тазобедренный сустав → chanoq-son boʻgʻimi; направление (from a doctor) → yoʻllanma; интервенционная → intervension;
+гигиена → gigiyena; роботизированная / роботическая хирургия → robotlashtirilgan jarrohlik; сооснователь → hammuassisi;
+туристическая компания → sayyohlik kompaniyasi;
 диетология → dietologiya; гнатология → gnatologiya; зона ожидания → kutish zonasi; вывеска → peshlavha;
 ресепшен → resepshn; хирургия → jarrohlik ("-хирургия" compounds → "-jarrohlik": кардиохирургия → kardiojarrohlik, ангиохирургия → angiojarrohlik,
 нейрохирургия → neyrojarrohlik); врач общей практики → umumiy amaliyot shifokori; медсестра → hamshira.

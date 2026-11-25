@@ -1,15 +1,21 @@
 import { useRef } from "react";
 import { useLang, type Text } from "@/shared/i18n/lang";
 
-type Member = { role: Text; name: string; org?: string; url?: string };
+type Member = { role: Text; name: Text; org?: string; url?: string };
 
 const TEAM: Member[] = [
-  { role: { ru: "Председатель Ассоциации", uz: "Assotsiatsiya raisi", en: "Chair of the Association" }, name: "Salokhiddin Mukhitdinov" },
-  { role: { ru: "Помощник председателя", uz: "Rais yordamchisi", en: "Assistant to the Chair" }, name: "Feruza Rizaeva" },
-  { role: { ru: "Медицинский маркетолог", uz: "Tibbiy marketolog", en: "Medical marketer" }, name: "Shakhnoza Yakubova", org: "Maestro Marketing Agency" },
-  { role: { ru: "Дизайнер", uz: "Dizayner", en: "Designer" }, name: "Daria Novikova" },
-  { role: { ru: "Редактор", uz: "Muharrir", en: "Editor" }, name: "Aziza Rasulova" },
-  { role: { ru: "Разработчик электронной версии", uz: "Elektron versiya ishlab chiquvchisi", en: "Developer of the digital edition" }, name: "B. B. Rakhmonberdiev", org: "RZB TECH agency", url: "https://rzbtech.uz/ru" },
+  { role: { ru: "Председатель Ассоциации", uz: "Assotsiatsiya raisi", en: "Chair of the Association" },
+    name: { ru: "Салохиддин Мухитдинов", uz: "Saloxiddin Muxitdinov", en: "Salokhiddin Mukhitdinov" } },
+  { role: { ru: "Помощник председателя", uz: "Rais yordamchisi", en: "Assistant to the Chair" },
+    name: { ru: "Феруза Ризаева", uz: "Feruza Rizayeva", en: "Feruza Rizaeva" } },
+  { role: { ru: "Медицинский маркетолог", uz: "Tibbiy marketolog", en: "Medical marketer" },
+    name: { ru: "Шахноза Якубова", uz: "Shahnoza Yakubova", en: "Shakhnoza Yakubova" }, org: "Maestro Marketing Agency" },
+  { role: { ru: "Дизайнер", uz: "Dizayner", en: "Designer" },
+    name: { ru: "Дарья Новикова", uz: "Dariya Novikova", en: "Daria Novikova" } },
+  { role: { ru: "Редактор", uz: "Muharrir", en: "Editor" },
+    name: { ru: "Азиза Расулова", uz: "Aziza Rasulova", en: "Aziza Rasulova" } },
+  { role: { ru: "Разработчик электронной версии", uz: "Elektron versiya ishlab chiquvchisi", en: "Developer of the digital edition" },
+    name: { ru: "Б. Б. Рахмонбердиев", uz: "B. B. Raxmonberdiyev", en: "B. B. Rakhmonberdiev" }, org: "RZB TECH agency", url: "https://rzbtech.uz/ru" },
 ];
 
 const CLINICS_COUNT = 26;
@@ -50,10 +56,10 @@ export function Team() {
 
         <ul className="team-list">
           {TEAM.map((member) => (
-            <li key={member.name} className="team-row">
+            <li key={member.name.en} className="team-row">
               <span className="team-row-rule" aria-hidden="true" />
               <span className="team-row-role">{t(member.role)}</span>
-              <strong className="team-row-name">{member.name}</strong>
+              <strong className="team-row-name">{t(member.name)}</strong>
               {member.org && member.url ? (
                 <a className="team-row-org" href={member.url} target="_blank" rel="noopener noreferrer">
                   {member.org}

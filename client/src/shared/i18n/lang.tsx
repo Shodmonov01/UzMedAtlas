@@ -97,9 +97,15 @@ export function plainText(lang: Lang, item: object | null | undefined, key: stri
 }
 
 /** A clinic's (or branch's) name: its brand name in Latin letters, the one the catalog sorts by A–Z. The original
- *  from the brief stands in when there is none. */
-export function clinicName(item: { nameRu?: string | null; nameEn?: string | null }) {
-  return item.nameEn || item.nameRu || "";
+ *  from the brief stands in when there is none. With `lang`, a "Brand — descriptor" name keeps the brand and shows the
+ *  descriptor in that language ("TourLink — sayyohlik kompaniyasi"), when that language's name has the same shape. */
+export function clinicName(item: { nameRu?: string | null; nameEn?: string | null; nameUz?: string | null }, lang?: Lang) {
+  const name = item.nameEn || item.nameRu || "";
+  if (!lang || lang === "en") return name;
+  const local = (lang === "uz" ? item.nameUz : item.nameRu) || "";
+  const at = name.indexOf(" — ");
+  const localAt = local.indexOf(" — ");
+  return at > 0 && localAt > 0 ? name.slice(0, at) + local.slice(localAt) : name;
 }
 
 /** English copy for code written without t(): a count with its noun ("1 clinic", "3 clinics"). */

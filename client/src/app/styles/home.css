@@ -501,6 +501,7 @@
 .clinic-tile-reply > svg { color: var(--accent-deep); }
 .clinic-tile-langs { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .clinic-tile-langs > span { padding: 3px 7px; border-radius: 8px; background: white; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.clinic-tile-langs > span.clinic-tile-langs-more { padding: 3px 2px; background: none; font-weight: 600; letter-spacing: 0; text-transform: none; }
 .clinic-tile-arrow { display: grid; flex-shrink: 0; place-items: center; width: 40px; height: 40px; margin-left: auto; border-radius: 999px; background: white; color: var(--ink);
   transition: background-color .35s ease, color .35s ease, transform .6s var(--ease-out); }
 .clinic-tile:hover .clinic-tile-arrow { background: var(--ink); color: white; transform: rotate(-45deg); }

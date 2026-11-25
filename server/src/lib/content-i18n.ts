@@ -2,8 +2,9 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
 /** Uzbek and English for a Russian clinic text, from src/i18n/content-translations.json (made by
- *  scripts/translate-content.mjs and reviewed by hand). */
-type Entry = { uz?: string; en?: string };
+ *  scripts/translate-content.mjs and reviewed by hand). `ru` is the site's own Russian wording for a brief's phrase
+ *  ("роботическая хирургия" shows as "роботизированная хирургия"); the clinic's stored text stays as written. */
+type Entry = { uz?: string; en?: string; ru?: string };
 
 let table: Map<string, Entry> | null = null;
 
@@ -54,6 +55,8 @@ function addTranslations(value: unknown, entries: Map<string, Entry>) {
       if (entry.uz && !filled(`${base}Uz`)) record[`${base}Uz`] = entry.uz;
       // An English text the clinic or a moderator wrote is kept; the translation only fills a missing one.
       if (entry.en && !filled(`${base}En`)) record[`${base}En`] = entry.en;
+      // Looked up by the stored text above, so the Russian can be reworded without losing its translations.
+      if (entry.ru) record[key] = entry.ru;
     } else if (PLAIN_KEYS.has(key) && typeof item === "string" && CYRILLIC.test(item)) {
       const entry = entries.get(item.trim());
       if (entry?.uz) record[`${key}Uz`] = entry.uz;

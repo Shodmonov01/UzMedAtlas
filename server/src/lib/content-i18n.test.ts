@@ -39,6 +39,14 @@ describe("withContentTranslations", () => {
     expect(result.equipment[1].manufacturerUz).toBeUndefined();
   });
 
+  it("shows the site's Russian wording and still finds the translations by the stored text", () => {
+    setContentTranslations({
+      "Роботическая хирургия": { ru: "Роботизированная хирургия", uz: "Robotlashtirilgan jarrohlik" },
+    });
+    const result = withContentTranslations({ nameRu: "Роботическая хирургия", nameEn: "Robotic surgery" }) as Record<string, unknown>;
+    expect(result).toMatchObject({ nameRu: "Роботизированная хирургия", nameUz: "Robotlashtirilgan jarrohlik", nameEn: "Robotic surgery" });
+  });
+
   it("leaves a Russian text it has no translation for (or one that changed) alone", () => {
     setContentTranslations({ "Старый текст": { uz: "Eski matn", en: "Old text" } });
     const result = withContentTranslations({ descriptionRu: "Новый текст", descriptionEn: "" }) as Record<string, unknown>;

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { MOTION_OK, gsap, useGSAP } from "@/shared/lib/gsap";
+import { MOTION_OK, ScrollTrigger, gsap, useGSAP } from "@/shared/lib/gsap";
 import { PhotoLightbox, type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { useLang, type Text } from "@/shared/i18n/lang";
 
@@ -28,8 +28,8 @@ const PLACES: Place[] = [
     alt: { ru: "Мавзолей Гур-Эмир в ночной подсветке", uz: "Tungi yoritishdagi Goʻri Amir maqbarasi", en: "The Gur-e-Amir mausoleum lit up at night" } },
   { photo: "story-9", place: { ru: "Минарет Ислам-Ходжа", uz: "Islomxoʻja minorasi", en: "Islam Khodja Minaret" }, city: KHIVA,
     alt: { ru: "Изразцовый минарет над крышами Хивы на закате", uz: "Quyosh botishida Xiva tomlari uzra koshinli minora", en: "A tiled minaret over the roofs of Khiva at sunset" } },
-  { photo: "story-10", place: { ru: "Мечеть Биби-Ханым", uz: "Bibixonim masjidi", en: "Bibi-Khanym Mosque" }, city: SAMARKAND,
-    alt: { ru: "Мечеть Биби-Ханым за куполами Шахи-Зинды", uz: "Shohi Zinda gumbazlari ortidagi Bibixonim masjidi", en: "The Bibi-Khanym Mosque behind the domes of Shah-i-Zinda" } },
+  { photo: "story-10", place: { ru: "Медресе Биби-Ханым", uz: "Bibixonim madrasasi", en: "Bibi-Khanym Madrasa" }, city: SAMARKAND,
+    alt: { ru: "Медресе Биби-Ханым за куполами Шахи-Зинды", uz: "Shohi Zinda gumbazlari ortidagi Bibixonim madrasasi", en: "The Bibi-Khanym Madrasa behind the domes of Shah-i-Zinda" } },
   { photo: "story-11", place: { ru: "Расписные потолки", uz: "Naqshinkor shiftlar", en: "Painted ceilings" }, city: UZBEKISTAN,
     alt: { ru: "Расписной деревянный потолок над рядом глиняных кувшинов", uz: "Bir qator loy koʻzalar ustidagi naqshli yogʻoch shift", en: "A painted wooden ceiling over a row of clay jugs" } },
   { photo: "story-12", place: { ru: "Купола Шахи-Зинды", uz: "Shohi Zinda gumbazlari", en: "Domes of Shah-i-Zinda" }, city: SAMARKAND,
@@ -54,10 +54,22 @@ export function Gallery() {
 
   useGSAP(
     () => {
+      // Photos far to the side are past the browser's lazy-load distance, so they would load and decode only while
+      // sliding in (a blank card, a stutter on phones). They start loading a screen before the section arrives.
+      const preload = () =>
+        root.current?.querySelectorAll<HTMLImageElement>(".story-card img[loading='lazy']").forEach((img) => {
+          img.loading = "eager";
+        });
+      ScrollTrigger.create({ trigger: root.current, start: "top 200%", end: "bottom top", onEnter: preload, onEnterBack: preload });
+
       const mm = gsap.matchMedia();
-      mm.add(MOTION_OK, () => {
+      mm.add({ motion: MOTION_OK, touch: "(pointer: coarse)" }, (context) => {
+        const { motion, touch } = context.conditions as { motion: boolean; touch: boolean };
+        if (!motion) return;
         // Each row starts shifted left by most of what it overflows and ends shifted right of where it began,
         // so the photos come in from the left and leave to the right while the section crosses the screen.
+        // On touch screens the rows follow the finger with a longer glide, which hides the uneven steps of a
+        // phone's scroll; the rows stay on their own GPU layer the whole way (force3D).
         gsap.utils.toArray<HTMLElement>(".story-track").forEach((track, i) => {
           const travel = () => Math.max(track.scrollWidth - window.innerWidth, 0) + window.innerWidth * 0.25;
           gsap.fromTo(
@@ -66,7 +78,8 @@ export function Gallery() {
             {
               x: () => (i === 0 ? 0 : -travel() * 0.35),
               ease: "none",
-              scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom top", scrub: 0.6, invalidateOnRefresh: true },
+              force3D: true,
+              scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom top", scrub: touch ? 1.1 : 0.6, invalidateOnRefresh: true },
             },
           );
         });

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { submitClinicLead, type LeadPayload } from "@/shared/api/client";
 import { createId } from "@/shared/lib/id";
 import { useLang, type Text } from "@/shared/i18n/lang";
@@ -94,10 +94,24 @@ export function LeadForm({ clinicSlug, clinicName, defaultSymptoms, responseHour
   const checker = useMemo(() => readCheckerMeta(), []);
   const symptoms = defaultSymptoms || checker?.symptoms || "";
   const fromChecker = Boolean(symptoms || checker?.specialtySlug);
+  const doneCard = useRef<HTMLDivElement>(null);
+
+  // The short "sent" card takes the place of the tall form, so the page shrinks under the reader and the card ends up
+  // above the screen: bring it back into view, clear of the site header (which shows again as the page moves up) and
+  // the page's sticky section bar.
+  useEffect(() => {
+    const card = doneCard.current;
+    if (!done || !card) return;
+    const header = document.querySelector<HTMLElement>(".site-header")?.offsetHeight ?? 0;
+    const bar = document.querySelector<HTMLElement>(".cp-bar")?.offsetHeight ?? 0;
+    const offset = header + bar + 20;
+    const { top, bottom } = card.getBoundingClientRect();
+    if (top < offset || bottom > window.innerHeight) window.scrollTo({ top: window.scrollY + top - offset });
+  }, [done]);
 
   if (done) {
     return (
-      <div id="lead" className="cp-lead cp-lead-done" role="status">
+      <div ref={doneCard} id="lead" className="cp-lead cp-lead-done" role="status">
         <span>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />

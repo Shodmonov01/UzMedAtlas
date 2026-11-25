@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
 import { fetchClinic } from "@/shared/api/client";
 import { cityName } from "@/shared/lib/cities";
+import { COMPANY_LANGUAGES_MORE, companyLanguages, isTourismCompany } from "@/shared/lib/tourism";
 import { ClinicLogo } from "@/shared/ui/ClinicLogo";
 import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
@@ -61,7 +62,7 @@ const L = {
   reply: { ru: "Ответ примерно за {n} ч", uz: "Taxminan {n} soatda javob", en: "Replies in about {n} h" },
   since: { ru: "С {n} года", uz: "{n}-yildan beri", en: "Since {n}" },
   request: { ru: "Оставить заявку", uz: "Ariza qoldirish", en: "Send a request" },
-  about: { ru: "О клинике", uz: "Klinika haqida", en: "About" },
+  about: { ru: "О компании", uz: "Kompaniya haqida", en: "About" },
   aboutKicker: { ru: "Знакомство", uz: "Tanishuv", en: "Introduction" },
   history: { ru: "История", uz: "Tarix", en: "History" },
   mission: { ru: "Миссия", uz: "Missiya", en: "Mission" },
@@ -71,7 +72,7 @@ const L = {
   intl: { ru: "Принимает иностранных пациентов", uz: "Xorijlik bemorlarni qabul qiladi", en: "Welcomes international patients" },
   advantages: { ru: "Преимущества", uz: "Afzalliklar", en: "Advantages" },
   advantagesKicker: { ru: "Почему сюда", uz: "Nega aynan shu yerga", en: "Why here" },
-  more: { ru: "Подробнее о клинике", uz: "Klinika haqida batafsil", en: "More about the clinic" },
+  more: { ru: "Подробнее о компании", uz: "Kompaniya haqida batafsil", en: "More about the company" },
   why: { ru: "Почему выбирают", uz: "Nega tanlashadi", en: "Why patients choose it" },
   plans: { ru: "Планы развития", uz: "Rivojlanish rejalari", en: "Development plans" },
   tourismText: { ru: "Медицинский туризм", uz: "Tibbiy turizm", en: "Medical travel" },
@@ -136,8 +137,8 @@ function ClinicDetailPage() {
   useSeo(
     seoData
       ? {
-          title: `${clinicName(seoData)}, ${seoCity} — ${t({ ru: "лечение и медицинский туризм", uz: "davolanish va tibbiy turizm", en: "Treatment & Medical Tourism" })} | ${SITE_NAME}`,
-          description: `${clinicName(seoData)}, ${seoCity}: ${localText(lang, seoData, "description")}`,
+          title: `${clinicName(seoData, lang)}, ${seoCity} — ${t({ ru: "лечение и медицинский туризм", uz: "davolanish va tibbiy turizm", en: "Treatment & Medical Tourism" })} | ${SITE_NAME}`,
+          description: `${clinicName(seoData, lang)}, ${seoCity}: ${localText(lang, seoData, "description")}`,
         }
       : clinic.isError
         ? { title: `${t({ ru: "Клиника не найдена", uz: "Klinika topilmadi", en: "Clinic not found" })} | ${SITE_NAME}`, noindex: true }
@@ -160,7 +161,7 @@ function ClinicDetailPage() {
   // The clinic's own texts in the site language (Russian from the brief, Uzbek and English from the translations).
   const pick = (item: object | null | undefined, field: string) => text(localText(lang, item, field));
   const pickPoints = (item: object | null | undefined, field: string) => splitPoints(localText(lang, item, field));
-  const name: string = clinicName(data);
+  const name: string = clinicName(data, lang);
   const phones = splitPhones(data.phone);
   const shortName = text(data.shortName);
   const description = pick(data, "description");
@@ -195,8 +196,14 @@ function ClinicDetailPage() {
   const cities: string = data.cities?.length ? data.cities.map((c: string) => cityName(lang, c)).join(", ") : cityLabel;
   const doctors = data.doctors || [];
   const specialties: { slug: string; nameRu?: string; nameEn: string }[] = data.specialties || [];
+  // Tourism partners are companies, not clinics: same rule as the catalog's "Tourism partners" block. A company shows
+  // no reply time, and its languages end with "and others".
+  const isCompany = isTourismCompany(specialties);
+  const responseHours = isCompany ? null : data.responseHours;
   const services = data.services || [];
-  const languages: string[] = Array.isArray(data.languages) ? data.languages : [];
+  const briefLanguages: string[] = Array.isArray(data.languages) ? data.languages : [];
+  const languages = isCompany ? companyLanguages(briefLanguages) : briefLanguages;
+  const moreLanguages = isCompany ? ` ${t(COMPANY_LANGUAGES_MORE)}` : "";
   const leaders: { id?: string; name: string; roleRu?: string; roleEn?: string; bioRu?: string; bioEn?: string; photoUrl?: string | null }[] = Array.isArray(data.leaders) ? data.leaders : [];
   const achievements: { id?: string; titleRu?: string; titleEn?: string; descriptionRu?: string; descriptionEn?: string; year?: number | null }[] = Array.isArray(data.achievements) ? data.achievements : [];
   const technologies: { id?: string; nameRu?: string; nameEn?: string; descriptionRu?: string; descriptionEn?: string }[] = Array.isArray(data.technologies) ? data.technologies : [];
@@ -217,8 +224,8 @@ function ClinicDetailPage() {
   const meta = [
     { icon: "pin" as IconName, text: cities },
     data.foundedYear ? { icon: "calendar" as IconName, text: t(L.since).replace("{n}", String(data.foundedYear)) } : null,
-    languages.length ? { icon: "translate" as IconName, text: languages.slice(0, 4).map((code) => languageName(code, lang)).join(" · ") + (languages.length > 4 ? ` +${languages.length - 4}` : "") } : null,
-    data.responseHours ? { icon: "clock" as IconName, text: t(L.reply).replace("{n}", String(data.responseHours)) } : null,
+    languages.length ? { icon: "translate" as IconName, text: languages.slice(0, 4).map((code) => languageName(code, lang)).join(" · ") + (languages.length > 4 ? ` +${languages.length - 4}` : "") + moreLanguages } : null,
+    responseHours ? { icon: "clock" as IconName, text: t(L.reply).replace("{n}", String(responseHours)) } : null,
   ].filter(Boolean) as { icon: IconName; text: string }[];
 
   const moreCards = [
@@ -355,6 +362,7 @@ function ClinicDetailPage() {
                         {languageName(code, lang)}
                       </span>
                     ))}
+                    {isCompany ? <span className="cp-pill-more">{t(COMPANY_LANGUAGES_MORE)}</span> : null}
                   </div>
                 </InfoCard>
               ) : null}
@@ -551,7 +559,7 @@ function ClinicDetailPage() {
         </div>
 
         <aside className="cp-aside">
-          <LeadForm clinicSlug={data.slug} clinicName={name} defaultSymptoms={symptoms} responseHours={data.responseHours} />
+          <LeadForm clinicSlug={data.slug} clinicName={name} defaultSymptoms={symptoms} responseHours={responseHours} />
           <ContactCard
             logoUrl={data.logoUrl}
             name={name}
@@ -563,7 +571,7 @@ function ClinicDetailPage() {
             instagram={data.instagram}
             youtube={data.youtube}
             socials={data.socials}
-            responseHours={data.responseHours}
+            responseHours={responseHours}
           >
             {data.coordinatorName ? (
               <div className="cp-contact-extra">
@@ -580,7 +588,7 @@ function ClinicDetailPage() {
               </div>
             ) : null}
           </ContactCard>
-          <QuickContact name={name} phone={phones[0]} whatsapp={data.whatsapp} telegram={data.telegram} responseHours={data.responseHours} cta={t(L.request)} />
+          <QuickContact name={name} phone={phones[0]} whatsapp={data.whatsapp} telegram={data.telegram} responseHours={responseHours} cta={t(L.request)} />
         </aside>
       </div>
 

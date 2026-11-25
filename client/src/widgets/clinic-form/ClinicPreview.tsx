@@ -131,7 +131,7 @@ export function ClinicPreview({ clinic, ru = false }: { clinic: CabinetClinic; r
             ) : null}
 
             {(history || mission) && (
-              <Section title={L("About the clinic", "О клинике")}>
+              <Section title={L("About the company", "О компании")}>
                 <div className="grid gap-4 md:grid-cols-2">
                   {history ? (
                     <div className="rounded-2xl border border-line bg-white p-4">
