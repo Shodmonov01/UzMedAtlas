@@ -769,7 +769,7 @@
    "en": "Germany, Japan"
   },
   "Гигиенист": {
-   "uz": "Gigiyenist"
+   "uz": "Professional tozalash mutaxassisi"
   },
   "Гинеколог": {
    "uz": "Ginekolog"
@@ -850,7 +850,7 @@
    "uz": "Gnatologiya"
   },
   "Гнатология — диагностика и лечение ВНЧС, мышц и прикуса\nОртодонтия — коррекция прикуса, скученности и искривления зубов\nХирургия — удаление зубов, в т.ч. ретинированных зубов мудрости, пластика мягких тканей и десны, костная пластика, имплантация\nТерапия и микроэндодонтия — лечение кариеса и каналов под микроскопом\nОртопедия — коронки, виниры, вкладки, протезирование\nПрофессиональная гигиена и отбеливание\nДетская стоматология": {
-   "uz": "Gnatologiya — chakka-pastki jagʻ boʻgʻimi, mushaklar va tishlamni tashxislash va davolash\nOrtodontiya — tishlam, tishlar zichligi va qiyshiqligini tuzatish\nJarrohlik — tish olish, jumladan chiqmay qolgan aql tishlarini, yumshoq toʻqima va milk plastikasi, suyak plastikasi, implantatsiya\nTerapiya va mikroendodontiya — kariyes va kanallarni mikroskop ostida davolash\nOrtopediya — koronkalar, vinirlar, vkladkalar, protezlash\nProfessional gigiyena va oqartirish\nBolalar stomatologiyasi"
+   "uz": "Gnatologiya — chakka-pastki jagʻ boʻgʻimi, mushaklar va tishlamni tashxislash va davolash\nOrtodontiya — tishlam, tishlar zichligi va qiyshiqligini tuzatish\nJarrohlik — tish olish, jumladan chiqmay qolgan aql tishlarini, yumshoq toʻqima va milk plastikasi, suyak plastikasi, implantatsiya\nTerapiya va mikroendodontiya — kariyes va kanallarni mikroskop ostida davolash\nOrtopediya — koronkalar, vinirlar, vkladkalar, protezlash\nProfessional tozalash va oqartirish\nBolalar stomatologiyasi"
   },
   "Голиб Хакимов": {
    "uz": "Golib Xakimov"
@@ -988,7 +988,7 @@
    "uz": "Diagnostika (MRT, MSKT, rentgen, UTT), jarrohlik yoʻnalishlari, kardiologiya va kardiojarrohlik, ginekologiya va akusherlik, neyrojarrohlik, ortopediya-travmatologiya, urologiya, otorinolaringologiya, laboratoriya tekshiruvlari, statsionar davolash, kam invaziv jarrohlik aralashuvlari."
   },
   "Диагностика и консультации, терапевтическое лечение, эндодонтия, профессиональная гигиена, ортопедия и протезирование, имплантация, виниры, ортодонтия и эстетическая стоматология. Приём взрослых и детей, хирургическая стоматологическая помощь.": {
-   "uz": "Diagnostika va konsultatsiyalar, terapevtik davolash, endodontiya, professional gigiyena, ortopediya va protezlash, implantatsiya, vinirlar, ortodontiya va estetik stomatologiya. Kattalar va bolalarni qabul qilish, jarrohlik stomatologik yordami."
+   "uz": "Diagnostika va konsultatsiyalar, terapevtik davolash, endodontiya, professional tozalash, ortopediya va protezlash, implantatsiya, vinirlar, ortodontiya va estetik stomatologiya. Kattalar va bolalarni qabul qilish, jarrohlik stomatologik yordami."
   },
   "Диагностика и лечение заболеваний уха, горла и носа, включая аудиометрическую диагностику слуха.": {
    "uz": "Quloq, tomoq va burun kasalliklarini tashxislash va davolash, jumladan eshitishni audiometrik tekshirish.",
@@ -1562,7 +1562,7 @@
    "en": "Competition"
   },
   "Консультация и диагностика\nТерапевтическое лечение взрослых и детей\nЭндодонтия\nПрофессиональная гигиена\nОртопедия и протезирование\nИмплантация\nВиниры и эстетическая стоматология\nОртодонтия\nХирургическая стоматология": {
-   "uz": "Konsultatsiya va diagnostika\nKattalar va bolalarni terapevtik davolash\nEndodontiya\nProfessional gigiyena\nOrtopediya va protezlash\nImplantatsiya\nVinirlar va estetik stomatologiya\nOrtodontiya\nJarrohlik stomatologiyasi"
+   "uz": "Konsultatsiya va diagnostika\nKattalar va bolalarni terapevtik davolash\nEndodontiya\nProfessional tozalash\nOrtopediya va protezlash\nImplantatsiya\nVinirlar va estetik stomatologiya\nOrtodontiya\nJarrohlik stomatologiyasi"
   },
   "Контроль положения хирургических инструментов в реальном времени": {
    "uz": "Jarrohlik asboblarining holatini real vaqt rejimida nazorat qilish"
@@ -2691,10 +2691,10 @@
    "uz": "Professionalizm: katta amaliy tajribaga ega mutaxassislar, oliy toifali shifokorlar\nMasʼuliyat hamda diagnostika va davolashning yuqori standartlari\nAniqlik: zamonaviy tibbiy vizualizatsiya, MSKT va 3D-KT\nEndoskopik va kam invaziv texnologiyalar\nKlinika asoschisi oʻtkazgan 25 000 dan ortiq operatsiya; LOR shifokorlari uchun disseksiyali Oʻzbekistondagi birinchi FESS kursi\nKlinika negizida klinik ordinatura va oʻqituvchilik faoliyati"
   },
   "Профессиональная гигиена и отбеливание": {
-   "uz": "Professional gigiyena va oqartirish"
+   "uz": "Professional tozalash va oqartirish"
   },
   "Профессиональная гигиена EMS Prophylaxis Master": {
-   "uz": "EMS Prophylaxis Master professional gigiyenasi"
+   "uz": "EMS Prophylaxis Master — professional tozalash"
   },
   "Профессиональное признание.": {
    "uz": "Kasbiy eʼtirof.",
@@ -3838,7 +3838,7 @@
    "uz": "Shayusupov Nariman Ramizovich — onkomammolog-jarroh, oliy toifali shifokor, t.f.n., ish staji 48 yil."
   },
   "Швейцарский аппарат для профессиональной гигиены полости рта.": {
-   "uz": "Ogʻiz boʻshligʻi professional gigiyenasi uchun Shveytsariya apparati.",
+   "uz": "Professional tozalash uchun Shveytsariya apparati.",
    "en": "Swiss device for professional oral hygiene."
   },
   "Швейцарский аппарат для профессиональной чистки.": {
@@ -4116,13 +4116,13 @@
    "uz": "ALTO MEDICAL"
   },
   "ALTO MEDICAL — премиальная многопрофильная стоматологическая клиника в Ташкенте, открытая в 2026 году. Объединяет ортодонтию, терапию, ортопедию, хирургию, имплантологию, гнатологию, детскую стоматологию, профессиональную гигиену и 3D-диагностику. Клиника работает с микроскопом Zumax, 3D-томографом Planmeca, интраоральным сканером iTero Lumina и системой EMS, соответствует стандартам ISO 7101 и ISO 9001. Каждого пациента ведёт личный координатор.": {
-   "uz": "ALTO MEDICAL — Toshkentda 2026-yilda ochilgan premium koʻp tarmoqli stomatologiya klinikasi. Ortodontiya, terapiya, ortopediya, jarrohlik, implantologiya, gnatologiya, bolalar stomatologiyasi, professional gigiyena va 3D diagnostikani birlashtiradi. Klinika Zumax mikroskopi, Planmeca 3D tomografi, iTero Lumina intraoral skaneri va EMS tizimi bilan ishlaydi, ISO 7101 va ISO 9001 standartlariga mos keladi. Har bir bemorni shaxsiy koordinator olib boradi."
+   "uz": "ALTO MEDICAL — Toshkentda 2026-yilda ochilgan premium koʻp tarmoqli stomatologiya klinikasi. Ortodontiya, terapiya, ortopediya, jarrohlik, implantologiya, gnatologiya, bolalar stomatologiyasi, professional tozalash va 3D diagnostikani birlashtiradi. Klinika Zumax mikroskopi, Planmeca 3D tomografi, iTero Lumina intraoral skaneri va EMS tizimi bilan ishlaydi, ISO 7101 va ISO 9001 standartlariga mos keladi. Har bir bemorni shaxsiy koordinator olib boradi."
   },
   "ALTO MEDICAL (ООО «FUNCTIONAL DENTAL»)": {
    "uz": "ALTO MEDICAL («FUNCTIONAL DENTAL» MChJ)"
   },
   "Alto Medical родилось из идеи высоты и вершины: Alto ассоциируется с самой высокой точкой — символом стремления к совершенству. Идея названия родилась в Италии, в Тоскане, во время знакомства с Montecatini Alto — историческим местом над Montecatini Terme.\nОснователь клиники, врач-ортодонт Хуснора Камариддинова, мечтала создать стоматологию, в которой пациент получает не отдельную услугу, а полноценную заботу о своём здоровье — от первого знакомства с клиникой до завершения лечения и дальнейшего наблюдения. Так сформировалась концепция многопрофильной клиники, объединяющей ортодонтию, терапию, ортопедию, хирургию, имплантологию, детскую стоматологию, профессиональную гигиену и диагностику. ALTO MEDICAL — медицина на высоте.": {
-   "uz": "Alto Medical nomi balandlik va choʻqqi gʻoyasidan tugʻilgan: Alto eng yuqori nuqta — mukammallikka intilish ramzi bilan bogʻlanadi. Nom gʻoyasi Italiyaning Toskana viloyatida, Montecatini Terme ustidagi tarixiy joy — Montecatini Alto bilan tanishuv chogʻida tugʻilgan.\nKlinika asoschisi, ortodont Xusnora Kamariddinova bemor alohida xizmat emas, balki klinika bilan ilk tanishuvdan davolash yakuni va keyingi kuzatuvgacha salomatligi haqida toʻlaqonli gʻamxoʻrlik oladigan stomatologiyani yaratishni orzu qilgan. Shu tariqa ortodontiya, terapiya, ortopediya, jarrohlik, implantologiya, bolalar stomatologiyasi, professional gigiyena va diagnostikani birlashtirgan koʻp tarmoqli klinika konsepsiyasi shakllandi. ALTO MEDICAL — yuksak darajadagi tibbiyot."
+   "uz": "Alto Medical nomi balandlik va choʻqqi gʻoyasidan tugʻilgan: Alto eng yuqori nuqta — mukammallikka intilish ramzi bilan bogʻlanadi. Nom gʻoyasi Italiyaning Toskana viloyatida, Montecatini Terme ustidagi tarixiy joy — Montecatini Alto bilan tanishuv chogʻida tugʻilgan.\nKlinika asoschisi, ortodont Xusnora Kamariddinova bemor alohida xizmat emas, balki klinika bilan ilk tanishuvdan davolash yakuni va keyingi kuzatuvgacha salomatligi haqida toʻlaqonli gʻamxoʻrlik oladigan stomatologiyani yaratishni orzu qilgan. Shu tariqa ortodontiya, terapiya, ortopediya, jarrohlik, implantologiya, bolalar stomatologiyasi, professional tozalash va diagnostikani birlashtirgan koʻp tarmoqli klinika konsepsiyasi shakllandi. ALTO MEDICAL — yuksak darajadagi tibbiyot."
   },
   "American Heart Association": {
    "uz": "American Heart Association",
@@ -4227,7 +4227,7 @@
    "uz": "Dentora Global Dental Care"
   },
   "Dentora Global Dental Care — современная стоматологическая клиника в Ташкенте, основанная хирургом-стоматологом Ферузой Ниязовой. Выпускница Ташкентского государственного медицинского института (1998), она повышала квалификацию в США, Японии и Южной Корее, а также развивала стоматологическую практику в Замбии.\n\nКлиника объединяет современные технологии, собственную цифровую лабораторию и персональный подход к пациентам. Направления: терапевтическая и хирургическая стоматология, имплантация зубов, ортопедия, ортодонтия, детская и эстетическая стоматология, профессиональная гигиена и отбеливание.\n\nДля диагностики и планирования сложных вмешательств используется компьютерная томография. Собственная зуботехническая лаборатория Dentora Lab с CAD/CAM-технологиями позволяет изготавливать ортопедические конструкции прямо в клинике.\n\nКлиника расположена в комплексе Nest One (Ташкент Сити): отдельные кабинеты, комфортная зона ожидания, многоязычный сервис для местных и иностранных пациентов и круглосуточная SOS-стоматологическая помощь.": {
-   "uz": "Dentora Global Dental Care — Toshkentdagi zamonaviy stomatologiya klinikasi, unga stomatolog-jarroh Feruza Niyazova asos solgan. Toshkent davlat tibbiyot institutining bitiruvchisi (1998) AQSh, Yaponiya va Janubiy Koreyada malaka oshirgan, shuningdek Zambiyada stomatologik amaliyotni rivojlantirgan.\n\nKlinika zamonaviy texnologiyalar, oʻz raqamli laboratoriyasi va bemorlarga shaxsiy yondashuvni birlashtiradi. Yoʻnalishlar: terapevtik va jarrohlik stomatologiyasi, tish implantatsiyasi, ortopediya, ortodontiya, bolalar va estetik stomatologiya, professional gigiyena va oqartirish.\n\nMurakkab aralashuvlarni tashxislash va rejalashtirish uchun kompyuter tomografiyasidan foydalaniladi. CAD/CAM texnologiyalariga ega Dentora Lab tish texnikasi laboratoriyasi ortopedik konstruksiyalarni bevosita klinikaning oʻzida tayyorlash imkonini beradi.\n\nKlinika Nest One majmuasida (Tashkent City) joylashgan: alohida kabinetlar, qulay kutish zonasi, mahalliy va xorijiy bemorlar uchun koʻp tilli xizmat va kecha-kunduz SOS stomatologik yordam."
+   "uz": "Dentora Global Dental Care — Toshkentdagi zamonaviy stomatologiya klinikasi, unga stomatolog-jarroh Feruza Niyazova asos solgan. Toshkent davlat tibbiyot institutining bitiruvchisi (1998) AQSh, Yaponiya va Janubiy Koreyada malaka oshirgan, shuningdek Zambiyada stomatologik amaliyotni rivojlantirgan.\n\nKlinika zamonaviy texnologiyalar, oʻz raqamli laboratoriyasi va bemorlarga shaxsiy yondashuvni birlashtiradi. Yoʻnalishlar: terapevtik va jarrohlik stomatologiyasi, tish implantatsiyasi, ortopediya, ortodontiya, bolalar va estetik stomatologiya, professional tozalash va oqartirish.\n\nMurakkab aralashuvlarni tashxislash va rejalashtirish uchun kompyuter tomografiyasidan foydalaniladi. CAD/CAM texnologiyalariga ega Dentora Lab tish texnikasi laboratoriyasi ortopedik konstruksiyalarni bevosita klinikaning oʻzida tayyorlash imkonini beradi.\n\nKlinika Nest One majmuasida (Tashkent City) joylashgan: alohida kabinetlar, qulay kutish zonasi, mahalliy va xorijiy bemorlar uchun koʻp tilli xizmat va kecha-kunduz SOS stomatologik yordam."
   },
   "Dentora Global Dental Care — Nest One": {
    "uz": "Dentora Global Dental Care — Nest One"
