@@ -237,7 +237,7 @@ li:last-child > .dest-list-item { border-bottom: 1px solid var(--line); }
 .site-footer-up:hover { background: transparent; box-shadow: inset 0 0 0 1px white; }
 .site-footer-about { color: white; }
 .site-footer-col > p { color: #ffffff80; }
-.site-footer-col a { color: #ffffffb3; }
+.site-footer-col a, .site-footer-col > span { color: #ffffffb3; }
 .site-footer-col a:hover { color: white; }
 .site-footer-cta-title { color: white; }
 .site-footer-cta > p:not(.site-footer-cta-title) { color: #ffffffb3; }

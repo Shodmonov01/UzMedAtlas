@@ -49,8 +49,9 @@ export function Footer() {
 
           <nav className="site-footer-col" aria-label={t({ ru: "Клиникам", uz: "Klinikalarga", en: "For clinics" })}>
             <p>{t({ ru: "Клиникам", uz: "Klinikalarga", en: "For clinics" })}</p>
-            <Link to="/cabinet/login">{t({ ru: "Личный кабинет", uz: "Shaxsiy kabinet", en: "Clinic account" })}</Link>
-            <Link to="/moderation/login">{t({ ru: "Кабинет модератора", uz: "Moderator kabineti", en: "Moderator account" })}</Link>
+            {/* Not links for now: the clinic and moderator accounts stay closed to the public until clinics are invited. */}
+            <span aria-disabled="true">{t({ ru: "Личный кабинет", uz: "Shaxsiy kabinet", en: "Clinic account" })}</span>
+            <span aria-disabled="true">{t({ ru: "Кабинет модератора", uz: "Moderator kabineti", en: "Moderator account" })}</span>
           </nav>
 
           <div className="site-footer-cta">
