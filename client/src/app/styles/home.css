@@ -435,8 +435,9 @@
 
 /* More-filters dialog: a white sheet over a dimmed page (no blur). Labelled pill fields on the paper tint that turn
    white with a blue ring on focus, a switch for medical tourism, outline and ink pill actions. While it is open the
-   page behind does not scroll (ClinicCatalog). */
-.filters-overlay { position: fixed; inset: 0; z-index: 50; display: flex; padding: 16px; overflow-y: auto; overscroll-behavior: contain; background: #0b2a3d73; animation: filters-fade .3s ease-out; }
+   page behind does not scroll (ClinicCatalog). It sits above the floating Health Checker button (z 50), which stays
+   dimmed under it; centered on phones too. */
+.filters-overlay { position: fixed; inset: 0; z-index: 80; display: flex; padding: 16px; overflow-y: auto; overscroll-behavior: contain; background: #0b2a3d73; animation: filters-fade .3s ease-out; }
 .filters-modal { display: flex; flex-direction: column; width: 100%; max-width: 520px; margin: auto; border-radius: 32px; background: white; box-shadow: 0 40px 80px -40px #0b2a3d99; animation: filters-in .5s var(--ease-out); }
 .filters-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 28px 28px 8px; }
 .filters-head h2 { color: var(--ink); font-size: 26px; font-weight: 600; line-height: 1.15; letter-spacing: -.035em; }
@@ -464,8 +465,7 @@
 @keyframes filters-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes filters-in { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: none; } }
 @media (max-width: 639px) {
-  .filters-overlay { padding: 8px; }
-  .filters-modal { margin: auto auto 0; }
+  .filters-overlay { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
   .filters-modal { border-radius: 28px; }
   .filters-head { padding: 22px 20px 4px; }
   .filters-body { padding: 16px 20px 4px; }
