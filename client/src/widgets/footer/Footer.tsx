@@ -57,12 +57,13 @@ export function Footer() {
           <div className="site-footer-cta">
             <p className="site-footer-cta-title">{t({ ru: "Вы представляете клинику?", uz: "Siz klinika vakilimisiz?", en: "Do you represent a clinic?" })}</p>
             <p>{t({ ru: "Разместите клинику в каталоге и получайте заявки от пациентов.", uz: "Klinikangizni katalogga joylang va bemorlardan arizalar oling.", en: "List your clinic in the catalog and receive requests from patients." })}</p>
-            <Link to="/cabinet/login" className="pill-btn is-brand">
+            {/* Not a link for now either, like the two accounts beside it. */}
+            <span className="pill-btn is-brand" aria-disabled="true">
               {t({ ru: "Подключить клинику", uz: "Klinikani ulash", en: "Add your clinic" })}
               <span className="pill-btn-icon">
                 <ArrowIcon />
               </span>
-            </Link>
+            </span>
           </div>
         </div>
 
