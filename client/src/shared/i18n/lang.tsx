@@ -96,11 +96,17 @@ export function plainText(lang: Lang, item: object | null | undefined, key: stri
   return typeof translated === "string" && translated ? translated : original;
 }
 
+/** The Uzbek letters oʻ and gʻ in a name typed with a quote or apostrophe ("Ko‘z Nuri", "Ko'z Nuri") get the
+ *  turned comma ʻ that the Uzbek texts use ("Koʻz Nuri"). An English possessive ("Women's") stays as it is. */
+export function uzbekLetters(name: string) {
+  return name.replace(/(?<=[OoGg])[‘’'`ʼ](?=\p{L})(?!s\b)/gu, "ʻ");
+}
+
 /** A clinic's (or branch's) name: its brand name in Latin letters, the one the catalog sorts by A–Z. The original
  *  from the brief stands in when there is none. With `lang`, a "Brand — descriptor" name keeps the brand and shows the
  *  descriptor in that language ("TourLink — sayyohlik kompaniyasi"), when that language's name has the same shape. */
 export function clinicName(item: { nameRu?: string | null; nameEn?: string | null; nameUz?: string | null }, lang?: Lang) {
-  const name = item.nameEn || item.nameRu || "";
+  const name = uzbekLetters(item.nameEn || item.nameRu || "");
   if (!lang || lang === "en") return name;
   const local = (lang === "uz" ? item.nameUz : item.nameRu) || "";
   const at = name.indexOf(" — ");

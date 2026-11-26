@@ -10,7 +10,7 @@ import { FitImage } from "@/shared/ui/FitImage";
 import { ArrowIcon } from "@/shared/ui/ArrowIcon";
 import { type GalleryPhoto } from "@/shared/ui/PhotoCarousel";
 import { yandexPointUrl, yandexRouteUrl } from "@/shared/lib/yandex-maps";
-import { clinicName, countWord, localText, plainText, useLang, type Text } from "@/shared/i18n/lang";
+import { clinicName, countWord, localText, plainText, useLang, uzbekLetters, type Text } from "@/shared/i18n/lang";
 import { LeadForm } from "@/widgets/lead-form/LeadForm";
 import {
   CertificateList,
@@ -163,7 +163,7 @@ function ClinicDetailPage() {
   const pickPoints = (item: object | null | undefined, field: string) => splitPoints(localText(lang, item, field));
   const name: string = clinicName(data, lang);
   const phones = splitPhones(data.phone);
-  const shortName = text(data.shortName);
+  const shortName = uzbekLetters(text(data.shortName) || "");
   const description = pick(data, "description");
   const gallery: GalleryPhoto[] = (data.photos || []).map((p: { id: string; url: string; altRu?: string; altEn?: string }) => ({
     id: p.id,
@@ -178,11 +178,17 @@ function ClinicDetailPage() {
   const advantages = pickPoints(data, "advantages");
   const why = pick(data, "whyChoose");
   const plans = pick(data, "developmentPlans");
-  const popular = (pick(data, "popularServices") || "")
-    .split(/[;,\n]/)
-    .map((item) => item.replace(/^[•\-*–]\s*/, "").replace(/\.$/, "").trim())
-    .filter(Boolean)
-    .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
+  const popularText = pick(data, "popularServices") || "";
+  // A brief that wrote its popular services as running prose (one block of three or more sentences, as Koʻz Nuri
+  // did) is shown as a paragraph: cutting it into pills at the commas breaks its sentences.
+  const popularProse = !/[;\n]/.test(popularText) && popularText.split(/(?<=[.!?])\s+(?=\p{Lu})/u).length >= 3 ? popularText.trim() : "";
+  const popular = popularProse
+    ? [popularProse]
+    : popularText
+        .split(/[;,\n]/)
+        .map((item) => item.replace(/^[•\-*–]\s*/, "").replace(/\.$/, "").trim())
+        .filter(Boolean)
+        .map((item) => item.charAt(0).toUpperCase() + item.slice(1));
   const tourism = pick(data, "medicalTourism");
   const cityLabel = cityName(lang, data.city);
   const branches: Branch[] = data.branches || [];
@@ -437,11 +443,15 @@ function ClinicDetailPage() {
                       {t(L.popular)}
                     </p>
                   ) : null}
-                  <ul>
-                    {popular.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
+                  {popularProse ? (
+                    <p className="cp-popular-text">{popularProse}</p>
+                  ) : (
+                    <ul>
+                      {popular.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ) : null}
               {services.length ? <ServicesList services={services} /> : null}
